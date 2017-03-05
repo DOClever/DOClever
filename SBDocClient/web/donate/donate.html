@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link href="../pic/logo.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <link rel="stylesheet" href="../../node_modules/animate.css/animate.min.css">
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../common/common.css">
+    <title>捐助我们</title>
+</head>
+<body>
+<div class="container" style="text-align: center" v-cloak id="app">
+    <mainnav>
+        <el-button type="text" style="font-size: 15px" slot="slot3" onclick="window.open('https://github.com/sx1989827/SBDoc','_blank')">开源</el-button>
+        <el-popover ref="popover" placement="bottom" width="250" trigger="hover" slot="other">
+            <span style="font-size: 15px;color: #20A0FF">
+                欢迎加入QQ讨论群：<span style="color: red">611940610</span>
+            </span>
+        </el-popover>
+        <el-button type="text" style="font-size: 15px" v-popover:popover slot="slot4">QQ群</el-button>
+        <el-button type="text" style="font-size: 15px" slot="slot1" v-if="!isLogin" onclick="location.href='../about/about.html'">关于</el-button>
+        <el-button type="text" style="font-size: 15px" slot="slot2" v-if="!isLogin" onclick="location.href='../help/help.html'">帮助</el-button>
+        <span style="color: #20A0FF;font-size: 25px" slot="title">支持我们</span>
+    </mainnav>
+    <el-row class="row" style="text-align: center;color: gray;margin-top: 30px;height: 700px">
+        <el-col class="col" :span="12" style="padding: 120px;font-size: 20px">
+            如果您觉得SBDoc对您非常有用，您可以通过捐赠来支持我们。您的捐赠将帮助我们支付购买与续费服务器，以及前端开发、UI优化等方面费用，帮助我们在未来您获得更加优质的内容和服务。您的支持，是对我们最大的鼓励。我们非常感谢您的捐赠与支持。
+        </el-col>
+        <el-col class="col" :span="12">
+            <img src="../pic/donate.JPG" style="width: 300px;margin-top: 30px">
+        </el-col>
+    </el-row>
+    <el-row class="row" style="height: 200px;background-color: rgb(39,52,68);">
+        <el-col class="col" :span="4" style="display: inline-block;color: white;text-align: center;line-height: 200px;font-size: larger;">
+            <a href="../about/about.html" style="color: white;text-decoration: none" target="_blank">关于我们</a>
+        </el-col>
+        <el-col class="col" :span="4" style="display: inline-block;color: white;text-align: center;line-height: 200px;font-size: larger;">
+            <a href="../about/about.html" style="color: white;text-decoration: none" target="_blank">支持我们</a>
+        </el-col>
+        <el-col class="col" :span="4" style="display: inline-block;color: white;text-align: center;line-height: 200px;font-size: larger;height: 100%">
+            <a href="../help/help.html" style="color: white;text-decoration: none" target="_blank">帮助中心</a>
+        </el-col>
+        <el-col class="col" :span="12" style="color: white;height: 100%">
+            <img src="../pic/logo.png" width="100" height="100" style="float: right;margin-top: 50px;margin-right: 50px">
+        </el-col>
+        <el-row class="row" style="position: absolute;bottom: 0px;left:0px;height: 30px;color: lightgray;text-align: center">
+            Copyright&nbsp;©&nbsp;2016～2017&nbsp;合肥市胖胖羊信息科技有限责任公司&nbsp;皖ICP备17002996号
+        </el-row>
+    </el-row>
+</div>
+<script src="../../dist/vendor.bundle.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="../../dist/donate.js"></script>
+</body>
+</html>

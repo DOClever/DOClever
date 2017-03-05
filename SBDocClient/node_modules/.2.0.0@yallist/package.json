@@ -1,0 +1,24 @@
+{
+  "name": "yallist",
+  "version": "2.0.0",
+  "description": "Yet Another Linked List",
+  "main": "yallist.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tap": "^2.3.2"
+  },
+  "scripts": {
+    "test": "tap test/*.js --cov"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isaacs/yallist.git"
+  },
+  "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
+  "license": "ISC",
+  "_from": "yallist@2.0.0",
+  "_resolved": "http://registry.npm.taobao.org/yallist/download/yallist-2.0.0.tgz"
+}

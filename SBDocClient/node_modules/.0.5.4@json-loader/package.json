@@ -1,0 +1,13 @@
+{
+  "name": "json-loader",
+  "version": "0.5.4",
+  "author": "Tobias Koppers @sokra",
+  "description": "json loader module for webpack",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webpack/json-loader.git"
+  },
+  "_from": "json-loader@0.5.4",
+  "_resolved": "http://registry.npm.taobao.org/json-loader/download/json-loader-0.5.4.tgz"
+}

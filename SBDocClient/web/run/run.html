@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link href="../pic/logo.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <link rel="stylesheet" href="../../node_modules/animate.css/animate.min.css">
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../common/common.css">
+    <title>mock</title>
+</head>
+<body>
+<div class="container" id="app" style="height: 600px;" v-cloak>
+    <mainnav>
+        <el-row class="row" style="text-align: center;height: 60px;line-height: 60px;font-size: 25px;color: #20A0FF" slot="title">{{session.projectName}}</el-row>
+    </mainnav>
+    <el-row class="row" style="min-height: 100px;margin: 20px 0 0 0;padding:0 10px 0 10px">
+        <el-row class="row" style="background-color: white;padding-bottom: 10px;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
+            <el-row class="row" style="height: 50px;line-height: 50px;">
+            <span style="color: #50a3ff;font-size: 20px" v-if="interface.name">
+                &nbsp;&nbsp;{{interface.group?interface.group.name:""}}&nbsp;<span style="color: black">/</span>&nbsp;{{interface.name}}
+            </span>
+                <span style="color: #50a3ff;font-size: 15px;margin-left: 20px" v-else>
+                测试完成后点击最右边生成按钮即可快速生成接口文档
+            </span>
+            </el-row>
+            <el-row class="row" style="height: 50px;">
+                <el-col class="col" :span="3" style="line-height: 50px;text-align: center">
+                    <div style="height: 100%;width: 80%;display: inline-block" id="method">
+                        <el-select v-model="interface.method">
+                            <el-option  value="GET" label="GET"></el-option>
+                            <el-option  value="POST" label="POST"></el-option>
+                            <el-option  value="PUT" label="PUT"></el-option>
+                            <el-option  value="DELETE" label="DELETE"></el-option>
+                        </el-select>
+                    </div>
+                </el-col>
+                <el-col class="col" :span="7" style="line-height: 50px;text-align: center">
+                    <el-autocomplete style="width: 100%" class="inline-input" v-model="baseUrl" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" icon="caret-bottom" :on-icon-click="showAutoComplete"></el-autocomplete>
+                </el-col>
+                <el-col class="col" :span="2" style="line-height: 50px;text-align: left">
+                    <el-popover ref="popover1" placement="bottom" width="400" trigger="hover">
+                    <span style="display: inline-block;font-size: 13px">
+                对于内网测试的用户，请先在测试机上安装node环境（安装包点击下载：<a href="../resource/node.msi" target="_blank">window</a>&nbsp;&nbsp;<a href="../resource/node.pkg" target="_blank">mac</a>），然后将<a href="net.js" target="_blank">net.js</a>(和mock数据是同一个文件)保存到本地，用node运行即可,其他无需做任何配置，即可用本页面进行内网数据调试!
+            </span>
+                    </el-popover>
+                    <el-button type="text" style="font-size: 14px" v-popover:popover1>
+                        &nbsp;&nbsp;内网环境<i class="el-icon-information"></i>
+                    </el-button>
+                </el-col>
+                <el-col class="col" :span="session.role==0?8:10" style="line-height: 50px;text-align: center">
+                    <el-input style="width: 90%" placeholder="请填入你请求的路由地址" v-model="interface.url" @change="changeUrl"></el-input>
+                </el-col>
+                <el-col class="col" :span="2" style="line-height: 50px;text-align: center">
+                    <el-button type="primary" @click="run" title="运行" id="run" :loading="runPending">
+                        运行
+                    </el-button>
+                </el-col>
+                <el-col class="col" :span="2" style="line-height: 50px;text-align: center" v-if="session.role==0">
+                    <el-button type="primary" @click="save" title="生成文档" id="save">
+                        生成
+                    </el-button>
+                </el-col>
+            </el-row>
+        </el-row>
+        <el-row class="row" style="padding: 20px;margin-top: 15px;background-color: white;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
+            <el-tabs type="card">
+                <el-tab-pane :label="paramTab" v-if="param.length>0">
+                    <runparam></runparam>
+                </el-tab-pane>
+                <el-tab-pane :label="queryTab">
+                    <runquery v-show="!queryRawShow"></runquery>
+                    <el-input type="textarea" :rows="3" style="height: 100px;margin-top: 10px" placeholder="在这里编辑原始的url参数字符串，以&符合分割" v-show="queryRawShow" v-model="queryRawStr"></el-input>
+                    <el-button type="primary" size="small" style="margin-top: 20px" @click="toggleQuery">{{queryRawShow?'Commit Raw':'Edit Raw'}}</el-button>
+                </el-tab-pane>
+                <el-tab-pane :label="headerTab">
+                    <runheader v-show="!headerRawShow"></runheader>
+                    <el-input  type="textarea" :rows="3" style="height: 100px;margin-top: 10px" placeholder="在这里编辑原始的header字符串，以回车分割" v-show="headerRawShow" v-model="headerRawStr"></el-input>
+                    <el-button type="primary" size="small" style="margin-top: 20px" @click="toggleHeader">{{headerRawShow?'Commit Raw':'Edit Raw'}}</el-button>
+                </el-tab-pane>
+                <el-tab-pane :label="bodyTab" v-if="interface.method=='POST' || interface.method=='PUT'">
+                    <runbody v-show="!bodyRawShow"></runbody>
+                    <el-input type="textarea" :rows="3" style="height: 100px;margin-top: 10px" placeholder="在这里编辑原始的url参数字符串，以&符合分割，文件类型用[FILE]代替" v-show="bodyRawShow" v-model="bodyRawStr"></el-input>
+                    <el-button type="primary" size="small" style="margin-top: 20px" @click="toggleBody" v-if="bodyInfo.type==0">{{bodyRawShow?'Commit Raw':'Edit Raw'}}</el-button>
+                </el-tab-pane>
+            </el-tabs>
+        </el-row>
+        <el-row class="row" style="padding: 15px;margin-top: 15px;background-color: white;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
+            <el-row class="row" style="padding: 10px;margin-bottom: 10px">
+            <span style="font-size: 18px;">
+                Result:&nbsp;&nbsp;<span :style="{color:status.match(/^2/)?'green':'red'}">{{status=='0'?'ERROR':status}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 18px;color: #50a3ff">{{second?("耗时"+second+"秒"):""}}</span>
+            </span>
+            </el-row>
+            <el-tabs type="card">
+                <el-tab-pane label="Preview">
+                    <el-row class="row" v-if="type=='object'">
+                        <template v-for="item in draw">
+                            <el-row class="row" style="font-size: 15px;min-height: 25px;line-height: 25px;word-break: break-all" v-html="item">
+                            </el-row>
+                        </template>
+                    </el-row>
+                    <img :src="imgUrl" v-else-if="type=='img'">
+                    <pre v-else>{{draw}}</pre>
+                </el-tab-pane>
+                <el-tab-pane label="Mix">
+                    <el-row class="row" v-if="type=='object'">
+                        <template v-for="item in drawMix" v-if="type=='object'">
+                            <el-row class="row" style="font-size: 15px;min-height: 25px;line-height: 25px;word-break: break-all" v-html="item">
+                            </el-row>
+                        </template>
+                    </el-row>
+                    <img :src="imgUrl" v-else-if="type=='img'">
+                    <pre v-else>{{drawMix}}</pre>
+                </el-tab-pane>
+                <el-tab-pane label="Raw">
+                    <el-row class="row" style="word-break: break-all">
+                        {{rawData}}
+                    </el-row>
+                </el-tab-pane>
+                <el-tab-pane label="Header">
+                    <table class="table-hover" style="width: 100%">
+                        <tbody>
+                        <template v-for="(value,key) in resHeader">
+                            <tr style="vertical-align: middle;height: 30px">
+                                <td style="width: 30%">
+                                    {{key}}
+                                </td>
+                                <td style="width: 70%">
+                                    {{value}}
+                                </td>
+                            </tr>
+                        </template>
+                        </tbody>
+                    </table>
+                </el-tab-pane>
+            </el-tabs>
+        </el-row>
+        <el-row class="row" style="height: 100px"></el-row>
+    </el-row>
+</div>
+<script src="../../dist/vendor.bundle.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="../../dist/run.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link href="../pic/logo.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <link rel="stylesheet" href="../node_modules/animate.css/animate.min.css">
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../common/common.css">
+    <title>找回密码</title>
+</head>
+<body>
+<div class="container" id="app" v-cloak>
+    <div class="row" style="text-align: center;color: #50a3ff;margin-top: 100px">
+        <h1><a style="text-decoration: none;cursor: pointer;color: inherit" href="/">SBDoc</a></h1>
+    </div>
+    <div class="row">
+        <el-form style="width: 50%;margin: 0 auto;padding: 20px 20px 0px 20px" label-width="100px" v-if="step==1">
+            <el-form-item style="text-align: center" label="问题">
+                <el-input style="width: 300px;"  v-model="question" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item  style="text-align: center" label="答案">
+                <el-input  placeholder="请输入找回密码的问题答案" style="width: 300px;"  v-model="answer"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center" label="新密码">
+                <el-input  placeholder="新密码" style="width: 300px;"  v-model="pwd" type="password"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center" label="密码确认">
+                <el-input  placeholder="确认新密码" style="width: 300px;"  v-model="pwd1" type="password"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: left">
+                <el-button type="primary" :loading="resetPending" style="width: 300px;" @click.prevent="reset">立即重置</el-button>
+            </el-form-item>
+        </el-form>
+        <el-form style="width: 50%;margin: 0 auto;padding: 20px 20px 0px 20px" label-width="100px" v-else>
+            <el-form-item style="text-align: center" label="用户名">
+                <el-input  placeholder="您要找回密码的用户名" style="width: 300px;"  v-model="username"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: left">
+                <el-button type="primary" :loading="questionPending" style="width: 300px;" @click.prevent="getQuestion">立即找回</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
+</div>
+<script src="../../dist/vendor.bundle.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="../../dist/reset.js"></script>
+</body>
+</html>

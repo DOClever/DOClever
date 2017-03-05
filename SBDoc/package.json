@@ -1,0 +1,26 @@
+{
+  "name": "SBDoc",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "asyncawait": "^1.0.6",
+    "bluebird": "^3.4.7",
+    "body-parser": "~1.15.2",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.2.0",
+    "express": "~4.14.0",
+    "express-session": "^1.14.2",
+    "hbs": "~3.1.0",
+    "moment": "^2.17.1",
+    "mongoomise": "^0.0.8",
+    "mongoose": "^4.7.6",
+    "morgan": "~1.7.0",
+    "multiparty": "^4.1.2",
+    "node-schedule": "^1.2.0",
+    "request": "^2.79.0",
+    "serve-favicon": "~2.3.0"
+  }
+}

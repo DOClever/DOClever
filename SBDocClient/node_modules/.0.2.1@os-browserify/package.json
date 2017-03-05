@@ -1,0 +1,22 @@
+{
+  "name": "os-browserify",
+  "version": "0.2.1",
+  "author": "CoderPuppy <coderpup@gmail.com>",
+  "license": "MIT",
+  "main": "main.js",
+  "browser": "browser.js",
+  "jspm": {
+    "map": {
+      "./main.js": {
+        "node": "@node/os",
+        "browser": "./browser.js"
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/CoderPuppy/os-browserify.git"
+  },
+  "_from": "os-browserify@0.2.1",
+  "_resolved": "http://registry.npm.taobao.org/os-browserify/download/os-browserify-0.2.1.tgz"
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link href="../pic/logo.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <link rel="stylesheet" href="../../node_modules/animate.css/animate.min.css">
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../common/common.css">
+    <title>项目列表</title>
+</head>
+<body>
+<div class="container" id="app" style="margin: 0px;height: 600px;width: 100%" v-cloak>
+    <mainnav>
+        <el-row class="row" style="text-align: center;height: 60px;line-height: 60px;font-size: 25px;color: #20A0FF" slot="title">项目列表</el-row>
+        <el-button type="text"  style="font-size: 30px;width:40px;height: 60px" slot="slot2" title="添加项目" @click="showAdd=true">
+            <i class="fa fa-plus-circle"></i>
+        </el-button>
+    </mainnav>
+    <div style="width: 100%;height: 500px;margin-top: 30px">
+        <projectlist :arr="projectList"></projectlist>
+    </div>
+    <el-dialog title="新建项目" v-model="showAdd" size="small">
+        <el-form ref="form" label-width="100px">
+            <el-form-item label="名称">
+                <el-input  style="width: 80%"  v-model="name" placeholder="请输入新项目的名称"></el-input>
+            </el-form-item>
+            <el-form-item label="描述">
+                <el-input type="textarea" :rows="2"  style="width: 80%"  v-model="dis" placeholder="请输入新项目的简介"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="showAdd = false">取 消</el-button>
+            <el-button type="primary" @click="add" :loading="addPending">确 定</el-button>
+        </span>
+    </el-dialog>
+</div>
+<script src="../../dist/vendor.bundle.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="../../dist/project.js"></script>
+</body>
+</html>

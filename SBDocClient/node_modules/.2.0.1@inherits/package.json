@@ -1,0 +1,24 @@
+{
+  "name": "inherits",
+  "description": "Browser-friendly inheritance fully compatible with standard node.js inherits()",
+  "version": "2.0.1",
+  "keywords": [
+    "inheritance",
+    "class",
+    "klass",
+    "oop",
+    "object-oriented",
+    "inherits",
+    "browser",
+    "browserify"
+  ],
+  "main": "./inherits.js",
+  "browser": "./inherits_browser.js",
+  "repository": "git://github.com/isaacs/inherits",
+  "license": "ISC",
+  "scripts": {
+    "test": "node test"
+  },
+  "_from": "inherits@2.0.1",
+  "_resolved": "http://registry.npm.taobao.org/inherits/download/inherits-2.0.1.tgz"
+}

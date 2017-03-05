@@ -1,0 +1,18 @@
+{
+  "name": "indexof",
+  "description": "Microsoft sucks",
+  "version": "0.0.1",
+  "keywords": [
+    "index",
+    "array",
+    "indexOf"
+  ],
+  "dependencies": {},
+  "component": {
+    "scripts": {
+      "indexof/index.js": "index.js"
+    }
+  },
+  "_from": "indexof@0.0.1",
+  "_resolved": "http://registry.npm.taobao.org/indexof/download/indexof-0.0.1.tgz"
+}

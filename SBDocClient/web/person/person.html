@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link href="../pic/logo.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <link rel="stylesheet" href="../node_modules/animate.css/animate.min.css">
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../common/common.css">
+    <title>个人中心</title>
+</head>
+<body>
+<div class="container" id="app" style="margin: 0px;width: 100%" v-cloak>
+    <mainnav>
+        <el-row class="row" style="text-align: center;height: 50px;line-height: 50px;font-size: 25px;color: #20A0FF" slot="title">个人中心</el-row>
+    </mainnav>
+    <el-row class="row">
+        <el-col :span="8" class="col">
+            <el-row style="background-color: white;margin:20px auto 0 auto;width: 90%;height: 100px;" >
+                <el-col :span="8" style="height: 100px;line-height: 100px;vertical-align: middle;padding: 0;text-align: center"  class="col">
+                    <img v-proxy="session.photo!='undefined'?session.photo:''"  style="vertical-align: middle;text-align: center;width: 60px;height: 60px;border-radius: 30px">
+                </el-col>
+                <el-col :span="16" style="height: 100px;line-height: 100px;font-size: 20px;padding: 0"  class="col">
+                    {{session.name}}
+                </el-col>
+            </el-row>
+            <div style="background-color: white;margin:20px auto 0 auto;width: 90%;height: 200px;">
+                <br>
+                <el-button type="primary" style="display: block;width: 90%;margin: 20px auto 0 auto" @click="infoShow=1">
+                    个人资料
+                </el-button>
+                <el-button type="primary"  style="display: block;width: 90%;margin: 20px auto 0 auto" @click="infoShow=0">
+                    修改密码
+                </el-button>
+            </div>
+        </el-col>
+        <el-col :span="16"  class="col">
+            <div style="background-color: white;margin:20px auto 0 auto;width: 90%;height: 600px;" v-if="infoShow">
+                <el-row class="row" style="height: 60px;margin: 0">
+                    <h4 style="margin-left: 10px">
+                        个人资料
+                    </h4>
+                </el-row>
+                <el-form ref="form" label-width="100px">
+                    <el-form-item label="头像" style="text-align: center;vertical-align: middle">
+                        <img width="60" height="60" :src="session.photo!='undefined'?session.photo:''" id="showimg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a  href="javascript:void(0)" class="file" style="display: inline-block;top: -15px">
+                            选择文件<input type="file"  v-imgfile="'showimg'" id="file">
+                        </a>
+                    </el-form-item>
+                    <el-form-item label="年龄" style="text-align: center">
+                        <el-input  style="width: 80%" name="age" v-model="session.age"></el-input>
+                    </el-form-item>
+                    <el-form-item label="性别" style="text-align: center">
+                        <el-input  style="width: 80%" name="sex" v-model="session.sex"></el-input>
+                    </el-form-item>
+                    <el-form-item label="公司" style="text-align: center">
+                        <el-input  style="width: 80%" name="company" v-model="session.company"></el-input>
+                    </el-form-item>
+                    <el-form-item label="qq" style="text-align: center">
+                        <el-input style="width: 80%" name="qq" v-model="session.qq"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱" style="text-align: center">
+                        <el-input style="width: 80%" name="email" v-model="session.email"></el-input>
+                    </el-form-item>
+                    <el-form-item style="text-align: center">
+                        <el-button type="primary" style="width: 60%;margin: 20px auto 0 auto" @click.prevent="saveInfo" :loading="savePending">
+                            保存
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <div style="background-color: white;margin:20px auto 0 auto;width: 90%;height: 600px;" v-else>
+                <el-row class="row" style="height: 60px;margin: 0">
+                    <h4 style="margin-left: 10px">
+                        修改密码
+                    </h4>
+                </el-row>
+                <el-form ref="form" label-width="100px">
+                    <el-form-item label="原密码" style="text-align: center">
+                        <el-input style="width: 80%" type="password" v-model="oldPass"></el-input>
+                    </el-form-item>
+                    <el-form-item label="新密码" style="text-align: center">
+                        <el-input style="width: 80%" type="password" v-model="newPass"></el-input>
+                    </el-form-item>
+                    <el-form-item label="确认密码" style="text-align: center">
+                        <el-input style="width: 80%" type="password" v-model="newPass1"></el-input>
+                    </el-form-item>
+                    <el-form-item style="text-align: center" style="text-align: center">
+                        <el-button type="primary" style="width: 60%;margin: 20px auto 0 auto" @click.prevent="editPass":loading="passPending">
+                            保存
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-col>
+    </el-row>
+</div>
+<script src="../../dist/vendor.bundle.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="../../dist/person.js"></script>
+</body>
+</html>

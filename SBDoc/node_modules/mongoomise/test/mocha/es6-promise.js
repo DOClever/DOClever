@@ -1,0 +1,1 @@
+require('../init')(require('es6-promise'))

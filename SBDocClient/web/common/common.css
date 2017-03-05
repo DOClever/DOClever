@@ -1,0 +1,68 @@
+body {
+    width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    background-color: rgb(247,246,242)
+}
+
+.container{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height:100%;
+}
+
+[v-cloak]{
+    display: none;
+}
+
+.row{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+.col{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.file {
+    position: relative;
+    display: inline-block;
+    background-color: #20A0FF;
+    border: 1px solid #99D3F5;
+    border-radius: 4px;
+    padding: 4px 12px;
+    overflow: hidden;
+    color: white;
+    text-decoration: none;
+    text-indent: 0;
+    line-height: 20px;
+}
+.file input {
+    position: absolute;
+    font-size: 100px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+}
+.file:hover {
+    background: #AADFFD;
+    border-color: #78C3F3;
+    color: #004974;
+    text-decoration: none;
+}
+
+.table-hover tr:hover
+{
+    background-color:rgb(247,246,242) ;
+}
+
+
+
+
+
+
+

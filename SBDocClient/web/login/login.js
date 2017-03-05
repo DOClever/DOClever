@@ -1,0 +1,49 @@
+/**
+ * Created by sunxin on 2016/12/28.
+ */
+var vue=new Vue({
+    el: "#app",
+    data: {
+        username:"",
+        pwd:"",
+        loginPending:false
+    },
+    methods:{
+        login:function () {
+            var _this=this;
+            if(!this.username || !this.pwd)
+            {
+                this.$message.error('用户名密码不能为空');
+                return;
+            }
+            this.loginPending=true;
+            net.post("/user/login",{
+                name:_this.username,
+                password:_this.pwd
+            },{
+                "content-type":"application/x-www-form-urlencoded"
+            }).then(function (data) {
+                _this.loginPending=false;
+                if(data.code==200)
+                {
+                    _this.$notify({
+                        title: '登陆成功',
+                        type: 'success'
+                    });
+                    session.clear()
+                    session.update(data.data);
+                    setTimeout(function () {
+                        location.href="../project/project.html"
+                    },1500);
+                }
+                else
+                {
+                    _this.$notify({
+                        title: data.msg,
+                        type: 'error'
+                    });
+                }
+            })
+        }
+    },
+})

@@ -1,0 +1,10 @@
+node_modules/
+CTest*
+*.sln
+*.vcxproj*
+*.log
+[Tt]ests/
+Makefile
+*.cmake
+/CMakeFiles/
+/CMakeCache.txt

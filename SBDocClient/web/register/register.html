@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link href="../pic/logo.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <link rel="stylesheet" href="../node_modules/animate.css/animate.min.css">
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../common/common.css">
+    <title>注册</title>
+</head>
+<body>
+<div class="container" id="app" v-cloak>
+    <div class="row" style="text-align: center;color: #50a3ff;margin-top: 80px">
+        <h1><a style="text-decoration: none;cursor: pointer;color: inherit" href="/">SBDoc</a></h1>
+    </div>
+    <div class="row">
+        <el-form ref="form" style="width: 50%;margin: 0 auto;padding: 20px 20px 0px 20px" >
+            <el-form-item style="text-align: center">
+                <el-input  placeholder="用户名" style="width: 400px;"  v-model="username"></el-input>
+            </el-form-item>
+            <el-form-item  style="text-align: center">
+                <el-input  placeholder="密码" style="width: 400px;"  v-model="pwd" type="password"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center">
+                <el-input  placeholder="确认密码" style="width: 400px;"  v-model="pwd1" type="password"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center">
+                <el-input  placeholder="密码找回问题" style="width: 400px;"  v-model="question"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center">
+                <el-input  placeholder="密码找回答案" style="width: 400px;"  v-model="answer"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center">
+                <el-button type="primary" :loading="registerPending" style="width: 400px;" @click.prevent="register">立即注册</el-button>
+                <el-row class="row" style="width: 400px;margin: 0 auto">
+                    <h5 style="text-align: center;float: left">
+                        <a style="color: #20A0FF;cursor: pointer" href="../reset/reset.html">忘记密码?</a>
+                    </h5>
+                    <h5 style="text-align: center;float: right">
+                        <a style="color: #20A0FF;cursor: pointer" href="../login/login.html">已有账号?立即登录</a>
+                    </h5>
+                </el-row>
+            </el-form-item>
+        </el-form>
+    </div>
+</div>
+<script src="../../dist/vendor.bundle.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="../../dist/register.js"></script>
+</body>
+</html>

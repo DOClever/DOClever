@@ -1,0 +1,23 @@
+{
+  "ok":200,
+  "userNotFound":1,
+  "userOrPwdWrong":2,
+  "missParam":3,
+  "methodNotFound":4,
+  "systemReason":5,
+  "paramWrong":6,
+  "userForbidden":7,
+  "userExits":8,
+  "registerFail":9,
+  "unknowErr":10,
+  "validateParamFail":11,
+  "paramTypeWrong":12,
+  "userNotLogin":13,
+  "projectNotFound":14,
+  "groupNotFound":15,
+  "interfaceNotFound":16,
+  "duplicateUser":17,
+  "duplicateName":18,
+  "interfaceChanged":19,
+  "questionIsEmpty":20
+}
