@@ -60,7 +60,18 @@ body {
     background-color:rgb(247,246,242) ;
 }
 
+.el-input__inner{
+    display:inline-block;
+}
 
+.el-textarea__inner{
+    display: inline-block;
+    height: 100%;
+}
+
+td {
+    padding: 0;
+}
 
 
 

@@ -2,8 +2,8 @@
     <el-row class="row" style="cursor: pointer;height: 100%">
         <table width="100%" style="border-spacing: 0">
             <template v-for="(item,index) in arr">
-                <tr style="text-align: center;vertical-align: middle;cursor: move" :draggable="item.drag?item.drag:'false'" @dragover="dragOver($event,item)" @dragleave="dragLeave($event,item)" @drop="drop($event,item,arr)" @dragstart="dragStart($event,item,index,arr)" @dragend="dragEnd($event)">
-                    <td :style="{width: '30%',height: '50px',lineHeight: '50px',verticalAlign: 'middle',paddingLeft:level*20+'px'}">
+                <tr style="text-align: center;vertical-align: middle;cursor: move;height: 50px;line-height: 50px" :draggable="item.drag?item.drag:'false'" @dragover="dragOver($event,item)" @dragleave="dragLeave($event,item)" @drop="drop($event,item,arr)" @dragstart="dragStart($event,item,index,arr)" @dragend="dragEnd($event)">
+                    <td :style="{width: '30%',verticalAlign: 'middle',paddingLeft:level*20+'px'}">
                         <el-col class="col" :span="2" v-if="(item.type==4 || item.type==3)" @click.native="toggle(item)">
                             <span :class="item.show?'el-icon-caret-bottom':'el-icon-caret-right'" style="color:#c7c7c7 "></span>
                         </el-col>
@@ -30,10 +30,10 @@
                         </span>
                     </td>
                     <td style="width: 18%">
-                        <el-input type="textarea" style="width: 90%;" resize="none" :row="2" placeholder="请填写备注;" v-model="item.remark" @focus="focus(item)" @blur="blur(item)"></el-input>
+                        <el-input type="textarea" style="width: 90%;height: 46px" resize="none" :row="0" placeholder="请填写备注;" v-model="item.remark" @focus="focus(item)" @blur="blur(item)"></el-input>
                     </td>
                     <td style="width: 20%">
-                        <el-input type="textarea" style="width: 90%;" resize="none" :row="2" placeholder="请填写Mock数据;" v-model="item.mock" v-if="item.type!=3 && item.type!=4" @focus="focus(item)" @blur="blur(item)"></el-input>
+                        <el-input type="textarea" style="width: 90%;height: 46px" resize="none" :row="0" placeholder="请填写Mock数据;" v-model="item.mock" v-if="item.type!=3 && item.type!=4" @focus="focus(item)" @blur="blur(item)"></el-input>
                     </td>
                     <td style="width: 5%">
                         <el-button type="text" icon="close" style="color: red;font-size: 15px" @click="remove(item,index,level)" size="small"></el-button>
