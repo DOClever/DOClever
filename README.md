@@ -19,8 +19,8 @@
 {  
   "db":"mongodb://localhost:27017/SBDoc",  //这里为你的mongodb服务器的地址和库的名称  
   "filePath":"/Users/Shared/SBDoc",  //这里作为SBDoc文件上传的路径  
-  "imgPath":"/Users/Shared/SBDoc/img",  //这里是SBDoc图片上传的路径  
-  "tempPath":"/Users/Shared/SBDoc/temp",  //这里SBDoc临时文件上传的路径  
+  "imgPath":"/Users/Shared/SBDoc/img",  //这里是SBDoc图片上传的路径(是SBDoc文件上传的路径的直接子目录）  
+  "tempPath":"/Users/Shared/SBDoc/temp",  //这里SBDoc临时文件上传的路径（是SBDoc文件上传的路径的直接子目录)  
   "port":10000,  //SBDoc启动的端口号  
   "version":"1.0.0"  //SBDoc的版本号（无需修改）  
 }  
