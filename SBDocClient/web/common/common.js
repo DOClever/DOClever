@@ -232,7 +232,7 @@ $.inputMul=function (vue,placeholder,func) {
     child.$refs.box.$on("close",function () {
         child.$el.parentNode.removeChild(child.$el);
     })
-    child.$refs.box.$on("save",function (val) {
+    child.$on("save",function (val) {
         if(func)
         {
             var ret=func(val);
