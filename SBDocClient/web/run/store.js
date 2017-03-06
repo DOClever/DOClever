@@ -939,7 +939,8 @@ module.exports=new Vuex.Store({
                                 rawTextRemark:"",
                                 rawFileRemark:"",
                                 rawText:"",
-                            }
+                            },
+                            finish:0
                         });
                     }
                     return data;
