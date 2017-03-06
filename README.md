@@ -15,7 +15,7 @@
 ## 如何部署
 #### 1.首先本地要安装node环境，推荐6.10.0版本([下载页面](https://nodejs.org/en/))
 #### 2.安装mongodb([下载页面](https://www.mongodb.com/))，可使用robomongo来作为mongodb的客户端工具([下载页面](https://robomongo.org/))，启动mongodb后（[如何启动](http://www.open-open.com/lib/view/open1435117403544.html)），用robomongo来连接，新建一个database作为SBDoc的数据库（名称随意）
-#### 3.将SBDoc的源码down到本地，进入根目录，修改config.js 
+#### 3.将SBDoc的源码down到本地，进入根目录，修改config.json 
 {  
   "db":"mongodb://localhost:27017/SBDoc",  //这里为你的mongodb服务器的地址和库的名称  
   "filePath":"/Users/Shared/SBDoc",  //这里作为SBDoc文件上传的路径  
