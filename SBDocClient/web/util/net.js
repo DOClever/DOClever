@@ -381,14 +381,7 @@ net.upload=function (method,path,data,headers,beforeFunc,run,bNet) {
                         status:xhr.status,
                         header:convertHeader(xhr.getAllResponseHeaders()),
                     }
-                    if(xhr.status>=200 && xhr.status<300)
-                    {
-                        resolve(obj)
-                    }
-                    else
-                    {
-                        reject(obj);
-                    }
+                    resolve(obj)
                     return;
                 }
             }
