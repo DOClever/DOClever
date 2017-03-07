@@ -4,11 +4,11 @@
 var config=require("../util/config");
 var obj={
     bind:function (el,binding) {
-        el.src="/pic/logo.png";
+        el.src="/html/web/pic/logo.png";
         if(binding.value)
         {
             var img=new Image();
-            img.src=config.hostname+binding.value
+            img.src=config.host+binding.value
             img.onload=function () {
                 el.src=img.src
             }
