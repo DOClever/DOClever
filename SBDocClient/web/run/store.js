@@ -469,17 +469,33 @@ module.exports=new Vuex.Store({
             {
                 path=path+"?"+query;
             }
-            var header={};
+            var header={},arrHeaders=["host","connection","origin","referer","user-agent"],objHeaders={};
             context.getters.headerSave.forEach(function (obj) {
                 if(obj.encrypt && obj.encrypt.type)
                 {
                     var value=helper.encrypt(obj.encrypt.type,obj.value,obj.encrypt.salt);
                     var key=obj.name;
-                    header[key]=value;
+                    if($.inArr(key,arrHeaders))
+                    {
+                        objHeaders[key]=value;
+                    }
+                    else
+                    {
+                        header[key]=value;
+                    }
+
                 }
                 else
                 {
-                    header[obj.name]=obj.value;
+                    if($.inArr(obj.name,arrHeaders))
+                    {
+                        objHeaders[obj.name]=obj.value;
+                    }
+                    else
+                    {
+                        header[obj.name]=obj.value;
+                    }
+
                 }
             })
             var body={},bUpload=false;
@@ -570,6 +586,7 @@ module.exports=new Vuex.Store({
             header["__path"]=path;
             header["__method"]=method;
             header["__user"]=session.get("id");
+            header["__headers"]=JSON.stringify(objHeaders);
             var proxyUrl="/proxy";
             var bNet=false;
             if(/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl) && !bMock)

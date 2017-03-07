@@ -316,6 +316,17 @@ $.param=function (obj) {
     return arr.join("&");
 }
 
+$.inArr=function (str,arr) {
+    for(var i=0;i<arr.length;i++)
+    {
+        if(str.toLowerCase()==arr[i].toLowerCase())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 module.exports=$;
 
 

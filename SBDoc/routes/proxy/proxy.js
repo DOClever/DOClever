@@ -10,8 +10,17 @@ var run=require("../../model/runModel")
 var getHeader = function (req) {
     var ret = {};
     for (var i in req.headers) {
-        if (!/host|connection|Access-|origin|referer|user-agent/i.test(i)) {
+        if (!/host|connection|Access-|origin|referer|user-agent|__user|__path|__url|__method|__headers/i.test(i)) {
                 ret[i] = req.headers[i];
+        }
+    }
+    var headers=req.headers["__headers"];
+    if(headers)
+    {
+        headers=JSON.parse(headers);
+        for(var key in headers)
+        {
+            ret[key]=headers[key];
         }
     }
     return ret;

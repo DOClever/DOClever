@@ -170,9 +170,12 @@ var vue=new Vue({
                 var results=_this.interface.baseUrl.map(function (obj) {
                     return {value:obj}
                 })
-                results.push({
-                    value:"MockServer"
-                })
+                if(!store.state.hash)
+                {
+                    results.push({
+                        value:"MockServer"
+                    })
+                }
                 if(queryString)
                 {
                     results=results.filter(function (obj) {

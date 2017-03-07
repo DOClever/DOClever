@@ -302,7 +302,7 @@ helper.format=function (txt,mix,outParam) {
                 remark=getRemark(name,raw)
             }
             var timestamp=new Date().getTime()+i;
-            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'"')+' <span style="border: 1px gray solid;cursor: pointer;color: #50a3ff;'+((formObj || root)?"":"margin-left: -17px")+'" jsonflag arrsize="'+value.length+'" timestamp="'+timestamp+'">-</span> '+'<span jsonleft>[</span>'+line+remark);
+            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+' <span style="border: 1px gray solid;cursor: pointer;color: #50a3ff;'+((formObj || root)?"":"margin-left: -22px")+'" jsonflag arrsize="'+value.length+'" timestamp="'+timestamp+'">-</span> '+'<span jsonleft>[</span>'+line+remark);
             for (var i=0;i<value.length;i++){
                 var raw1=getData(i,raw)
                 notify(i,value[i],i==value.length-1,indent,false,raw1);
@@ -315,7 +315,7 @@ helper.format=function (txt,mix,outParam) {
                 remark=getRemark(name,raw)
             }
             var timestamp=new Date().getTime()+i;
-            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+' <span style="border: 1px gray solid;cursor: pointer;color: #50a3ff;'+((formObj || root)?"":"margin-left: -17px")+'" jsonflag timestamp="'+timestamp+'">-</span> '+'<span jsonleft>{</span>'+line+remark);
+            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+' <span style="border: 1px gray solid;cursor: pointer;color: #50a3ff;'+((formObj || root)?"":"margin-left: -22px")+'" jsonflag timestamp="'+timestamp+'">-</span> '+'<span jsonleft>{</span>'+line+remark);
             var len=0,i=0;
             for(var key in value){
                 len++;
