@@ -91,8 +91,8 @@
                     <el-input placeholder="请填入salt的值" id="bodyRawEncryptSalt" v-model="salt"></el-input>
                 </el-col>
             </el-row>
-            <el-row class="row">
-                <el-input type="textarea" :rows="6" style="width: 100%;height: 200px;" v-if="info.rawType==0" placeholder="请填入文本内容" id="bodyText" v-model="info.rawText" :placeholder="info.rawTextRemark">
+            <el-row class="row" style="margin-top: 10px">
+                <el-input type="textarea" :rows="6" style="width: 100%;height: 200px;" v-if="info.rawType==0"  id="bodyText" v-model="info.rawText" :placeholder="info.rawTextRemark?info.rawTextRemark:'请填入文本内容'">
                 </el-input>
                 <a  href="javascript:void(0)" class="file" style="display: inline-block;" v-else>
                     <span>选择文件</span><input type="file"  id="bodyFile" @change="change" custom>

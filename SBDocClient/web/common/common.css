@@ -60,6 +60,11 @@ body {
     background-color:rgb(247,246,242) ;
 }
 
+.el-textarea
+{
+    vertical-align:baseline ;
+}
+
 .el-input__inner{
     display:inline-block;
 }
@@ -67,6 +72,7 @@ body {
 .el-textarea__inner{
     display: inline-block;
     height: 100%;
+    vertical-align: middle;
 }
 
 td {
