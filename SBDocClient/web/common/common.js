@@ -6,6 +6,10 @@ if(Vue)
     window.Vue=Vue;
 }
 Vue.use(Vuex);
+document.body.ondrop = function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+}
 var $={};
 $.ready = function (callback) {
     if (document.addEventListener) {

@@ -236,7 +236,7 @@
                                 $.tip("名字为空的元素不允许拖动!",0);
                             }
                             ele.style.backgroundColor="white";
-                            return;
+                            return false;
                         }
                         if(ele.style.backgroundColor=="orange")
                         {
@@ -244,7 +244,7 @@
                             {
                                 $.tip("已经是顶部元素了!",0);
                                 ele.style.backgroundColor="white";
-                                return;
+                                return false;
                             }
                             dragArr.splice(obj.index,1);
                             this.arr.push(obj.item);
@@ -255,7 +255,7 @@
                             {
                                 $.tip("已经是直接父子元素关系了!",0);
                                 ele.style.backgroundColor="white";
-                                return;
+                                return false;
                             }
                             var objFind={
                                 find:false
@@ -279,6 +279,7 @@
                     }
                     ele.style.backgroundColor="white";
                 }
+                return false;
             },
             dragEnd:function () {
                 dragArr=null;

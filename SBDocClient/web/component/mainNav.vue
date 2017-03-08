@@ -1,5 +1,5 @@
 <template>
-    <el-row id="navBar" class="row" :style="transparent?{height:'60px','backgroundColor':'transparent',left:0,top:0,position:'absolute'}:{height:'60px','backgroundColor':'white'}">
+    <el-row id="navBar" class="row" :style="transparent?{height:'60px','backgroundColor':'rgba(0,0,0,0.3)',left:0,top:0,position:'absolute'}:{height:'60px','backgroundColor':'white'}">
         <slot name="other"></slot>
         <el-col class="col" :span="3" style="text-align: left;line-height: 60px;color:#20A0FF ;font-size: 30px;padding-left: 20px">
             <a style="text-decoration: none;cursor: pointer;color: inherit" href="/">SBDoc</a>
@@ -123,7 +123,7 @@
                     else
                     {
                         ele.style.top=0;
-                        ele.style.backgroundColor="transparent"
+                        ele.style.backgroundColor="rgba(0,0,0,0.3)"
                         ele.style.position="absolute";
                     }
                 })

@@ -267,7 +267,7 @@ function list(req,res) {
                     role:1
                 }
             }
-        },"name dis",{
+        },"name dis users",{
             sort:"-createdAt"
         }))
         arr.forEach(function (obj) {
