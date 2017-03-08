@@ -252,7 +252,7 @@ module.exports=new Vuex.Store({
                     }
                     if(key)
                     {
-                        var obj=$.findValue(state.header,key);
+                        var obj=helper.findValue(state.header,key);
                         arrHeader.push({
                             name:key,
                             value:value,
@@ -301,7 +301,7 @@ module.exports=new Vuex.Store({
                     var param2=param1[i].split("=");
                     if(param2.length>0)
                     {
-                        var valueObj=$.findValue(state.body,param2[0]);
+                        var valueObj=helper.findValue(state.body,param2[0]);
                         var selValue=param2[1]?param2[1]:""
                         if(valueObj && valueObj.type!=1)
                         {
