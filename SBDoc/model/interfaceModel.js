@@ -51,6 +51,14 @@ var model=new mongoose.Schema({
     finish:{
         type:Number,
         default:0
+    },
+    before:{
+        type:String,
+        default:""
+    },
+    after:{
+        type:String,
+        default:""
     }
 },{
     timestamps:true

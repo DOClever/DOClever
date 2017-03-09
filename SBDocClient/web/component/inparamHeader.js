@@ -11,7 +11,9 @@ module.exports={
         "image/jpeg",
         "text/plain",
         "image/png",
-        "application/json"
+        "application/json",
+        "application/xml",
+        "application/javascript"
     ],
     "Accept":[
         "application/json",

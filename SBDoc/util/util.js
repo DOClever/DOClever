@@ -370,6 +370,17 @@ function convertToJSON(data,obj) {
                     return true
                 }
             }
+            else if(data.type==5)
+            {
+                if(data.mock)
+                {
+                    return data.mock.trim();
+                }
+                else
+                {
+                    return "mixed"
+                }
+            }
         }
         else
         {
@@ -403,7 +414,7 @@ function convertToJSON(data,obj) {
                 let arr=val.split(",");
                 let temp=Math.round(Math.random()*(arr.length-1));
                 temp=arr[temp];
-                if(data.type==0)
+                if(data.type==0 || data.type==5)
                 {
                     return String(temp);
                 }
@@ -415,6 +426,74 @@ function convertToJSON(data,obj) {
                 {
                     return Boolean(temp);
                 }
+            }
+            else if(str.startsWith("arr"))
+            {
+                var val=str.substring(4,str.length-1).trim();
+                if(data.type==5)
+                {
+                    if(val.length>0)
+                    {
+                        var arr;
+                        try
+                        {
+                            arr=eval(val);
+                        }
+                        catch (err)
+                        {
+                            arr=[];
+                        }
+                        if(!(arr instanceof  Array))
+                        {
+                            arr=[];
+                        }
+                        return arr;
+                    }
+                    else
+                    {
+                        return [];
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else if(str.startsWith("obj"))
+            {
+                var val=str.substring(4,str.length-1).trim();
+                if(data.type==5)
+                {
+                    if(val.length>0)
+                    {
+                        var obj;
+                        try
+                        {
+                            obj=eval("("+val+")");
+                        }
+                        catch (err)
+                        {
+                            obj={};
+                        }
+                        if(!(obj instanceof  Object))
+                        {
+                            obj={};
+                        }
+                        return obj;
+                    }
+                    else
+                    {
+                        return {};
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else if(str.startsWith("null"))
+            {
+                return null;
             }
         }
         return data.mock?data.mock.trim():null;
@@ -485,6 +564,17 @@ function convertToJSON(data,obj) {
                 func(data.data[i],objTemp);
             }
         }
+        else if(data.type==5)
+        {
+            if(typeof(obj)=="object" && (obj instanceof  Array))
+            {
+                obj.push(mock(data));
+            }
+            else if(typeof(obj)=="object" && !(obj instanceof  Array))
+            {
+                obj[data.name]=mock(data);
+            }
+        }
     }
     for(var i=0;i<data.length;i++)
     {
@@ -530,6 +620,34 @@ function mock(data) {
             var temp=Math.round(Math.random()*(arr.length-1));
             temp=arr[temp];
             return String(temp);
+        }
+        else if(/^arr/i.test(str))
+        {
+            var val=str.substring(4,str.length-1).trim();
+            if(val.length>0)
+            {
+                return val;
+            }
+            else
+            {
+                return "[]";
+            }
+        }
+        else if(/^obj/i.test(str))
+        {
+            var val=str.substring(4,str.length-1).trim();
+            if(val.length>0)
+            {
+                return val;
+            }
+            else
+            {
+                return "{}";
+            }
+        }
+        else if(/^null/i.test(str))
+        {
+            return "null";
         }
     }
     return data?data.trim():null;

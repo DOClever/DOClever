@@ -30,6 +30,14 @@ var interface=[
                 type:Number,
                 optional:1
             },
+            before:{
+                type:String,
+                optional:1
+            },
+            after:{
+                type:String,
+                optional:1
+            },
             method:{
                 type:String,
                 uppercase:1,

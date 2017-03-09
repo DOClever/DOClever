@@ -7,6 +7,7 @@ var runHeader=require("../component/runHeader.vue")
 var runBody=require("../component/runBody.vue")
 var runParam=require("../component/runParam.vue")
 var encrypt=require("../component/encrypt.vue")
+var runInject=require("../component/runInject.vue")
 var store=require("./store")
 if((!session.get("interfaceId") || !session.get("groupId")) && location.hash.length<=1)
 {
@@ -25,7 +26,8 @@ var vue=new Vue({
         "runheader":runHeader,
         "runbody":runBody,
         "runparam":runParam,
-        "encrypt":encrypt
+        "encrypt":encrypt,
+        "runinject":runInject
     },
     store:store,
     computed:{
@@ -102,6 +104,9 @@ var vue=new Vue({
         },
         resHeader:function () {
             return store.state.resHeader;
+        },
+        errorCount:function () {
+            return store.state.errorCount;
         },
         queryRawStr:{
             get:function () {
@@ -190,6 +195,28 @@ var vue=new Vue({
             setTimeout(function(){
                 event.target.nextSibling.focus();
             },100)
+        },
+        getError:function (item) {
+            var ele=document.createElement("div");
+            ele.innerHTML=item;
+            var errEle=ele.querySelector("[err]");
+            return errEle.getAttribute("err");
+        },
+        existError:function (item) {
+            var ele=document.createElement("div");
+            ele.innerHTML=item;
+            var errEle=ele.querySelector("[err]");
+            if(errEle)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        },
+        changeMethod:function () {
+            store.commit("changeMethod")
         }
     },
     created:function () {

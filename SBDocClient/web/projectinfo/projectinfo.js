@@ -10,6 +10,7 @@ var outParam=require("../component/outParam.vue")
 var valueList=require("../component/valueList.vue")
 var restParam=require("../component/restParam.vue")
 var rawText=require("../component/rawText.vue")
+var inParamInject=require("../component/inparamInject.vue")
 var store=require("./store")
 var config=require("../util/config")
 if(!session.get("id"))
@@ -38,6 +39,7 @@ var vue=new Vue({
         "valuelist":valueList,
         "restparam":restParam,
         "rawtext":rawText,
+        "inparaminject":inParamInject
     },
     watch:{
         preview:function (val) {

@@ -400,7 +400,7 @@ module.exports=new Vuex.Store({
                 var obj={};
                 var result=helper.resultSave(state.result);
                 helper.convertToJSON(result,obj);
-                state.drawMix=helper.format(JSON.stringify(obj),1,result);
+                state.drawMix=helper.format(JSON.stringify(obj),1,result).draw;
             }
         }
     },
@@ -690,7 +690,7 @@ module.exports=new Vuex.Store({
                 var obj={};
                 var result=helper.resultSave(context.state.result);
                 helper.convertToJSON(result,obj);
-                context.commit("setDrawMix",helper.format(JSON.stringify(obj),1,result));
+                context.commit("setDrawMix",helper.format(JSON.stringify(obj),1,result).draw);
             }
         },
         move:function (context,obj) {
@@ -742,6 +742,8 @@ module.exports=new Vuex.Store({
                 project:session.get("projectId"),
                 method:context.state.interfaceEdit.method,
                 finish:context.state.interfaceEdit.finish,
+                before:context.state.interfaceEdit.before,
+                after:context.state.interfaceEdit.after,
             }
             if(context.state.interfaceEdit._id)
             {

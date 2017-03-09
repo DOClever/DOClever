@@ -53,7 +53,8 @@ module.exports=new Vuex.Store({
         headerRawStr:"",
         bodyRawStr:"",
         rawData:"",
-        encryptType:""
+        encryptType:"",
+        errorCount:0
     },
     getters:{
         querySave:function (state,getters) {
@@ -339,6 +340,58 @@ module.exports=new Vuex.Store({
                 state.bodyRawStr=str;
             }
         },
+        changeMethod:function (state) {
+            if(state.interface.method=="POST" || state.interface.method=="PUT")
+            {
+                if(state.header.length==1 && !state.header[0].name)
+                {
+                    state.header[0].name="Content-Type";
+                    state.header[0].value="application/x-www-form-urlencoded"
+                }
+                else
+                {
+                    var bFind=false;
+                    for(var i=0;i<state.header.length;i++)
+                    {
+                        var obj=state.header[i];
+                        if(obj.name=="Content-Type")
+                        {
+                            bFind=true;
+                            break;
+                        }
+                    }
+                    if(!bFind)
+                    {
+                        state.header.push({
+                            name:"Content-Type",
+                            value:"application/x-www-form-urlencoded",
+                            remark:""
+                        })
+                    }
+                }
+            }
+            else
+            {
+                for(var i=0;i<state.header.length;i++)
+                {
+                    var obj=state.header[i];
+                    if(obj.name=="Content-Type")
+                    {
+                        if(state.header.length>1)
+                        {
+                            state.header.splice(i,1);
+                        }
+                        else
+                        {
+                            state.header[0].name="";
+                            state.header[0].value="";
+                            state.header[0].remark="";
+                        }
+                        break;
+                    }
+                }
+            }
+        },
         changeUrl:function (state,val) {
             if(val)
             {
@@ -464,11 +517,6 @@ module.exports=new Vuex.Store({
                 }
 
             })
-            query=$.param(query);
-            if(query.length>0)
-            {
-                path=path+"?"+query;
-            }
             var header={},arrHeaders=["host","connection","origin","referer","user-agent"],objHeaders={};
             context.getters.headerSave.forEach(function (obj) {
                 if(obj.encrypt && obj.encrypt.type)
@@ -582,6 +630,16 @@ module.exports=new Vuex.Store({
                     }
                 }
             }
+            var beforeCode=$.trim(context.state.interface.before);
+            if(beforeCode)
+            {
+                helper.runBefore(beforeCode,baseUrl,path,method,query,header,body)
+            }
+            query=$.param(query);
+            if(query.length>0)
+            {
+                path=path+"?"+query;
+            }
             header["__url"]=baseUrl;
             header["__path"]=path;
             header["__method"]=method;
@@ -610,73 +668,57 @@ module.exports=new Vuex.Store({
                 }
             }
             context.state.resultData="";
+            var func;
             if(bUpload || context.state.bodyInfo.type==1)
             {
                 if(bContent && context.state.bodyInfo.type==0)
                 {
                     delete header[contentKey];
                 }
-                return net.upload("POST",proxyUrl,body,header,null,1,bNet).then(function (result) {
-                    context.state.resHeader=result.header;
-                    context.state.status=String(result.status);
-                    context.state.second=(((new Date())-startDate)/1000).toFixed(3);
-                    context.state.type=typeof (result.data);
-                    if(context.state.type=="object" && !(result.data instanceof Blob))
-                    {
-                        context.state.type="object"
-                        context.state.resultData=result.data;
-                        context.state.rawData=JSON.stringify(result.data);
-                        context.state.draw=helper.format(context.state.rawData,0,context.state.interface.outParam)
-                        context.state.drawMix=helper.format(context.state.rawData,1,context.state.interface.outParam)
-                    }
-                    else if(result.header["content-type"] && result.header["content-type"].indexOf("image/")>-1)
-                    {
-                        context.state.type="img";
-                        context.state.rawData="";
-                        context.state.imgUrl=baseUrl+path;
-                    }
-                    else
-                    {
-                        context.state.rawData=result.data;
-                        context.state.draw=result.data
-                        context.state.drawMix=result.data
-                    }
-                    return {
-                        code:200
-                    }
-                })
+                func=net.upload("POST",proxyUrl,body,header,null,1,bNet)
             }
             else
             {
-                return net.post(proxyUrl,body,header,null,1,bNet).then(function (result) {
-                    context.state.resHeader=result.header;
-                    context.state.status=String(result.status);
-                    context.state.second=(((new Date())-startDate)/1000).toFixed(3);
-                    context.state.type=typeof (result.data);
-                    if(context.state.type=="object" && !(result.data instanceof Blob))
-                    {
-                        context.state.resultData=result.data;
-                        context.state.rawData=JSON.stringify(result.data);
-                        context.state.draw=helper.format(context.state.rawData,0,context.state.interface.outParam)
-                        context.state.drawMix=helper.format(context.state.rawData,1,context.state.interface.outParam)
-                    }
-                    else if((result.header["content-type"] && result.header["content-type"].indexOf("image/")>-1) || (result.data instanceof Blob))
-                    {
-                        context.state.type="img";
-                        context.state.rawData="";
-                        context.state.imgUrl=baseUrl+path;
-                    }
-                    else
-                    {
-                        context.state.rawData=result.data;
-                        context.state.draw=result.data
-                        context.state.drawMix=result.data
-                    }
-                    return {
-                        code:200
-                    }
-                })
+                func=net.post(proxyUrl,body,header,null,1,bNet)
             }
+            return func.then(function (result) {
+                context.state.resHeader=result.header;
+                context.state.status=String(result.status);
+                context.state.second=(((new Date())-startDate)/1000).toFixed(3);
+                context.state.type=typeof (result.data);
+                if(context.state.type=="object" && !(result.data instanceof Blob))
+                {
+                    context.state.type="object"
+                    context.state.resultData=result.data;
+                    context.state.rawData=JSON.stringify(result.data);
+                    context.state.draw=helper.format(context.state.rawData,0,context.state.interface.outParam).draw;
+                    var obj=helper.format(context.state.rawData,1,context.state.interface.outParam);
+                    context.state.drawMix=obj.draw
+                    context.state.errorCount=obj.error;
+                }
+                else if(result.header["content-type"] && result.header["content-type"].indexOf("image/")>-1)
+                {
+                    context.state.type="img";
+                    context.state.rawData="";
+                    context.state.imgUrl=baseUrl+path;
+                    context.state.errorCount=0;
+                }
+                else
+                {
+                    context.state.rawData=result.data;
+                    context.state.draw=result.data
+                    context.state.drawMix=result.data;
+                    context.state.errorCount=0;
+                }
+                var AfterCode=$.trim(context.state.interface.after);
+                if(AfterCode)
+                {
+                    helper.runAfter(AfterCode,result.status,result.header,result.data);
+                }
+                return {
+                    code:200
+                }
+            })
         },
         save:function (context) {
             var method=context.state.interface.method;
@@ -875,7 +917,9 @@ module.exports=new Vuex.Store({
                 createdAt:context.state.hash?"":context.state.interface.createdAt,
                 updatedAt:context.state.hash?"":context.state.interface.updatedAt,
                 finish:context.state.interface.finish,
-                outInfo:outInfo
+                outInfo:outInfo,
+                before:context.state.interface.before,
+                after:context.state.interface.after
             }
             if(method=="POST" || method=="PUT")
             {
@@ -887,7 +931,7 @@ module.exports=new Vuex.Store({
             {
                 for(var i=0;i<context.state.interface.baseUrl.length;i++)
                 {
-                    var reg=new RegExp(context.state.interface.baseUrl[i],"i");
+                    var reg=new RegExp(context.state.interface.baseUrl[i]);
                     if(reg.test(baseUrl))
                     {
                         bMatchUrl=true;

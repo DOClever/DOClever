@@ -31,7 +31,7 @@
             <el-row class="row" style="height: 50px;">
                 <el-col class="col" :span="3" style="line-height: 50px;text-align: center">
                     <div style="height: 100%;width: 80%;display: inline-block" id="method">
-                        <el-select v-model="interface.method">
+                        <el-select v-model="interface.method" @input="changeMethod">
                             <el-option  value="GET" label="GET"></el-option>
                             <el-option  value="POST" label="POST"></el-option>
                             <el-option  value="PUT" label="PUT"></el-option>
@@ -87,13 +87,20 @@
                     <el-input type="textarea" :rows="3" style="height: 100px;margin-top: 10px" placeholder="在这里编辑原始的url参数字符串，以&符合分割，文件类型用[FILE]代替" v-show="bodyRawShow" v-model="bodyRawStr"></el-input>
                     <el-button type="primary" size="small" style="margin-top: 20px" @click="toggleBody" v-if="bodyInfo.type==0">{{bodyRawShow?'Commit Raw':'Edit Raw'}}</el-button>
                 </el-tab-pane>
+                <el-tab-pane label="Inject">
+                    <runinject></runinject>
+                </el-tab-pane>
             </el-tabs>
         </el-row>
         <el-row class="row" style="padding: 15px;margin-top: 15px;background-color: white;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
             <el-row class="row" style="padding: 10px;margin-bottom: 10px">
             <span style="font-size: 18px;">
-                Result:&nbsp;&nbsp;<span :style="{color:status.match(/^2/)?'green':'red'}">{{status=='0'?'ERROR':status}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 18px;color: #50a3ff">{{second?("耗时"+second+"秒"):""}}</span>
+                Result:&nbsp;&nbsp;<span :style="{color:status.match(/^2/)?'green':'red'}">{{status=='0'?'ERROR':status}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 18px;color: #50a3ff">{{second?("耗时"+second+"秒"):""}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span v-if="errorCount>0" style="color: red">Error:&nbsp;{{errorCount}}</span>
             </span>
+                <el-popover ref="error" placement="bottom" width="400" trigger="hover" v-if="errorCount>0" content="切换到Advance Tab页，移动到红色的行上面即可看到错误信息">
+                </el-popover>
+                <el-button type="text" style="font-size: 15px" v-popover:error icon="information" v-if="errorCount>0">
+                </el-button>
             </el-row>
             <el-tabs type="card">
                 <el-tab-pane label="Preview">
@@ -106,10 +113,15 @@
                     <img :src="imgUrl" v-else-if="type=='img'">
                     <pre v-else>{{draw}}</pre>
                 </el-tab-pane>
-                <el-tab-pane label="Mix">
+                <el-tab-pane label="Advance">
                     <el-row class="row" v-if="type=='object'">
                         <template v-for="item in drawMix" v-if="type=='object'">
-                            <el-row class="row" style="font-size: 15px;min-height: 25px;line-height: 25px;word-break: break-all" v-html="item">
+                            <el-popover placement="bottom" title="错误信息" width="300" trigger="hover" v-if="existError(item)">
+                                {{getError(item)}}
+                                <el-row class="row" style="font-size: 15px;min-height: 25px;line-height: 25px;word-break: break-all;background-color: rgba(255,0,0,0.3)" v-html="item" slot="reference">
+                                </el-row>
+                            </el-popover>
+                            <el-row class="row" style="font-size: 15px;min-height: 25px;line-height: 25px;word-break: break-all" v-html="item" v-else>
                             </el-row>
                         </template>
                     </el-row>

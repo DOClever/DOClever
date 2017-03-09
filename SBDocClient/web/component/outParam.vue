@@ -22,6 +22,7 @@
                             <el-option :value="2" label="Boolean"></el-option>
                             <el-option :value="3" label="Array"></el-option>
                             <el-option :value="4" label="Object"></el-option>
+                            <el-option :value="5" label="Mixed"></el-option>
                         </el-select>
                     </td>
                     <td style="width: 8%">
@@ -39,7 +40,7 @@
                         <el-button type="text" icon="close" style="color: red;font-size: 15px" @click="remove(item,index,level)" size="small"></el-button>
                     </td>
                     <td style="width: 5%">
-                        <el-button type="text" style="font-size: 15px" icon="plus" size="small"  @click="add(arr)" v-if="(item.type==0 || item.type==1 || item.type==2)"></el-button>
+                        <el-button type="text" style="font-size: 15px" icon="plus" size="small"  @click="add(arr)" v-if="(item.type==0 || item.type==1 || item.type==2 || item.type==5)"></el-button>
                         <el-dropdown v-else>
                             <el-button type="text" icon="plus" size="small" style="font-size: 15px">
                             </el-button>

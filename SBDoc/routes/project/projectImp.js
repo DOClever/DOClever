@@ -101,7 +101,6 @@ var interface=[
             },
             urls:{
                 type:String,
-                lowercase:1,
                 optional:1
             }
         },
@@ -208,7 +207,6 @@ var interface=[
             },
             url:{
                 type:String,
-                lowercase:1,
             }
         },
         "data":{

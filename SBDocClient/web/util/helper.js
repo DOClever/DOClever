@@ -138,6 +138,17 @@ helper.convertToJSON=function (data,obj) {
                     return true
                 }
             }
+            else if(data.type==5)
+            {
+                if(data.mock)
+                {
+                    return $.trim(data.mock)
+                }
+                else
+                {
+                    return "mixed"
+                }
+            }
         }
         else
         {
@@ -171,7 +182,7 @@ helper.convertToJSON=function (data,obj) {
                 var arr=val.split(",");
                 var temp=Math.round(Math.random()*(arr.length-1));
                 temp=arr[temp];
-                if(data.type==0)
+                if(data.type==0 || data.type==5)
                 {
                     return String(temp);
                 }
@@ -183,6 +194,74 @@ helper.convertToJSON=function (data,obj) {
                 {
                     return Boolean(temp);
                 }
+            }
+            else if(/^arr/i.test(str))
+            {
+                var val=$.trim(str.substring(4,str.length-1));
+                if(data.type==5)
+                {
+                    if(val.length>0)
+                    {
+                        var arr;
+                        try
+                        {
+                            arr=eval(val);
+                        }
+                        catch (err)
+                        {
+                            arr=[];
+                        }
+                        if(!(arr instanceof  Array))
+                        {
+                            arr=[];
+                        }
+                        return arr;
+                    }
+                    else
+                    {
+                        return [];
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else if(/^obj/i.test(str))
+            {
+                var val=$.trim(str.substring(4,str.length-1));
+                if(data.type==5)
+                {
+                    if(val.length>0)
+                    {
+                        var obj;
+                        try
+                        {
+                            obj=eval("("+val+")");
+                        }
+                        catch (err)
+                        {
+                            obj={};
+                        }
+                        if(!(obj instanceof  Object))
+                        {
+                            obj={};
+                        }
+                        return obj;
+                    }
+                    else
+                    {
+                        return {};
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else if(/^null/i.test(str))
+            {
+                return null;
             }
         }
         return data.mock?$.trim(data.mock):null;
@@ -253,6 +332,17 @@ helper.convertToJSON=function (data,obj) {
                 func(data.data[i],objTemp);
             }
         }
+        else if(data.type==5)
+        {
+            if(typeof(obj)=="object" && (obj instanceof  Array))
+            {
+                obj.push(mock(data));
+            }
+            else if(typeof(obj)=="object" && !(obj instanceof  Array))
+            {
+                obj[data.name]=mock(data);
+            }
+        }
     }
     for(var i=0;i<data.length;i++)
     {
@@ -288,7 +378,81 @@ helper.format=function (txt,mix,outParam) {
         return;
     };
     var result=outParam;
-    var draw=[],last=false,line='',nodeCount=0,maxDepth=0;
+    var draw=[],last=false,line='',nodeCount=0,maxDepth=0,errorCount=0;
+    var checkType=function (value,raw,obj) {
+        if(value===null || value==undefined || raw.type==5)
+        {
+            return;
+        }
+        else if(typeof(value)=="string" && raw.type==0)
+        {
+            return;
+        }
+        else if(typeof(value)=="number" && raw.type==1)
+        {
+            return;
+        }
+        else if(typeof(value)=="boolean" && raw.type==2)
+        {
+            return;
+        }
+        else if((typeof(value)=="object" && (value instanceof Array)) && raw.type==3)
+        {
+            return;
+        }
+        else if((typeof(value)=="object" && !(value instanceof Array)) && raw.type==4)
+        {
+            return;
+        }
+        errorCount++;
+        obj.title+="返回数据类型和文档模型不匹配。 "
+    }
+    var checkExist=function (value,raw,obj) {
+        if(typeof(raw)=="object" && !(raw instanceof Array) && raw.type!=5)
+        {
+            for(var i=0;i<raw.data.length;i++)
+            {
+                if(raw.data[i].must)
+                {
+                    var bFind=false;
+                    for(var key in value)
+                    {
+                        if(key==raw.data[i].name)
+                        {
+                            bFind=true;
+                        }
+                    }
+                    if(!bFind && raw.data[i].name)
+                    {
+                        errorCount++;
+                        obj.title+="必有字段"+raw.data[i].name+"在返回数据里不存在。 ";
+                    }
+                }
+            }
+        }
+        else if(typeof(raw)=="object" && (raw instanceof Array))
+        {
+            for(var i=0;i<raw.length;i++)
+            {
+                if(raw[i].must)
+                {
+                    var bFind=false;
+                    for(var key in value)
+                    {
+                        if(key==raw[i].name)
+                        {
+                            bFind=true;
+                        }
+                    }
+                    if(!bFind && raw[i].name)
+                    {
+                        errorCount++;
+                        obj.title+="必有字段"+raw[i].name+"在返回数据里不存在。 ";
+                    }
+                }
+            }
+        }
+    }
     var notify=function(name,value,isLast,indent,formObj,raw,root){
         nodeCount++;
         for (var i=0,tab='';i<indent;i++ ){
@@ -296,26 +460,33 @@ helper.format=function (txt,mix,outParam) {
         }
         maxDepth=++indent;
         if(value&&value.constructor==Array){
-            var remark="";
+            var remark="",errObj={title:""};
             if(raw && !root)
             {
-                remark=getRemark(name,raw)
+                remark=getRemark(name,raw);
+                checkType(value,raw,errObj);
             }
             var timestamp=new Date().getTime()+i;
-            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+' <span style="border: 1px gray solid;cursor: pointer;color: #50a3ff;'+((formObj || root)?"":"margin-left: -22px")+'" jsonflag arrsize="'+value.length+'" timestamp="'+timestamp+'">-</span> '+'<span jsonleft>[</span>'+line+remark);
+            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+' <span style="border: 1px gray solid;cursor: pointer;color: #50a3ff;'+((formObj || root)?"":"margin-left: -22px")+'" jsonflag arrsize="'+value.length+'" timestamp="'+timestamp+'" '+(errObj.title?('err="'+errObj.title+'"'):'')+'>-</span> '+'<span jsonleft>[</span>'+line+remark);
             for (var i=0;i<value.length;i++){
                 var raw1=getData(i,raw)
                 notify(i,value[i],i==value.length-1,indent,false,raw1);
             }
             draw.push(tab+'<span timestamp="'+timestamp+'"></span>'+']'+(isLast?line:(','+line)));
         }else   if(value&&typeof value=='object'){
-            var remark="";
+            var remark="",errObj={title:""};
             if(raw && !root)
             {
                 remark=getRemark(name,raw)
+                checkType(value,raw,errObj);
+                checkExist(value,raw,errObj)
+            }
+            else if(raw && root)
+            {
+                checkExist(value,raw,errObj)
             }
             var timestamp=new Date().getTime()+i;
-            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+' <span style="border: 1px gray solid;cursor: pointer;color: #50a3ff;'+((formObj || root)?"":"margin-left: -22px")+'" jsonflag timestamp="'+timestamp+'">-</span> '+'<span jsonleft>{</span>'+line+remark);
+            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+' <span style="border: 1px gray solid;cursor: pointer;color: #50a3ff;'+((formObj || root)?"":"margin-left: -22px")+'" jsonflag timestamp="'+timestamp+'" '+(errObj.title?('err="'+errObj.title+'"'):'')+'>-</span> '+'<span jsonleft>{</span>'+line+remark);
             var len=0,i=0;
             for(var key in value){
                 len++;
@@ -326,6 +497,12 @@ helper.format=function (txt,mix,outParam) {
             }
             draw.push(tab+'<span timestamp="'+timestamp+'"></span>'+'}'+(isLast?line:(','+line)))
         }else{
+            var remark="",errObj={title:""};
+            if(raw && !root)
+            {
+                remark=getRemark(name,raw);
+                checkType(value,raw,errObj);
+            }
             if(typeof value=='string'){
                 value='"'+"<span style='font-weight: bold'>"+value+"</span>"+'"';
             }
@@ -337,12 +514,7 @@ helper.format=function (txt,mix,outParam) {
             {
                 value="<span style='font-weight: bold'>"+value+"</span>"
             }
-            var remark="";
-            if(raw && !root)
-            {
-                remark=getRemark(name,raw)
-            }
-            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+"<span style='color: #1daf42'>"+value+"</span>"+(isLast?'':',')+line+remark);
+            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+"<span style='color: #1daf42' "+(errObj.title?('err="'+errObj.title+'"'):'')+">"+value+"</span>"+(isLast?'':',')+line+remark);
         };
     };
     var getData=function (key,raw) {
@@ -356,7 +528,7 @@ helper.format=function (txt,mix,outParam) {
             {
                 for(var i=0;i<raw.length;i++)
                 {
-                    if(raw[i].name.toLowerCase()==key.toLowerCase())
+                    if(raw[i].name && raw[i].name.toLowerCase()==key.toLowerCase())
                     {
                         return raw[i];
                     }
@@ -369,15 +541,15 @@ helper.format=function (txt,mix,outParam) {
         }
         else
         {
+            if(!raw.data)
+            {
+                return null;
+            }
             if(typeof(key)=="string")
             {
-                if(!raw.data)
-                {
-                    return null;
-                }
                 for(var i=0;i<raw.data.length;i++)
                 {
-                    if(raw.data[i].name.toLowerCase()==key.toLowerCase())
+                    if(raw.data[i].name && raw.data[i].name.toLowerCase()==key.toLowerCase())
                     {
                         return raw.data[i];
                     }
@@ -391,7 +563,7 @@ helper.format=function (txt,mix,outParam) {
         return null;
     }
     var getRemark=function (name,raw) {
-        var type=["String","Number","Boolean","Array","Object"];
+        var type=["String","Number","Boolean","Array","Object","Mixed"];
         if(!raw)
         {
             return "";
@@ -478,7 +650,10 @@ helper.format=function (txt,mix,outParam) {
             }
         }
     },300);
-    return draw;
+    return {
+        draw:draw,
+        error:errorCount
+    };
 }
 
 helper.handleResultData=function (name,data,result,originObj,show) {
@@ -651,6 +826,34 @@ helper.mock=function (data) {
             temp=arr[temp];
             return String(temp);
         }
+        else if(/^arr/i.test(str))
+        {
+            var val=$.trim(str.substring(4,str.length-1));
+            if(val.length>0)
+            {
+                return val;
+            }
+            else
+            {
+                return "[]";
+            }
+        }
+        else if(/^obj/i.test(str))
+        {
+            var val=$.trim(str.substring(4,str.length-1));
+            if(val.length>0)
+            {
+                return val;
+            }
+            else
+            {
+                return "{}";
+            }
+        }
+        else if(/^null/i.test(str))
+        {
+            return "null";
+        }
     }
     return data?$.trim(data):null;
 }
@@ -688,4 +891,28 @@ helper.encrypt=function (type,val,salt) {
     }
     return val;
 }
+
+helper.runBefore=function (code,url,path,method,query,header,body) {
+    var Base64=BASE64.encoder,MD5=CryptoJS.MD5,SHA1=CryptoJS.SHA1,SHA256=CryptoJS.SHA256,SHA512=CryptoJS.SHA512,SHA3=CryptoJS.SHA3,RIPEMD160=CryptoJS.RIPEMD160,AES=CryptoJS.AES.encrypt,TripleDES=CryptoJS.TripleDES.encrypt,DES=CryptoJS.DES.encrypt,Rabbit=CryptoJS.Rabbit.encrypt,RC4=CryptoJS.RC4.encrypt,RC4Drop=CryptoJS.RC4Drop.encrypt;
+    try
+    {
+        eval(code);
+    }
+    catch (err)
+    {
+        console.log("Before Error:"+err);
+    }
+}
+
+helper.runAfter=function (code,status,header,data) {
+    try
+    {
+        eval(code);
+    }
+    catch (err)
+    {
+        console.log("After Error:"+err);
+    }
+}
+
 module.exports=helper;

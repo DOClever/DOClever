@@ -2,7 +2,16 @@
     <el-row class="row">
         <el-row class="row" style="padding:0 0 0 20px;height: 50px;line-height: 50px">
             <el-radio class="radio" :label="0" v-model="info.type" :checked="info.type==0" id="bodyKey">Key-Value</el-radio>&nbsp;&nbsp;
-            <el-radio class="radio" :label="1" v-model="info.type" :checked="info.type==1" id="bodyRaw">Raw</el-radio>
+            <el-radio class="radio" :label="1" v-model="info.type" :checked="info.type==1" id="bodyRaw">Raw</el-radio>&nbsp;&nbsp;&nbsp;&nbsp;
+            <el-select v-model="rawType" v-if="info.type==1 && info.rawType==0">
+                <el-option value="" label="Text"></el-option>
+                <el-option value="text/plain" label="Text(text/plain)"></el-option>
+                <el-option value="application/json" label="JSON"></el-option>
+                <el-option value="text/html" label="HTML"></el-option>
+                <el-option value="application/xml" label="XML(application/xml)"></el-option>
+                <el-option value="text/xml" label="XML(text/xml)"></el-option>
+                <el-option value="application/javascript" label="JAVASCRIPT"></el-option>
+            </el-select>
         </el-row>
         <table width="100%" v-if="info.type==0">
             <template v-for="(item,index) in arr">
@@ -69,6 +78,42 @@
             },
             info:function () {
                 return this.$store.state.bodyInfo
+            },
+            rawType:{
+                get:function () {
+                    var type="";
+                    this.$store.getters.headerSave.forEach(function (obj) {
+                        if(obj.name.toLowerCase()=="content-type")
+                        {
+                            var value=obj.value.toLowerCase();
+                            var arr=["text/plain","application/json","text/html","application/xml","text/xml","application/javascript"];
+                            var index=arr.indexOf(value);
+                            if(index>-1)
+                            {
+                                type=arr[index];
+                            }
+                        }
+                    })
+                    return type;
+                },
+                set:function (value) {
+                    var bFind=false;
+                    this.$store.getters.headerSave.forEach(function (obj) {
+                        if(obj.name.toLowerCase()=="content-type")
+                        {
+                            obj.value=value;
+                            bFind=true;
+                        }
+                    })
+                    if(!bFind)
+                    {
+                        this.$store.state.header.push({
+                            name:'Content-Type',
+                            value:value,
+                            remark:''
+                        })
+                    }
+                }
             }
         },
         methods:{
