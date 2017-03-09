@@ -445,7 +445,9 @@ module.exports=new Vuex.Store({
                         rawRemark:"",
                         rawMock:""
                     },
-                    restParam:[]
+                    restParam:[],
+                    before:"",
+                    after:""
                 });
             }
 

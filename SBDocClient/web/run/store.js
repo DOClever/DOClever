@@ -1001,7 +1001,9 @@ module.exports=new Vuex.Store({
                                 rawFileRemark:"",
                                 rawText:"",
                             },
-                            finish:0
+                            finish:0,
+                            before:"",
+                            after:""
                         });
                     }
                     return data;
