@@ -7,7 +7,7 @@
                         <el-input style="width: 90%" placeholder="请填写参数名称" v-model="item.name"></el-input>
                     </td>
                     <td style="width: 10%;" >
-                        <el-checkbox v-model="item.must" :true-value="1" :false-value="0">必选</el-checkbox>
+                        <el-checkbox v-model="item.must" :true-label="1" :false-label="0">必选</el-checkbox>
                     </td>
                     <td style="width: 55%">
                         <el-input style="width: 90%" placeholder="请填写备注" v-model="item.remark"></el-input>

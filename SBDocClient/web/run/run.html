@@ -53,7 +53,7 @@
                     </el-button>
                 </el-col>
                 <el-col class="col" :span="session.role==0?8:10" style="line-height: 50px;text-align: center">
-                    <el-input style="width: 90%" placeholder="请填入你请求的路由地址" v-model="interface.url" @change="changeUrl"></el-input>
+                    <el-input style="width: 90%" placeholder="请填入你请求的路由地址" v-model="interface.url" @change="changeUrl" @paste.native="paste"></el-input>
                 </el-col>
                 <el-col class="col" :span="2" style="line-height: 50px;text-align: center">
                     <el-button type="primary" @click="run" title="运行" id="run" :loading="runPending">

@@ -217,6 +217,50 @@ var vue=new Vue({
         },
         changeMethod:function () {
             store.commit("changeMethod")
+        },
+        paste:function () {
+            setTimeout(function () {
+                var path=store.state.interface.url;
+                var arrStoreQuery=store.state.query;
+                arrStoreQuery.splice(0,arrStoreQuery.length);
+                var index=path.indexOf("?");
+                if(index>-1)
+                {
+                    var arr=path.split("?");
+                    if(arr[1])
+                    {
+                        var query=arr[1];
+                        var arrQuery=query.split("&");
+                        for(var i=0;i<arrQuery.length;i++)
+                        {
+                            if(arrQuery[i])
+                            {
+                                var arrQuery1=arrQuery[i].split("=");
+                                arrStoreQuery.push({
+                                    name:arrQuery1[0],
+                                    value:arrQuery1[1]?[arrQuery1[1]]:[],
+                                    must:1,
+                                    remark:"",
+                                    selValue:arrQuery1[1]?arrQuery1[1]:"",
+                                    enable:1
+                                })
+                            }
+                        }
+                    }
+                    store.state.interface.url=store.state.interface.url.substring(0,index);
+                }
+                else
+                {
+                    arrStoreQuery.push({
+                        name:"",
+                        must:0,
+                        remark:"",
+                        value:"",
+                        selValue:"",
+                        enable:1
+                    })
+                }
+            },100)
         }
     },
     created:function () {
