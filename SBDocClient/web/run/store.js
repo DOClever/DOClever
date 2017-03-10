@@ -191,7 +191,7 @@ module.exports=new Vuex.Store({
             if(state.queryRawShow)
             {
                 state.queryRawShow=0;
-                var str=decodeURI($.trim(state.queryRawStr));
+                var str=$.trim(state.queryRawStr);
                 var arr=[];
                 var param1=str.split("&");
                 for(var i=0;i<param1.length;i++)
@@ -204,7 +204,7 @@ module.exports=new Vuex.Store({
                             name:param2[0],
                             must:valueObj?valueObj.must:1,
                             remark:valueObj?valueObj.remark:"",
-                            selValue:param2[1]?param2[1]:"",
+                            selValue:param2[1]?decodeURIComponent(param2[1]):"",
                             enable:valueObj?valueObj.enable:1,
                             value:valueObj?valueObj.value:null,
                             encrypt:(valueObj && valueObj.encrypt)?valueObj.encrypt:{
@@ -225,7 +225,7 @@ module.exports=new Vuex.Store({
                 {
                     if(arr[i].name)
                     {
-                        str+=(arr[i].name+"="+(arr[i].selValue)+((i!=arr.length-1)?"&":""))
+                        str+=(arr[i].name+"="+(encodeURIComponent(arr[i].selValue))+((i!=arr.length-1)?"&":""))
                     }
                 }
                 state.queryRawStr=str;
@@ -294,7 +294,7 @@ module.exports=new Vuex.Store({
             if(state.bodyRawShow)
             {
                 state.bodyRawShow=0;
-                var str=decodeURI($.trim(state.bodyRawStr));
+                var str=$.trim(state.bodyRawStr);
                 var arr=[];
                 var param1=str.split("&");
                 for(var i=0;i<param1.length;i++)
@@ -303,7 +303,7 @@ module.exports=new Vuex.Store({
                     if(param2.length>0)
                     {
                         var valueObj=helper.findValue(state.body,param2[0]);
-                        var selValue=param2[1]?param2[1]:""
+                        var selValue=param2[1]?decodeURIComponent(param2[1]):""
                         if(valueObj && valueObj.type!=1)
                         {
                             valueObj.selValue=selValue;
@@ -334,7 +334,7 @@ module.exports=new Vuex.Store({
                 {
                     if(arr[i].name)
                     {
-                        str+=(arr[i].name+"="+(arr[i].type==1?"[FILE]":arr[i].selValue)+((i!=arr.length-1)?"&":""))
+                        str+=(arr[i].name+"="+(arr[i].type==1?"[FILE]":encodeURIComponent(arr[i].selValue))+((i!=arr.length-1)?"&":""))
                     }
                 }
                 state.bodyRawStr=str;

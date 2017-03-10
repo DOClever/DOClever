@@ -247,7 +247,7 @@ module.exports=new Vuex.Store({
                         name:param2[0],
                         must:1,
                         remark:"",
-                        value:param2[1]?[param2[1]]:[],
+                        value:param2[1]?[decodeURIComponent(param2[1])]:[],
                     })
                 }
             }
@@ -303,7 +303,7 @@ module.exports=new Vuex.Store({
                         type:param2[1]=="[FILE]"?1:0,
                         must:1,
                         remark:"",
-                        value:(param2[1]!="[FILE]")?(param2[1]?[param2[1]]:[]):[],
+                        value:(param2[1]!="[FILE]")?(param2[1]?[decodeURIComponent(param2[1])]:[]):[],
                     })
                 }
             }

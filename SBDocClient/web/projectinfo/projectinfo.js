@@ -252,7 +252,7 @@ var vue=new Vue({
                                 var arrQuery1=arrQuery[i].split("=");
                                 arrStoreQuery.push({
                                     name:arrQuery1[0],
-                                    value:arrQuery1[1]?[arrQuery1[1]]:[],
+                                    value:arrQuery1[1]?[decodeURIComponent(arrQuery1[1])]:[],
                                     must:1,
                                     remark:""
                                 })

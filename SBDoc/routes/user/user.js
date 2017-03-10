@@ -68,7 +68,7 @@ function save(req,res) {
             {
                 util.throw(e.userNotFound,"用户不存在");
             }
-            else if(obj.photo && req.clientParam.photo!=obj.photo)
+            else if(req.clientParam.photo && obj.photo && req.clientParam.photo!=obj.photo)
             {
                 util.delImg(obj.photo);
             }

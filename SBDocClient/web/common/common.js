@@ -315,7 +315,7 @@ $.param=function (obj) {
     var arr=[];
     for(var key in obj)
     {
-        arr.push(key+"="+obj[key]);
+        arr.push(key+"="+encodeURIComponent(obj[key]));
     }
     return arr.join("&");
 }
