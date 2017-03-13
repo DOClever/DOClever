@@ -23,6 +23,7 @@
                             <el-dropdown-item  v-if="item.type==0"><div @click="renameGroup(item)">重命名</div></el-dropdown-item>
                             <el-dropdown-item  v-if="item.type==0"><div @click="removeGroup(item)">删除</div></el-dropdown-item>
                             <el-dropdown-item  v-if="item.type==1"><div @click="clear">清空</div></el-dropdown-item>
+                            <el-dropdown-item  v-if="item.type==0 && objCopy"><div @click="paste(item)">粘贴</div></el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
                 </el-col>
@@ -42,6 +43,7 @@
                             </div>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item v-if="item.type==0"><div @click="removeInterface(item1)">删除</div></el-dropdown-item>
+                                <el-dropdown-item v-if="item.type==0"><div @click="copy(item,item1)">复制</div></el-dropdown-item>
                                 <el-dropdown-item v-if="item.type==1"><div @click="destroyInterface(item1)">彻底删除</div></el-dropdown-item>
                             </el-dropdown-menu>
                         </el-dropdown>
@@ -62,6 +64,14 @@
         computed:{
             arr:function () {
                 return this.$store.state.interfaceList
+            },
+            objCopy:{
+                get:function () {
+                    return this.$store.state.objCopy
+                },
+                set:function (value) {
+                    this.$store.commit("setObjCopy",value);
+                }
             }
         },
         methods:{
@@ -275,6 +285,34 @@
                         }
                     })
 
+                }
+            },
+            copy:function (item,item1) {
+                this.$store.dispatch("copy",{
+                    item:item,
+                    item1:item1
+                }).then(function (data) {
+                    if(data.code==200)
+                    {
+                        $.notify("复制成功",1);
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
+            },
+            paste:function (item) {
+                if(this.objCopy)
+                {
+                    this.objCopy.group._id=item._id
+                    this.objCopy=$.clone(this.objCopy);
+                    this.$store.dispatch("add",{
+                        item:this.objCopy,
+                        id:item._id
+                    })
+                    this.objCopy=null;
+                    $.notify("粘贴完成，请修改后保存",1);
                 }
             }
         }

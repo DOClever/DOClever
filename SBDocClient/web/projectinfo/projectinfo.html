@@ -21,7 +21,7 @@
             <el-row style="background-color: white;padding: 10px;font-size: 15px;word-break: break-all" class="row">
                 Mock Server地址：{{mockUrl}}<br>
                 Mock Js文件：<a href="../run/net.js" target="_blank">net.js</a>（和内网测试是同一个文件，需要安装node环境，安装包点击下载：<a href="../resource/node.msi" target="_blank">window</a>&nbsp;&nbsp;<a href="../resource/node.pkg" target="_blank">mac</a>）<br>
-                使用方法：在本地用node运行net.js ,加上mock server地址和你需要请求的真实地址，当您的接口文档的状态为开发完成的时候，net.js不会去请求mock server地址而去请求真实地址（举例：node net.js {{mockUrl}} http://localhost:8081) ,然后将您开发工程下的根地址替换为localhost:36742即可开启您的Mock之旅！
+                使用方法：在本地用node运行net.js ,加上mock server地址和你需要请求的真实地址的根地址，当您的接口文档的状态为开发完成的时候，net.js不会去请求mock server地址而去请求真实地址（举例：node net.js {{mockUrl}} http://localhost:8081) ,然后将您开发工程下的根地址替换为localhost:36742即可开启您的Mock之旅！
             </el-row>
         </el-popover>
         <el-button type="text"  style="font-size: 15px;height: 100%" slot="slot1" v-popover:popover>

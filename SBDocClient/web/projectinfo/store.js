@@ -49,7 +49,8 @@ module.exports=new Vuex.Store({
             }
         ],
         preview:"",
-        drawMix:[]
+        drawMix:[],
+        objCopy:null
     },
     getters:{
         querySave:function (state,getters) {
@@ -132,6 +133,9 @@ module.exports=new Vuex.Store({
         },
         setInterfaceList:function (state,data) {
             state.interfaceList=data;
+        },
+        setObjCopy:function (state,data) {
+            state.objCopy=data;
         },
         initParam:function (state,data) {
             state.query.splice(0,state.query.length);
@@ -862,6 +866,54 @@ module.exports=new Vuex.Store({
                 }
                 return data;
             })
-        }
+        },
+        copy:function (context,data) {
+            return net.get("/interface/item",{
+                id:data.item1._id,
+                group:data.item._id
+            }).then(function (data) {
+                if(data.code==200)
+                {
+                    var method=data.data.method;
+                    var url=$.trim(data.data.url);
+                    var name=$.trim(data.data.name)+"(副本)";
+                    var param=data.data.restParam;
+                    var query=data.data.queryParam;
+                    var header=data.data.header;
+                    var body=data.data.bodyParam;
+                    var result=data.data.outParam;
+                    var outInfo=data.data.outInfo;
+                    var obj={
+                        method:method,
+                        url:url,
+                        queryParam:query,
+                        header:header,
+                        bodyParam:body,
+                        outParam:result,
+                        restParam:param,
+                        group:{
+                            _id:data.data.group._id
+                        },
+                        name:name,
+                        remark:data.data.remark,
+                        owner:"",
+                        editor:"",
+                        createdAt:"",
+                        updatedAt:"",
+                        finish:0,
+                        outInfo:outInfo,
+                        before:data.data.before,
+                        after:data.data.after
+                    }
+                    if(method=="POST" || method=="PUT")
+                    {
+                        obj.bodyInfo=data.data.bodyInfo;
+                    }
+                    context.state.objCopy=obj;
+                }
+                return data;
+            })
+
+        },
     }
 })
