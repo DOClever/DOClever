@@ -53,7 +53,7 @@
                 </tr>
                 <tr v-if="(item.type==4 || item.type==3) && (item.data && item.data.length>0) && item.show">
                     <td colspan="7" style="width: 100%;margin:0;padding: 0 ">
-                        <outparam :source="item.data" :le="level+1"></outparam>
+                        <outparam :source="item.data" :le="level+1" :parent="item"></outparam>
                     </td>
                 </tr>
             </template>
@@ -65,7 +65,7 @@
     var dragArr=null,dragItem=null;
     module.exports={
         name:"outparam",
-        props:["source","le"],
+        props:["source","le","parent"],
         data:function () {
             return {
                 level:this.le?this.le:0,
@@ -112,7 +112,7 @@
             },
             add:function (arr) {
                 arr.push({
-                    name:"",
+                    name:(this.parent && this.parent.type==3)?null:"",
                     must:1,
                     type:0,
                     remark:"",

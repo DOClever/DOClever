@@ -453,7 +453,7 @@ helper.format=function (txt,mix,outParam) {
             }
         }
     }
-    var notify=function(name,value,isLast,indent,formObj,raw,root){
+    var notify=function(name,value,isLast,indent,formObj,raw,match,root){
         nodeCount++;
         for (var i=0,tab='';i<indent;i++ ){
             tab+=indentChar;
@@ -461,7 +461,7 @@ helper.format=function (txt,mix,outParam) {
         maxDepth=++indent;
         if(value&&value.constructor==Array){
             var remark="",errObj={title:""};
-            if(raw && !root)
+            if(raw && !root && match)
             {
                 remark=getRemark(name,raw);
                 checkType(value,raw,errObj);
@@ -470,18 +470,25 @@ helper.format=function (txt,mix,outParam) {
             draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+' <span style="border: 1px gray solid;cursor: pointer;color: #50a3ff;'+((formObj || root)?"":"margin-left: -22px")+'" jsonflag arrsize="'+value.length+'" timestamp="'+timestamp+'" '+(errObj.title?('err="'+errObj.title+'"'):'')+'>-</span> '+'<span jsonleft>[</span>'+line+remark);
             for (var i=0;i<value.length;i++){
                 var raw1=getData(i,raw)
-                notify(i,value[i],i==value.length-1,indent,false,raw1);
+                notify(i,value[i],i==value.length-1,indent,false,raw1,errObj.title?0:1);
             }
             draw.push(tab+'<span timestamp="'+timestamp+'"></span>'+']'+(isLast?line:(','+line)));
         }else   if(value&&typeof value=='object'){
-            var remark="",errObj={title:""};
-            if(raw && !root)
+            var remark="",errObj={title:""},bMatch=true;
+            if(raw && !root && match)
             {
                 remark=getRemark(name,raw)
                 checkType(value,raw,errObj);
-                checkExist(value,raw,errObj)
+                if(!errObj.title)
+                {
+                    checkExist(value,raw,errObj)
+                }
+                else
+                {
+                    bMatch=false;
+                }
             }
-            else if(raw && root)
+            else if(raw && root && match)
             {
                 checkExist(value,raw,errObj)
             }
@@ -493,12 +500,12 @@ helper.format=function (txt,mix,outParam) {
             }
             for(var key in value){
                 var raw1=getData(key,raw)
-                notify(key,value[key],++i==len,indent,true,raw1);
+                notify(key,value[key],++i==len,indent,true,raw1,bMatch?1:0);
             }
             draw.push(tab+'<span timestamp="'+timestamp+'"></span>'+'}'+(isLast?line:(','+line)))
         }else{
             var remark="",errObj={title:""};
-            if(raw && !root)
+            if(raw && !root && match)
             {
                 remark=getRemark(name,raw);
                 checkType(value,raw,errObj);
@@ -571,7 +578,7 @@ helper.format=function (txt,mix,outParam) {
         return "<span style='color: gray'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//类型："+type[raw.type]+"&nbsp;&nbsp;"+(raw.must?"必有字段":"可有字段")+"&nbsp;&nbsp;备注："+(raw.remark?raw.remark:"无")+"</span>";
     }
     var isLast=true,indent=0;
-    notify('',data,isLast,indent,false,mix?result:null,1);
+    notify('',data,isLast,indent,false,mix?result:null,1,1);
     setTimeout(function () {
         var arr=document.querySelectorAll("span[jsonflag]");
         for(var i=0;i<arr.length;i++)
