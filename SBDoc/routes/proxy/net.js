@@ -20,6 +20,7 @@ var getHeader = function (req) {
             ret[key]=headers[key];
         }
     }
+    return ret
 };
 
 var filterResHeader = function (headers) {

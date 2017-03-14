@@ -53,6 +53,10 @@
                     this.arr[0].name="";
                     this.arr[0].must=0;
                     this.arr[0].remark="";
+                    if(this.arr[0].value)
+                    {
+                        this.arr[0].value=[];
+                    }
                 }
             },
             configValue:function (item) {
