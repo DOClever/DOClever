@@ -11,6 +11,8 @@ var valueList=require("../component/valueList.vue")
 var restParam=require("../component/restParam.vue")
 var rawText=require("../component/rawText.vue")
 var inParamInject=require("../component/inparamInject.vue")
+var run=require("../component/run.vue")
+var encrypt=require("../component/encrypt.vue")
 var store=require("./store")
 var config=require("../util/config")
 if(!session.get("id"))
@@ -39,7 +41,9 @@ var vue=new Vue({
         "valuelist":valueList,
         "restparam":restParam,
         "rawtext":rawText,
-        "inparaminject":inParamInject
+        "inparaminject":inParamInject,
+        "encrypt":encrypt,
+        "run":run
     },
     watch:{
         preview:function (val) {
@@ -220,14 +224,15 @@ var vue=new Vue({
             store.commit("setPreview",val);
         },
         run:function () {
-            if(!this.interfaceEdit._id)
-            {
-                $.tip("请先保存接口！",0);
-                return;
-            }
             session.set("interfaceId",this.interfaceEdit._id);
             session.set("groupId",this.interfaceEdit.group._id);
-            window.open("../run/run.html","_blank");
+            var child=$.showBox(this,"run",{
+                "interfaceEdit":this.interfaceEdit,
+                "baseUrls":store.state.baseUrls
+            });
+            child.$on("save",function () {
+                store.dispatch("newInterface");
+            });
         },
         methodColor:function (val) {
             return helper.methodColor(val);

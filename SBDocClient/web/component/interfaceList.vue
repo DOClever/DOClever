@@ -5,10 +5,10 @@
                 <el-col class="col" :span="4" style="font-size: large;text-align: center;white-space: nowrap" @click.native="item.show=!item.show">
                     <span :class="item.show?'el-icon-caret-bottom':'el-icon-caret-right'" style="color:#c7c7c7 "></span>
                 </el-col>
-                <el-col class="col" :span="12" :style="{margin: 0,fontSize: 'larger',color: item.type==0?'#20A0FF':'red',whiteSpace: 'nowrap',padding: 0}">
+                <el-col class="col" :span="12" :style="{margin: 0,fontSize: 'larger',color: item.type==0?'#20A0FF':'red',whiteSpace: 'nowrap',padding: 0,textOverflow:'ellipsis',overflow:'hidden'}" @click.native="item.show=!item.show">
                     {{item.name}}
                 </el-col>
-                <el-col class="col" :span="4" style="height: 40px;white-space: nowrap">
+                <el-col class="col" :span="4" style="height: 40px;white-space: nowrap" @click.native="item.show=!item.show">
 
                 </el-col>
                 <el-col class="col" :span="4" style="height: 40px;white-space: nowrap;text-align: center">
@@ -18,7 +18,6 @@
                         </div>
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item  v-if="item.type==0"><div @click="addInterface(item)">新建接口</div></el-dropdown-item>
-                            <el-dropdown-item  v-if="item.type==0"><div @click="run(item)">新建运行</div></el-dropdown-item>
                             <el-dropdown-item ><div @click="refresh">刷新</div></el-dropdown-item>
                             <el-dropdown-item  v-if="item.type==0"><div @click="renameGroup(item)">重命名</div></el-dropdown-item>
                             <el-dropdown-item  v-if="item.type==0"><div @click="removeGroup(item)">删除</div></el-dropdown-item>
@@ -29,11 +28,15 @@
                 </el-col>
             </el-row>
             <template v-for="(item1,index1) in item.data">
-                <el-row class="row" :draggable="session.role==0" style="height: 40px;line-height: 40px;padding-left: 20px;cursor: move" v-if="item.show" @mouseenter.native="mouseEnter($event,item1)" @mouseleave.native="mouseLeave($event,item1)" @click.native="info(item,item1,index1,$event)" :section="index" :row="index1" :style="{backgroundColor:item1.select?'#20A0FF':''}" @dragstart.native="dragStart($event,item1,item,index1)">
-                    <el-col class="col" :span="6" :style="{fontSize: 'small',margin: 0,color:methodColor(item1.method),padding:0,textAlign:'center',lineHeight:'40px'}" name="treeMethod">
+                <el-row class="row" :draggable="session.role==0" style="height: 40px;line-height: 40px;cursor: move" v-if="item.show" @mouseenter.native="mouseEnter($event,item1)" @mouseleave.native="mouseLeave($event,item1)" @click.native="info(item,item1,index1,$event)" :section="index" :row="index1" :style="{backgroundColor:item1.select?'#20A0FF':''}" @dragstart.native="dragStart($event,item1,item,index1)">
+                    <el-col class="col" :span="2" style="height: 40px;line-height: 40px;text-align: right">
+                        <span class="fa fa-check" style="color: #13ce66;display: inline-block;" v-if="item1.finish"></span>
+                        <span v-else>&nbsp;</span>
+                    </el-col>
+                    <el-col class="col" :span="5" :style="{fontSize: 'small',margin: 0,color:methodColor(item1.method),padding:0,textAlign:'center',lineHeight:'40px'}" name="treeMethod">
                         {{item1.method}}
                     </el-col>
-                    <el-col class="col" :span="12" :style="{margin: 0,color: '#20A0FF',color:item1.select?'white':'#20A0FF',lineHeight:'40px'}" name="treeName">
+                    <el-col class="col" :span="11" :style="{margin: 0,color: '#20A0FF',color:item1.select?'white':'#20A0FF',lineHeight:'40px',textOverflow:'ellipsis',overflow:'hidden'}" name="treeName">
                         {{item1.name}}
                     </el-col>
                     <el-col class="col" :span="6" style="margin: 0;height: 40px;text-align: center">
@@ -221,9 +224,6 @@
                     id:item._id
                 })
             },
-            run:function (item) {
-                location.href="/html/web/run/run.html#"+item._id
-            },
             dragStart:function (event,item,group,index) {
                 event.dataTransfer.effectAllowed = "move";
                 event.dataTransfer.setData("text", JSON.stringify({
@@ -309,7 +309,7 @@
                     this.objCopy=$.clone(this.objCopy);
                     this.$store.dispatch("add",{
                         item:this.objCopy,
-                        id:item._id
+                        id:null
                     })
                     this.objCopy=null;
                     $.notify("粘贴完成，请修改后保存",1);

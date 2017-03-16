@@ -6,6 +6,7 @@ module.exports=new Vuex.Store({
         interfaceList:[],
         interface:null,
         interfaceEdit:null,
+        baseUrls:[],
         query:[{
             name:"",
             must:0,
@@ -118,6 +119,9 @@ module.exports=new Vuex.Store({
                 arr.push(data[i]);
             }
             state.interfaceList=arr;
+        },
+        setBaseUrls:function (state,data) {
+            state.baseUrls=data;
         },
         setPreview:function (state,data) {
             state.preview=data;
@@ -410,12 +414,12 @@ module.exports=new Vuex.Store({
     },
     actions:{
         add:function (context,data) {
-            if(context.state.interface)
+            if(context.state.interface && !data.item)
             {
                 context.state.interface.select=0;
+                context.commit("setInterface",null);
             }
             context.commit("initParam");
-            context.commit("setInterface",null);
             if(data.item)
             {
                 context.commit("setInterfaceEdit",data.item);
@@ -462,53 +466,8 @@ module.exports=new Vuex.Store({
             }).then(function (data) {
                 if(data.code==200)
                 {
-                    context.commit("initInterfaceList",data.data);
-                    if(session.get("newInterface"))
-                    {
-                        var objInterface=JSON.parse(session.get("newInterface"));
-                        if(objInterface._id)
-                        {
-                            for(var i=0;i<context.state.interfaceList.length;i++)
-                            {
-                                var obj=context.state.interfaceList[i];
-                                var bBreak=false;
-                                for(var j=0;j<obj.data.length;j++)
-                                {
-                                    var obj1=obj.data[j];
-                                    if(obj1._id==objInterface._id)
-                                    {
-                                        obj.show=1;
-                                        context.commit("setInterface",obj1);
-                                        obj1.select=1;
-                                        context.commit("setInterfaceEdit",objInterface);
-                                        bBreak=true;
-                                        break;
-                                    }
-                                }
-                                if(bBreak)
-                                {
-                                    break;
-                                }
-                            }
-                            context.commit("initParam");
-                            if(context.state.interface)
-                            {
-                                context.commit("initInterface")
-                            }
-                            else
-                            {
-                                context.commit("setInterfaceEdit",null);
-                            }
-                        }
-                        else
-                        {
-                            context.dispatch("add",{
-                                id:objInterface.group._id,
-                                item:objInterface
-                            });
-                        }
-                        session.remove("newInterface");
-                    }
+                    context.commit("initInterfaceList",data.data.data);
+                    context.commit("setBaseUrls",data.data.baseUrl);
                 }
                 else
                 {
@@ -533,7 +492,8 @@ module.exports=new Vuex.Store({
             }).then(function (data) {
                 if(data.code==200)
                 {
-                    context.dispatch("refreshData",data.data);
+                    context.dispatch("refreshData",data.data.data);
+                    context.commit("setBaseUrls",data.data.baseUrl);
                 }
                 return data;
             })
@@ -601,6 +561,7 @@ module.exports=new Vuex.Store({
                 {
                     obj.item1.name=data.data.name;
                     obj.item1.method=data.data.method;
+                    obj.item1.finish=data.data.finish;
                     itemData=data.data;
                     if(data.data.change)
                     {
@@ -609,7 +570,8 @@ module.exports=new Vuex.Store({
                         }).then(function (data) {
                             if(data.code==200)
                             {
-                                context.dispatch("refreshData",data.data);
+                                context.dispatch("refreshData",data.data.data);
+                                context.commit("setBaseUrls",data.data.baseUrl);
                                 context.dispatch("showInfo",{
                                     data:itemData._id,
                                     data1:itemData
@@ -805,6 +767,7 @@ module.exports=new Vuex.Store({
                     {
                         context.state.interface.name=context.state.interfaceEdit.name;
                         context.state.interface.method=context.state.interfaceEdit.method;
+                        context.state.interface.finish=context.state.interfaceEdit.finish;
                         Vue.set(context.state.interfaceEdit,"editor",{name:session.get("name")});
                         Vue.set(context.state.interfaceEdit,"updatedAt",$.getNowFormatDate("yyyy-MM-dd hh:mm:ss"))
                     }
@@ -853,6 +816,7 @@ module.exports=new Vuex.Store({
                                         _id:data.data._id,
                                         name:data.data.name,
                                         method:data.data.method,
+                                        finish:data.data.finish,
                                         select:1
                                     }
                                     obj.data.push(o)
@@ -915,5 +879,16 @@ module.exports=new Vuex.Store({
             })
 
         },
+        newInterface:function (context) {
+            if(session.get("newInterface"))
+            {
+                var objInterface=JSON.parse(session.get("newInterface"));
+                context.dispatch("add",{
+                    id:null,
+                    item:objInterface
+                });
+                session.remove("newInterface");
+            }
+        }
     }
 })

@@ -13,7 +13,6 @@ module.exports = {
         project:"./web/project/project",
         projectinfo:"./web/projectinfo/projectinfo",
         projectset:"./web/projectset/projectset",
-        run:"./web/run/run",
         reset:"./web/reset/reset",
         about:"./web/about/about",
         help:"./web/help/help",

@@ -6,6 +6,7 @@ module.exports=new Vuex.Store({
     state:{
         interface:{},
         baseUrl:"",
+        baseUrls:[],
         query:[{
             name:"",
             must:0,
@@ -44,7 +45,6 @@ module.exports=new Vuex.Store({
         drawMix:[],
         type:"object",
         imgUrl:"",
-        hash:"",
         resultData:"",
         queryRawShow:0,
         headerRawShow:0,
@@ -107,9 +107,61 @@ module.exports=new Vuex.Store({
         },
     },
     mutations:{
+        clear:function (state) {
+            state.interface={};
+            state.baseUrl="";
+            state.baseUrls=[];
+            state.query=[{
+                name:"",
+                must:0,
+                remark:"",
+                value:"",
+                selValue:"",
+                enable:1
+            }];
+            state.header=[{
+                name:"",
+                value:"",
+                remark:""
+            }];
+            state.body=[{
+                name:"",
+                type:0,
+                must:0,
+                remark:"",
+                value:"",
+                selValue:"",
+                enable:1
+            }];
+            state.param=[];
+            state.bodyInfo={
+                type:0,
+                    rawType:0,
+                    rawTextRemark:"",
+                    rawFileRemark:"",
+                    rawText:"",
+            };
+            state.fileResult="";
+            state.resHeader=[];
+            state.status="";
+            state.second="";
+            state.draw=[];
+            state.drawMix=[];
+            state.type="object";
+            state.imgUrl="";
+            state.resultData="";
+            state.queryRawShow=0;
+            state.headerRawShow=0;
+            state.bodyRawShow=0;
+            state.queryRawStr="";
+            state.headerRawStr="";
+            state.bodyRawStr="";
+            state.rawData="";
+            state.encryptType="";
+            state.errorCount=0;
+        },
         initData:function (state,data) {
             state.interface=data;
-            state.baseUrl=data.baseUrl.length>0?data.baseUrl[0]:"";
             if(state.interface.queryParam.length>0)
             {
                 for(var i=0;i<state.interface.queryParam.length;i++)
@@ -425,6 +477,10 @@ module.exports=new Vuex.Store({
                 state.param=arrParam;
             }
         },
+        setBaseUrls:function (state,val) {
+            state.baseUrls=val;
+            state.baseUrl=val.length>0?val[0]:""
+        },
         setBaseUrl:function (state,val) {
             state.baseUrl=val;
         },
@@ -452,46 +508,36 @@ module.exports=new Vuex.Store({
                     resolve(obj)
                 });
             }
-            var bMock=false;
-            if(baseUrl!="MockServer")
+            var indexHttp=baseUrl.indexOf("://"),indexSlash;
+            if(indexHttp==-1)
             {
-                var indexHttp=baseUrl.indexOf("://"),indexSlash;
-                if(indexHttp==-1)
-                {
-                    indexSlash=baseUrl.indexOf("/")
-                }
-                else
-                {
-                    indexSlash=baseUrl.indexOf("/",indexHttp+3);
-                }
-                if(indexSlash>-1)
-                {
-                    var baseUrlTemp=baseUrl.substring(0,indexSlash);
-                    var pathTemp=baseUrl.substr(indexSlash);
-                    if(pathTemp[pathTemp.length-1]=="/" && path[0]=="/")
-                    {
-                        pathTemp=pathTemp.substr(0,pathTemp.length-1);
-                    }
-                    else if(pathTemp[pathTemp.length-1]!="/" && path[0]!="/" && pathTemp.indexOf("?")==-1 && pathTemp.indexOf("#")==-1)
-                    {
-                        pathTemp+="/"
-                    }
-                    baseUrl=baseUrlTemp;
-                    path=pathTemp+path;
-                }
-                else
-                {
-                    if(path[0]!="/")
-                    {
-                        path="/"+path;
-                    }
-                }
+                indexSlash=baseUrl.indexOf("/")
             }
             else
             {
-                bMock=true;
-                baseUrl=config.baseUrl;
-                path="/mock/"+session.get("projectId")+(path[0]!="/"?("/"+path):path);
+                indexSlash=baseUrl.indexOf("/",indexHttp+3);
+            }
+            if(indexSlash>-1)
+            {
+                var baseUrlTemp=baseUrl.substring(0,indexSlash);
+                var pathTemp=baseUrl.substr(indexSlash);
+                if(pathTemp[pathTemp.length-1]=="/" && path[0]=="/")
+                {
+                    pathTemp=pathTemp.substr(0,pathTemp.length-1);
+                }
+                else if(pathTemp[pathTemp.length-1]!="/" && path[0]!="/" && pathTemp.indexOf("?")==-1 && pathTemp.indexOf("#")==-1)
+                {
+                    pathTemp+="/"
+                }
+                baseUrl=baseUrlTemp;
+                path=pathTemp+path;
+            }
+            else
+            {
+                if(path[0]!="/")
+                {
+                    path="/"+path;
+                }
             }
             context.state.param.forEach(function (obj) {
                 if(obj.name)
@@ -647,7 +693,7 @@ module.exports=new Vuex.Store({
             header["__headers"]=JSON.stringify(objHeaders);
             var proxyUrl="/proxy";
             var bNet=false;
-            if(/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl) && !bMock)
+            if(/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl))
             {
                 bNet=true;
                 proxyUrl="http://127.0.0.1:36742";
@@ -908,14 +954,14 @@ module.exports=new Vuex.Store({
                 outParam:result,
                 restParam:param,
                 group:{
-                    _id:context.state.hash?context.state.hash:context.state.interface.group._id
+                    _id:context.state.interface.group._id
                 },
-                name:context.state.hash?"":context.state.interface.name,
-                remark:context.state.hash?"":context.state.interface.remark,
-                owner:context.state.hash?"":context.state.interface.owner,
-                editor:context.state.hash?"":context.state.interface.editor,
-                createdAt:context.state.hash?"":context.state.interface.createdAt,
-                updatedAt:context.state.hash?"":context.state.interface.updatedAt,
+                name:!context.state.interface._id?"":context.state.interface.name,
+                remark:!context.state.interface._id?"":context.state.interface.remark,
+                owner:!context.state.interface._id?"":context.state.interface.owner,
+                editor:!context.state.interface._id?"":context.state.interface.editor,
+                createdAt:!context.state.interface._id?"":context.state.interface.createdAt,
+                updatedAt:!context.state.interface._id?"":context.state.interface.updatedAt,
                 finish:context.state.interface.finish,
                 outInfo:outInfo,
                 before:context.state.interface.before,
@@ -927,25 +973,21 @@ module.exports=new Vuex.Store({
             }
             session.set("newInterface",JSON.stringify(obj));
             var bMatchUrl=false;
-            if(baseUrl!="MockServer")
+            for(var i=0;i<context.state.baseUrls.length;i++)
             {
-                for(var i=0;i<context.state.interface.baseUrl.length;i++)
+                var reg=new RegExp(context.state.baseUrls[i]);
+                if(reg.test(baseUrl))
                 {
-                    var reg=new RegExp(context.state.interface.baseUrl[i]);
-                    if(reg.test(baseUrl))
-                    {
-                        bMatchUrl=true;
-                        break;
-                    }
+                    bMatchUrl=true;
+                    break;
                 }
             }
-            else
-            {
-                bMatchUrl=true;
-            }
+            var pro=new Promise(function (resolve,reject) {
+                resolve();
+            })
             if(bMatchUrl)
             {
-                location.href="../projectinfo/projectinfo.html"
+                return pro;
             }
             else
             {
@@ -959,76 +1001,18 @@ module.exports=new Vuex.Store({
                         if(data.code==200)
                         {
                             $.notify("添加baseUrl成功",1);
-                            setTimeout(function () {
-                                location.href="../projectinfo/projectinfo.html"
-                            },1200)
+                            return pro;
 
                         }
                         else
                         {
-                            location.href="../projectinfo/projectinfo.html"
+                            return pro;
                         }
                     })
                 },function () {
-                    location.href="../projectinfo/projectinfo.html"
+                    return pro;
                 })
             }
         },
-        init:function (context) {
-            var hash=location.hash.substr(1);
-            if(hash)
-            {
-                context.state.hash=hash;
-                return net.get("/project/info",{
-                    id:session.get("projectId")
-                }).then(function (data) {
-                    if(data.code==200)
-                    {
-                        context.commit("initData",{
-                            url:"",
-                            baseUrl:data.data.baseUrls,
-                            queryParam:[],
-                            restParam:[],
-                            bodyParam:[],
-                            header:[],
-                            outParam:[],
-                            param:[],
-                            method:"GET",
-                            bodyInfo:{
-                                type:0,
-                                rawType:0,
-                                rawTextRemark:"",
-                                rawFileRemark:"",
-                                rawText:"",
-                            },
-                            finish:0,
-                            before:"",
-                            after:""
-                        });
-                    }
-                    return data;
-                })
-            }
-            else
-            {
-                return net.get("/interface/item",{
-                    id:session.get("interfaceId"),
-                    group:session.get("groupId"),
-                    run:1
-                }).then(function (data) {
-                    if(data.code==200)
-                    {
-                        context.commit("initData",data.data);
-                    }
-                    else
-                    {
-                        setTimeout(function () {
-                            location.href="../projectinfo/projectinfo.html"
-                        },1200)
-                    }
-                    return data;
-                })
-            }
-        }
     }
 })

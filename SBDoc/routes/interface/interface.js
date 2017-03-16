@@ -22,7 +22,7 @@ let refreshInterface=async (function (id) {
     {
         let arrInterface=await (interface.findAsync({
             group:obj._id
-        },"_id name method",{
+        },"_id name method finish",{
             sort:"name"
         }));
         obj._doc.data=arrInterface;

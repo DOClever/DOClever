@@ -365,12 +365,15 @@ function interfaceList(req,res) {
         {
             let arrInterface=await (interface.findAsync({
                 group:obj._id
-            },"_id name method",{
+            },"_id name method finish",{
                 sort:"name"
             }));
             obj._doc.data=arrInterface;
         }
-        util.ok(res,arr,"ok");
+        util.ok(res,{
+            data:arr,
+            baseUrl:req.obj.baseUrls
+        },"ok");
     }
     catch (err)
     {
