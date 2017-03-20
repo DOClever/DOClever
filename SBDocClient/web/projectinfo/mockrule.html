@@ -7,14 +7,15 @@
 </head>
 <body>
 <div class="container">
-    @date   生成当前日期<br>
-    @num(min,max)  生成min到max范围之间的数字，比如@num(1,100)<br>
-    @in(val1,val2,...)    生成括号内的某一个值，比如@in(get,post,put,delete)<br>
-    @img   生成一个图片地址<br>
-    @null  生成null值<br>
-    @arr   针对mixed类型，生成一个数组，比如@arr([123,45])<br>
-    @obj   针对mixed类型，生成一个对象,比如@obj({"name":"aa"})<br>
-    如果不是以@字符开头的话 就直接生成你输入的那个值<br>
+    @date   针对String类型，生成当前日期<br>
+    @num(min,max)  针对Number类型，生成min到max范围之间的数字，比如@num(1,100)<br>
+    @in(val1,val2,...)    针对String，Number类型，生成括号内的某一个值，比如@in(get,post,put,delete)<br>
+    @img   针对String类型，生成一个图片地址<br>
+    @null  针对String，Number，Boolean，Mixed类型，生成null值<br>
+    @arr   针对Mixed类型，生成一个数组，比如@arr([123,45])<br>
+    @obj   针对Mixed类型，生成一个对象,比如@obj({"name":"aa"})<br>
+    @count(min,max)   针对Array类型，确定生成数组的大小,比如@count(1,10)<br>
+    如果不是以@字符开头的话 就直接生成你输入的那个值,当类型不匹配的时候会尝试去做类型转换<br>
 </div>
 </body>
 </html>

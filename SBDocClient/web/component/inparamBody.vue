@@ -34,7 +34,7 @@
                         <el-input style="width: 90%;" placeholder="请填写备注" v-model="item.remark"></el-input>
                     </td>
                     <td style="width: 5%">
-                        <el-button type="text" size="small" @click="configValue(item)" v-if="item.type==0" style="font-size: 15px">填值</el-button>
+                        <el-button type="text" size="small" @click="configValue(item)" v-if="item.type==0" style="font-size: 15px">{{(item.value && item.value.length>0)?"已填值":"未填值"}}</el-button>
                     </td>
                     <td style="width: 5%">
                         <el-button type="text" style="color: red;font-size: 15px" size="small" icon="close" @click="remove(index)"></el-button>
@@ -60,7 +60,7 @@
                 <el-input style="width: 90%;" placeholder="请填写备注" v-model="info.rawFileRemark" v-else></el-input>
             </el-col>
             <el-col class="col" :span="4" style="text-align: center">
-                <el-button type="text" size="small" @click="configRawValue"  v-if="info.rawType==0" style="font-size: 15px">填值</el-button>
+                <el-button type="text" size="small" @click="configRawValue"  v-if="info.rawType==0" style="font-size: 15px">{{info.rawText?"已填值":"未填值"}}</el-button>
             </el-col>
         </el-row>
     </el-row>

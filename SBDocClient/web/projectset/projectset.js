@@ -24,6 +24,22 @@ var vue=new Vue({
         infoPending:false,
         deletePending:false,
     },
+    computed:{
+        users:function () {
+            var arr=this.project.users;
+            this.project.users=arr.filter(function (obj) {
+                if(obj.user._id==session.get("id"))
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            })
+            return this.project.users;
+        }
+    },
     components:{
         "mainnav":mainNav,
         "urllist":urlList,

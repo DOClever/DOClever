@@ -38,19 +38,21 @@
                     <el-dropdown-item command="setting">个人设置</el-dropdown-item>
                     <el-dropdown-item command="help">帮助</el-dropdown-item>
                     <el-dropdown-item command="about">关于</el-dropdown-item>
+                    <el-dropdown-item command="update">检查更新</el-dropdown-item>
                     <el-dropdown-item command="quit">退出</el-dropdown-item>
                 </el-dropdown-menu>
             </el-dropdown>
         </el-col>
         <el-col class="col" :span="2" style="text-align: center;line-height: 60px" v-if="!isLogin">
-            <el-button type="primary" onclick="location='login/login.html'">登陆</el-button>
+            <el-button type="primary" onclick="location='/html/web/login/login.html'">登陆</el-button>
         </el-col>
         <el-col class="col" :span="2" style="text-align: center;line-height: 60px" v-if="!isLogin">
-            <el-button type="primary"  onclick="location='register/register.html'">注册</el-button>
+            <el-button type="primary"  onclick="location='/html/web/register/register.html'">注册</el-button>
         </el-col>
     </el-row>
 </template>
 <script>
+    var con=require("../../../config.json");
     var proxyImg=require("../director/proxyImg")
     module.exports={
         props:["transparent"],
@@ -81,6 +83,41 @@
                 else if(command=="about")
                 {
                     location.href="/html/web/about/about.html"
+                }
+                else if(command=="update")
+                {
+                    var xml=new XMLHttpRequest();
+                    $.startHud();
+                    xml.onreadystatechange=function () {
+                        if(xml.readyState==4 && xml.status==200)
+                        {
+                            $.stopHud();
+                            var obj=JSON.parse(xml.responseText);
+                            var verArr=obj[0].name.split(".");
+                            var verLocalArr=con.version.split(".");
+                            var bNew=false;
+                            for(var i=0;i<3;i++)
+                            {
+                                if(verArr[i]>verLocalArr[i])
+                                {
+                                    bNew=true;
+                                    break;
+                                }
+                            }
+                            if(bNew)
+                            {
+                                $.confirm("已发现新版本"+verArr.join(".")+" 是否现在下载？",function () {
+                                    window.open(obj[0].zipball_url,"_blank");
+                                })
+                            }
+                            else
+                            {
+                                $.tip("已经是最新版本了",1);
+                            }
+                        }
+                    }
+                    xml.open("GET","https://api.github.com/repos/sx1989827/SBDoc/tags?timestamp="+(new Date()).getTime(),true);
+                    xml.send();
                 }
                 else if(command=="quit")
                 {

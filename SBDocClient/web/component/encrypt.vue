@@ -22,7 +22,7 @@
             <el-form-item style="margin-left: 50px">
                 <el-checkbox id="encryptKey" v-model="val.key" :true-label="1" :false-label="0" :disabled="notKey==1">是否加密字段的Key</el-checkbox>
             </el-form-item>
-            <el-form-item label="Salt" style="text-align: center">
+            <el-form-item label="Salt" style="text-align: center" v-if="saltShow">
                 <el-input placeholder="请填入salt的值" style="width: 80%" v-model="val.salt"></el-input>
             </el-form-item>
         </el-form>

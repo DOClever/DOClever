@@ -34,7 +34,7 @@
                         <el-input type="textarea" style="width: 90%;height: 46px;line-height: 46px" resize="none" :rows="0" placeholder="请填写备注;" v-model="item.remark" @focus="focus(item)" @blur="blur(item)"></el-input>
                     </td>
                     <td style="width: 20%">
-                        <el-input type="textarea" style="width: 90%;height: 46px;line-height: 46px" resize="none" :rows="0" placeholder="请填写Mock数据;" v-model="item.mock" v-if="item.type!=3 && item.type!=4" @focus="focus(item)" @blur="blur(item)"></el-input>
+                        <el-input type="textarea" style="width: 90%;height: 46px;line-height: 46px" resize="none" :rows="0" placeholder="请填写Mock数据;" v-model="item.mock" v-if="item.type!=4" @focus="focus(item)" @blur="blur(item)"></el-input>
                     </td>
                     <td style="width: 5%">
                         <el-button type="text" icon="close" style="color: red;font-size: 15px" @click="remove(item,index,level)" size="small"></el-button>

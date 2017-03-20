@@ -400,6 +400,7 @@ module.exports=new Vuex.Store({
                     }
                 }
                 state.param=arrParam;
+                state.interfaceEdit.restParam=state.param;
             }
         },
         changePreview:function (state,val) {
@@ -414,7 +415,7 @@ module.exports=new Vuex.Store({
     },
     actions:{
         add:function (context,data) {
-            if(context.state.interface && !data.item)
+            if(context.state.interface && (data.id || (data.item && !data.item._id)))
             {
                 context.state.interface.select=0;
                 context.commit("setInterface",null);
@@ -423,7 +424,6 @@ module.exports=new Vuex.Store({
             if(data.item)
             {
                 context.commit("setInterfaceEdit",data.item);
-                context.commit("initInterface");
 
             }
             else
@@ -437,10 +437,31 @@ module.exports=new Vuex.Store({
                     "remark": "",
                     "method": "GET",
                     "finish":0,
-                    "outParam": [],
-                    "bodyParam": [],
-                    "queryParam": [],
-                    "header": [],
+                    "outParam": [{
+                        name:"",
+                        must:0,
+                        type:0,
+                        remark:"",
+                        show:0,
+                        mock:"",
+                        drag:1
+                    }],
+                    "bodyParam": [{
+                        name:"",
+                        type:0,
+                        must:0,
+                        remark:"",
+                    }],
+                    "queryParam": [{
+                        name:"",
+                        must:0,
+                        remark:""
+                    }],
+                    "header": [{
+                        name:"",
+                        value:"",
+                        remark:""
+                    }],
                     "bodyInfo":{
                         type:0,
                         rawType:0,
@@ -458,7 +479,7 @@ module.exports=new Vuex.Store({
                     after:""
                 });
             }
-
+            context.commit("initInterface");
         },
         getAllInterface:function (context) {
             return net.get("/project/interface",{

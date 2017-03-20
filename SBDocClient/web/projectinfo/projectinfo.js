@@ -227,8 +227,8 @@ var vue=new Vue({
             session.set("interfaceId",this.interfaceEdit._id);
             session.set("groupId",this.interfaceEdit.group._id);
             var child=$.showBox(this,"run",{
-                "interfaceEdit":this.interfaceEdit,
-                "baseUrls":store.state.baseUrls
+                "interfaceEdit":$.clone(this.interfaceEdit),
+                "baseUrls":$.clone(store.state.baseUrls)
             });
             child.$on("save",function () {
                 store.dispatch("newInterface");

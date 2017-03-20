@@ -46,7 +46,7 @@
                             </div>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item v-if="item.type==0"><div @click="removeInterface(item1)">删除</div></el-dropdown-item>
-                                <el-dropdown-item v-if="item.type==0"><div @click="copy(item,item1)">复制</div></el-dropdown-item>
+                                <el-dropdown-item><div @click="copy(item,item1)">复制</div></el-dropdown-item>
                                 <el-dropdown-item v-if="item.type==1"><div @click="destroyInterface(item1)">彻底删除</div></el-dropdown-item>
                             </el-dropdown-menu>
                         </el-dropdown>

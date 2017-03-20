@@ -543,9 +543,21 @@ function convertToJSON(data,obj) {
             {
                 obj[data.name]=objTemp;
             }
-            for(var i=0;i<data.data.length;i++)
+            var str=data.mock.trim().substr(1),count=1;
+            if(/^count/i.test(str))
             {
-                func(data.data[i],objTemp);
+                var val=str.substring(6,str.length-1);
+                var arr=val.split(",");
+                var gap=parseInt(arr[1])-parseInt(arr[0]);
+                var temp=Math.round(Math.random()*gap+parseInt(arr[0]));
+                count=temp;
+            }
+            for(var j=0;j<count;j++)
+            {
+                for(var i=0;i<data.data.length;i++)
+                {
+                    func(data.data[i],objTemp);
+                }
             }
         }
         else if(data.type==4)

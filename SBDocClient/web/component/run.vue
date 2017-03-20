@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="运行"  size="large" ref="box">
+    <el-dialog title="运行"  size="large" ref="box" :close-on-click-modal="false">
         <el-row class="row" style="min-height: 100px;margin: 20px 0 0 0;padding:0 10px 0 10px">
             <el-row class="row" style="background-color: white;padding-bottom: 10px;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
                 <el-row class="row" style="height: 50px;">

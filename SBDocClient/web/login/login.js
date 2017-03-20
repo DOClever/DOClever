@@ -47,3 +47,17 @@ var vue=new Vue({
         }
     },
 })
+$.ready(function () {
+    document.body.onkeydown=function (e) {
+        var event=window.event || e;
+        if(event.keyCode==13)
+        {
+            var event1 = document.createEvent('HTMLEvents');
+            20
+            event1.initEvent("click", true, true);
+            21
+            event1.eventType = 'message';
+            document.getElementById("login").dispatchEvent(event1);
+        }
+    }
+})
