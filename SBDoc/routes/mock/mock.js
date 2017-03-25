@@ -46,7 +46,9 @@ function validate(req,res,next) {
             util.throw(e.systemReason,"接口path不存在");
         }
         let objInter=await (interface.findOneAsync({
-            url:mockUrl,
+            url:{
+                $in:[mockUrl,mockUrl.substr(1)]
+            },
             project:obj._id,
             method:req.method,
         }))

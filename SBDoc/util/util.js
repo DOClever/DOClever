@@ -391,7 +391,12 @@ function convertToJSON(data,obj) {
             }
             else if(str.startsWith("img"))
             {
-                return "https://dummyimage.com/600x400/"+Math.round(Math.random()*999);
+                var val=str.length==3?"":str.substring(4,str.length-1),arr;
+                if(val)
+                {
+                    arr=val.split(",");
+                }
+                return "https://dummyimage.com/"+(arr?(arr[0]+"x"+arr[1]+"/"):"600x400/")+Math.round(Math.random()*999);
             }
             else if(str.startsWith("num"))
             {
@@ -615,7 +620,12 @@ function mock(data) {
         }
         else if(/^img/i.test(str))
         {
-            return "https://dummyimage.com/600x400/"+Math.round(Math.random()*999);
+            var val=str.length==3?"":str.substring(4,str.length-1),arr;
+            if(val)
+            {
+                arr=val.split(",");
+            }
+            return "https://dummyimage.com/"+(arr?(arr[0]+"x"+arr[1]+"/"):"600x400/")+Math.round(Math.random()*999);
         }
         else if(/^num/i.test(str))
         {

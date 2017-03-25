@@ -508,36 +508,46 @@ module.exports=new Vuex.Store({
                     resolve(obj)
                 });
             }
-            var indexHttp=baseUrl.indexOf("://"),indexSlash;
-            if(indexHttp==-1)
+            var bMock=false;
+            if(baseUrl!="MockServer")
             {
-                indexSlash=baseUrl.indexOf("/")
+                var indexHttp=baseUrl.indexOf("://"),indexSlash;
+                if(indexHttp==-1)
+                {
+                    indexSlash=baseUrl.indexOf("/")
+                }
+                else
+                {
+                    indexSlash=baseUrl.indexOf("/",indexHttp+3);
+                }
+                if(indexSlash>-1)
+                {
+                    var baseUrlTemp=baseUrl.substring(0,indexSlash);
+                    var pathTemp=baseUrl.substr(indexSlash);
+                    if(pathTemp[pathTemp.length-1]=="/" && path[0]=="/")
+                    {
+                        pathTemp=pathTemp.substr(0,pathTemp.length-1);
+                    }
+                    else if(pathTemp[pathTemp.length-1]!="/" && path[0]!="/" && pathTemp.indexOf("?")==-1 && pathTemp.indexOf("#")==-1)
+                    {
+                        pathTemp+="/"
+                    }
+                    baseUrl=baseUrlTemp;
+                    path=pathTemp+path;
+                }
+                else
+                {
+                    if(path[0]!="/")
+                    {
+                        path="/"+path;
+                    }
+                }
             }
             else
             {
-                indexSlash=baseUrl.indexOf("/",indexHttp+3);
-            }
-            if(indexSlash>-1)
-            {
-                var baseUrlTemp=baseUrl.substring(0,indexSlash);
-                var pathTemp=baseUrl.substr(indexSlash);
-                if(pathTemp[pathTemp.length-1]=="/" && path[0]=="/")
-                {
-                    pathTemp=pathTemp.substr(0,pathTemp.length-1);
-                }
-                else if(pathTemp[pathTemp.length-1]!="/" && path[0]!="/" && pathTemp.indexOf("?")==-1 && pathTemp.indexOf("#")==-1)
-                {
-                    pathTemp+="/"
-                }
-                baseUrl=baseUrlTemp;
-                path=pathTemp+path;
-            }
-            else
-            {
-                if(path[0]!="/")
-                {
-                    path="/"+path;
-                }
+                bMock=true;
+                baseUrl=config.baseUrl;
+                path="/mock/"+sessionStorage.getItem("projectId")+(path[0]!="/"?("/"+path):path);
             }
             context.state.param.forEach(function (obj) {
                 if(obj.name)
@@ -693,7 +703,7 @@ module.exports=new Vuex.Store({
             header["__headers"]=JSON.stringify(objHeaders);
             var proxyUrl="/proxy";
             var bNet=false;
-            if(/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl))
+            if(/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl) && !bMock)
             {
                 bNet=true;
                 proxyUrl="http://127.0.0.1:36742";
@@ -737,8 +747,9 @@ module.exports=new Vuex.Store({
                     context.state.type="object"
                     context.state.resultData=result.data;
                     context.state.rawData=JSON.stringify(result.data);
-                    context.state.draw=helper.format(context.state.rawData,0,context.state.interface.outParam).draw;
-                    var obj=helper.format(context.state.rawData,1,context.state.interface.outParam);
+                    var outParam=helper.resultSave(context.state.interface.outParam)
+                    context.state.draw=helper.format(context.state.rawData,0,outParam).draw;
+                    var obj=helper.format(context.state.rawData,1,outParam);
                     context.state.drawMix=obj.draw
                     context.state.errorCount=obj.error;
                 }
@@ -973,14 +984,21 @@ module.exports=new Vuex.Store({
             }
             session.set("newInterface",JSON.stringify(obj));
             var bMatchUrl=false;
-            for(var i=0;i<context.state.baseUrls.length;i++)
+            if(baseUrl!="MockServer")
             {
-                var reg=new RegExp(context.state.baseUrls[i]);
-                if(reg.test(baseUrl))
+                for(var i=0;i<context.state.baseUrls.length;i++)
                 {
-                    bMatchUrl=true;
-                    break;
+                    var reg=new RegExp(context.state.baseUrls[i]);
+                    if(reg.test(baseUrl))
+                    {
+                        bMatchUrl=true;
+                        break;
+                    }
                 }
+            }
+            else
+            {
+                bMatchUrl=true;
             }
             var pro=new Promise(function (resolve,reject) {
                 resolve();

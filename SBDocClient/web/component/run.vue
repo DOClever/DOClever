@@ -14,7 +14,7 @@
                         </div>
                     </el-col>
                     <el-col class="col" :span="7" style="line-height: 50px;text-align: center">
-                        <el-autocomplete style="width: 100%" class="inline-input" v-model="baseUrl" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" icon="caret-bottom" :on-icon-click="showAutoComplete"></el-autocomplete>
+                        <el-autocomplete style="width: 100%" class="inline-input" v-model="baseUrl" :fetch-suggestions="querySearch" placeholder="选择或者填入你的BaseUrl" icon="caret-bottom" :on-icon-click="showAutoComplete" @input="changeBaseUrl"></el-autocomplete>
                     </el-col>
                     <el-col class="col" :span="2" style="line-height: 50px;text-align: left">
                         <el-popover ref="popover1" placement="bottom" width="400" trigger="hover">
@@ -299,6 +299,12 @@
                     var results=_this.baseUrls.map(function (obj) {
                         return {value:obj}
                     })
+                    if(_this.interfaceEdit._id)
+                    {
+                        results.push({
+                            value:"MockServer"
+                        })
+                    }
                     if(queryString)
                     {
                         results=results.filter(function (obj) {
@@ -379,6 +385,12 @@
                         })
                     }
                 },100)
+            },
+            changeBaseUrl:function () {
+                if(this.baseUrl=="MockServer")
+                {
+                    $.tip("如果你修改了Mock数据，请在Mock之前保存接口",1);
+                }
             }
         },
         created:function () {
