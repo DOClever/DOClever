@@ -260,6 +260,7 @@ module.exports=new Vuex.Store({
                 }
             }
             state.query=arr;
+            state.interfaceEdit.queryParam=arr;
         },
         importHeader:function (state,val) {
             var arr=$.trim(val).split("\n");
@@ -296,6 +297,7 @@ module.exports=new Vuex.Store({
                 })
             }
             state.header=arrHeader;
+            state.interfaceEdit.header=arrHeader;
         },
         importBody:function (state,val) {
             var str=decodeURI($.trim(val));
@@ -316,6 +318,7 @@ module.exports=new Vuex.Store({
                 }
             }
             state.body=arr;
+            state.interfaceEdit.bodyParam=arr;
         },
         changeMethod:function (state) {
             if(state.interfaceEdit.method=="POST" || state.interfaceEdit.method=="PUT")

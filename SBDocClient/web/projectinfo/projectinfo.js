@@ -274,6 +274,7 @@ var vue=new Vue({
                         remark:""
                     })
                 }
+                store.state.interfaceEdit.queryParam=arrStoreQuery;
             },100)
         }
     },
