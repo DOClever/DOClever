@@ -190,6 +190,60 @@ function handleHeader(req,res) {
     }
 }
 
+function redirect(res,bHttps,opt,location) {
+    var urlRedirect=location;
+    if(urlRedirect.startsWith("/"))
+    {
+        urlRedirect=(bHttps?"https://":"http://")+opt.host+urlRedirect;
+    }
+    var objUrl=url.parse(urlRedirect);
+    var request1,opt1;
+    if(objUrl.protocol=="http:")
+    {
+        opt1={
+            host:  objUrl.hostname,
+            path:     objUrl.path,
+            method:   "GET",
+            port:objUrl.port?objUrl.port:80,
+            headers:opt.headers
+        }
+        request1=http.request;
+        bHttps=false;
+    }
+    else
+    {
+        opt1={
+            host:  objUrl.hostname,
+            path:     objUrl.path,
+            method:   "GET",
+            port:objUrl.port?objUrl.port:443,
+            headers:opt.headers,
+            rejectUnauthorized: false,
+            requestCert: true,
+        }
+        request1=https.request;
+        bHttps=true;
+    }
+    var req3=request1(opt1,function (res3) {
+        if(res3.statusCode==302)
+        {
+            redirect(res,bHttps,opt,res3.headers.location)
+        }
+        else
+        {
+            res.writeHead(res3.statusCode, filterResHeader(res3.headers));
+            res3.pipe(res);
+            res3.on('end', function () {
+
+            });
+        }
+    })
+    req3.end();
+    req3.on('error', function (err) {
+        res.end(err.stack);
+    });
+}
+
 function proxy(req,res) {
     var bHttps=false;
     if(req.headers["__url"].toLowerCase().startsWith("https://"))
@@ -224,43 +278,7 @@ function proxy(req,res) {
     var req2 = request(opt, function (res2) {
         if(res2.statusCode==302)
         {
-            var objUrl=url.parse(res2.headers.location);
-            var request1,opt1;
-            if(objUrl.protocol=="http:")
-            {
-                opt1={
-                    host:  objUrl.hostname,
-                    path:     objUrl.path,
-                    method:   "GET",
-                    port:objUrl.port?objUrl.port:80,
-                    headers:opt.headers
-                }
-                request1=http.request;
-            }
-            else
-            {
-                opt1={
-                    host:  objUrl.hostname,
-                    path:     objUrl.path,
-                    method:   "GET",
-                    port:objUrl.port?objUrl.port:443,
-                    headers:opt.headers,
-                    rejectUnauthorized: false,
-                    requestCert: true,
-                }
-                request1=https.request;
-            }
-            var req3=request1(opt1,function (res3) {
-                res.writeHead(res3.statusCode, filterResHeader(res3.headers));
-                res3.pipe(res);
-                res3.on('end', function () {
-
-                });
-            })
-            req3.end();
-            req3.on('error', function (err) {
-                res.end(err.stack);
-            });
+            redirect(res,bHttps,opt,res2.headers.location)
         }
         else
         {
