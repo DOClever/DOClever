@@ -7,7 +7,7 @@ var pass = require('stream').PassThrough;
 var getHeader = function (req) {
     var ret = {};
     for (var i in req.headers) {
-        if (!/host|connection|Access-|origin|referer|user-agent|__user|__path|__url|__method|__headers/i.test(i)) {
+        if (!/^(host|connection|Access-|origin|referer|user-agent|__user|__path|__url|__method|__headers)/i.test(i)) {
             ret[i] = req.headers[i];
         }
     }

@@ -22,7 +22,7 @@ let refreshInterface=async (function (id) {
     {
         let arrInterface=await (interface.findAsync({
             group:obj._id
-        },"_id name method",{
+        },"_id name method finish url",{
             sort:"name"
         }));
         obj._doc.data=arrInterface;
@@ -93,28 +93,20 @@ function create(req,res) {
         {
             req.group.name=req.clientParam.name;
             await (req.group.saveAsync());
-
         }
         else
         {
-            await (group.createAsync({
+            let result=await (group.createAsync({
                 name:req.clientParam.name,
                 project:req.clientParam.id
             }));
+            if(req.clientParam.import==1)
+            {
+                util.ok(res,result,"ok");
+                return;
+            }
         }
-        let query={
-            project:req.clientParam.id
-        }
-        let arr=await (group.findAsync(query,null,{
-            sort:"name"
-        }));
-        for(let obj of arr)
-        {
-            let arrInterface=await (interface.findAsync({
-                group:obj._id
-            }));
-            obj._doc.data=arrInterface;
-        }
+        let arr=await (refreshInterface(req.clientParam.id));
         util.ok(res,arr,"更新成功");
 
     }
@@ -177,11 +169,100 @@ function interfaceList(req,res) {
     }
 }
 
+function exportJSON(req,res) {
+    try
+    {
+        let obj={
+            name:req.group.name,
+            flag:"SBDoc",
+            data:[]
+        };
+        let arr=await (interface.findAsync({
+            group:req.group._id
+        }));
+        for(let item of arr)
+        {
+            let newInter={};
+            for(let key in item._doc)
+            {
+                if(item._doc.hasOwnProperty(key) && key!="__v" && key!="_id" && key!="project" && key!="group" && key!="owner" && key!="editor")
+                {
+                    newInter[key]=item._doc[key];
+                }
+            }
+            obj.data.push(newInter);
+        }
+        let content=JSON.stringify(obj);
+        res.writeHead(200,{
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': 'attachment; filename*=UTF-8\'\''+encodeURIComponent(req.group.name)+".json",
+            "Transfer-Encoding": "chunked",
+            "Expires":0,
+            "Cache-Control":"must-revalidate, post-check=0, pre-check=0",
+            "Content-Transfer-Encoding":"binary",
+            "Pragma":"public",
+        });
+        res.end(content);
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
+function importJSON(req,res) {
+    try
+    {
+        let obj;
+        try
+        {
+            obj=JSON.parse(req.clientParam.json);
+        }
+        catch (err)
+        {
+            util.throw(e.systemReason,"json解析错误");
+            return;
+        }
+        if(obj.flag!="SBDoc")
+        {
+            util.throw(e.systemReason,"不是SBDoc的导出格式");
+            return;
+        }
+        let objProject=await (project.findOneAsync({
+            _id:req.clientParam.id
+        }))
+        if(!objProject)
+        {
+            util.throw(e.projectNotFound,"项目不存在");
+            return;
+        }
+        let objGroup=await (group.createAsync({
+            name:obj.name,
+            project:objProject._id,
+        }));
+        for(let item of obj.data)
+        {
+            item.project=objProject._id;
+            item.group=objGroup._id;
+            item.owner=req.userInfo._id;
+            item.editor=req.userInfo._id;
+            await (interface.createAsync(item));
+        }
+        let arr=await (refreshInterface(objProject._id));
+        util.ok(res,arr,"导入成功");
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
 exports.validateUser=async (validateUser);
 exports.create=async (create);
 exports.remove=async (remove);
 exports.interface=async (interfaceList);
-
+exports.exportJSON=async (exportJSON);
+exports.importJSON=async (importJSON);
 
 
 

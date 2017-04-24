@@ -1,1 +1,68 @@
-webpackJsonp([3],{132:function(e,t,n){(function(e,t){new e({el:"#app",data:{username:"",pwd:"",pwd1:"",question:"",answer:"",registerPending:!1},methods:{register:function(){var e=this;return this.username&&this.pwd&&this.pwd1&&this.question&&this.answer?this.pwd!=this.pwd1?void this.$message.error("两次输入的密码不一致"):(e.registerPending=!0,void t.post("/user/save",{name:e.username,password:e.pwd,question:e.question,answer:e.answer},{"content-type":"application/x-www-form-urlencoded"}).then(function(t){e.registerPending=!1,200==t.code?(e.$notify({title:"注册成功",type:"success"}),setTimeout(function(){location.href="../login/login.html"},1500)):e.$notify({title:t.msg,type:"error"})})):void this.$message.error("用户名密码,找回密码问题，找回密码答案不能为空")}}})}).call(t,n(0),n(5))}},[132]);
+webpackJsonp([2],{
+
+/***/ 161:
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(Vue, net) {/**
+ * Created by sunxin on 2016/12/28.
+ */
+var vue=new Vue({
+    el: "#app",
+    data: {
+        username:"",
+        pwd:"",
+        pwd1:"",
+        question:"",
+        answer:"",
+        registerPending:false
+    },
+    methods:{
+        register:function () {
+            var _this=this;
+            if(!this.username || !this.pwd || !this.pwd1 || !this.question || !this.answer)
+            {
+                this.$message.error("用户名密码,找回密码问题，找回密码答案不能为空");
+                return;
+            }
+            else if(this.pwd!=this.pwd1)
+            {
+                this.$message.error("两次输入的密码不一致");
+                return;
+            }
+            _this.registerPending=true;
+            net.post("/user/save",{
+                name:_this.username,
+                password:_this.pwd,
+                question:_this.question,
+                answer:_this.answer
+            },{
+                "content-type":"application/x-www-form-urlencoded"
+            }).then(function (data) {
+                _this.registerPending=false;
+                if(data.code==200)
+                {
+                    _this.$notify({
+                        title: '注册成功',
+                        type: 'success'
+                    });
+                    setTimeout(function () {
+                        location.href="../login/login.html"
+                    },1500);
+                }
+                else
+                {
+                    _this.$notify({
+                        title: data.msg,
+                        type: 'error'
+                    });
+                }
+            })
+        }
+    },
+})
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(5)))
+
+/***/ })
+
+},[161]);
+//# sourceMappingURL=register.js.map

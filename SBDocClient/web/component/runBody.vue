@@ -7,8 +7,9 @@
             <el-radio class="radio" :label="1" v-model="info.type" id="bodyRaw">
                 Raw
             </el-radio>&nbsp;&nbsp;&nbsp;&nbsp;
-            <el-select v-model="rawType" v-if="info.type==1 && info.rawType==0">
+            <el-select v-model="rawType" v-if="info.type==1">
                 <el-option value="" label="Text"></el-option>
+                <el-option value="file" label="File"></el-option>
                 <el-option value="text/plain" label="Text(text/plain)"></el-option>
                 <el-option value="application/json" label="JSON"></el-option>
                 <el-option value="text/html" label="HTML"></el-option>
@@ -30,8 +31,8 @@
                         </el-select>
                     </td>
                     <td style="width: 20%;text-align: center;vertical-align: middle;height: 50px;line-height: 50px">
-                        <div  style="height: 100%;width: 90%;display: inline-block;" v-if="item.type==0 && item.value && item.value.length>0">
-                            <el-autocomplete class="inline-input" v-model="item.selValue" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" icon="caret-bottom" :on-icon-click="showAutoComplete" @mouseenter.native="focus(item)" :disabled="!item.enable" custom style="width:100%"></el-autocomplete>
+                        <div  style="height: 100%;width: 90%;display: inline-block;" v-if="item.type==0 && item.value && (item.value.data.length>0 || item.value.status)">
+                            <el-autocomplete class="inline-input" v-model="item.selValue" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" icon="caret-bottom" :on-icon-click="showAutoComplete" @mouseenter.native="focus(item)" :disabled="!item.enable" custom style="width:100%" popper-class="my-autocomplete" custom-item="itemauto"></el-autocomplete>
                         </div>
                         <el-input style="width: 90%;" placeholder="请填写值" v-model="item.selValue" v-else-if="item.type==0 && !item.value" custom></el-input>
                         <a  href="javascript:void(0)" class="file" style="display: inline-block;top: 10px" v-else>
@@ -61,17 +62,12 @@
                 </tr>
             </template>
         </table>
-        <el-row class="row" style="padding: 0 0 0 20px;" v-show="info.type==1">
-            <el-row class="row" style="height: 50px;line-height: 50px;margin: 0;padding: 0">
-                <el-col class="col" :span="3">
-                    Raw的类型：
-                </el-col>
-                <el-col class="col" :span="5">
-                    <el-select v-model="info.rawType">
-                        <el-option :value="0" label="文本"></el-option>
-                        <el-option :value="1" label="文件"></el-option>
-                    </el-select>
-                </el-col>
+        <el-row class="row" style="padding: 0 0 0 20px;" v-show="info.type==1 && info.rawType==2">
+            <runbodyjson></runbodyjson>
+            <el-button type="primary" size="small" style="margin-top: 10px;margin-left: 20px" @click="importJSON">导入JSON</el-button>
+        </el-row>
+        <el-row class="row" style="padding: 0 0 0 20px;" v-show="info.type==1 && info.rawType!=2">
+            <el-row class="row" style="height: 50px;line-height: 50px;margin: 0;padding: 0" v-if="info.rawType==0">
                 <el-col class="col" :span="3" style="text-align: center" v-if="info.rawType==0">
                     加密类型
                 </el-col>
@@ -111,12 +107,40 @@
     </el-row>
 </template>
 <script>
+    var runBodyJSON=require("./runBodyJSON.vue");
     module.exports={
         data:function () {
             return {
                 encryptType:"",
                 salt:"",
                 itemSel:null,
+            }
+        },
+        components:{
+            "runbodyjson":runBodyJSON
+        },
+        watch:{
+            "info.type":function (val) {
+                if(val==0)
+                {
+                    var bFind=false,objIndex,value="application/x-www-form-urlencoded";
+                    this.$store.state.header.forEach(function (obj,index) {
+                        if(obj.name && obj.name.toLowerCase()=="content-type")
+                        {
+                            obj.value=value;
+                            objIndex=index;
+                            bFind=true;
+                        }
+                    })
+                    if(!bFind)
+                    {
+                        this.$store.state.header.push({
+                            name:'Content-Type',
+                            value:value,
+                            remark:''
+                        })
+                    }
+                }
             }
         },
         computed:{
@@ -144,24 +168,85 @@
                             }
                         }
                     })
+                    if(type=="" && this.info.rawType==1)
+                    {
+                        type="file"
+                    }
+                    else if(type=="application/json")
+                    {
+                        this.info.rawType=2
+                    }
+                    else
+                    {
+                        this.info.rawType=0;
+                    }
                     return type;
                 },
                 set:function (value) {
-                    var bFind=false;
-                    this.$store.getters.headerSave.forEach(function (obj) {
-                        if(obj.name.toLowerCase()=="content-type")
-                        {
-                            obj.value=value;
-                            bFind=true;
-                        }
-                    })
-                    if(!bFind)
+                    if(value=="file")
                     {
-                        this.$store.state.header.push({
-                            name:'Content-Type',
-                            value:value,
-                            remark:''
+                        this.info.rawType=1;
+                    }
+                    else if(value=="application/json")
+                    {
+                        this.info.rawType=2;
+                        var bFind=false,objIndex;
+                        this.$store.state.header.forEach(function (obj,index) {
+                            if(obj.name && obj.name.toLowerCase()=="content-type")
+                            {
+                                obj.value=value;
+                                objIndex=index;
+                                bFind=true;
+                            }
                         })
+                        if(!bFind)
+                        {
+                            this.$store.state.header.push({
+                                name:'Content-Type',
+                                value:value,
+                                remark:''
+                            })
+                        }
+                    }
+                    else
+                    {
+                        this.info.rawType=0;
+                        var bFind=false,objIndex;
+                        this.$store.state.header.forEach(function (obj,index) {
+                            if(obj.name && obj.name.toLowerCase()=="content-type")
+                            {
+                                obj.value=value;
+                                objIndex=index;
+                                bFind=true;
+                            }
+                        })
+                        if(value=="")
+                        {
+                            if(bFind)
+                            {
+                                if(this.$store.state.header.length>1)
+                                {
+                                    this.$store.state.header.splice(objIndex,1);
+                                }
+                                else
+                                {
+                                    this.$store.state.header[0].name="";
+                                    this.$store.state.header[0].value="";
+                                    this.$store.state.header[0].remark="";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if(!bFind)
+                            {
+                                this.$store.state.header.push({
+                                    name:'Content-Type',
+                                    value:value,
+                                    remark:''
+                                })
+                            }
+                        }
                     }
                 }
             }
@@ -178,7 +263,11 @@
                     this.arr[0].must=0;
                     this.arr[0].type=0;
                     this.arr[0].remark="";
-                    this.arr[0].value="";
+                    this.arr[0].value={
+                        type: 0,
+                        data: [],
+                        status: ""
+                    };
                     this.arr[0].selValue="";
                 }
             },
@@ -237,9 +326,39 @@
                 });
             },
             querySearch:function (queryString,cb) {
-                var results=this.itemSel.value.map(function (obj) {
-                    return {value:obj}
-                })
+                var results=[];
+                if(this.itemSel.value.type==0)
+                {
+                    results=this.itemSel.value.data.map(function (obj) {
+                        return {
+                            value:obj.value,
+                            remark:obj.remark
+                        }
+                    })
+                }
+                else
+                {
+                    if(this.itemSel.value.status)
+                    {
+                        var objStatus=null;
+                        var _this=this;
+                        this.$store.state.arrStatus.forEach(function (obj) {
+                            if(obj.id==_this.itemSel.value.status)
+                            {
+                                objStatus=obj;
+                            }
+                        })
+                        if(objStatus)
+                        {
+                            results=objStatus.data.map(function (obj) {
+                                return {
+                                    value:obj.key,
+                                    remark:obj.remark
+                                }
+                            })
+                        }
+                    }
+                }
                 if(queryString)
                 {
                     results=results.filter(function (obj) {
@@ -257,6 +376,33 @@
                 setTimeout(function(){
                     event.target.nextSibling.focus();
                 },100)
+            },
+            importJSON:function () {
+                var _this=this;
+                $.inputMul(this,"请输入JSON",function (val) {
+                    if(!val)
+                    {
+                        $.tip("请输入JSON",0);
+                        return false
+                    }
+                    var obj;
+                    try
+                    {
+                        obj=JSON.parse(val)
+                    }
+                    catch (err)
+                    {
+                        $.tip("JSON不符合格式",0);
+                        return false
+                    }
+                    var result=[];
+                    for(var key in obj)
+                    {
+                        helper.handleResultData(key,obj[key],result,null,1)
+                    }
+                    _this.info.rawJSON=result;
+                    return true;
+                },0);
             }
         }
     }

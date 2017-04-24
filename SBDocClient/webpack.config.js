@@ -12,7 +12,6 @@ module.exports = {
         person:"./web/person/person",
         project:"./web/project/project",
         projectinfo:"./web/projectinfo/projectinfo",
-        projectset:"./web/projectset/projectset",
         reset:"./web/reset/reset",
         about:"./web/about/about",
         help:"./web/help/help",
@@ -36,14 +35,14 @@ module.exports = {
                 NODE_ENV: '"production"'
             }
         }),
-        new webpack.optimize.UglifyJsPlugin({
-            compressor: {
-                warnings: false,
-            },
-            output: {
-                comments: false,  // remove all comments
-            }
-        }),
+        // new webpack.optimize.UglifyJsPlugin({
+        //     compressor: {
+        //         warnings: false,
+        //     },
+        //     output: {
+        //         comments: false,  // remove all comments
+        //     }
+        // }),
         new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.bundle.js' }),
     ],
     module: {
@@ -67,8 +66,8 @@ module.exports = {
     devtool: 'source-map',
     resolve: {
         alias: {
-            "vue": path.join(__dirname, 'node_modules/vue/dist/vue.min'),
-            "vuex": path.join(__dirname, 'node_modules/vuex/dist/vuex.min')
+            "vue": path.join(__dirname, 'node_modules/vue/dist/vue'),
+            "vuex": path.join(__dirname, 'node_modules/vuex/dist/vuex')
         }
     }
 }

@@ -140,7 +140,7 @@
     var runInject=require("./runInject.vue")
     var store=require("../projectinfo/storeRun")
     module.exports={
-        props:["interfaceEdit","baseUrls"],
+        props:["interfaceEdit","baseUrls","status","globalBefore","globalAfter"],
         data:function () {
             return {
                 session:$.clone(session.raw()),
@@ -395,8 +395,12 @@
         },
         created:function () {
             store.commit("clear");
-            store.commit("initData",this.interfaceEdit)
             store.commit("setBaseUrls",this.baseUrls);
+            store.commit("setArrStatus",this.$options.propsData.status);
+            store.commit("setGlobalBefore",this.globalBefore);
+            store.commit("setGlobalAfter",this.globalAfter);
+            store.commit("setBaseUrls",this.baseUrls);
+            store.commit("initData",this.interfaceEdit);
         },
     }
 </script>

@@ -25,11 +25,22 @@ var model=new mongoose.Schema({
             _id:false
         }],
         default:[]
+    },
+    before:{
+        type:String,
+        default:""
+    },
+    after:{
+        type:String,
+        default:""
     }
 },{
     timestamps:true
 });
-
+model.configOutputField(null,[
+    "createdAt",
+    "updatedAt"
+]);
 var dbManage=db.model("Project",model);
 mongoomise.promisifyAll(dbManage,require("bluebird"));
 module.exports=dbManage;

@@ -15,8 +15,8 @@
                         {{item.remark?item.remark:"无备注"}}
                     </td>
                     <td style="width: 25%;height: 50px;line-height: 50px">
-                        <div  style="height: 100%;width: 90%;display: inline-block;" v-if="item.value && item.value.length>0">
-                            <el-autocomplete class="inline-input" v-model="item.selValue" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" icon="caret-bottom" :on-icon-click="showAutoComplete" @mouseenter.native="focus(item)" :disabled="!item.enable" style="width:100%"></el-autocomplete>
+                        <div  style="height: 100%;width: 90%;display: inline-block;" v-if="item.value && (item.value.data.length>0 || item.value.status)">
+                            <el-autocomplete class="inline-input" v-model="item.selValue" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" icon="caret-bottom" :on-icon-click="showAutoComplete" @mouseenter.native="focus(item)" :disabled="!item.enable" style="width:100%" popper-class="my-autocomplete" custom-item="itemauto"></el-autocomplete>
                         </div>
                         <el-input v-else style="width: 90%" v-model="item.selValue" :disabled="!item.enable"></el-input>
                     </td>
@@ -61,7 +61,11 @@
                     this.arr[0].must=0;
                     this.arr[0].remark="";
                     this.arr[0].enable=1;
-                    this.arr[0].value="";
+                    this.arr[0].value={
+                        type: 0,
+                        data: [],
+                        status: ""
+                    };
                     this.arr[0].selValue="";
                 }
             },
@@ -93,9 +97,39 @@
                 });
             },
             querySearch:function (queryString,cb) {
-                var results=this.itemSel.value.map(function (obj) {
-                    return {value:obj}
-                })
+                var results=[];
+                if(this.itemSel.value.type==0)
+                {
+                    results=this.itemSel.value.data.map(function (obj) {
+                        return {
+                            value:obj.value,
+                            remark:obj.remark
+                        }
+                    })
+                }
+                else
+                {
+                    if(this.itemSel.value.status)
+                    {
+                        var objStatus=null;
+                        var _this=this;
+                        this.$store.state.arrStatus.forEach(function (obj) {
+                            if(obj.id==_this.itemSel.value.status)
+                            {
+                                objStatus=obj;
+                            }
+                        })
+                        if(objStatus)
+                        {
+                            results=objStatus.data.map(function (obj) {
+                                return {
+                                    value:obj.key,
+                                    remark:obj.remark
+                                }
+                            })
+                        }
+                    }
+                }
                 if(queryString)
                 {
                     results=results.filter(function (obj) {

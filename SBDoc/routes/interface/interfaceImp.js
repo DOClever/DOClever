@@ -145,8 +145,34 @@ var interface=[
         "data":String,
         user:1,
         handle:inter.info
-    }
-
+    },
+    {
+        "method":"GET",
+        "path":"/interface/exportjson",
+        "param": {
+            id:{
+                type:String
+            }
+        },
+        "data":String,
+        user:1,
+        handle:inter.exportJSON
+    },
+    {
+        "method":"POST",
+        "path":"/interface/importjson",
+        "param": {
+            id:{
+                type:String
+            },
+            json:{
+                type:String
+            }
+        },
+        "data":String,
+        user:1,
+        handle:inter.importJSON
+    },
 ];
 
 module.exports=interface;

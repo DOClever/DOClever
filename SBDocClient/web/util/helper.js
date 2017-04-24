@@ -70,16 +70,16 @@ helper.refreshInterface=function (localData,data) {
     return data;
 }
 
-helper.resultSave=function (data) {
+helper.resultSave=function (data,json) {
     var arr=[];
     for(var i=0;i<data.length;i++)
     {
-        helper.eachResult(data[i],null,arr);
+        helper.eachResult(data[i],data[i].name===null?{type:3}:null,arr,json);
     }
     return arr;
 }
 
-helper.eachResult=function (item,pItem,arr) {
+helper.eachResult=function (item,pItem,arr,json) {
     if(item.name || (!item.name && pItem && pItem.type==3))
     {
         var obj={
@@ -89,19 +89,57 @@ helper.eachResult=function (item,pItem,arr) {
             must:item.must,
             mock:item.mock
         }
+        if(json)
+        {
+            if(item.value)
+            {
+                if(item.value.type==0)
+                {
+                    var v=item.mock,bFind=false;
+                    item.value.data.forEach(function (o) {
+                        if(o.value==v)
+                        {
+                            bFind=true;
+                        }
+                    })
+                    if(!bFind)
+                    {
+                        item.value.data.push({
+                            value:v,
+                            remark:""
+                        });
+                    }
+                }
+            }
+            else
+            {
+                obj.value={
+                    type:0,
+                    status:"",
+                    data:[{
+                        value:item.mock,
+                        remark:""
+                    }]
+                }
+            }
+        }
+        if(item.status)
+        {
+            obj.status=item.status;
+        }
         arr.push(obj)
         if(item.type==3 || item.type==4)
         {
             obj.data=[];
             for(var i=0;i<item.data.length;i++)
             {
-                arguments.callee(item.data[i],item,obj.data)
+                arguments.callee(item.data[i],item,obj.data,json)
             }
         }
     }
 }
 
-helper.convertToJSON=function (data,obj) {
+helper.convertToJSON=function (data,obj,info) {
     var mock=function (data) {
         if(!data.mock || $.trim(data.mock)[0]!="@")
         {
@@ -195,7 +233,7 @@ helper.convertToJSON=function (data,obj) {
                 {
                     return parseFloat(temp);
                 }
-                else (data.type==2)
+                else if(data.type==2)
                 {
                     return Boolean(temp);
                 }
@@ -267,6 +305,44 @@ helper.convertToJSON=function (data,obj) {
             else if(/^null/i.test(str))
             {
                 return null;
+            }
+            else if(/^code/i.test(str))
+            {
+                var val=$.trim(str.substring(5,str.length-1));
+                if(info)
+                {
+                    try
+                    {
+                        var ret=(function (param,query,header,body,global) {
+                            return eval("("+val+")");
+                        })(info.param,info.query,info.header,info.body,info.global)
+                        if(data.type==0)
+                        {
+                            return String(ret);
+                        }
+                        else if(data.type==1)
+                        {
+                            return parseFloat(ret);
+                        }
+                        else if(data.type==2)
+                        {
+                            return Boolean(ret);
+                        }
+                        else if(data.type==5)
+                        {
+                            return ret;
+                        }
+                    }
+                    catch (err)
+                    {
+                        console.log("execute err:"+err);
+                        return null;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
         return data.mock?$.trim(data.mock):null;
@@ -367,7 +443,7 @@ helper.convertToJSON=function (data,obj) {
     }
 }
 
-helper.format=function (txt,mix,outParam) {
+helper.format=function (txt,mix,outParam,status) {
     var indentChar = '&nbsp;&nbsp;&nbsp;&nbsp;';
     if(/^\s*$/.test(txt)){
         alert('数据为空,无法格式化! ');
@@ -487,7 +563,7 @@ helper.format=function (txt,mix,outParam) {
             draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+' <span style="border: 1px gray solid;cursor: pointer;color: #50a3ff;'+((formObj || root)?"":"margin-left: -22px")+'" jsonflag arrsize="'+value.length+'" timestamp="'+timestamp+'" '+(errObj.title?('err="'+errObj.title+'"'):'')+'>-</span> '+'<span jsonleft>[</span>'+line+remark);
             for (var i=0;i<value.length;i++){
                 var raw1=getData(i,raw)
-                notify(i,value[i],i==value.length-1,indent,false,raw1,errObj.title?0:1);
+                notify(i,value[i],i==value.length-1,indent,false,raw1,errObj.title?0:1,false,status);
             }
             draw.push(tab+'<span timestamp="'+timestamp+'"></span>'+']'+(isLast?line:(','+line)));
         }else   if(value&&typeof value=='object'){
@@ -517,17 +593,18 @@ helper.format=function (txt,mix,outParam) {
             }
             for(var key in value){
                 var raw1=getData(key,raw)
-                notify(key,value[key],++i==len,indent,true,raw1,bMatch?1:0);
+                notify(key,value[key],++i==len,indent,true,raw1,bMatch?1:0,false,status);
             }
             draw.push(tab+'<span timestamp="'+timestamp+'"></span>'+'}'+(isLast?line:(','+line)))
         }else{
-            var remark="",errObj={title:""};
+            var remark="",errObj={title:""},statusInfo=null;
             if(raw && !root && match)
             {
                 remark=getRemark(name,raw);
                 checkType(value,raw,errObj);
             }
             if(typeof value=='string'){
+                statusInfo=getStatus(raw,value,status);
                 value='"'+"<span style='font-weight: bold'>"+value+"</span>"+'"';
             }
             else if(typeof(value)=="boolean")
@@ -536,11 +613,51 @@ helper.format=function (txt,mix,outParam) {
             }
             else
             {
+                statusInfo=getStatus(raw,value,status);
                 value="<span style='font-weight: bold'>"+value+"</span>"
             }
-            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+"<span style='color: #1daf42' "+(errObj.title?('err="'+errObj.title+'"'):'')+">"+value+"</span>"+(isLast?'':',')+line+remark);
+            draw.push(tab+(formObj?('"'+"<span style='font-weight: bold'>"+name+"</span>"+'":'):'')+"<span style='color: #1daf42' "+(errObj.title?('err="'+errObj.title+'"'):'')+">"+value+"</span>"+(isLast?'':',')+line+remark+(statusInfo?("<span style='color: green;'>(状态码:"+statusInfo.remark+")</span>"):""));
         };
     };
+    var getStatus=function (raw,value,status) {
+        if(!raw || !status || !raw.status)
+        {
+            return null;
+        }
+        var objStatus=null;
+        status.forEach(function (obj) {
+            if(obj.id==raw.status)
+            {
+                objStatus=obj;
+            }
+        })
+        if(objStatus)
+        {
+            var remark="";
+            objStatus.data.forEach(function (obj) {
+                if(obj.key==value)
+                {
+                    remark=obj.remark;
+                }
+            })
+            if(!remark)
+            {
+                return null
+            }
+            else
+            {
+                return {
+                    id:objStatus.id,
+                    remark:remark,
+                    value:value
+                }
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
     var getData=function (key,raw) {
         if(!raw)
         {
@@ -595,7 +712,7 @@ helper.format=function (txt,mix,outParam) {
         return "<span style='color: gray'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//类型："+type[raw.type]+"&nbsp;&nbsp;"+(raw.must?"必有字段":"可有字段")+"&nbsp;&nbsp;备注："+(raw.remark?raw.remark:"无")+"</span>";
     }
     var isLast=true,indent=0;
-    notify('',data,isLast,indent,false,mix?result:null,1,1);
+    notify('',data,isLast,indent,false,mix?result:null,1,1,status);
     setTimeout(function () {
         var arr=document.querySelectorAll("span[jsonflag]");
         for(var i=0;i<arr.length;i++)
@@ -681,6 +798,7 @@ helper.format=function (txt,mix,outParam) {
 }
 
 helper.handleResultData=function (name,data,result,originObj,show) {
+    name=typeof(name)=="string"?name:null;
     if(typeof(data)=="string")
     {
         var obj={
@@ -688,7 +806,8 @@ helper.handleResultData=function (name,data,result,originObj,show) {
             must:originObj?originObj.must:1,
             type:0,
             remark:originObj?originObj.remark:"",
-            mock:originObj?(originObj.mock?originObj.mock:data):data
+            mock:originObj?(originObj.mock?originObj.mock:data):data,
+            drag:1
         }
         if(show)
         {
@@ -703,7 +822,8 @@ helper.handleResultData=function (name,data,result,originObj,show) {
             must:originObj?originObj.must:1,
             type:1,
             remark:originObj?originObj.remark:"",
-            mock:originObj?(originObj.mock?originObj.mock:String(data)):String(data)
+            mock:originObj?(originObj.mock?originObj.mock:String(data)):String(data),
+            drag:1
         }
         if(show)
         {
@@ -718,7 +838,8 @@ helper.handleResultData=function (name,data,result,originObj,show) {
             must:originObj?originObj.must:1,
             type:2,
             remark:originObj?originObj.remark:"",
-            mock:originObj?(originObj.mock?originObj.mock:String(data)):String(data)
+            mock:originObj?(originObj.mock?originObj.mock:String(data)):String(data),
+            drag:1
         }
         if(show)
         {
@@ -734,7 +855,8 @@ helper.handleResultData=function (name,data,result,originObj,show) {
             type:3,
             remark:originObj?originObj.remark:"",
             data:[],
-            mock:""
+            mock:"",
+            drag:1
         };
         if(show)
         {
@@ -755,7 +877,8 @@ helper.handleResultData=function (name,data,result,originObj,show) {
             type:4,
             remark:originObj?originObj.remark:"",
             data:[],
-            mock:""
+            mock:"",
+            drag:1
         };
         if(show)
         {
@@ -811,7 +934,7 @@ helper.findValue=function (data,key) {
     return null;
 }
 
-helper.mock=function (data) {
+helper.mock=function (data,info) {
     if(!data || $.trim(data)[0]!="@")
     {
         if(data)
@@ -883,6 +1006,28 @@ helper.mock=function (data) {
         {
             return "null";
         }
+        else if(/^code/i.test(str))
+        {
+            var val=$.trim(str.substring(5,str.length-1));
+            if(info)
+            {
+                try
+                {
+                    return (function (param,query,header,body,global) {
+                        return eval("("+val+")");
+                    })(info.param,info.query,info.header,info.body,info.global)
+                }
+                catch (err)
+                {
+                    console.log("execute err:"+err);
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
     return data?$.trim(data):null;
 }
@@ -944,4 +1089,135 @@ helper.runAfter=function (code,status,header,data) {
     }
 }
 
+helper.handleValue=function (obj) {
+    var value=obj.value;
+    if(obj.selValue)
+    {
+        if(value)
+        {
+            if(value.type==0)
+            {
+                var v=obj.selValue,bFind=false;
+                value.data.forEach(function (o) {
+                    if(o.value==v)
+                    {
+                        bFind=true;
+                    }
+                })
+                if(!bFind)
+                {
+                    value.data.push({
+                        value:v,
+                        remark:""
+                    });
+                }
+            }
+        }
+        else
+        {
+            value={
+                type:0,
+                status:"",
+                data:[{
+                    value:obj.selValue,
+                    remark:""
+                }]
+            }
+        }
+    }
+    else
+    {
+        if(!value)
+        {
+            value={
+                type:0,
+                status:"",
+                data:[]
+            }
+        }
+    }
+    return value;
+}
+
+helper.handleMockInfo=function (type,param,query,header,body,state) {
+    var info={
+        param:{},
+        query:{},
+        header:{},
+        body:{},
+        global:{}
+    };
+    param.forEach(function (obj) {
+        if(obj.name)
+        {
+            if(type==0)
+            {
+                info.param[obj.name]="";
+            }
+            else
+            {
+                info.param[obj.name]=obj.selValue;
+            }
+        }
+    })
+    query.forEach(function (obj) {
+        if(obj.name)
+        {
+            if(type==0)
+            {
+                info.query[obj.name]="";
+            }
+            else
+            {
+                info.query[obj.name]=obj.selValue;
+            }
+        }
+    })
+    header.forEach(function (obj) {
+        if(obj.name)
+        {
+            info.header[obj.name]=obj.value;
+        }
+    })
+    if(body && (body instanceof Array))
+    {
+        body.forEach(function (obj) {
+            if(obj.name)
+            {
+                if(type==0)
+                {
+                    info.body[obj.name]="";
+                }
+                else
+                {
+                    info.body[obj.name]=obj.selValue;
+                }
+            }
+        })
+    }
+    else
+    {
+        info.body=body;
+    }
+    info.global={
+        name:type==0?state.interfaceEdit.name:state.interface.name,
+        baseurl:type==0?"":state.baseurl,
+        path:type==0?state.interfaceEdit.url:state.interface.url,
+        method:type==0?state.interfaceEdit.method:state.interface.method
+    }
+    return info;
+}
+
 module.exports=helper;
+
+
+
+
+
+
+
+
+
+
+
+

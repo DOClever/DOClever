@@ -11,7 +11,7 @@
                             &nbsp;
                         </el-col>
                         <el-col class="col" :span="22">
-                            <el-input style="width: 90%;" placeholder="请填写名称" v-model="item.name" v-if="item.name!=null" @focus="focus(item)" @blur="blur(item)"></el-input>
+                            <el-input style="width: 90%;" placeholder="请填写名称" v-model="item.name" v-if="item.name!=null && (level!=0 || type!=1)" @focus="focus(item)" @blur="blur(item)"></el-input>
                             <el-input style="width: 90%;" placeholder="该字段没有名称" disabled v-else></el-input>
                         </el-col>
                     </td>
@@ -40,7 +40,18 @@
                         <el-button type="text" icon="close" style="color: red;font-size: 15px" @click="remove(item,index,level)" size="small"></el-button>
                     </td>
                     <td style="width: 5%">
-                        <el-button type="text" style="font-size: 15px" icon="plus" size="small"  @click="add(arr)" v-if="(item.type==0 || item.type==1 || item.type==2 || item.type==5)"></el-button>
+                        <el-button type="text" style="font-size: 15px" icon="plus" size="small"  @click="add(arr)" v-if="(item.type==2 || item.type==5)"></el-button>
+                        <template v-else-if="item.type==0 || item.type==1">
+                            <el-button type="text" style="font-size: 15px" icon="plus" size="small"  @click="add(arr)" v-if="!statusExist"></el-button>
+                            <el-dropdown v-else>
+                                <el-button type="text" icon="plus" size="small" style="font-size: 15px">
+                                </el-button>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item @click.native="add(arr)">兄弟节点</el-dropdown-item>
+                                    <el-dropdown-item @click.native="editStatus(item)">{{statusValid(item)?"修改状态码":"绑定状态码"}}</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+                        </template>
                         <el-dropdown v-else>
                             <el-button type="text" icon="plus" size="small" style="font-size: 15px">
                             </el-button>
@@ -74,6 +85,12 @@
         computed:{
             arr:function () {
                 return this.source?this.source:this.$store.state.result
+            },
+            statusExist:function () {
+                return (this.$store.state.status && this.$store.state.status.length>0)?true:false;
+            },
+            type:function () {
+                return this.$store.state.outInfo.jsonType;
             }
         },
         methods:{
@@ -304,6 +321,43 @@
             },
             blur:function (item) {
                 item.drag=1;
+            },
+            editStatus:function (item) {
+                if(!item.status)
+                {
+                    Vue.set(item,"status","");
+                }
+                var child=$.showBox(this,"chooseStatus",{
+                    status:item.status
+                });
+                child.$on("save",function (data) {
+                    item.status=data;
+                })
+            },
+            statusValid:function (item) {
+                if(!item.status)
+                {
+                    return false;
+                }
+                else
+                {
+                    var bFind=false;
+                    this.$store.state.status.forEach(function (obj) {
+                        if(obj.id==item.status)
+                        {
+                            bFind=true;
+                        }
+                    })
+                    if(bFind)
+                    {
+                        return item.status;
+                    }
+                    else
+                    {
+                        item.status="";
+                        return ""
+                    }
+                }
             }
         }
     }

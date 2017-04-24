@@ -10,7 +10,7 @@
                         <el-input style="width: 90%" v-model="item.remark" placeholder="请填写备注"></el-input>
                     </td>
                     <td style="width: 20%">
-                        <el-button style="font-size: 15px" type="text" size="small" @click="configValue(item)">{{(item.value && item.value.length>0)?"已填值":"未填值"}}</el-button>
+                        <el-button style="font-size: 15px" type="text" size="small" @click="configValue(item)">{{(item.value && (item.value.data.length>0 || item.value.status))?"已填值":"未填值"}}</el-button>
                     </td>
                 </tr>
             </template>
@@ -37,7 +37,11 @@
             configValue:function (item) {
                 if(!item.value)
                 {
-                    Vue.set(item,"value",[]);
+                    Vue.set(item,"value",{
+                        type: 0,
+                        data: [],
+                        status: ""
+                    });
                 }
                 var child=$.showBox(this.$parent,"valueList",{
                     "source":item.value

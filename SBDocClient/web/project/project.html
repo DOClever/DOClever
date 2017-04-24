@@ -17,8 +17,16 @@
 <div class="container" id="app" style="margin: 0px;height: 600px;width: 100%" v-cloak>
     <mainnav>
         <el-row class="row" style="text-align: center;height: 60px;line-height: 60px;font-size: 25px;color: #20A0FF" slot="title">项目列表</el-row>
+        <el-popover ref="popover" placement="bottom" width="250" trigger="hover" slot="other">
+            <span style="font-size: 15px;color: red">
+                支持postman v2格式的JSON导入和SBDoc导出JSON的导入
+            </span>
+        </el-popover>
         <el-button type="text"  style="font-size: 30px;width:40px;height: 60px" slot="slot2" title="添加项目" @click="showAdd=true">
             <i class="fa fa-plus-circle"></i>
+        </el-button>
+        <el-button type="text" v-popover:popover style="font-size: 25px;width:40px;height: 60px" slot="slot1" title="导入项目" @click="importProject">
+            <i class="fa fa-download"></i>
         </el-button>
     </mainnav>
     <div style="width: 100%;height: 500px;margin-top: 30px">

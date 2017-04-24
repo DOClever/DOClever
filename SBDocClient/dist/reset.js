@@ -1,1 +1,92 @@
-webpackJsonp([2],{133:function(n,e,t){(function(n,e,t){new n({el:"#app",data:{question:"",pwd:"",pwd1:"",answer:"",resetPending:!1,questionPending:!1,step:0,username:""},methods:{getQuestion:function(){var n=this;if(!this.username)return void e.tip("用户名不能为空",0);this.questionPending=!0,t.get("/user/question",{name:n.username},{"content-type":"application/x-www-form-urlencoded"}).then(function(t){n.questionPending=!1,200==t.code?(e.notify(t.msg,1),n.step=1,n.question=t.data):e.notify(t.msg,0)})},reset:function(){var n=this;return this.pwd&&this.pwd1&&this.answer?this.pwd!=this.pwd1?void e.tip("两次输入的密码不一致",0):(this.questionPending=!0,void t.put("/user/reset",{name:n.username,answer:n.answer,password:n.pwd},{"content-type":"application/x-www-form-urlencoded"}).then(function(t){n.questionPending=!1,200==t.code?(e.notify(t.msg,1),setTimeout(function(){location.href="../login/login.html"},1500)):e.notify(t.msg,0)})):void e.tip("密码,确认密码,找回密码答案不能为空",0)}}})}).call(e,t(0),t(2),t(5))}},[133]);
+webpackJsonp([1],{
+
+/***/ 162:
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(Vue, $, net) {/**
+ * Created by sunxin on 2017/3/2.
+ */
+/**
+ * Created by sunxin on 2016/12/28.
+ */
+var vue=new Vue({
+    el: "#app",
+    data: {
+        question:"",
+        pwd:"",
+        pwd1:"",
+        answer:"",
+        resetPending:false,
+        questionPending:false,
+        step:0,
+        username:""
+    },
+    methods:{
+        getQuestion:function () {
+            var _this=this;
+            if(!this.username)
+            {
+                $.tip("用户名不能为空",0);
+                return;
+            }
+            this.questionPending=true;
+            net.get("/user/question",{
+                name:_this.username,
+            },{
+                "content-type":"application/x-www-form-urlencoded"
+            }).then(function (data) {
+                _this.questionPending=false;
+                if(data.code==200)
+                {
+                    $.notify(data.msg,1);
+                    _this.step=1;
+                    _this.question=data.data;
+                }
+                else
+                {
+                    $.notify(data.msg,0);
+                }
+            })
+        },
+        reset:function () {
+            var _this=this;
+            if(!this.pwd || !this.pwd1 || !this.answer )
+            {
+                $.tip("密码,确认密码,找回密码答案不能为空",0);
+                return;
+            }
+            else if(this.pwd!=this.pwd1)
+            {
+                $.tip("两次输入的密码不一致",0);
+                return;
+            }
+            this.questionPending=true;
+            net.put("/user/reset",{
+                name:_this.username,
+                answer:_this.answer,
+                password:_this.pwd
+            },{
+                "content-type":"application/x-www-form-urlencoded"
+            }).then(function (data) {
+                _this.questionPending=false;
+                if(data.code==200)
+                {
+                    $.notify(data.msg,1);
+                    setTimeout(function () {
+                        location.href="../login/login.html"
+                    },1500);
+                }
+                else
+                {
+                    $.notify(data.msg,0);
+                }
+            })
+        }
+    },
+})
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(0), __webpack_require__(5)))
+
+/***/ })
+
+},[162]);
+//# sourceMappingURL=reset.js.map

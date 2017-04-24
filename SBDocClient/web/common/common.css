@@ -79,7 +79,27 @@ td {
     padding: 0;
 }
 
+.my-autocomplete {
+}
+.my-autocomplete li {
+    line-height: normal;
+    padding: 7px;
+}
+.my-autocomplete li .value {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.my-autocomplete li .remark {
+    font-size: 12px;
+    color: #b4b4b4;
+}
+.my-autocomplete li .highlighted .remark {
+    color: #ddd;
+}
 
+* {
+    font-family: "Microsoft YaHei";
+}
 
 
 

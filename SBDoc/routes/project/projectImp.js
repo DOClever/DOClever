@@ -17,6 +17,10 @@ var interface=[
             id:{
                 optional:1,
                 type:String
+            },
+            import:{
+                type:Number,
+                optional:1
             }
         },
         "data":String,
@@ -214,6 +218,56 @@ var interface=[
         },
         user:1,
         handle:[project.validateUser,project.addUrl]
+    },
+    {
+        "method":"GET",
+        "path":"/project/exportjson",
+        "param": {
+            id:{
+                type:String
+            },
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.inProject,project.exportJSON]
+    },
+    {
+        "method":"POST",
+        "path":"/project/importjson",
+        "param": {
+            json:{
+                type:String
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.importJSON]
+    },
+    {
+        "method":"PUT",
+        "path":"/project/inject",
+        "param": {
+            id:{
+                type:String
+            },
+            before:{
+                type:String,
+                optional:1
+            },
+            after:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.validateUser,project.setInject]
     },
 ];
 

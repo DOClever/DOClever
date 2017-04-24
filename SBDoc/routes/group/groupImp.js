@@ -16,6 +16,10 @@ var interface=[
             group:{
                 type:String,
                 optional:1
+            },
+            import:{
+                type:Number,
+                optional:1
             }
         },
         "data":String,
@@ -45,6 +49,33 @@ var interface=[
         "data":String,
         user:1,
         handle:[group.validateUser,group.interface]
+    },
+    {
+        "method":"GET",
+        "path":"/group/exportjson",
+        "param": {
+            group:{
+                type:String
+            }
+        },
+        "data":String,
+        user:1,
+        handle:[group.validateUser,group.exportJSON]
+    },
+    {
+        "method":"POST",
+        "path":"/group/importjson",
+        "param": {
+            id:{
+                type:String
+            },
+            json:{
+                type:String
+            }
+        },
+        "data":String,
+        user:1,
+        handle:[group.importJSON]
     },
 ];
 

@@ -10,6 +10,7 @@ var user=require("../../model/userModel")
 var project=require("../../model/projectModel")
 var group=require("../../model/groupModel")
 var interface=require("../../model/interfaceModel")
+var status=require("../../model/statusModel")
 var fs=require("fs");
 let refreshInterface=async (function (id) {
     let query={
@@ -22,7 +23,7 @@ let refreshInterface=async (function (id) {
     {
         let arrInterface=await (interface.findAsync({
             group:obj._id
-        },"_id name method",{
+        },"_id name method finish url",{
             sort:"name"
         }));
         obj._doc.data=arrInterface;
@@ -116,10 +117,13 @@ function create(req,res) {
         if(!req.clientParam.id)
         {
             let obj=await (project.createAsync(query));
-            await (group.createAsync({
-                name:"未命名",
-                project:obj._id
-            }))
+            if(req.clientParam.import!=1)
+            {
+                await (group.createAsync({
+                    name:"未命名",
+                    project:obj._id
+                }))
+            }
             await (group.createAsync({
                 name:"#回收站",
                 project:obj._id,
@@ -365,7 +369,7 @@ function interfaceList(req,res) {
         {
             let arrInterface=await (interface.findAsync({
                 group:obj._id
-            },"_id name method finish",{
+            },"_id name method finish url",{
                 sort:"name"
             }));
             obj._doc.data=arrInterface;
@@ -482,6 +486,172 @@ function addUrl(req,res) {
     }
 }
 
+function exportJSON(req,res) {
+    try
+    {
+        let obj={};
+        obj.flag="SBDoc"
+        obj.info={
+            name:req.obj.name,
+            description:req.obj.dis
+        }
+        obj.global={
+            baseurl:req.obj.baseUrls,
+            before:req.obj.before,
+            after:req.obj.after
+        }
+        obj.global.status=await (status.findAsync({
+            project:req.obj._id
+        },"-_id -project"));
+        obj.data=[];
+        let arrGroup=await (group.findAsync({
+            project:req.obj._id
+        }))
+        for(let item of arrGroup)
+        {
+            let o={
+                name:item.name,
+                type:item.type,
+                data:[]
+            }
+            let arrInter=await (interface.findAsync({
+                group:item._id
+            }))
+            for(let item of arrInter)
+            {
+                let newInter={};
+                for(let key in item._doc)
+                {
+                    if(item._doc.hasOwnProperty(key) && key!="__v" && key!="_id" && key!="_id" && key!="project" && key!="group" && key!="owner" && key!="editor")
+                    {
+                        newInter[key]=item._doc[key];
+                    }
+                }
+                o.data.push(newInter);
+            }
+            obj.data.push(o);
+        }
+        let content=JSON.stringify(obj);
+        res.writeHead(200,{
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': 'attachment; filename*=UTF-8\'\''+encodeURIComponent(req.obj.name)+".json",
+            "Transfer-Encoding": "chunked",
+            "Expires":0,
+            "Cache-Control":"must-revalidate, post-check=0, pre-check=0",
+            "Content-Transfer-Encoding":"binary",
+            "Pragma":"public",
+        });
+        res.end(content);
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
+function importJSON(req,res) {
+    try
+    {
+        let obj;
+        try
+        {
+            obj=JSON.parse(req.clientParam.json);
+        }
+        catch (err)
+        {
+            util.throw(e.systemReason,"json解析错误");
+            return;
+        }
+        if(obj.flag!="SBDoc")
+        {
+            util.throw(e.systemReason,"不是SBDoc的导出格式");
+            return;
+        }
+        let query={
+            name:obj.info.name,
+            owner:req.userInfo._id
+        }
+        if(obj.info.dis)
+        {
+            query.dis=obj.info.dis
+        }
+        if(obj.global.baseurl)
+        {
+            query.baseUrls=obj.global.baseurl
+        }
+        if(obj.global.before)
+        {
+            query.before=obj.global.before;
+        }
+        if(obj.global.after)
+        {
+            query.after=obj.global.after;
+        }
+        let objProject=await (project.createAsync(query));
+        if(obj.global.status.length>0)
+        {
+            for(let item of obj.global.status)
+            {
+                item.project=objProject._id;
+                await (status.createAsync(item));
+            }
+        }
+        let bTrash=false,interfaceCount=0;
+        for(let item of obj.data)
+        {
+            if(item.type==1)
+            {
+                bTrash=true;
+            }
+            let objGroup=await (group.createAsync({
+                name:item.name,
+                project:objProject._id,
+                type:item.type
+            }));
+            for(let itemInter of item.data)
+            {
+                interfaceCount++;
+                itemInter.project=objProject._id;
+                itemInter.group=objGroup._id;
+                itemInter.owner=req.userInfo._id;
+                itemInter.editor=req.userInfo._id;
+                await (interface.createAsync(itemInter));
+            }
+        }
+        if(!bTrash)
+        {
+            await (group.createAsync({
+                name:"#回收站",
+                project:objProject._id,
+                type:1
+            }))
+        }
+        objProject._doc.role=0;
+        objProject._doc.userCount=1;
+        objProject._doc.interfaceCount=interfaceCount;
+        objProject._doc.own=1;
+        util.ok(res,objProject,"导入成功");
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
+function setInject(req,res) {
+    try
+    {
+        req.obj.before=req.clientParam.before;
+        req.obj.after=req.clientParam.after;
+        await (req.obj.saveAsync());
+        util.ok(res,"ok");
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
 exports.validateUser=async (validateUser);
 exports.inProject=async (inProject);
 exports.create=async (create);
@@ -497,6 +667,9 @@ exports.clear=async (clear);
 exports.removeProject=async (removeProject);
 exports.addUrl=async (addUrl);
 exports.quit=async (quit);
+exports.exportJSON=async (exportJSON);
+exports.importJSON=async (importJSON);
+exports.setInject=async (setInject);
 
 
 

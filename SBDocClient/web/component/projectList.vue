@@ -60,7 +60,6 @@
                 session.set("projectName",item.name);
                 session.set("role",item.role);
                 session.set("own",item.own);
-                location.href="/html/web/projectset/projectset.html";
             },
             up:function (event) {
                 event.target.style.animation="up 0.2s ease-out forwards"

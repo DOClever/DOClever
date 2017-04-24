@@ -19,5 +19,6 @@
   "duplicateUser":17,
   "duplicateName":18,
   "interfaceChanged":19,
-  "questionIsEmpty":20
+  "questionIsEmpty":20,
+  "statusNotFound":21
 }

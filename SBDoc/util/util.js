@@ -333,7 +333,7 @@ function next() {
     }
 })();
 
-function convertToJSON(data,obj) {
+function convertToJSON(data,obj,info) {
     var mock=function (data) {
         if(!data.mock || data.mock.trim()[0]!="@")
         {
@@ -427,7 +427,7 @@ function convertToJSON(data,obj) {
                 {
                     return parseFloat(temp);
                 }
-                else (data.type==2)
+                else if(data.type==2)
                 {
                     return Boolean(temp);
                 }
@@ -499,6 +499,44 @@ function convertToJSON(data,obj) {
             else if(str.startsWith("null"))
             {
                 return null;
+            }
+            else if(str.startsWith("code"))
+            {
+                var val=str.substring(5,str.length-1).trim();
+                if(info)
+                {
+                    try
+                    {
+                        var ret=(function (param,query,header,body,global) {
+                            return eval("("+val+")");
+                        })(info.param,info.query,info.header,info.body,info.global)
+                        if(data.type==0)
+                        {
+                            return String(ret);
+                        }
+                        else if(data.type==1)
+                        {
+                            return parseFloat(ret);
+                        }
+                        else if(data.type==2)
+                        {
+                            return Boolean(ret);
+                        }
+                        else if(data.type==5)
+                        {
+                            return ret;
+                        }
+                    }
+                    catch (err)
+                    {
+                        console.log("execute err:"+err);
+                        return null;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
         return data.mock?data.mock.trim():null;
@@ -599,7 +637,7 @@ function convertToJSON(data,obj) {
     }
 }
 
-function mock(data) {
+function mock(data,info) {
     if(!data || data.trim()[0]!="@")
     {
         if(data)
@@ -671,6 +709,28 @@ function mock(data) {
         {
             return "null";
         }
+        else if(/^code/i.test(str))
+        {
+            var val=str.substring(5,str.length-1).trim();
+            if(info)
+            {
+                try
+                {
+                    return (function (param,query,header,body,global) {
+                        return eval("("+val+")");
+                    })(info.param,info.query,info.header,info.body,info.global)
+                }
+                catch (err)
+                {
+                    console.log("execute err:"+err);
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
     return data?data.trim():null;
 }
@@ -700,6 +760,24 @@ function createDir(dirpath) {
     return true;
 }
 
+function handleMockInfo(param,query,body,header,objInterface,url) {
+    var info={
+        param:param,
+        query:query,
+        header:header,
+        body:body,
+        global:{}
+    };
+    info.global={
+        name:objInterface.name,
+        baseurl:url.substring(0,url.indexOf(objInterface.url)),
+        path:objInterface.url,
+        method:objInterface.method
+    }
+    return info;
+}
+
+
 exports.err=err;
 exports.ok=ok;
 exports.dateDiff=dateDiff;
@@ -720,3 +798,4 @@ exports.next=next;
 exports.convertToJSON=convertToJSON;
 exports.mock=mock;
 exports.createDir=createDir;
+exports.handleMockInfo=handleMockInfo

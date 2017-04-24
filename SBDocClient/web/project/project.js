@@ -51,6 +51,9 @@ var vue=new Vue({
                     _this.dis=""
                 }
             })
+        },
+        importProject:function () {
+            $.showBox(this,"importProject");
         }
     },
     created:function () {

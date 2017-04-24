@@ -130,15 +130,16 @@ function handle(req,res) {
             }
         }
         res.setHeader("__finish",req.obj.finish);
+        let info=util.handleMockInfo(req.param,req.query,req.body,req.headers,req.obj,req.protocol+"://"+req.headers.host+req.originalUrl);
         if(!req.obj.outInfo || req.obj.outInfo.type==0)
         {
-            let result={};
-            util.convertToJSON(req.obj.outParam,result);
+            let result=req.obj.outInfo.jsonType==1?[]:{};
+            util.convertToJSON(req.obj.outParam,result,info);
             res.json(result);
         }
         else
         {
-            res.json(util.mock(req.obj.outInfo.rawMock));
+            res.json(util.mock(req.obj.outInfo.rawMock,info));
         }
     }
     catch (err)

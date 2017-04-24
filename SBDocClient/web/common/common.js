@@ -101,6 +101,10 @@ $.once=function (ele,ev,fn) {
 }
 
 $.startLoading=function () {
+    if(document.getElementById("SBDocStartLoading"))
+    {
+        return;
+    }
     var ele=document.createElement("div");
     ele.id="SBDocStartLoading"
     document.body.appendChild(ele);
@@ -120,7 +124,11 @@ $.stopLoading=function () {
     {
         $.addClass(ele,"animated fadeOut");
         $.once(ele,"webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend",function () {
-            ele.parentNode.removeChild(ele);
+            var ele=document.getElementById("SBDocStartLoading");
+            if(ele)
+            {
+                ele.parentNode.removeChild(ele);
+            }
         })
     }
 }
@@ -222,7 +230,7 @@ $.input=function (title,func) {
     });
 }
 
-$.inputMul=function (vue,placeholder,func) {
+$.inputMul=function (vue,placeholder,func,hudRemove) {
     var ele=document.createElement("div");
     vue.$el.appendChild(ele);
     var self = vue;
@@ -230,7 +238,10 @@ $.inputMul=function (vue,placeholder,func) {
     var child = new Child({
         el: ele,
         parent: self,
-        propsData:placeholder?{placeholder:placeholder}:null
+        propsData:{
+            placeholder:placeholder,
+            hudremove:hudRemove
+        }
     });
     child.$refs.box.open();
     child.$refs.box.$on("close",function () {
@@ -307,6 +318,7 @@ $.showBox=function (vue,type,attr) {
     child.$refs.box.open();
     child.$refs.box.$on("close",function () {
         child.$el.parentNode.removeChild(child.$el);
+        child.$destroy();
     })
     return child;
 }
@@ -330,6 +342,35 @@ $.inArr=function (str,arr) {
     }
     return false;
 }
+
+$.parseURL=function(url) {
+    var a = document.createElement('a');
+    a.href = url;
+    return {
+        source: url,
+        protocol: a.protocol.replace(':',''),
+        host: a.hostname,
+        port: a.port,
+        query: a.search,
+        params: (function(){
+            var ret = {},
+                seg = a.search.replace(/^\?/,'').split('&'),
+                len = seg.length, i = 0, s;
+            for (;i<len;i++) {
+                if (!seg[i]) { continue; }
+                s = seg[i].split('=');
+                ret[s[0]] = s[1];
+            }
+            return ret;
+        })(),
+        file: (a.pathname.match(/\/([^\/?#]+)$/i) || [,''])[1],
+        hash: a.hash.replace('#',''),
+        path: a.pathname.replace(/^([^\/])/,'/$1'),
+        relative: (a.href.match(/tps?:\/\/[^\/]+(.+)/) || [,''])[1],
+        segments: a.pathname.replace(/^\//,'').split('/')
+    };
+}
+
 
 module.exports=$;
 
