@@ -281,6 +281,31 @@ var interface=[
         user:1,
         handle:[project.inProject,project.urlList]
     },
+    {
+        "method":"GET",
+        "path":"/project/importmember",
+        "param": {
+            id:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.inProject,project.getImportMember]
+    },
+    {
+        "method":"POST",
+        "path":"/project/importmember",
+        "param": {
+            id:String,
+            data:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.inProject,project.importMember]
+    },
 ];
 
 module.exports=interface;

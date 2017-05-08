@@ -15,6 +15,7 @@
     @arr   针对Mixed类型，生成一个数组，比如@arr([123,45])<br>
     @obj   针对Mixed类型，生成一个对象,比如@obj({"name":"aa"})<br>
     @count(min,max)   针对Array类型，确定生成数组的大小,比如@count(1,10)<br>
+    @code 针对String，Number，Boolean，Mixed类型，会执行自定义的代码并返回结果,比如@code(body["aa"])这个就会返回body参数里key为aa的值，有以下几个内置对象：param,query,header,body,global（global里面还有以下几个成员：name,baseurl,path,method)<br>
     如果不是以@字符开头的话 就直接生成你输入的那个值,当类型不匹配的时候会尝试去做类型转换<br>
 </div>
 </body>

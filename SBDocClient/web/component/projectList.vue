@@ -10,7 +10,6 @@
                                 <el-row class="row" style="height: 30px;line-height:30px;font-size: 15px;color: gray;position: absolute;left: 0;bottom: 0;text-align: left;background-color: rgba(215,215,215,0.51)">
                                     &nbsp;{{"成员:"+arr[(n-1)*4+(index-1)].userCount}}&nbsp;
                                         {{"接口:"+arr[(n-1)*4+(index-1)].interfaceCount}}
-                                    <el-button  type="text" icon="setting" style="position:absolute;width: 30px;height: 30px;right: 2px;top:0px;color: gray;font-size: 17px" title="设置" @click.stop="setting(arr[(n-1)*4+(index-1)])" v-if="arr[(n-1)*4+(index-1)].role==0"></el-button>
                                 </el-row>
                             </div>
                         </td>

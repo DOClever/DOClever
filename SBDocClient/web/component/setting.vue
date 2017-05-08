@@ -2,9 +2,9 @@
     <el-row class="row">
         <el-col class="col" :span="6" style="padding: 0 10px 0 10px">
             <el-row class="row" style="background-color: white;text-align: center;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
-                <el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=0">
+                <el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=0" v-if="session.role==0">
                     修改项目信息
-                </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=1">
+                </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=1" v-if="session.role==0">
                 修改项目组员
             </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=2">
                 导出
@@ -57,7 +57,7 @@
                         <el-col class="col" :span="4" style="line-height: 50px;font-size: 15px;text-align: center;white-space: nowrap">
                             邀请用户
                         </el-col>
-                        <el-col class="col" :span="12" style="text-align: center">
+                        <el-col class="col" :span="10" style="text-align: center">
                             <el-input placeholder="输入邀请的用户名" style="margin-top: 8px;width: 80%" v-model="name"></el-input>
                         </el-col>
                         <el-col class="col" :span="4" style="text-align: center">
@@ -66,9 +66,14 @@
                                 <el-option :value="0" label="管理员"></el-option>
                             </el-select>
                         </el-col>
-                        <el-col class="col" :span="4" style="line-height: 50px;text-align: center">
+                        <el-col class="col" :span="3" style="line-height: 50px;text-align: center">
                             <el-button type="primary" style="font-size: 15px" @click="invite" :loading="invitePending">
                                 邀请
+                            </el-button>
+                        </el-col>
+                        <el-col class="col" :span="3" style="line-height: 50px;text-align: center">
+                            <el-button type="primary" style="font-size: 15px" @click="importMember">
+                                导入
                             </el-button>
                         </el-col>
                     </el-row>
@@ -109,7 +114,7 @@
     module.exports={
         data:function () {
             return {
-                type:0,
+                type:session.get("role")==0?0:2,
                 session:$.clone(session.raw()),
                 project:{},
                 name:"",
@@ -230,6 +235,40 @@
                 link.href="/project/exportjson?id="+session.get("projectId");
                 link.download=session.get("projectName")+".json";
                 link.click();
+            },
+            importMember:function () {
+                var _this=this;
+                $.startHud();
+                net.get("/project/importmember",{
+                    id:session.get("projectId")
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        if(data.data.length==0)
+                        {
+                            $.notify("没有需要导入的用户",0);
+                            return;
+                        }
+                        var arr=data.data.map(function (obj) {
+                            return {
+                                select:0,
+                                role:0,
+                                user:obj
+                            }
+                        })
+                        var child=$.showBox(_this,"importMember",{
+                            source:arr
+                        });
+                        child.$on("save",function (arr) {
+                            _this.project.users=_this.project.users.concat(arr);
+                        })
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
             }
         },
         created:function () {

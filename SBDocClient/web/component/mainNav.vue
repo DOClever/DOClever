@@ -103,6 +103,10 @@
                                     bNew=true;
                                     break;
                                 }
+                                else if(verArr[i]<verLocalArr[i])
+                                {
+                                    break;
+                                }
                             }
                             if(bNew)
                             {

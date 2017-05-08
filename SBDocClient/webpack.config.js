@@ -71,8 +71,8 @@ module.exports = {
     devtool: 'source-map',
     resolve: {
         alias: {
-            "vue": path.join(__dirname, 'node_modules/vue/dist/vue'),
-            "vuex": path.join(__dirname, 'node_modules/vuex/dist/vuex')
+            "vue": path.join(__dirname, 'node_modules/vue/dist/vue.min'),
+            "vuex": path.join(__dirname, 'node_modules/vuex/dist/vuex.min')
         }
     }
 }

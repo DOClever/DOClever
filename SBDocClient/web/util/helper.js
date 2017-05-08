@@ -1548,6 +1548,11 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
     var name=obj.name
     var method=obj.method;
     var baseUrl=obj.baseUrl=="defaultUrl"?baseUrl:obj.baseUrl;
+    if(!baseUrl)
+    {
+        root.output+="baseUrl为空，请设置baseUrl<br>"
+        return {};
+    }
     var path=obj.url;
     var indexHttp=baseUrl.indexOf("://"),indexSlash;
     if(indexHttp==-1)

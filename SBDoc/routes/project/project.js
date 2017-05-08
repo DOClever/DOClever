@@ -754,6 +754,121 @@ function urlList(req,res) {
     }
 }
 
+function getImportMember(req,res) {
+    try
+    {
+        let arrProject=await (project.findAsync({
+            $or:[
+                {
+                    "users.user":req.userInfo._id
+                },
+                {
+                    owner:req.userInfo._id
+                }
+                ]
+        },null,{
+            populate:{
+                path:"users.user",
+                select:"name photo"
+            }
+        }));
+        arrProject=await (project.populateAsync(arrProject,{
+            path:"owner",
+            select:"name photo"
+        }))
+        var arrExcept=[req.obj.owner];
+        arrExcept=arrExcept.concat(req.obj.users.map(function (obj) {
+            return obj.user;
+        }));
+        var arrRet=[];
+        for(let objProject of arrProject)
+        {
+            let arr=[objProject.owner].concat(objProject.users.map(function (obj) {
+                return obj.user
+            }));
+            for(let obj of arr)
+            {
+                let bFind=false;
+                for(let obj1 of arrExcept)
+                {
+                    if(obj1.toString()==obj._id.toString())
+                    {
+                        bFind=true;
+                        break;
+                    }
+                }
+                if(bFind)
+                {
+                    continue;
+                }
+                for(let obj1 of arrRet)
+                {
+                    if(obj1._id.toString()==obj._id.toString())
+                    {
+                        bFind=true;
+                        break;
+                    }
+                }
+                if(bFind)
+                {
+                    continue;
+                }
+                let objUser=await (user.findOneAsync({
+                    _id:obj._id
+                },"_id"))
+                if(!objUser)
+                {
+                    continue;
+                }
+                arrRet.push(obj);
+            }
+        }
+        util.ok(res,arrRet,"ok");
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
+function importMember(req,res) {
+    try
+    {
+        let arr=JSON.parse(req.clientParam.data);
+        let arrImport=[];
+        for(let obj of arr)
+        {
+            let bFind=false;
+            for(let obj1 of req.obj.users)
+            {
+                if(obj.user==obj1.user.toString())
+                {
+                    bFind=true;
+                    break;
+                }
+            }
+            if(!bFind)
+            {
+                arrImport.push(obj);
+            }
+        }
+        await (project.updateAsync({
+            _id:req.obj._id
+        },{
+            $addToSet:{
+                users:{
+                    $each:arrImport
+                }
+            }
+        }));
+        util.ok(res,"ok");
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
 exports.validateUser=async (validateUser);
 exports.inProject=async (inProject);
 exports.create=async (create);
@@ -773,7 +888,8 @@ exports.exportJSON=async (exportJSON);
 exports.importJSON=async (importJSON);
 exports.setInject=async (setInject);
 exports.urlList=async (urlList);
-
+exports.getImportMember=async (getImportMember);
+exports.importMember=async (importMember);
 
 
 

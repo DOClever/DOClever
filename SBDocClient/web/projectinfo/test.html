@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="../common/common.css" rel="stylesheet">
+    <title>用例编写</title>
+</head>
+<body>
+<div class="container">
+    <p>
+        SBDoc允许你用javascript代码来编写你的测试用例,举例<br>
+        <pre>
+    var a=<a style="color: blue">获取图片信息</a>;
+    var  res=await a({
+        query:{
+            a:123
+        }
+    });
+    global["sx"]="ddd";
+    var gg=<a style="color: orange">登录</a>;
+    await gg();
+    var b=info;
+    res=await b({
+        query:{
+            sx:"ddd"
+        }
+    });
+    log(res.status);
+    return true;
+        </pre>
+        上述代码为一个简单的用例，注意每个语句都需要用分号来结尾,蓝色的内容代表你插入的接口，橘黄色的内容代表你插入的用例，执行一个接口或者用例需要用await来等待数据返回，并且我们还可以在执行接口的时候动态的传入接口参数数据:<br>
+    param:restful中的param对象<br>
+    query:query参数对象<br>
+    header:header参数对象<br>
+    body:body参数，这里可以是一个对象或者字符串，字符串代表接口会把这个字符串当做整个body发送出去，如果是对象的话，有两种方式，1.key-value类型，2.json类型。当类型为json的时候，支持层级之间用"."来进行分隔，比如
+    <pre>
+        body:{
+            "a.b.c":"aaa"
+        }
+    </pre>
+    这个就代表body["a"]["b"]["c"]的数据为aaa，如果路径不存在，会自动添加<br>
+    返回值：这里return true代码当前的用例执行成功，如果是false代表失败，如果直接return或者没有return代表当前的用例结果未判定。
+    </p>
+    <p>
+        内置变量：<br>
+        global:全局对象，可用于在不同的用例之间传输数据<br>
+        log:输出函数，只有一个参数，为需要输出的数据<br>
+        Base64,MD5,SHA1,SHA256,SHA512,SHA3,RIPEMD160:这些加密函数只有一个参数，为加密的字符串<br>
+        AES,TripleDES,DES,Rabbit,RC4,RC4Drop:这些加密函数有两个参数，第一个参数是加密的字符串，第二个参数是salt<br>
+    </p>
+</div>
+</body>
+</html>
