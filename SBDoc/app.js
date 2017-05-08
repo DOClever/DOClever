@@ -38,6 +38,7 @@ app.use("/project",checkFormDataUser(con.imgPath),checkParam("project"),checkUse
 app.use("/group",checkFormDataUser(con.imgPath),checkParam("group"),checkUser);
 app.use("/interface",checkFormDataUser(con.imgPath),checkParam("interface"),checkUser);
 app.use("/status",checkFormDataUser(con.imgPath),checkParam("status"),checkUser);
+app.use("/test",checkFormDataUser(con.imgPath),checkParam("test"),checkUser);
 app.use("/mock",checkFormDataUser(con.tempPath),mock);
 app.use("/html",express.static(path.join(__dirname, '../SBDocClient')));
 app.use("/img",express.static(con.imgPath));

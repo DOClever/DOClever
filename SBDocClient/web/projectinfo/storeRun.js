@@ -593,7 +593,10 @@ module.exports=new Vuex.Store({
         },
         setGlobalAfter:function (state,val) {
             state.globalAfter=val;
-        }
+        },
+        setEncryptType:function (state,val) {
+            state.encryptType=val;
+        },
     },
     actions:{
         run:function (context) {

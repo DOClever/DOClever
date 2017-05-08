@@ -21,6 +21,7 @@
     "multiparty": "^4.1.2",
     "node-schedule": "^1.2.0",
     "request": "^2.79.0",
-    "serve-favicon": "~2.3.0"
+    "serve-favicon": "~2.3.0",
+    "uuid": "^3.0.1"
   }
 }

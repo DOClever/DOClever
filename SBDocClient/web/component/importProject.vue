@@ -8,6 +8,9 @@
             <el-input type="textarea" :rows="10" placeholder="请输入JSON" v-model="text" style="margin-bottom: 10px">
             </el-input>
             请编辑BaseUrl：
+            <el-checkbox v-model="ignore" :true-label="1" :false-label="0" style="float: right;margin-right: 20px">
+                忽略大小写
+            </el-checkbox>
             <template v-for="(item,index) in arr">
                 <el-row class="row" style="height: 50px;line-height: 50px;text-align: center">
                     <el-col class="col" :span="20">
@@ -46,7 +49,8 @@
                     title:""
                 }],
                 savePending:false,
-                status:""
+                status:"",
+                ignore:0
             }
         },
         computed:{
@@ -90,16 +94,42 @@
                             throw data.msg;
                         }
                     });
-                    var count=0,indexInterface=0;
+                    var count=0,indexInterface=0,bDefaultGroup=false,bDefaultGroupId;
                     obj.item.forEach(function (o) {
-                        count+=o.item.length;
+                        if(o.item)
+                        {
+                            count+=o.item.length;
+                        }
+                        else
+                        {
+                            count++;
+                        }
                     })
                     obj.item.forEach(function (group) {
                         pro=pro.then(function () {
-                            _this.status="正在创建分组"+group.name;
+                            var groupName,bDefault=false;
+                            if(group.item)
+                            {
+                                groupName=group.name;
+                            }
+                            else
+                            {
+                                bDefault=true;
+                                if(!bDefaultGroup)
+                                {
+                                    groupName="未命名";
+                                    bDefaultGroup=true;
+                                }
+                                else
+                                {
+                                    groupID=bDefaultGroupId;
+                                    return;
+                                }
+                            }
+                            _this.status="正在创建分组"+groupName;
                             var query={};
                             query.id=projectID;
-                            query.name=group.name;
+                            query.name=groupName;
                             query.import=1;
                             return net.post("/group/create",query).then(function (data) {
                                 if(data.code!=200)
@@ -109,9 +139,17 @@
                                 else
                                 {
                                     groupID=data.data._id;
+                                    if(bDefault)
+                                    {
+                                        bDefaultGroupId=groupID;
+                                    }
                                 }
                             })
                         })
+                        if(!group.item)
+                        {
+                            group.item=[group];
+                        }
                         group.item.forEach(function (item) {
                             pro=pro.then(function () {
                                 indexInterface++;
@@ -125,7 +163,14 @@
                                 }
                                 for(var i=0;i<arr.length;i++)
                                 {
-                                    index=url.indexOf(arr[i]);
+                                    if(_this.ignore)
+                                    {
+                                        index=url.toLowerCase().indexOf(arr[i].toLowerCase());
+                                    }
+                                    else
+                                    {
+                                        index=url.indexOf(arr[i]);
+                                    }
                                     if(index>-1)
                                     {
                                         url=url.substr(index+arr[i].length);
@@ -160,7 +205,7 @@
                                 obj.queryparam=JSON.stringify(param);
                                 var bJSON=false;
                                 obj.header=JSON.stringify(item.request.header.map(function (obj) {
-                                    if(obj.key.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application")
+                                    if(obj.key.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application/json")
                                     {
                                         bJSON=true;
                                     }
@@ -216,7 +261,7 @@
                                                 var result=[];
                                                 for(var key in objJSON)
                                                 {
-                                                    helper.handleResultData(key,obj[key],result,null,1)
+                                                    helper.handleResultData(key,objJSON[key],result,null,1)
                                                 }
                                                 bodyInfo={
                                                     type:1,
@@ -278,6 +323,10 @@
                                 });
                             })
                         })
+                        if(group.item && group.item[0]==group)
+                        {
+                            group.item=null;
+                        }
                     })
                     pro=pro.then(function () {
                         return net.put("/project/url",{

@@ -34,7 +34,7 @@
                         <div  style="height: 100%;width: 90%;display: inline-block;" v-if="item.type==0 && item.value && (item.value.data.length>0 || item.value.status)">
                             <el-autocomplete class="inline-input" v-model="item.selValue" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" icon="caret-bottom" :on-icon-click="showAutoComplete" @mouseenter.native="focus(item)" :disabled="!item.enable" custom style="width:100%" popper-class="my-autocomplete" custom-item="itemauto"></el-autocomplete>
                         </div>
-                        <el-input style="width: 90%;" placeholder="请填写值" v-model="item.selValue" v-else-if="item.type==0 && !item.value" custom></el-input>
+                        <el-input style="width: 90%;" placeholder="请填写值" v-model="item.selValue" v-else-if="item.type==0" custom></el-input>
                         <a  href="javascript:void(0)" class="file" style="display: inline-block;top: 10px" v-else>
                             <span>选择文件</span><input type="file" onchange="this.previousSibling.innerText=this.files[0].name" custom>
                         </a>
@@ -48,7 +48,7 @@
                         {{item.remark?item.remark:"无备注"}}
                     </td>
                     <td style="width: 10%;height: 50px;">
-                        <el-button type="text" size="small"  style="font-size: 15px" @click="encrypt(item)">{{(item.encrypt && item.encrypt.type)?item.encrypt.type:"未加密"}}</el-button>
+                        <el-button type="text" size="small"  style="font-size: 15px" @click="encrypt(item)" v-if="item.type==0">{{(item.encrypt && item.encrypt.type)?item.encrypt.type:"未加密"}}</el-button>
                     </td>
                     <td style="width: 5%">
                         <el-button type="text" size="small" style="font-size: 15px;" @click="toggleEnable(item,index)"><span :class="item.enable?'fa fa-eye-slash':'fa fa-eye'" :title="item.enable?'发送时不包含此字段':'发送时包含此字段'"></span></el-button>
@@ -111,7 +111,6 @@
     module.exports={
         data:function () {
             return {
-                encryptType:"",
                 salt:"",
                 itemSel:null,
             }
@@ -152,6 +151,14 @@
             },
             info:function () {
                 return this.$store.state.bodyInfo
+            },
+            encryptType:{
+                get:function () {
+                    return this.$store.state.encryptType;
+                },
+                set:function (val) {
+                    this.$store.commit("setEncryptType",val)
+                }
             },
             rawType:{
                 get:function () {

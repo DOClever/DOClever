@@ -14,7 +14,7 @@ var model=new mongoose.Schema({
         type:Array,
         default:[]
     },
-    id:Number
+    id:String
 },{
     timestamps:true
 });

@@ -5,14 +5,13 @@ var async=require("asyncawait/async")
 var await=require("asyncawait/await")
 var e=require("../../util/error.json");
 var util=require("../../util/util");
-var con=require("../../../config.json");
 var user=require("../../model/userModel")
 var project=require("../../model/projectModel")
 var group=require("../../model/groupModel")
 var interface=require("../../model/interfaceModel")
 var status=require("../../model/statusModel")
 var fs=require("fs");
-
+var uuid=require("uuid/v1");
 function save(req,res) {
     try
     {
@@ -40,7 +39,7 @@ function save(req,res) {
         }
         else
         {
-            obj.id=Date.now();
+            obj.id=uuid();
             ret=await (status.createAsync(obj));
         }
         util.ok(res,ret,"ok");

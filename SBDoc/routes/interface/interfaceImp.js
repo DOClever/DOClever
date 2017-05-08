@@ -135,7 +135,8 @@ var interface=[
                 type:String
             },
             group:{
-                type:String
+                type:String,
+                optional:1
             },
             run:{
                 optional:1,

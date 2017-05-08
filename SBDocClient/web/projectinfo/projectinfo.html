@@ -39,6 +39,7 @@
         </div>
         <el-col class="col" :span="24" style="height: calc(100vh - 80px);overflow-x: hidden;overflow-y: auto">
             <interface v-show="type==0"></interface>
+            <test v-show="type==1"></test>
             <global v-show="type==2"></global>
             <setting v-show="type==3"></setting>
         </el-col>

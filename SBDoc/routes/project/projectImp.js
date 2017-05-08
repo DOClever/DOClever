@@ -269,6 +269,18 @@ var interface=[
         user:1,
         handle:[project.validateUser,project.setInject]
     },
+    {
+        "method":"GET",
+        "path":"/project/urllist",
+        "param": {
+            id:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.inProject,project.urlList]
+    },
 ];
 
 module.exports=interface;

@@ -33,7 +33,7 @@ var model=new mongoose.Schema({
     after:{
         type:String,
         default:""
-    }
+    },
 },{
     timestamps:true
 });

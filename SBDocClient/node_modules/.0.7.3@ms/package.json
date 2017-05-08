@@ -1,0 +1,38 @@
+{
+  "name": "ms",
+  "version": "0.7.3",
+  "description": "Tiny milisecond conversion utility",
+  "repository": "zeit/ms",
+  "main": "./index",
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "test": "xo && mocha test/index.js",
+    "test-browser": "serve ./test"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "expect.js": "0.3.1",
+    "mocha": "3.0.2",
+    "serve": "5.0.1",
+    "xo": "0.17.0"
+  },
+  "component": {
+    "scripts": {
+      "ms/index.js": "index.js"
+    }
+  },
+  "xo": {
+    "space": true,
+    "semicolon": false,
+    "envs": [
+      "mocha"
+    ],
+    "rules": {
+      "complexity": 0
+    }
+  },
+  "_from": "ms@0.7.3",
+  "_resolved": "http://registry.npm.taobao.org/ms/download/ms-0.7.3.tgz"
+}

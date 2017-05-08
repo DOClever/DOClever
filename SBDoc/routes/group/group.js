@@ -11,6 +11,7 @@ var project=require("../../model/projectModel")
 var group=require("../../model/groupModel")
 var interface=require("../../model/interfaceModel")
 var fs=require("fs");
+var uuid=require("uuid/v1");
 let refreshInterface=async (function (id) {
     let query={
         project:id
@@ -98,7 +99,8 @@ function create(req,res) {
         {
             let result=await (group.createAsync({
                 name:req.clientParam.name,
-                project:req.clientParam.id
+                project:req.clientParam.id,
+                id:uuid()
             }));
             if(req.clientParam.import==1)
             {

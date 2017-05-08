@@ -227,6 +227,8 @@ $.input=function (title,func) {
         {
             func(value);
         }
+    }).catch(function () {
+
     });
 }
 

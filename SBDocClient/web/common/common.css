@@ -97,6 +97,19 @@ td {
     color: #ddd;
 }
 
+.el-tree-node__content>.el-checkbox {
+    vertical-align:inherit;
+}
+
+div.el-tree-node__content {
+    overflow: hidden;
+}
+
+span.el-cascader__label
+{
+    top:10px
+}
+
 * {
     font-family: "Microsoft YaHei";
 }

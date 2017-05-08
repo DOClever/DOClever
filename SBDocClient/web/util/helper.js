@@ -1199,13 +1199,809 @@ helper.handleMockInfo=function (type,param,query,header,body,state) {
     {
         info.body=body;
     }
-    info.global={
-        name:type==0?state.interfaceEdit.name:state.interface.name,
-        baseurl:type==0?"":state.baseurl,
-        path:type==0?state.interfaceEdit.url:state.interface.url,
-        method:type==0?state.interfaceEdit.method:state.interface.method
+    if(state.interfaceEdit || state.interface)
+    {
+        info.global={
+            name:type==0?state.interfaceEdit.name:state.interface.name,
+            baseurl:type==0?"":state.baseurl,
+            path:type==0?state.interfaceEdit.url:state.interface.url,
+            method:type==0?state.interfaceEdit.method:state.interface.method
+        }
+    }
+    else
+    {
+        info.global={};
     }
     return info;
+}
+
+helper.getSelection=function () {
+    var node=document.getElementById("testContent");
+    var oRange = window.getSelection().rangeCount>0?window.getSelection().getRangeAt(0):null;
+    if(!oRange)
+    {
+        return null;
+    }
+    var ele=oRange.startContainer,bMatch=false;
+    while(ele && ele.tagName!="body")
+    {
+        if(ele==node)
+        {
+            bMatch=true;
+            break;
+        }
+        else
+        {
+            ele=ele.parentNode;
+        }
+    }
+    if(!bMatch)
+    {
+        return null;
+    }
+    ele=oRange.endContainer,bMatch=false;
+    while(ele && ele.tagName!="body")
+    {
+        if(ele==node)
+        {
+            bMatch=true;
+            break;
+        }
+        else
+        {
+            ele=ele.parentNode;
+        }
+    }
+    if(!bMatch)
+    {
+        return null;
+    }
+    return oRange;
+}
+
+helper.handleTestInterface=function (inter,data,status) {
+    inter.url=data.url;
+    inter.method=data.method;
+    inter.finish=data.finish;
+    inter.remark=data.remark;
+    inter.before=data.before;
+    inter.after=data.after;
+    inter.updatedAt=data.updatedAt;
+    data.restParam.forEach(function (item) {
+        var obj;
+        inter.restParam.forEach(function (item1) {
+            if(item.name==item1.name)
+            {
+                obj=item1;
+            }
+        })
+        if(obj)
+        {
+            for(var key in obj)
+            {
+                item[key]=obj[key];
+            }
+        }
+        else
+        {
+            Vue.set(item,"selValue","");
+            if(item.value && item.value.type==0 && item.value.data.length>0)
+            {
+                item.selValue=item.value.data[0].value;
+            }
+            else if(item.value && item.value.type==1 && item.value.status)
+            {
+                var objStatus=null;
+                status.forEach(function (obj) {
+                    if(obj.id==item.value.status)
+                    {
+                        objStatus=obj;
+                    }
+                })
+                if(objStatus && objStatus.data.length>0)
+                {
+                    item.selValue=objStatus.data[0].key;
+                }
+                else
+                {
+                    item.selValue="";
+                }
+            }
+            else
+            {
+                item.selValue="";
+            }
+        }
+    });
+    inter.restParam=data.restParam;
+    data.queryParam.forEach(function (item) {
+        var obj;
+        inter.queryParam.forEach(function (item1) {
+            if(item.name==item1.name)
+            {
+                obj=item1;
+            }
+        })
+        if(obj)
+        {
+            for(var key in obj)
+            {
+                item[key]=obj[key];
+            }
+        }
+        else
+        {
+            Vue.set(item,"enable",1);
+            Vue.set(item,"selValue","");
+            if(item.value && item.value.type==0 && item.value.data.length>0)
+            {
+                item.selValue=item.value.data[0].value;
+            }
+            else if(item.value && item.value.type==1 && item.value.status)
+            {
+                var objStatus=null;
+                status.forEach(function (obj) {
+                    if(obj.id==item.value.status)
+                    {
+                        objStatus=obj;
+                    }
+                })
+                if(objStatus && objStatus.data.length>0)
+                {
+                    item.selValue=objStatus.data[0].key;
+                }
+                else
+                {
+                    item.selValue="";
+                }
+            }
+            else
+            {
+                item.selValue="";
+            }
+        }
+    });
+    inter.queryParam=data.queryParam
+    data.header.forEach(function (item) {
+        var obj;
+        inter.header.forEach(function (item1) {
+            if(item.name==item1.name)
+            {
+                obj=item1;
+            }
+        })
+        if(obj)
+        {
+            for(var key in obj)
+            {
+                item[key]=obj[key];
+            }
+        }
+        else
+        {
+            Vue.set(item,"enable",1);
+        }
+    });
+    inter.header=data.header;
+    data.bodyParam.forEach(function (item) {
+        var obj;
+        inter.bodyParam.forEach(function (item1) {
+            if(item.name==item1.name)
+            {
+                obj=item1;
+            }
+        })
+        if(obj)
+        {
+            for(var key in obj)
+            {
+                item[key]=obj[key];
+            }
+        }
+        else
+        {
+            Vue.set(item,"enable",1);
+            Vue.set(item,"selValue","");
+            if(item.value && item.value.type==0 && item.value.data.length>0)
+            {
+                item.selValue=item.value.data[0].value;
+            }
+            else if(item.value && item.value.type==1 && item.value.status)
+            {
+                var objStatus=null;
+                status.forEach(function (obj) {
+                    if(obj.id==item.value.status)
+                    {
+                        objStatus=obj;
+                    }
+                })
+                if(objStatus && objStatus.data.length>0)
+                {
+                    item.selValue=objStatus.data[0].key;
+                }
+                else
+                {
+                    item.selValue="";
+                }
+            }
+            else
+            {
+                item.selValue="";
+            }
+        }
+    });
+    inter.bodyParam=data.bodyParam;
+    if(data.method=="GET" || data.method=="DELETE")
+    {
+        delete inter.bodyInfo;
+    }
+    else
+    {
+        if(!inter.bodyInfo)
+        {
+            inter.bodyInfo={};
+        }
+        if(data.bodyInfo.rawText===undefined)
+        {
+            Vue.set(data.bodyInfo,"rawText","");
+        }
+        if(data.bodyInfo.rawTextRemark===undefined)
+        {
+            Vue.set(data.bodyInfo,"rawTextRemark","");
+        }
+        if(data.bodyInfo.rawFileRemark===undefined)
+        {
+            Vue.set(data.bodyInfo,"rawFileRemark","");
+        }
+        if(data.bodyInfo.rawJSON==undefined)
+        {
+            Vue.set(data.bodyInfo,"rawJSON",[]);
+        }
+        var bFind=false;
+        for(var i=0;i<data.header.length;i++)
+        {
+            var obj1=data.header[i];
+            if(obj1.name.toLowerCase()=="content-type" && obj1.value.toLowerCase()=="application/json")
+            {
+                bFind=true;
+                break;
+            }
+        }
+        if(bFind && data.bodyInfo.rawText)
+        {
+            var obj;
+            try
+            {
+                obj=JSON.parse(data.bodyInfo.rawText);
+            }
+            catch (e)
+            {
+
+            }
+            if(obj)
+            {
+                var result=[];
+                for(var key in obj)
+                {
+                    helper.handleResultData(key,obj[key],result,null,1)
+                }
+                data.bodyInfo.rawJSON=result;
+                data.rawText="";
+                data.rawType=2;
+            }
+        }
+        for(var key in data.bodyInfo)
+        {
+            if(key!="rawJSON")
+            {
+                inter.bodyInfo[key]=data.bodyInfo[key];
+            }
+        }
+        if(data.bodyInfo.type==1 && data.bodyInfo.rawType==2)
+        {
+            if(inter.bodyInfo.rawJSON)
+            {
+                mapJSON(inter.bodyInfo.rawJSON,data.bodyInfo.rawJSON)
+                inter.bodyInfo.rawJSON=data.bodyInfo.rawJSON;
+            }
+            else
+            {
+                inter.bodyInfo.rawJSON=data.bodyInfo.rawJSON
+            }
+        }
+    }
+    function mapJSON(originData,data) {
+        for (var i = 0; i < data.length; i++) {
+            _mapJSON(originData, data[i]);
+        }
+    }
+    function _mapJSON(originObj,obj) {
+        var objFind;
+        originObj.forEach(function (item) {
+            if(item.type==obj.type && item.name==obj.name)
+            {
+                objFind=item;
+            }
+        })
+        if(objFind)
+        {
+            if((obj.type==3 || obj.type==4))
+            {
+                for(var i=0;i<obj.data.length;i++)
+                {
+                    arguments.callee(objFind.data?objFind.data:[],obj.data[i])
+                }
+            }
+            else
+            {
+                for(var key in objFind)
+                {
+                    obj[key]=objFind[key];
+                }
+            }
+        }
+    }
+}
+
+helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
+    root.output+="开始运行接口："+obj.name+"<br>"
+    var name=obj.name
+    var method=obj.method;
+    var baseUrl=obj.baseUrl=="defaultUrl"?baseUrl:obj.baseUrl;
+    var path=obj.url;
+    var indexHttp=baseUrl.indexOf("://"),indexSlash;
+    if(indexHttp==-1)
+    {
+        indexSlash=baseUrl.indexOf("/")
+    }
+    else
+    {
+        indexSlash=baseUrl.indexOf("/",indexHttp+3);
+    }
+    if(indexSlash>-1)
+    {
+        var baseUrlTemp=baseUrl.substring(0,indexSlash);
+        var pathTemp=baseUrl.substr(indexSlash);
+        if(pathTemp[pathTemp.length-1]=="/" && path[0]=="/")
+        {
+            pathTemp=pathTemp.substr(0,pathTemp.length-1);
+        }
+        else if(pathTemp[pathTemp.length-1]!="/" && path[0]!="/" && pathTemp.indexOf("?")==-1 && pathTemp.indexOf("#")==-1)
+        {
+            pathTemp+="/"
+        }
+        baseUrl=baseUrlTemp;
+        path=pathTemp+path;
+    }
+    else
+    {
+        if(path[0]!="/")
+        {
+            path="/"+path;
+        }
+    }
+    var objParam=$.clone(obj.restParam);
+    if(opt && opt.param)
+    {
+        var arr=[];
+        for(var key in opt.param)
+        {
+            var val=opt.param[key];
+            var objItem;
+            objParam.forEach(function (obj) {
+                if(obj.name==key)
+                {
+                    objItem=obj;
+                }
+            })
+            if(objItem)
+            {
+                objItem.selValue=val;
+            }
+            else
+            {
+                arr.push({
+                    name:key,
+                    remark:"",
+                    selValue:val
+                })
+            }
+        }
+        objParam=objParam.concat(arr);
+    }
+    objParam.forEach(function (obj) {
+        if(obj.name)
+        {
+            path=path.replace("{"+obj.name+"}",obj.selValue)
+        }
+    })
+    var query={};
+    obj.queryParam.forEach(function (obj) {
+        if(!obj.name || !obj.enable)
+        {
+            return;
+        }
+        if(obj.encrypt && obj.encrypt.type)
+        {
+            var value=helper.encrypt(obj.encrypt.type,obj.selValue,obj.encrypt.salt);
+            var key=obj.name;
+            if(obj.encrypt.key)
+            {
+                key=helper.encrypt(obj.encrypt.type,key,obj.encrypt.salt);
+            }
+            query[key]=value;
+        }
+        else
+        {
+            query[obj.name]=obj.selValue;
+        }
+    })
+    if(opt && opt.query)
+    {
+        Object.assign(query,opt.query);
+    }
+    var header={},arrHeaders=["host","connection","origin","referer","user-agent"],objHeaders={};
+    obj.header.forEach(function (obj) {
+        if(!obj.name || !obj.enable)
+        {
+            return;
+        }
+        if(obj.encrypt && obj.encrypt.type)
+        {
+            var value=helper.encrypt(obj.encrypt.type,obj.value,obj.encrypt.salt);
+            var key=obj.name;
+            if($.inArr(key,arrHeaders))
+            {
+                objHeaders[key]=value;
+            }
+            else
+            {
+                header[key]=value;
+            }
+
+        }
+        else
+        {
+            if($.inArr(obj.name,arrHeaders))
+            {
+                objHeaders[obj.name]=obj.value;
+            }
+            else
+            {
+                header[obj.name]=obj.value;
+            }
+
+        }
+    })
+    if(opt && opt.header)
+    {
+        Object.assign(header,opt.header);
+    }
+    var body={},bUpload=false;
+    if(method=="POST" || method=="PUT")
+    {
+        if(obj.bodyInfo.type==0)
+        {
+            for(var i=0;i<obj.bodyParam.length;i++)
+            {
+                var obj1=obj.bodyParam[i];
+                if(!obj1.name || !obj1.enable)
+                {
+                    return;
+                }
+                if(obj1.type==0)
+                {
+                    if(obj1.encrypt && obj1.encrypt.type)
+                    {
+                        var value=helper.encrypt(obj1.encrypt.type,obj1.selValue,obj1.encrypt.salt);
+                        var key=obj1.name;
+                        if(obj1.encrypt.key)
+                        {
+                            key=helper.encrypt(obj1.encrypt.type,key,obj1.encrypt.salt);
+                        }
+                        body[key]=value;
+                    }
+                    else
+                    {
+                        body[obj1.name]=obj1.selValue;
+                    }
+                }
+                else if(obj1.type==1)
+                {
+                    var startDate=new Date();
+                    var file=await (new Promise(function (resolve,reject) {
+                        var child=$.showBox(window.vueObj,"testUploadFile",{
+                            name:name,
+                            url:path,
+                            keyName:obj1.name,
+                            remark:obj1.remark
+                        });
+                        child.$on("save",function (obj) {
+                            resolve(obj);
+                        })
+                    }))
+                    if(file.files.length>0)
+                    {
+                        body[obj1.name]=file.files[0];
+                        bUpload=true;
+                    }
+                    else
+                    {
+                        body[obj1.name]="";
+                    }
+                }
+            }
+            if(opt && opt.body)
+            {
+                Object.assign(body,opt.body);
+            }
+        }
+        else
+        {
+            if(obj.bodyInfo.rawType==0)
+            {
+                var encryptType=obj.encrypt.type;
+                if(encryptType)
+                {
+                    body=helper.encrypt(encryptType,obj.bodyInfo.rawText,obj.encrypt.salt)
+                }
+                else
+                {
+                    body=obj.bodyInfo.rawText;
+                }
+                if(opt && opt.body!==undefined)
+                {
+                    body=opt.body;
+                }
+            }
+            else if(obj.bodyInfo.rawType==2)
+            {
+                var obj1={};
+                var result=helper.resultSave(obj.bodyInfo.rawJSON);
+                helper.convertToJSON(result,obj1);
+                body=obj1;
+                if(opt && opt.body)
+                {
+                    for(var key in opt.body)
+                    {
+                        var val=opt.body[key];
+                        var arr=key.split(".");
+                        if(arr.length>1)
+                        {
+                            var obj1=body;
+                            for(var i=0;i<arr.length;i++)
+                            {
+                                var key1=arr[i];
+                                if(i!=arr.length-1)
+                                {
+                                    if(obj1[key1]!==undefined)
+                                    {
+                                        obj1=obj1[key1];
+                                    }
+                                    else
+                                    {
+                                        obj1=obj1[key1]={};
+                                    }
+                                }
+                                else
+                                {
+                                    obj1[key1]=val;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            body[key]=val;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var startDate=new Date();
+                var file=await (new Promise(function (resolve,reject) {
+                    var child=$.showBox(window.vueObj,"testUploadFile",{
+                        name:name,
+                        url:path,
+                        keyName:obj.name,
+                        remark:obj.remark
+                    });
+                    child.$on("save",function (obj) {
+                        if(obj.files.length==0)
+                        {
+                            resolve("");
+                            return;
+                        }
+                        var file=obj.files[0];
+                        var read=new FileReader();
+                        var loading;
+                        read.onloadstart=function () {
+                            loading=window.vueObj.$loading({fullscreen:true});
+                        }
+                        read.onload=function () {
+                            loading.close();
+                            resolve(read.result);
+                        }
+                        read.onerror=function () {
+                            loading.close();
+                            reject({
+                                code:0,
+                                msg:"文件读取错误"
+                            })
+                        }
+                        read.readAsArrayBuffer(file);
+                    })
+                }))
+                body=file;
+            }
+        }
+    }
+    if(obj.before.mode==0)
+    {
+        if(global.before)
+        {
+            helper.runBefore(global.before,baseUrl,path,method,query,header,body)
+        }
+        helper.runBefore(obj.before.code,baseUrl,path,method,query,header,body)
+    }
+    else
+    {
+        helper.runBefore(obj.before.code,baseUrl,path,method,query,header,body)
+    }
+    if((method=="POST" || method=="PUT") && obj.bodyInfo.type==1 && obj.bodyInfo.rawType==2)
+    {
+        body=JSON.stringify(body);
+    }
+    query=$.param(query);
+    if(query.length>0)
+    {
+        path=path+"?"+query;
+    }
+    header["__url"]=baseUrl;
+    header["__path"]=path;
+    header["__method"]=method;
+    header["__user"]=session.get("id");
+    header["__headers"]=JSON.stringify(objHeaders);
+    var proxyUrl="/proxy";
+    var bNet=false;
+    if(/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl))
+    {
+        bNet=true;
+        proxyUrl="http://127.0.0.1:36742";
+    }
+    var startDate=new Date();
+    var bContent=false,contentKey;
+    for(var key in header)
+    {
+        if(key.toLowerCase()=="content-type")
+        {
+            bContent=true;
+            contentKey=key;
+            if(/multipart\/form-data/i.test(header[contentKey]))
+            {
+                bUpload=true;
+            }
+            break
+        }
+    }
+    var func;
+    if(bUpload || (obj.bodyInfo && obj.bodyInfo.type==1))
+    {
+        if(bContent && obj.bodyInfo.type==0)
+        {
+            delete header[contentKey];
+        }
+        func=net.upload("POST",proxyUrl,body,header,null,1,bNet)
+    }
+    else
+    {
+        func=net.post(proxyUrl,body,header,null,1,bNet)
+    }
+    return func.then(function (result) {
+        var res={}
+        res.header=result.header;
+        res.status=String(result.status);
+        res.second=(((new Date())-startDate)/1000).toFixed(3);
+        res.type=typeof (result.data);
+        res.data=result.data;
+        if(obj.after.mode==0)
+        {
+            if(global.after)
+            {
+                helper.runBefore(global.after,baseUrl,path,method,query,header,body)
+            }
+            helper.runBefore(obj.after.code,baseUrl,path,method,query,header,body)
+        }
+        else
+        {
+            helper.runBefore(obj.after.code,baseUrl,path,method,query,header,body)
+        }
+        root.output+="结束运行接口："+obj.name+"(耗时：<span style='color: green'>"+res.second+"秒</span>)<br>"
+        return res;
+    })
+}
+
+helper.runTestCode=async function (code,test,global,opt,root) {
+    var Base64=BASE64.encoder,MD5=CryptoJS.MD5,SHA1=CryptoJS.SHA1,SHA256=CryptoJS.SHA256,SHA512=CryptoJS.SHA512,SHA3=CryptoJS.SHA3,RIPEMD160=CryptoJS.RIPEMD160,AES=CryptoJS.AES.encrypt,TripleDES=CryptoJS.TripleDES.encrypt,DES=CryptoJS.DES.encrypt,Rabbit=CryptoJS.Rabbit.encrypt,RC4=CryptoJS.RC4.encrypt,RC4Drop=CryptoJS.RC4Drop.encrypt;
+    if(!global)
+    {
+        global={};
+    }
+    function log(text) {
+        root.output+=text+"<br>";
+    }
+    var ele=document.createElement("div");
+    ele.innerHTML=code;
+    var arr=ele.getElementsByTagName("a");
+    var arrNode=[];
+    for(var i=0;i<arr.length;i++)
+    {
+        var obj=arr[i].getAttribute("data");
+        var type=arr[i].getAttribute("type");
+        var text;
+        if(type=="1")
+        {
+            text="function (opt) {return helper.runTest("+obj+",'"+opt.baseUrl+"',"+"{before:'"+opt.before+"',after:'"+opt.after+"'}"+",test,root,opt)}"
+        }
+        else if(type=="2")
+        {
+            var testObj;
+            try
+            {
+                testObj=await net.get("/test/info",{
+                id:obj
+            }).then(function (data) {
+                if(data.code==200)
+                {
+                    return data.data
+                }
+                else
+                {
+                    $.notify(data.msg,0);
+                    throw "error";
+                }
+            })
+            }
+            catch (err)
+            {
+                return;
+            }
+            text="function () {return helper.runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;")+"',"+JSON.stringify(testObj)+",global,"+JSON.stringify(opt)+",root)}"
+        }
+        else
+        {
+            continue;
+        }
+        var node=document.createTextNode(text);
+        arrNode.push({
+            oldNode:arr[i],
+            newNode:node
+        });
+    }
+    arrNode.forEach(function (obj) {
+        obj.oldNode.parentNode.replaceChild(obj.newNode,obj.oldNode);
+    })
+    root.output+="<br><div style='background-color: #ececec'>开始执行用例："+test.name+"<br>";
+    var ret=eval("(async function () {"+ele.innerText+"})()").then(function (ret) {
+        if(ret===undefined)
+        {
+            test.status=0;
+            root.output+="用例执行结束："+test.name+"(未判定)";
+        }
+        else if(Boolean(ret)==true)
+        {
+            test.status=1;
+            root.output+="用例执行结束："+test.name+"(<span style='color:green'>已通过</span>)";
+        }
+        else
+        {
+            test.status=2;
+            root.output+="用例执行结束："+test.name+"(<span style='color:red'>未通过</span>)";
+        }
+        root.output+="</div><br>"
+        return ret;
+    });
+    return ret;
 }
 
 module.exports=helper;

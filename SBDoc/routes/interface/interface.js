@@ -11,6 +11,7 @@ var project=require("../../model/projectModel")
 var group=require("../../model/groupModel")
 var interface=require("../../model/interfaceModel")
 var fs=require("fs");
+var uuid=require("uuid/v1");
 let refreshInterface=async (function (id) {
     let query={
         project:id
@@ -34,8 +35,10 @@ var validateUser =async (function validateUser(req) {
     let obj,pro;
     if(req.clientParam.id)
     {
-        let obj=await (interface.findOneAsync({
+        let obj=await (interface.findOneAsync(req.clientParam.id.length==24?{
             _id:req.clientParam.id
+        }:{
+            id:req.clientParam.id
         }));
         if(!obj)
         {
@@ -123,7 +126,10 @@ function create(req,res) {
             {
                 if(key=="queryParam" || key=="header" || key=="bodyParam" || key=="outParam" || key=="restParam" || key=="bodyInfo" || key=="outInfo" || key=="before" || key=="after")
                 {
-                    update[key]=JSON.parse(req.clientParam[key]);
+                    if(req.clientParam[key]!=="")
+                    {
+                        update[key]=JSON.parse(req.clientParam[key]);
+                    }
                 }
                 else
                 {
@@ -170,6 +176,7 @@ function create(req,res) {
             }
             update.owner=req.userInfo._id;
             update.editor=req.userInfo._id;
+            update.id=uuid();
             let obj=await (interface.createAsync(update))
             util.ok(res,obj,"新建成功");
         }
@@ -255,7 +262,7 @@ function info(req,res) {
                 select:"name"
             }))
         }
-        if(obj.group._id.toString()!=req.clientParam.group)
+        if(req.clientParam.group && obj.group._id.toString()!=req.clientParam.group && req.clientParam.group.length==24)
         {
             obj._doc.change=1;
         }

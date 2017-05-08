@@ -11,7 +11,11 @@ var project=require("../../model/projectModel")
 var group=require("../../model/groupModel")
 var interface=require("../../model/interfaceModel")
 var status=require("../../model/statusModel")
+var test=require("../../model/testModel")
+var testModule=require("../../model/testModuleModel")
+var testGroup=require("../../model/testGroupModel")
 var fs=require("fs");
+var uuid=require("uuid/v1");
 let refreshInterface=async (function (id) {
     let query={
         project:id
@@ -362,16 +366,31 @@ function interfaceList(req,res) {
         let query={
             project:req.clientParam.id
         }
-        let arr=await (group.findAsync(query,"_id name type",{
+        let arr=await (group.findAsync(query,"_id name type id",{
             sort:"name"
         }));
         for(let obj of arr)
         {
             let arrInterface=await (interface.findAsync({
                 group:obj._id
-            },"_id name method finish url",{
+            },"_id name method finish url id",{
                 sort:"name"
             }));
+            for(let inter of arrInterface)
+            {
+                if(!inter.id)
+                {
+                    inter.id=uuid();
+                    inter._doc.id=inter.id;
+                    await (inter.saveAsync())
+                }
+            }
+            if(!obj.id)
+            {
+                obj.id=uuid();
+                obj._doc.id=obj.id;
+                await (obj.saveAsync())
+            }
             obj._doc.data=arrInterface;
         }
         util.ok(res,{
@@ -412,6 +431,24 @@ function removeProject(req,res) {
             project:req.clientParam.id
         }));
         await (group.removeAsync({
+            project:req.clientParam.id
+        }))
+        await (status.removeAsync({
+            project:req.clientParam.id
+        }))
+        await (test.removeAsync({
+            project:req.clientParam.id
+        }))
+        let arrTestModule=await (testModule.findAsync({
+            project:req.clientParam.id
+        }))
+        for(let obj of arrTestModule)
+        {
+            await (testGroup.removeAsync({
+                module:obj._id
+            }))
+        }
+        await (testModule.removeAsync({
             project:req.clientParam.id
         }))
         await (project.removeAsync({
@@ -503,6 +540,33 @@ function exportJSON(req,res) {
         obj.global.status=await (status.findAsync({
             project:req.obj._id
         },"-_id -project"));
+        obj.test=[];
+        let arrTestModule=await (testModule.findAsync({
+            project:req.obj._id
+        }));
+        for(let objTestModule of arrTestModule)
+        {
+            let o={
+                name:objTestModule.name,
+                id:objTestModule.id,
+                data:[]
+            };
+            let arrTestGroup=await (testGroup.findAsync({
+                module:objTestModule._id
+            }));
+            for(let objTestGroup of arrTestGroup)
+            {
+                let o1={
+                    name:objTestGroup.name,
+                    id:objTestGroup.id,
+                    data:(await (test.findAsync({
+                        group:objTestGroup._id
+                    },"-_id -project -module -group -owner -editor -createdAt -updatedAt")))
+                }
+                o.data.push(o1);
+            }
+            obj.test.push(o);
+        }
         obj.data=[];
         let arrGroup=await (group.findAsync({
             project:req.obj._id
@@ -522,7 +586,7 @@ function exportJSON(req,res) {
                 let newInter={};
                 for(let key in item._doc)
                 {
-                    if(item._doc.hasOwnProperty(key) && key!="__v" && key!="_id" && key!="_id" && key!="project" && key!="group" && key!="owner" && key!="editor")
+                    if(item._doc.hasOwnProperty(key) && key!="__v" && key!="_id" && key!="_id" && key!="project" && key!="group" && key!="owner" && key!="editor" && key!="createdAt" && key!="updatedAt")
                     {
                         newInter[key]=item._doc[key];
                     }
@@ -596,6 +660,33 @@ function importJSON(req,res) {
                 await (status.createAsync(item));
             }
         }
+        if(obj.test.length>0)
+        {
+            for(let obj1 of obj.test)
+            {
+                let objTestModule=await (testModule.createAsync({
+                    name:obj1.name,
+                    id:obj1.id,
+                    project:objProject._id
+                }))
+                for(let obj2 of obj1.data)
+                {
+                    let objTestGroup=await (testGroup.createAsync({
+                        name:obj2.name,
+                        id:obj2.id,
+                        module:objTestModule._id
+                    }))
+                    for(let obj3 of obj2.data)
+                    {
+                        obj3.project=objProject._id;
+                        obj3.module=objTestModule._id;
+                        obj3.group=objTestGroup._id;
+                        obj3.editor=obj3.owner=req.userInfo._id;
+                        await (test.createAsync(obj3));
+                    }
+                }
+            }
+        }
         let bTrash=false,interfaceCount=0;
         for(let item of obj.data)
         {
@@ -652,6 +743,17 @@ function setInject(req,res) {
     }
 }
 
+function urlList(req,res) {
+    try
+    {
+        util.ok(res,req.obj.baseUrls,"ok");
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
 exports.validateUser=async (validateUser);
 exports.inProject=async (inProject);
 exports.create=async (create);
@@ -670,6 +772,7 @@ exports.quit=async (quit);
 exports.exportJSON=async (exportJSON);
 exports.importJSON=async (importJSON);
 exports.setInject=async (setInject);
+exports.urlList=async (urlList);
 
 
 

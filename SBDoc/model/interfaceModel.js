@@ -53,7 +53,8 @@ var model=new mongoose.Schema({
         default:0
     },
     before:Object,
-    after:Object
+    after:Object,
+    id:String
 },{
     timestamps:true
 });

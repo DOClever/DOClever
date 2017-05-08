@@ -5,6 +5,7 @@ var mainNav=require("../component/mainNav.vue")
 var interface=require("../component/interface.vue")
 var setting=require("../component/setting.vue")
 var global=require("../component/global.vue")
+var test=require("../component/test.vue")
 var config=require("../util/config");
 var bus=require("../bus/projectInfoBus")
 var itemAuto=require("../component/autocompleteItem.vue");
@@ -27,7 +28,8 @@ var vue=new Vue({
         "mainnav":mainNav,
         "interface":interface,
         "setting":setting,
-        "global":global
+        "global":global,
+        "test":test
     },
     created:function () {
         Promise.all([
@@ -39,12 +41,16 @@ var vue=new Vue({
             }),
             net.get("/status/list",{
                 id:session.get("projectId")
+            }),
+            net.get("/test/list",{
+                project:session.get("projectId")
             })
         ]).then(function (values) {
             $.stopLoading();
             var obj1=values[0];
             var obj2=values[1];
             var obj3=values[2];
+            var obj4=values[3];
             if(obj1.code==200)
             {
                 bus.$emit("initInterface",obj1.data);
@@ -69,6 +75,14 @@ var vue=new Vue({
             {
                 throw obj3.msg;
             }
+            if(obj4.code==200)
+            {
+                bus.$emit("initTest",obj4.data);
+            }
+            else
+            {
+                throw obj4.msg;
+            }
         }).catch(function (err) {
             $.stopLoading();
             if(typeof(err)=="string")
@@ -82,7 +96,7 @@ var vue=new Vue({
         })
     }
 })
-
+window.vueObj=vue;
 $.ready(function () {
     $.startLoading();
 })
