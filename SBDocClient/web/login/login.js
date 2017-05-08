@@ -27,7 +27,7 @@ var vue=new Vue({
                 if(data.code==200)
                 {
                     _this.$notify({
-                        title: '登陆成功',
+                        title: '登录成功',
                         type: 'success'
                     });
                     session.clear()
