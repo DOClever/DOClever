@@ -1,6 +1,18 @@
 # NAN ChangeLog
 
-**Version 2.5.1: current Node 7.4.0, Node 12: 0.12.18, Node 10: 0.10.48, iojs: 3.3.1**
+**Version 2.6.2: current Node 7.9.0, Node 12: 0.12.18, Node 10: 0.10.48, iojs: 3.3.1**
+
+### 2.6.2 Apr 12 2017
+
+  - Bugfix: Fix v8::JSON::Parse() deprecation warning. 87f6a3c65815fa062296a994cc863e2fa124867d
+
+### 2.6.1 Apr 6 2017
+
+  - Bugfix: nan_json.h: fix build breakage in Node 6 ac8d47dc3c10bfbf3f15a6b951633120c0ee6d51
+
+### 2.6.0 Apr 6 2017
+
+  - Feature: nan: add support for JSON::Parse & Stringify b533226c629cce70e1932a873bb6f849044a56c5
 
 ### 2.5.1 Jan 23 2017
 

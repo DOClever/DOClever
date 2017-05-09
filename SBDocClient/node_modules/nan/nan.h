@@ -9,10 +9,11 @@
  *   - Brett Lawson <https://github.com/brett19>
  *   - Ben Noordhuis <https://github.com/bnoordhuis>
  *   - David Siegel <https://github.com/agnat>
+ *   - Michael Ira Krufky <https://github.com/mkrufky>
  *
  * MIT License <https://github.com/nodejs/nan/blob/master/LICENSE.md>
  *
- * Version 2.5.1: current Node 7.4.0, Node 12: 0.12.18, Node 10: 0.10.48, iojs: 3.3.1
+ * Version 2.6.2: current Node 7.9.0, Node 12: 0.12.18, Node 10: 0.10.48, iojs: 3.3.1
  *
  * See https://github.com/nodejs/nan for the latest update to this file
  **********************************************************************************/
@@ -32,6 +33,7 @@
 #define NODE_4_0_MODULE_VERSION  46
 #define NODE_5_0_MODULE_VERSION  47
 #define NODE_6_0_MODULE_VERSION  48
+#define NODE_7_0_MODULE_VERSION  51
 
 #ifdef _MSC_VER
 # define NAN_HAS_CPLUSPLUS_11 (_MSC_VER >= 1800)
@@ -2309,6 +2311,10 @@ MakeMaybe(MaybeMaybe<T> v) {
 //=== TypedArrayContents =======================================================
 
 #include "nan_typedarray_contents.h"  // NOLINT(build/include)
+
+//=== JSON =====================================================================
+
+#include "nan_json.h"  // NOLINT(build/include)
 
 }  // end of namespace Nan
 

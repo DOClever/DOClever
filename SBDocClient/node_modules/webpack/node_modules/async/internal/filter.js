@@ -21,6 +21,10 @@ var _noop = require('lodash/noop');
 
 var _noop2 = _interopRequireDefault(_noop);
 
+var _wrapAsync = require('./wrapAsync');
+
+var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function filterArray(eachfn, arr, iteratee, callback) {
@@ -66,6 +70,6 @@ function filterGeneric(eachfn, coll, iteratee, callback) {
 
 function _filter(eachfn, coll, iteratee, callback) {
     var filter = (0, _isArrayLike2.default)(coll) ? filterArray : filterGeneric;
-    filter(eachfn, coll, iteratee, callback || _noop2.default);
+    filter(eachfn, coll, (0, _wrapAsync2.default)(iteratee), callback || _noop2.default);
 }
 module.exports = exports['default'];

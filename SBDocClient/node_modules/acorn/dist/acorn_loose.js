@@ -209,7 +209,7 @@ lp.readToken = function() {
         this$1.toks.type = __acorn.tokTypes.ellipsis
       }
       return new __acorn.Token(this$1.toks)
-    } catch(e) {
+    } catch (e) {
       if (!(e instanceof SyntaxError)) throw e
 
       // Try to skip some text, based on the error message, and then continue
@@ -220,12 +220,15 @@ lp.readToken = function() {
           replace = {start: e.pos, end: pos, type: __acorn.tokTypes.string, value: this$1.input.slice(e.pos + 1, pos)}
         } else if (/regular expr/i.test(msg)) {
           var re = this$1.input.slice(e.pos, pos)
-          try { re = new RegExp(re) } catch(e) {}
+          try { re = new RegExp(re) } catch (e) { /* ignore compilation error due to new syntax */ }
           replace = {start: e.pos, end: pos, type: __acorn.tokTypes.regexp, value: re}
         } else if (/template/.test(msg)) {
-          replace = {start: e.pos, end: pos,
-                     type: __acorn.tokTypes.template,
-                     value: this$1.input.slice(e.pos, pos)}
+          replace = {
+            start: e.pos,
+            end: pos,
+            type: __acorn.tokTypes.template,
+            value: this$1.input.slice(e.pos, pos)
+          }
         } else {
           replace = false
         }
@@ -263,7 +266,7 @@ lp.resetTo = function(pos) {
 
   this.toks.pos = pos
   var ch = this.input.charAt(pos - 1)
-  this.toks.exprAllowed = !ch || /[\[\{\(,;:?\/*=+\-~!|&%^<>]/.test(ch) ||
+  this.toks.exprAllowed = !ch || /[[{(,;:?/*=+\-~!|&%^<>]/.test(ch) ||
     /[enwfd]/.test(ch) &&
     /\b(keywords|case|else|return|throw|new|in|(instance|type)of|delete|void)$/.test(this.input.slice(pos - 10, pos))
 
@@ -547,9 +550,8 @@ lp$1.parseClass = function(isStatement) {
 
   var node = this.startNode()
   this.next()
-  if (isStatement == null) isStatement = this.tok.type === __acorn.tokTypes.name
   if (this.tok.type === __acorn.tokTypes.name) node.id = this.parseIdent()
-  else if (isStatement) node.id = this.dummyIdent()
+  else if (isStatement === true) node.id = this.dummyIdent()
   else node.id = null
   node.superClass = this.eat(__acorn.tokTypes._extends) ? this.parseExpression() : null
   node.body = this.startNode()
@@ -595,7 +597,7 @@ lp$1.parseClass = function(isStatement) {
           method.key.type === "Literal" && method.key.value === "constructor")) {
         method.kind = "constructor"
       } else {
-        method.kind =  "method"
+        method.kind = "method"
       }
       method.value = this$1.parseMethod(isGenerator, isAsync)
     }
@@ -622,9 +624,8 @@ lp$1.parseFunction = function(node, isStatement, isAsync) {
   if (this.options.ecmaVersion >= 8) {
     node.async = !!isAsync
   }
-  if (isStatement == null) isStatement = this.tok.type === __acorn.tokTypes.name
   if (this.tok.type === __acorn.tokTypes.name) node.id = this.parseIdent()
-  else if (isStatement) node.id = this.dummyIdent()
+  else if (isStatement === true) node.id = this.dummyIdent()
   this.inAsync = node.async
   node.params = this.parseFunctionParams()
   node.body = this.parseBlock()
@@ -646,9 +647,9 @@ lp$1.parseExport = function() {
       var fNode = this.startNode()
       this.next()
       if (isAsync) this.next()
-      node.declaration = this.parseFunction(fNode, null, isAsync)
+      node.declaration = this.parseFunction(fNode, "nullableID", isAsync)
     } else if (this.tok.type === __acorn.tokTypes._class) {
-      node.declaration = this.parseClass(null)
+      node.declaration = this.parseClass("nullableID")
     } else {
       node.declaration = this.parseMaybeAssign()
       this.semicolon()
@@ -674,7 +675,7 @@ lp$1.parseImport = function() {
   if (this.tok.type === __acorn.tokTypes.string) {
     node.specifiers = []
     node.source = this.parseExprAtom()
-    node.kind = ''
+    node.kind = ""
   } else {
     var elt
     if (this.tok.type === __acorn.tokTypes.name && this.tok.value !== "from") {
@@ -1072,7 +1073,7 @@ lp$2.parseNew = function() {
 lp$2.parseTemplateElement = function() {
   var elem = this.startNode()
   elem.value = {
-    raw: this.input.slice(this.tok.start, this.tok.end).replace(/\r\n?/g, '\n'),
+    raw: this.input.slice(this.tok.start, this.tok.end).replace(/\r\n?/g, "\n"),
     cooked: this.tok.value
   }
   this.next()
@@ -1095,7 +1096,7 @@ lp$2.parseTemplate = function() {
       curElt = this$1.parseTemplateElement()
     } else {
       curElt = this$1.startNode()
-      curElt.value = {cooked: '', raw: ''}
+      curElt.value = {cooked: "", raw: ""}
       curElt.tail = true
       this$1.finishNode(curElt, "TemplateElement")
     }
@@ -1357,6 +1358,7 @@ lp$2.parseAwait = function() {
 
 __acorn.defaultOptions.tabSize = 4
 
+// eslint-disable-next-line camelcase
 function parse_dammit(input, options) {
   var p = new LooseParser(input, options)
   p.next()

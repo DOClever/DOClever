@@ -13,6 +13,8 @@ var _initialParams = require('./internal/initialParams');
 
 var _initialParams2 = _interopRequireDefault(_initialParams);
 
+var _wrapAsync = require('./internal/wrapAsync');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
@@ -21,16 +23,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * no extra deferral is added. This is useful for preventing stack overflows
  * (`RangeError: Maximum call stack size exceeded`) and generally keeping
  * [Zalgo](http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony)
- * contained.
+ * contained. ES2017 `async` functions are returned as-is -- they are immune
+ * to Zalgo's corrupting influences, as they always resolve on a later tick.
  *
  * @name ensureAsync
  * @static
  * @memberOf module:Utils
  * @method
  * @category Util
- * @param {Function} fn - an async function, one that expects a node-style
+ * @param {AsyncFunction} fn - an async function, one that expects a node-style
  * callback as its last argument.
- * @returns {Function} Returns a wrapped function with the exact same call
+ * @returns {AsyncFunction} Returns a wrapped function with the exact same call
  * signature as the function passed in.
  * @example
  *
@@ -50,6 +53,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * async.mapSeries(args, async.ensureAsync(sometimesAsync), done);
  */
 function ensureAsync(fn) {
+    if ((0, _wrapAsync.isAsync)(fn)) return fn;
     return (0, _initialParams2.default)(function (args, callback) {
         var sync = true;
         args.push(function () {

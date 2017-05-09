@@ -61,7 +61,7 @@ module.exports = function kindOf(val) {
   }
 
   // buffer
-  if (typeof Buffer !== 'undefined' && isBuffer(val)) {
+  if (isBuffer(val)) {
     return 'buffer';
   }
 

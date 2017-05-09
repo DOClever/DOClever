@@ -21,6 +21,10 @@ var _once = require('./internal/once');
 
 var _once2 = _interopRequireDefault(_once);
 
+var _wrapAsync = require('./internal/wrapAsync');
+
+var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
@@ -36,11 +40,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @param {Array|Iterable|Object} coll - A collection to iterate over.
  * @param {*} [accumulator] - The initial state of the transform.  If omitted,
  * it will default to an empty Object or Array, depending on the type of `coll`
- * @param {Function} iteratee - A function applied to each item in the
- * collection that potentially modifies the accumulator. The `iteratee` is
- * passed a `callback(err)` which accepts an optional error as its first
- * argument. If an error is passed to the callback, the transform is stopped
- * and the main `callback` is immediately called with the error.
+ * @param {AsyncFunction} iteratee - A function applied to each item in the
+ * collection that potentially modifies the accumulator.
  * Invoked with (accumulator, item, key, callback).
  * @param {Function} [callback] - A callback which is called after all the
  * `iteratee` functions have finished. Result is the transformed accumulator.
@@ -69,15 +70,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * })
  */
 function transform(coll, accumulator, iteratee, callback) {
-    if (arguments.length === 3) {
+    if (arguments.length <= 3) {
         callback = iteratee;
         iteratee = accumulator;
         accumulator = (0, _isArray2.default)(coll) ? [] : {};
     }
     callback = (0, _once2.default)(callback || _noop2.default);
+    var _iteratee = (0, _wrapAsync2.default)(iteratee);
 
     (0, _eachOf2.default)(coll, function (v, k, cb) {
-        iteratee(accumulator, v, k, cb);
+        _iteratee(accumulator, v, k, cb);
     }, function (err) {
         callback(err, accumulator);
     });

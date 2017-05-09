@@ -4,11 +4,21 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _rest = require('./internal/rest');
+exports.default = function (fn /*, ...args*/) {
+    var args = (0, _slice2.default)(arguments, 1);
+    return function () /*callArgs*/{
+        var callArgs = (0, _slice2.default)(arguments);
+        return fn.apply(null, args.concat(callArgs));
+    };
+};
 
-var _rest2 = _interopRequireDefault(_rest);
+var _slice = require('./internal/slice');
+
+var _slice2 = _interopRequireDefault(_slice);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+;
 
 /**
  * Creates a continuation function with some arguments already applied.
@@ -22,10 +32,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @memberOf module:Utils
  * @method
  * @category Util
- * @param {Function} function - The function you want to eventually apply all
+ * @param {Function} fn - The function you want to eventually apply all
  * arguments to. Invokes with (arguments...).
  * @param {...*} arguments... - Any number of arguments to automatically apply
  * when the continuation is called.
+ * @returns {Function} the partially-applied function
  * @example
  *
  * // using apply
@@ -54,9 +65,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * two
  * three
  */
-exports.default = (0, _rest2.default)(function (fn, args) {
-    return (0, _rest2.default)(function (callArgs) {
-        return fn.apply(null, args.concat(callArgs));
-    });
-});
 module.exports = exports['default'];

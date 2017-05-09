@@ -3,18 +3,27 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = seq;
 
 var _noop = require('lodash/noop');
 
 var _noop2 = _interopRequireDefault(_noop);
 
-var _rest = require('./internal/rest');
+var _slice = require('./internal/slice');
 
-var _rest2 = _interopRequireDefault(_rest);
+var _slice2 = _interopRequireDefault(_slice);
 
 var _reduce = require('./reduce');
 
 var _reduce2 = _interopRequireDefault(_reduce);
+
+var _wrapAsync = require('./internal/wrapAsync');
+
+var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
+
+var _arrayMap = require('lodash/_arrayMap');
+
+var _arrayMap2 = _interopRequireDefault(_arrayMap);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -31,7 +40,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @method
  * @see [async.compose]{@link module:ControlFlow.compose}
  * @category Control Flow
- * @param {...Function} functions - the asynchronous functions to compose
+ * @param {...AsyncFunction} functions - the asynchronous functions to compose
  * @returns {Function} a function that composes the `functions` in order
  * @example
  *
@@ -56,8 +65,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *     });
  * });
  */
-exports.default = (0, _rest2.default)(function seq(functions) {
-    return (0, _rest2.default)(function (args) {
+function seq() /*...functions*/{
+    var _functions = (0, _arrayMap2.default)(arguments, _wrapAsync2.default);
+    return function () /*...args*/{
+        var args = (0, _slice2.default)(arguments);
         var that = this;
 
         var cb = args[args.length - 1];
@@ -67,13 +78,14 @@ exports.default = (0, _rest2.default)(function seq(functions) {
             cb = _noop2.default;
         }
 
-        (0, _reduce2.default)(functions, args, function (newargs, fn, cb) {
-            fn.apply(that, newargs.concat((0, _rest2.default)(function (err, nextargs) {
+        (0, _reduce2.default)(_functions, args, function (newargs, fn, cb) {
+            fn.apply(that, newargs.concat(function (err /*, ...nextargs*/) {
+                var nextargs = (0, _slice2.default)(arguments, 1);
                 cb(err, nextargs);
-            })));
+            }));
         }, function (err, results) {
             cb.apply(that, [err].concat(results));
         });
-    });
-});
+    };
+}
 module.exports = exports['default'];

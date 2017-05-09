@@ -1,4 +1,4 @@
-/*! http://mths.be/jsesc v0.5.0 by @mathias */
+/*! https://mths.be/jsesc v1.3.0 by @mathias */
 ;(function(root) {
 
 	// Detect free variables `exports`
@@ -58,6 +58,10 @@
 		return typeof value == 'string' ||
 			toString.call(value) == '[object String]';
 	};
+	var isNumber = function(value) {
+		return typeof value == 'number' ||
+			toString.call(value) == '[object Number]';
+	};
 	var isFunction = function(value) {
 		// In a perfect world, the `typeof` check would be sufficient. However,
 		// in Chrome 1–12, `typeof /x/ == 'object'`, and in IE 6–8
@@ -65,10 +69,16 @@
 		return typeof value == 'function' ||
 			toString.call(value) == '[object Function]';
 	};
+	var isMap = function(value) {
+		return toString.call(value) == '[object Map]';
+	};
+	var isSet = function(value) {
+		return toString.call(value) == '[object Set]';
+	};
 
 	/*--------------------------------------------------------------------------*/
 
-	// http://mathiasbynens.be/notes/javascript-escapes#single
+	// https://mathiasbynens.be/notes/javascript-escapes#single
 	var singleEscapes = {
 		'"': '\\"',
 		'\'': '\\\'',
@@ -90,13 +100,18 @@
 		// Handle options
 		var defaults = {
 			'escapeEverything': false,
+			'escapeEtago': false,
 			'quotes': 'single',
 			'wrap': false,
 			'es6': false,
 			'json': false,
 			'compact': true,
+			'lowercaseHex': false,
+			'numbers': 'decimal',
 			'indent': '\t',
-			'__indent__': ''
+			'__indent__': '',
+			'__inline1__': false,
+			'__inline2__': false
 		};
 		var json = options && options.json;
 		if (json) {
@@ -110,34 +125,88 @@
 		var quote = options.quotes == 'double' ? '"' : '\'';
 		var compact = options.compact;
 		var indent = options.indent;
-		var oldIndent;
+		var lowercaseHex = options.lowercaseHex;
+		var oldIndent = '';
+		var inline1 = options.__inline1__;
+		var inline2 = options.__inline2__;
 		var newLine = compact ? '' : '\n';
 		var result;
 		var isEmpty = true;
+		var useBinNumbers = options.numbers == 'binary';
+		var useOctNumbers = options.numbers == 'octal';
+		var useDecNumbers = options.numbers == 'decimal';
+		var useHexNumbers = options.numbers == 'hexadecimal';
 
 		if (json && argument && isFunction(argument.toJSON)) {
 			argument = argument.toJSON();
 		}
 
 		if (!isString(argument)) {
+			if (isMap(argument)) {
+				if (argument.size == 0) {
+					return 'new Map()';
+				}
+				if (!compact) {
+					options.__inline1__ = true;
+				}
+				return 'new Map(' + jsesc(Array.from(argument), options) + ')';
+			}
+			if (isSet(argument)) {
+				if (argument.size == 0) {
+					return 'new Set()';
+				}
+				return 'new Set(' + jsesc(Array.from(argument), options) + ')';
+			}
 			if (isArray(argument)) {
 				result = [];
 				options.wrap = true;
-				oldIndent = options.__indent__;
-				indent += oldIndent;
-				options.__indent__ = indent;
+				if (inline1) {
+					options.__inline1__ = false;
+					options.__inline2__ = true;
+				} else {
+					oldIndent = options.__indent__;
+					indent += oldIndent;
+					options.__indent__ = indent;
+				}
 				forEach(argument, function(value) {
 					isEmpty = false;
+					if (inline2) {
+						options.__inline2__ = false;
+					}
 					result.push(
-						(compact ? '' : indent) +
+						(compact || inline2 ? '' : indent) +
 						jsesc(value, options)
 					);
 				});
 				if (isEmpty) {
 					return '[]';
 				}
+				if (inline2) {
+					return '[' + result.join(', ') + ']';
+				}
 				return '[' + newLine + result.join(',' + newLine) + newLine +
 					(compact ? '' : oldIndent) + ']';
+			} else if (isNumber(argument)) {
+				if (json) {
+					// Some number values (e.g. `Infinity`) cannot be represented in JSON.
+					return JSON.stringify(argument);
+				}
+				if (useDecNumbers) {
+					return String(argument);
+				}
+				if (useHexNumbers) {
+					var tmp = argument.toString(16);
+					if (!lowercaseHex) {
+						tmp = tmp.toUpperCase();
+					}
+					return '0x' + tmp;
+				}
+				if (useBinNumbers) {
+					return '0b' + argument.toString(2);
+				}
+				if (useOctNumbers) {
+					return '0o' + argument.toString(8);
+				}
 			} else if (!isObject(argument)) {
 				if (json) {
 					// For some values (e.g. `undefined`, `function` objects),
@@ -187,9 +256,13 @@
 				) {
 					second = string.charCodeAt(index + 1);
 					if (second >= 0xDC00 && second <= 0xDFFF) { // low surrogate
-						// http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+						// https://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
 						codePoint = (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
-						result += '\\u{' + codePoint.toString(16).toUpperCase() + '}';
+						var hexadecimal = codePoint.toString(16);
+						if (!lowercaseHex) {
+							hexadecimal = hexadecimal.toUpperCase();
+						}
+						result += '\\u{' + hexadecimal + '}';
 						index++;
 						continue;
 					}
@@ -225,7 +298,10 @@
 				continue;
 			}
 			var charCode = character.charCodeAt(0);
-			var hexadecimal = charCode.toString(16).toUpperCase();
+			var hexadecimal = charCode.toString(16);
+			if (!lowercaseHex) {
+				hexadecimal = hexadecimal.toUpperCase();
+			}
 			var longhand = hexadecimal.length > 2 || json;
 			var escaped = '\\' + (longhand ? 'u' : 'x') +
 				('0000' + hexadecimal).slice(longhand ? -4 : -2);
@@ -235,10 +311,14 @@
 		if (options.wrap) {
 			result = quote + result + quote;
 		}
+		if (options.escapeEtago) {
+			// https://mathiasbynens.be/notes/etago
+			return result.replace(/<\/(script|style)/gi, '<\\/$1');
+		}
 		return result;
 	};
 
-	jsesc.version = '0.5.0';
+	jsesc.version = '1.3.0';
 
 	/*--------------------------------------------------------------------------*/
 

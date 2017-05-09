@@ -4,15 +4,22 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _rest = require('./internal/rest');
+exports.default = function () /*...values*/{
+    var values = (0, _slice2.default)(arguments);
+    var args = [null].concat(values);
+    return function () /*...ignoredArgs, callback*/{
+        var callback = arguments[arguments.length - 1];
+        return callback.apply(this, args);
+    };
+};
 
-var _rest2 = _interopRequireDefault(_rest);
+var _slice = require('./internal/slice');
 
-var _initialParams = require('./internal/initialParams');
-
-var _initialParams2 = _interopRequireDefault(_initialParams);
+var _slice2 = _interopRequireDefault(_slice);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+;
 
 /**
  * Returns a function that when called, calls-back with the values provided.
@@ -26,7 +33,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @category Util
  * @param {...*} arguments... - Any number of arguments to automatically invoke
  * callback with.
- * @returns {Function} Returns a function that when invoked, automatically
+ * @returns {AsyncFunction} Returns a function that when invoked, automatically
  * invokes the callback with the previous given arguments.
  * @example
  *
@@ -56,10 +63,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *     //...
  * }, callback);
  */
-exports.default = (0, _rest2.default)(function (values) {
-    var args = [null].concat(values);
-    return (0, _initialParams2.default)(function (ignoredArgs, callback) {
-        return callback.apply(this, args);
-    });
-});
 module.exports = exports['default'];

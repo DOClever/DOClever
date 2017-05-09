@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.wrapSync = exports.selectSeries = exports.selectLimit = exports.select = exports.foldr = exports.foldl = exports.inject = exports.forEachOfLimit = exports.forEachOfSeries = exports.forEachOf = exports.forEachLimit = exports.forEachSeries = exports.forEach = exports.findSeries = exports.findLimit = exports.find = exports.anySeries = exports.anyLimit = exports.any = exports.allSeries = exports.allLimit = exports.all = exports.whilst = exports.waterfall = exports.until = exports.unmemoize = exports.transform = exports.timesSeries = exports.timesLimit = exports.times = exports.timeout = exports.sortBy = exports.someSeries = exports.someLimit = exports.some = exports.setImmediate = exports.series = exports.seq = exports.retryable = exports.retry = exports.rejectSeries = exports.rejectLimit = exports.reject = exports.reflectAll = exports.reflect = exports.reduceRight = exports.reduce = exports.race = exports.queue = exports.priorityQueue = exports.parallelLimit = exports.parallel = exports.nextTick = exports.memoize = exports.mapValuesSeries = exports.mapValuesLimit = exports.mapValues = exports.mapSeries = exports.mapLimit = exports.map = exports.log = exports.forever = exports.filterSeries = exports.filterLimit = exports.filter = exports.everySeries = exports.everyLimit = exports.every = exports.ensureAsync = exports.eachSeries = exports.eachOfSeries = exports.eachOfLimit = exports.eachOf = exports.eachLimit = exports.each = exports.during = exports.doWhilst = exports.doUntil = exports.doDuring = exports.dir = exports.detectSeries = exports.detectLimit = exports.detect = exports.constant = exports.concatSeries = exports.concat = exports.compose = exports.cargo = exports.autoInject = exports.auto = exports.asyncify = exports.apply = exports.applyEachSeries = exports.applyEach = undefined;
+exports.wrapSync = exports.selectSeries = exports.selectLimit = exports.select = exports.foldr = exports.foldl = exports.inject = exports.forEachOfLimit = exports.forEachOfSeries = exports.forEachOf = exports.forEachLimit = exports.forEachSeries = exports.forEach = exports.findSeries = exports.findLimit = exports.find = exports.anySeries = exports.anyLimit = exports.any = exports.allSeries = exports.allLimit = exports.all = exports.whilst = exports.waterfall = exports.until = exports.unmemoize = exports.tryEach = exports.transform = exports.timesSeries = exports.timesLimit = exports.times = exports.timeout = exports.sortBy = exports.someSeries = exports.someLimit = exports.some = exports.setImmediate = exports.series = exports.seq = exports.retryable = exports.retry = exports.rejectSeries = exports.rejectLimit = exports.reject = exports.reflectAll = exports.reflect = exports.reduceRight = exports.reduce = exports.race = exports.queue = exports.priorityQueue = exports.parallelLimit = exports.parallel = exports.nextTick = exports.memoize = exports.mapValuesSeries = exports.mapValuesLimit = exports.mapValues = exports.mapSeries = exports.mapLimit = exports.map = exports.log = exports.groupBySeries = exports.groupByLimit = exports.groupBy = exports.forever = exports.filterSeries = exports.filterLimit = exports.filter = exports.everySeries = exports.everyLimit = exports.every = exports.ensureAsync = exports.eachSeries = exports.eachOfSeries = exports.eachOfLimit = exports.eachOf = exports.eachLimit = exports.each = exports.during = exports.doWhilst = exports.doUntil = exports.doDuring = exports.dir = exports.detectSeries = exports.detectLimit = exports.detect = exports.constant = exports.concatSeries = exports.concat = exports.compose = exports.cargo = exports.autoInject = exports.auto = exports.asyncify = exports.apply = exports.applyEachSeries = exports.applyEach = undefined;
 
 var _applyEach = require('./applyEach');
 
@@ -136,6 +136,18 @@ var _filterSeries2 = _interopRequireDefault(_filterSeries);
 var _forever = require('./forever');
 
 var _forever2 = _interopRequireDefault(_forever);
+
+var _groupBy = require('./groupBy');
+
+var _groupBy2 = _interopRequireDefault(_groupBy);
+
+var _groupByLimit = require('./groupByLimit');
+
+var _groupByLimit2 = _interopRequireDefault(_groupByLimit);
+
+var _groupBySeries = require('./groupBySeries');
+
+var _groupBySeries2 = _interopRequireDefault(_groupBySeries);
 
 var _log = require('./log');
 
@@ -277,6 +289,10 @@ var _transform = require('./transform');
 
 var _transform2 = _interopRequireDefault(_transform);
 
+var _tryEach = require('./tryEach');
+
+var _tryEach2 = _interopRequireDefault(_tryEach);
+
 var _unmemoize = require('./unmemoize');
 
 var _unmemoize2 = _interopRequireDefault(_unmemoize);
@@ -296,11 +312,51 @@ var _whilst2 = _interopRequireDefault(_whilst);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
+ * An "async function" in the context of Async is an asynchronous function with
+ * a variable number of parameters, with the final parameter being a callback.
+ * (`function (arg1, arg2, ..., callback) {}`)
+ * The final callback is of the form `callback(err, results...)`, which must be
+ * called once the function is completed.  The callback should be called with a
+ * Error as its first argument to signal that an error occurred.
+ * Otherwise, if no error occurred, it should be called with `null` as the first
+ * argument, and any additional `result` arguments that may apply, to signal
+ * successful completion.
+ * The callback must be called exactly once, ideally on a later tick of the
+ * JavaScript event loop.
+ *
+ * This type of function is also referred to as a "Node-style async function",
+ * or a "continuation passing-style function" (CPS). Most of the methods of this
+ * library are themselves CPS/Node-style async functions, or functions that
+ * return CPS/Node-style async functions.
+ *
+ * Wherever we accept a Node-style async function, we also directly accept an
+ * [ES2017 `async` function]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function}.
+ * In this case, the `async` function will not be passed a final callback
+ * argument, and any thrown error will be used as the `err` argument of the
+ * implicit callback, and the return value will be used as the `result` value.
+ * (i.e. a `rejected` of the returned Promise becomes the `err` callback
+ * argument, and a `resolved` value becomes the `result`.)
+ *
+ * Note, due to JavaScript limitations, we can only detect native `async`
+ * functions and not transpilied implementations.
+ * Your environment must have `async`/`await` support for this to work.
+ * (e.g. Node > v7.6, or a recent version of a modern browser).
+ * If you are using `async` functions through a transpiler (e.g. Babel), you
+ * must still wrap the function with [asyncify]{@link module:Utils.asyncify},
+ * because the `async function` will be compiled to an ordinary function that
+ * returns a promise.
+ *
+ * @typedef {Function} AsyncFunction
+ * @static
+ */
+
+/**
  * Async is a utility module which provides straight-forward, powerful functions
  * for working with asynchronous JavaScript. Although originally designed for
  * use with [Node.js](http://nodejs.org) and installable via
  * `npm install --save async`, it can also be used directly in the browser.
  * @module async
+ * @see AsyncFunction
  */
 
 /**
@@ -318,6 +374,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * A collection of `async` utility functions.
  * @module Utils
  */
+
 exports.default = {
   applyEach: _applyEach2.default,
   applyEachSeries: _applyEachSeries2.default,
@@ -352,6 +409,9 @@ exports.default = {
   filterLimit: _filterLimit2.default,
   filterSeries: _filterSeries2.default,
   forever: _forever2.default,
+  groupBy: _groupBy2.default,
+  groupByLimit: _groupByLimit2.default,
+  groupBySeries: _groupBySeries2.default,
   log: _log2.default,
   map: _map2.default,
   mapLimit: _mapLimit2.default,
@@ -387,6 +447,7 @@ exports.default = {
   timesLimit: _timesLimit2.default,
   timesSeries: _timesSeries2.default,
   transform: _transform2.default,
+  tryEach: _tryEach2.default,
   unmemoize: _unmemoize2.default,
   until: _until2.default,
   waterfall: _waterfall2.default,
@@ -442,6 +503,9 @@ exports.filter = _filter2.default;
 exports.filterLimit = _filterLimit2.default;
 exports.filterSeries = _filterSeries2.default;
 exports.forever = _forever2.default;
+exports.groupBy = _groupBy2.default;
+exports.groupByLimit = _groupByLimit2.default;
+exports.groupBySeries = _groupBySeries2.default;
 exports.log = _log2.default;
 exports.map = _map2.default;
 exports.mapLimit = _mapLimit2.default;
@@ -477,6 +541,7 @@ exports.times = _times2.default;
 exports.timesLimit = _timesLimit2.default;
 exports.timesSeries = _timesSeries2.default;
 exports.transform = _transform2.default;
+exports.tryEach = _tryEach2.default;
 exports.unmemoize = _unmemoize2.default;
 exports.until = _until2.default;
 exports.waterfall = _waterfall2.default;

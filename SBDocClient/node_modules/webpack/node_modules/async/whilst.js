@@ -9,13 +9,17 @@ var _noop = require('lodash/noop');
 
 var _noop2 = _interopRequireDefault(_noop);
 
-var _rest = require('./internal/rest');
+var _slice = require('./internal/slice');
 
-var _rest2 = _interopRequireDefault(_rest);
+var _slice2 = _interopRequireDefault(_slice);
 
 var _onlyOnce = require('./internal/onlyOnce');
 
 var _onlyOnce2 = _interopRequireDefault(_onlyOnce);
+
+var _wrapAsync = require('./internal/wrapAsync');
+
+var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -30,9 +34,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @category Control Flow
  * @param {Function} test - synchronous truth test to perform before each
  * execution of `iteratee`. Invoked with ().
- * @param {Function} iteratee - A function which is called each time `test` passes.
- * The function is passed a `callback(err)`, which must be called once it has
- * completed with an optional `err` argument. Invoked with (callback).
+ * @param {AsyncFunction} iteratee - An async function which is called each time
+ * `test` passes. Invoked with (callback).
  * @param {Function} [callback] - A callback which is called after the test
  * function has failed and repeated execution of `iteratee` has stopped. `callback`
  * will be passed an error and any arguments passed to the final `iteratee`'s
@@ -56,12 +59,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 function whilst(test, iteratee, callback) {
     callback = (0, _onlyOnce2.default)(callback || _noop2.default);
+    var _iteratee = (0, _wrapAsync2.default)(iteratee);
     if (!test()) return callback(null);
-    var next = (0, _rest2.default)(function (err, args) {
+    var next = function (err /*, ...args*/) {
         if (err) return callback(err);
-        if (test()) return iteratee(next);
+        if (test()) return _iteratee(next);
+        var args = (0, _slice2.default)(arguments, 1);
         callback.apply(null, [null].concat(args));
-    });
-    iteratee(next);
+    };
+    _iteratee(next);
 }
 module.exports = exports['default'];

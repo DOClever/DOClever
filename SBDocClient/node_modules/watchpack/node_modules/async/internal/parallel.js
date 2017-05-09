@@ -13,9 +13,13 @@ var _isArrayLike = require('lodash/isArrayLike');
 
 var _isArrayLike2 = _interopRequireDefault(_isArrayLike);
 
-var _rest = require('./rest');
+var _slice = require('./slice');
 
-var _rest2 = _interopRequireDefault(_rest);
+var _slice2 = _interopRequireDefault(_slice);
+
+var _wrapAsync = require('./wrapAsync');
+
+var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -24,13 +28,13 @@ function _parallel(eachfn, tasks, callback) {
     var results = (0, _isArrayLike2.default)(tasks) ? [] : {};
 
     eachfn(tasks, function (task, key, callback) {
-        task((0, _rest2.default)(function (err, args) {
-            if (args.length <= 1) {
-                args = args[0];
+        (0, _wrapAsync2.default)(task)(function (err, result) {
+            if (arguments.length > 2) {
+                result = (0, _slice2.default)(arguments, 1);
             }
-            results[key] = args;
+            results[key] = result;
             callback(err);
-        }));
+        });
     }, function (err) {
         callback(err, results);
     });

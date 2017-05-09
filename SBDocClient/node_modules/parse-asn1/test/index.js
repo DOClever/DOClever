@@ -1,7 +1,6 @@
 var test = require('tape')
 var fs = require('fs')
 var parseKey = require('../')
-var crypto = require('crypto')
 var rsa1024 = {
   private: fs.readFileSync(__dirname + '/rsa.1024.priv'),
   public: fs.readFileSync(__dirname + '/rsa.1024.pub')
@@ -68,12 +67,16 @@ var rsapass2 = {
   },
   public: fs.readFileSync(__dirname + '/pass.rsa.2028.pub')
 }
+var cert = {
+  private: fs.readFileSync(__dirname + '/rsa.1024.priv'),
+  public: fs.readFileSync(__dirname + '/node.cert')
+}
 var i = 0
 function testIt (keys) {
   test('key ' + (++i), function (t) {
     t.plan(2)
-    t.ok(parseKey(keys.public, crypto), 'public key')
-    t.ok(parseKey(keys.private, crypto), 'private key')
+    t.ok(parseKey(keys.public), 'public key')
+    t.ok(parseKey(keys.private), 'private key')
   })
 }
 
@@ -90,3 +93,4 @@ testIt(rsapass)
 testIt(rsapass2)
 testIt(pass1024)
 testIt(pass1024)
+testIt(cert)

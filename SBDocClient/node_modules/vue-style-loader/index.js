@@ -32,23 +32,28 @@ module.exports.pitch = function (remainingRequest) {
 
   if (!isServer) {
     // on the client: dynamic inject + hot-reload
-    return shared.concat([
+    var code = [
       '// add the styles to the DOM',
-      'var update = require(' + addStylesClientPath + ')(' + id + ', content, ' + isProduction + ');',
-      '// Hot Module Replacement',
-      'if(module.hot) {',
-      ' // When the styles change, update the <style> tags',
-      ' if(!content.locals) {',
-      '   module.hot.accept(' + request + ', function() {',
-      '     var newContent = require(' + request + ');',
-      "     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];",
-      '     update(newContent);',
-      '   });',
-      ' }',
-      ' // When the module is disposed, remove the <style> tags',
-      ' module.hot.dispose(function() { update(); });',
-      '}'
-    ]).join('\n')
+      'var update = require(' + addStylesClientPath + ')(' + id + ', content, ' + isProduction + ');'
+    ]
+    if (!isProduction) {
+      code = code.concat([
+        '// Hot Module Replacement',
+        'if(module.hot) {',
+        ' // When the styles change, update the <style> tags',
+        ' if(!content.locals) {',
+        '   module.hot.accept(' + request + ', function() {',
+        '     var newContent = require(' + request + ');',
+        "     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];",
+        '     update(newContent);',
+        '   });',
+        ' }',
+        ' // When the module is disposed, remove the <style> tags',
+        ' module.hot.dispose(function() { update(); });',
+        '}'
+      ])
+    }
+    return shared.concat(code).join('\n')
   } else {
     // on the server: attach to Vue SSR context
     return shared.concat([

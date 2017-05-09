@@ -13,6 +13,10 @@ var _initialParams = require('./internal/initialParams');
 
 var _initialParams2 = _interopRequireDefault(_initialParams);
 
+var _setImmediate = require('./internal/setImmediate');
+
+var _setImmediate2 = _interopRequireDefault(_setImmediate);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
@@ -26,7 +30,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * resolved/rejected state will be used to call the callback, rather than simply
  * the synchronous return value.
  *
- * This also means you can asyncify ES2016 `async` functions.
+ * This also means you can asyncify ES2017 `async` functions.
  *
  * @name asyncify
  * @static
@@ -34,10 +38,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @method
  * @alias wrapSync
  * @category Util
- * @param {Function} func - The synchronous function to convert to an
- * asynchronous function.
- * @returns {Function} An asynchronous wrapper of the `func`. To be invoked with
- * (callback).
+ * @param {Function} func - The synchronous function, or Promise-returning
+ * function to convert to an {@link AsyncFunction}.
+ * @returns {AsyncFunction} An asynchronous wrapper of the `func`. To be
+ * invoked with `(args..., callback)`.
  * @example
  *
  * // passing a regular synchronous function
@@ -62,7 +66,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *     }
  * ], callback);
  *
- * // es6 example
+ * // es2017 example, though `asyncify` is not needed if your JS environment
+ * // supports async functions out of the box
  * var q = async.queue(async.asyncify(async function(file) {
  *     var intermediateStep = await processFile(file);
  *     return await somePromise(intermediateStep)
@@ -81,13 +86,25 @@ function asyncify(func) {
         // if result is Promise object
         if ((0, _isObject2.default)(result) && typeof result.then === 'function') {
             result.then(function (value) {
-                callback(null, value);
+                invokeCallback(callback, null, value);
             }, function (err) {
-                callback(err.message ? err : new Error(err));
+                invokeCallback(callback, err.message ? err : new Error(err));
             });
         } else {
             callback(null, result);
         }
     });
+}
+
+function invokeCallback(callback, error, value) {
+    try {
+        callback(error, value);
+    } catch (e) {
+        (0, _setImmediate2.default)(rethrow, e);
+    }
+}
+
+function rethrow(error) {
+    throw error;
 }
 module.exports = exports['default'];

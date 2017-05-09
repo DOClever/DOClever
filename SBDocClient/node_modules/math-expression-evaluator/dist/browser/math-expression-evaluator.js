@@ -1,5 +1,5 @@
-/** math-expression-evaluator version 1.2.16
- Dated:2017-02-02 */
+/** math-expression-evaluator version 1.2.17
+ Dated:2017-04-28 */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.mexp = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var Mexp=require('./postfix_evaluator.js');
@@ -616,7 +616,7 @@ Mexp.prototype.postfixEval = function (UserDefined) {
 	if (stack.length>1) {
 		throw(new Mexp.exception("Uncaught Syntax error"));
 	}
-	return stack[0].value>1000000000000000?"Infinity":Number(stack[0].value.toFixed(15)).toPrecision();
+	return stack[0].value>1000000000000000?"Infinity":parseFloat(stack[0].value.toFixed(15));
 };
 Mexp.eval=function(str,tokens,obj){
 	if (typeof tokens==="undefined") {

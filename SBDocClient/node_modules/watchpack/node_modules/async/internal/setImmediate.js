@@ -7,9 +7,9 @@ exports.hasNextTick = exports.hasSetImmediate = undefined;
 exports.fallback = fallback;
 exports.wrap = wrap;
 
-var _rest = require('./rest');
+var _slice = require('./slice');
 
-var _rest2 = _interopRequireDefault(_rest);
+var _slice2 = _interopRequireDefault(_slice);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -21,11 +21,12 @@ function fallback(fn) {
 }
 
 function wrap(defer) {
-    return (0, _rest2.default)(function (fn, args) {
+    return function (fn /*, ...args*/) {
+        var args = (0, _slice2.default)(arguments, 1);
         defer(function () {
             fn.apply(null, args);
         });
-    });
+    };
 }
 
 var _defer;

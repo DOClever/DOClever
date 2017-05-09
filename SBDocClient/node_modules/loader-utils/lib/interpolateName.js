@@ -37,18 +37,15 @@ function interpolateName(loaderContext, name, options) {
 	let directory = "";
 	let folder = "";
 	if(loaderContext.resourcePath) {
+		const parsed = path.parse(loaderContext.resourcePath);
 		let resourcePath = loaderContext.resourcePath;
-		const idx = resourcePath.lastIndexOf(".");
-		const i = resourcePath.lastIndexOf("\\");
-		const j = resourcePath.lastIndexOf("/");
-		const p = i < 0 ? j : j < 0 ? i : i < j ? i : j;
-		if(idx >= 0) {
-			ext = resourcePath.substr(idx + 1);
-			resourcePath = resourcePath.substr(0, idx);
+
+		if(parsed.ext) {
+			ext = parsed.ext.substr(1);
 		}
-		if(p >= 0) {
-			basename = resourcePath.substr(p + 1);
-			resourcePath = resourcePath.substr(0, p + 1);
+		if(parsed.dir) {
+			basename = parsed.name;
+			resourcePath = parsed.dir + path.sep;
 		}
 		if(typeof context !== "undefined") {
 			directory = path.relative(context, resourcePath + "_").replace(/\\/g, "/").replace(/\.\.(\/)?/g, "_$1");

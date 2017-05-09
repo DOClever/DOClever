@@ -5,15 +5,16 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function (fn) {
-    return (0, _rest2.default)(function (args /*..., callback*/) {
+    return function () /*...args, callback*/{
+        var args = (0, _slice2.default)(arguments);
         var callback = args.pop();
         fn.call(this, args, callback);
-    });
+    };
 };
 
-var _rest = require('./rest');
+var _slice = require('./slice');
 
-var _rest2 = _interopRequireDefault(_rest);
+var _slice2 = _interopRequireDefault(_slice);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 

@@ -27,7 +27,10 @@ DLL.prototype.removeLink = function (node) {
     return node;
 };
 
-DLL.prototype.empty = DLL;
+DLL.prototype.empty = function () {
+    while (this.head) this.shift();
+    return this;
+};
 
 DLL.prototype.insertAfter = function (node, newNode) {
     newNode.prev = node;
@@ -59,5 +62,27 @@ DLL.prototype.shift = function () {
 
 DLL.prototype.pop = function () {
     return this.tail && this.removeLink(this.tail);
+};
+
+DLL.prototype.toArray = function () {
+    var arr = Array(this.length);
+    var curr = this.head;
+    for (var idx = 0; idx < this.length; idx++) {
+        arr[idx] = curr.data;
+        curr = curr.next;
+    }
+    return arr;
+};
+
+DLL.prototype.remove = function (testFn) {
+    var curr = this.head;
+    while (!!curr) {
+        var next = curr.next;
+        if (testFn(curr)) {
+            this.removeLink(curr);
+        }
+        curr = next;
+    }
+    return this;
 };
 module.exports = exports["default"];

@@ -1,3 +1,6 @@
+v1.3.0
+  * Additionally include chromium to electron mappings
+
 v1.2.0
   * versions and full-versions are now separately importable.
 

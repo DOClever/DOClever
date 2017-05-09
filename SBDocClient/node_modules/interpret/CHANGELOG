@@ -1,3 +1,15 @@
+v1.0.3:
+  date: 2017-04-18
+  changes:
+    - fix buble support
+v1.0.2:
+  date: 2017-03-29
+  changes:
+    - add support for coffeescript (now with no hyphen)
+v1.0.1:
+  date: 2016-05-01
+  changes:
+    - add support for buble
 v1.0.0:
   date: 2015-11-18
   changes:

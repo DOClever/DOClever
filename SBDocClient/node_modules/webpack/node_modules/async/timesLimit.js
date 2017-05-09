@@ -13,6 +13,10 @@ var _baseRange = require('lodash/_baseRange');
 
 var _baseRange2 = _interopRequireDefault(_baseRange);
 
+var _wrapAsync = require('./internal/wrapAsync');
+
+var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
@@ -27,11 +31,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @category Control Flow
  * @param {number} count - The number of times to run the function.
  * @param {number} limit - The maximum number of async operations at a time.
- * @param {Function} iteratee - The function to call `n` times. Invoked with the
- * iteration index and a callback (n, next).
+ * @param {AsyncFunction} iteratee - The async function to call `n` times.
+ * Invoked with the iteration index and a callback: (n, next).
  * @param {Function} callback - see [async.map]{@link module:Collections.map}.
  */
 function timeLimit(count, limit, iteratee, callback) {
-  (0, _mapLimit2.default)((0, _baseRange2.default)(0, count, 1), limit, iteratee, callback);
+  var _iteratee = (0, _wrapAsync2.default)(iteratee);
+  (0, _mapLimit2.default)((0, _baseRange2.default)(0, count, 1), limit, _iteratee, callback);
 }
 module.exports = exports['default'];

@@ -9,6 +9,10 @@ var _noop = require('lodash/noop');
 
 var _noop2 = _interopRequireDefault(_noop);
 
+var _wrapAsync = require('./wrapAsync');
+
+var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncMap(eachfn, arr, iteratee, callback) {
@@ -16,10 +20,11 @@ function _asyncMap(eachfn, arr, iteratee, callback) {
     arr = arr || [];
     var results = [];
     var counter = 0;
+    var _iteratee = (0, _wrapAsync2.default)(iteratee);
 
     eachfn(arr, function (value, _, callback) {
         var index = counter++;
-        iteratee(value, function (err, v) {
+        _iteratee(value, function (err, v) {
             results[index] = v;
             callback(err);
         });

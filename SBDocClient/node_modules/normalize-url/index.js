@@ -98,9 +98,8 @@ module.exports = function (str, opts) {
 
 		if (testParameter(lastComponent, opts.removeDirectoryIndex)) {
 			pathComponents = pathComponents.slice(0, pathComponents.length - 1);
+			urlObj.pathname = pathComponents.slice(1).join('/') + '/';
 		}
-
-		urlObj.pathname = pathComponents.slice(1).join('/') + '/';
 	}
 
 	// resolve relative paths, but only for slashed protocols

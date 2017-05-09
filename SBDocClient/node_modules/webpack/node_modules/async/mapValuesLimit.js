@@ -17,6 +17,10 @@ var _once = require('./internal/once');
 
 var _once2 = _interopRequireDefault(_once);
 
+var _wrapAsync = require('./internal/wrapAsync');
+
+var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
@@ -31,10 +35,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @category Collection
  * @param {Object} obj - A collection to iterate over.
  * @param {number} limit - The maximum number of async operations at a time.
- * @param {Function} iteratee - A function to apply to each value in `obj`.
- * The iteratee is passed a `callback(err, transformed)` which must be called
- * once it has completed with an error (which can be `null`) and a
- * transformed value. Invoked with (value, key, callback).
+ * @param {AsyncFunction} iteratee - A function to apply to each value and key
+ * in `coll`.
+ * The iteratee should complete with the transformed value as its result.
+ * Invoked with (value, key, callback).
  * @param {Function} [callback] - A callback which is called when all `iteratee`
  * functions have finished, or an error occurs. `result` is a new object consisting
  * of each key from `obj`, with each transformed value on the right-hand side.
@@ -43,8 +47,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function mapValuesLimit(obj, limit, iteratee, callback) {
     callback = (0, _once2.default)(callback || _noop2.default);
     var newObj = {};
+    var _iteratee = (0, _wrapAsync2.default)(iteratee);
     (0, _eachOfLimit2.default)(obj, limit, function (val, key, next) {
-        iteratee(val, key, function (err, result) {
+        _iteratee(val, key, function (err, result) {
             if (err) return next(err);
             newObj[key] = result;
             next();

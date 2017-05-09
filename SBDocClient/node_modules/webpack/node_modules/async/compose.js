@@ -4,15 +4,21 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+exports.default = function () /*...args*/{
+  return _seq2.default.apply(null, (0, _slice2.default)(arguments).reverse());
+};
+
 var _seq = require('./seq');
 
 var _seq2 = _interopRequireDefault(_seq);
 
-var _rest = require('./internal/rest');
+var _slice = require('./internal/slice');
 
-var _rest2 = _interopRequireDefault(_rest);
+var _slice2 = _interopRequireDefault(_slice);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+;
 
 /**
  * Creates a function which is a composition of the passed asynchronous
@@ -27,7 +33,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @memberOf module:ControlFlow
  * @method
  * @category Control Flow
- * @param {...Function} functions - the asynchronous functions to compose
+ * @param {...AsyncFunction} functions - the asynchronous functions to compose
  * @returns {Function} an asynchronous function that is the composed
  * asynchronous `functions`
  * @example
@@ -49,7 +55,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *     // result now equals 15
  * });
  */
-exports.default = (0, _rest2.default)(function (args) {
-  return _seq2.default.apply(null, args.reverse());
-});
 module.exports = exports['default'];

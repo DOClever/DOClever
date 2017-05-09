@@ -9,9 +9,9 @@ var _identity = require('lodash/identity');
 
 var _identity2 = _interopRequireDefault(_identity);
 
-var _rest = require('./internal/rest');
+var _slice = require('./internal/slice');
 
-var _rest2 = _interopRequireDefault(_rest);
+var _slice2 = _interopRequireDefault(_slice);
 
 var _setImmediate = require('./internal/setImmediate');
 
@@ -21,6 +21,10 @@ var _initialParams = require('./internal/initialParams');
 
 var _initialParams2 = _interopRequireDefault(_initialParams);
 
+var _wrapAsync = require('./internal/wrapAsync');
+
+var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function has(obj, key) {
@@ -28,7 +32,7 @@ function has(obj, key) {
 }
 
 /**
- * Caches the results of an `async` function. When creating a hash to store
+ * Caches the results of an async function. When creating a hash to store
  * function results against, the callback is omitted from the hash and an
  * optional hash function can be used.
  *
@@ -46,11 +50,11 @@ function has(obj, key) {
  * @memberOf module:Utils
  * @method
  * @category Util
- * @param {Function} fn - The function to proxy and cache results from.
+ * @param {AsyncFunction} fn - The async function to proxy and cache results from.
  * @param {Function} hasher - An optional function for generating a custom hash
  * for storing results. It has all the arguments applied to it apart from the
  * callback, and must be synchronous.
- * @returns {Function} a memoized version of `fn`
+ * @returns {AsyncFunction} a memoized version of `fn`
  * @example
  *
  * var slow_fn = function(name, callback) {
@@ -68,6 +72,7 @@ function memoize(fn, hasher) {
     var memo = Object.create(null);
     var queues = Object.create(null);
     hasher = hasher || _identity2.default;
+    var _fn = (0, _wrapAsync2.default)(fn);
     var memoized = (0, _initialParams2.default)(function memoized(args, callback) {
         var key = hasher.apply(null, args);
         if (has(memo, key)) {
@@ -78,14 +83,15 @@ function memoize(fn, hasher) {
             queues[key].push(callback);
         } else {
             queues[key] = [callback];
-            fn.apply(null, args.concat((0, _rest2.default)(function (args) {
+            _fn.apply(null, args.concat(function () /*args*/{
+                var args = (0, _slice2.default)(arguments);
                 memo[key] = args;
                 var q = queues[key];
                 delete queues[key];
                 for (var i = 0, l = q.length; i < l; i++) {
                     q[i].apply(null, args);
                 }
-            })));
+            }));
         }
     });
     memoized.memo = memo;

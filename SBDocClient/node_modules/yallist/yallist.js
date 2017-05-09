@@ -49,7 +49,7 @@ Yallist.prototype.removeNode = function (node) {
     this.tail = prev
   }
 
-  node.list.length --
+  node.list.length--
   node.next = null
   node.prev = null
   node.list = null
@@ -75,7 +75,7 @@ Yallist.prototype.unshiftNode = function (node) {
   if (!this.tail) {
     this.tail = node
   }
-  this.length ++
+  this.length++
 }
 
 Yallist.prototype.pushNode = function (node) {
@@ -98,7 +98,7 @@ Yallist.prototype.pushNode = function (node) {
   if (!this.head) {
     this.head = node
   }
-  this.length ++
+  this.length++
 }
 
 Yallist.prototype.push = function () {
@@ -116,24 +116,34 @@ Yallist.prototype.unshift = function () {
 }
 
 Yallist.prototype.pop = function () {
-  if (!this.tail)
+  if (!this.tail) {
     return undefined
+  }
 
   var res = this.tail.value
   this.tail = this.tail.prev
-  this.tail.next = null
-  this.length --
+  if (this.tail) {
+    this.tail.next = null
+  } else {
+    this.head = null
+  }
+  this.length--
   return res
 }
 
 Yallist.prototype.shift = function () {
-  if (!this.head)
+  if (!this.head) {
     return undefined
+  }
 
   var res = this.head.value
   this.head = this.head.next
-  this.head.prev = null
-  this.length --
+  if (this.head) {
+    this.head.prev = null
+  } else {
+    this.tail = null
+  }
+  this.length--
   return res
 }
 
@@ -176,7 +186,7 @@ Yallist.prototype.getReverse = function (n) {
 Yallist.prototype.map = function (fn, thisp) {
   thisp = thisp || this
   var res = new Yallist()
-  for (var walker = this.head; walker !== null; ) {
+  for (var walker = this.head; walker !== null;) {
     res.push(fn.call(thisp, walker.value, this))
     walker = walker.next
   }
@@ -325,7 +335,7 @@ function push (self, item) {
   if (!self.head) {
     self.head = self.tail
   }
-  self.length ++
+  self.length++
 }
 
 function unshift (self, item) {
@@ -333,7 +343,7 @@ function unshift (self, item) {
   if (!self.tail) {
     self.tail = self.head
   }
-  self.length ++
+  self.length++
 }
 
 function Node (value, prev, next, list) {

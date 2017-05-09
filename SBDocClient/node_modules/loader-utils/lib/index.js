@@ -1,6 +1,7 @@
 "use strict";
 
 const getOptions = require("./getOptions");
+const parseQuery = require("./parseQuery");
 const stringifyRequest = require("./stringifyRequest");
 const getRemainingRequest = require("./getRemainingRequest");
 const getCurrentRequest = require("./getCurrentRequest");
@@ -11,6 +12,7 @@ const getHashDigest = require("./getHashDigest");
 const interpolateName = require("./interpolateName");
 
 exports.getOptions = getOptions;
+exports.parseQuery = parseQuery;
 exports.stringifyRequest = stringifyRequest;
 exports.getRemainingRequest = getRemainingRequest;
 exports.getCurrentRequest = getCurrentRequest;

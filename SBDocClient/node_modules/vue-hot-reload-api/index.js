@@ -95,6 +95,12 @@ function tryWrap (fn) {
 
 exports.rerender = tryWrap(function (id, options) {
   var record = map[id]
+  if (!options) {
+    record.instances.slice().forEach(function (instance) {
+      instance.$forceUpdate()
+    })
+    return
+  }
   if (typeof options === 'function') {
     options = options.options
   }
@@ -109,22 +115,24 @@ exports.rerender = tryWrap(function (id, options) {
 })
 
 exports.reload = tryWrap(function (id, options) {
-  if (typeof options === 'function') {
-    options = options.options
-  }
-  makeOptionsHot(id, options)
   var record = map[id]
-  if (version[1] < 2) {
-    // preserve pre 2.2 behavior for global mixin handling
-    record.Ctor.extendOptions = options
-  }
-  var newCtor = record.Ctor.super.extend(options)
-  record.Ctor.options = newCtor.options
-  record.Ctor.cid = newCtor.cid
-  record.Ctor.prototype = newCtor.prototype
-  if (newCtor.release) {
-    // temporary global mixin strategy used in < 2.0.0-alpha.6
-    newCtor.release()
+  if (options) {
+    if (typeof options === 'function') {
+      options = options.options
+    }
+    makeOptionsHot(id, options)
+    if (version[1] < 2) {
+      // preserve pre 2.2 behavior for global mixin handling
+      record.Ctor.extendOptions = options
+    }
+    var newCtor = record.Ctor.super.extend(options)
+    record.Ctor.options = newCtor.options
+    record.Ctor.cid = newCtor.cid
+    record.Ctor.prototype = newCtor.prototype
+    if (newCtor.release) {
+      // temporary global mixin strategy used in < 2.0.0-alpha.6
+      newCtor.release()
+    }
   }
   record.instances.slice().forEach(function (instance) {
     if (instance.$vnode && instance.$vnode.context) {

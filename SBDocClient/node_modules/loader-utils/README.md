@@ -36,10 +36,23 @@ someLibrary(options);
 
 #### Options as query strings
 
-If the loader options have been passed as loader query string (`loader?some&params`), the string is parsed like this:
+If the loader options have been passed as loader query string (`loader?some&params`), the string is parsed by using [`parseQuery`](#parsequery).
+
+### `parseQuery`
+
+Parses a passed string (e.g. `loaderContext.resourceQuery`) as a query string, and returns an object.
+
+``` javascript
+const params = loaderUtils.parseQuery(this.resourceQuery); // resource: `file?param1=foo`
+if (params.param1 === "foo") {
+	// do something
+}
+```
+
+The string is parsed like this:
 
 ``` text
-                             -> null
+                             -> Error
 ?                            -> {}
 ?flag                        -> { flag: true }
 ?+flag                       -> { flag: true }
@@ -103,8 +116,8 @@ loaderUtils.stringifyRequest(this, "\\\\network-drive\\test.js");
 Converts some resource URL to a webpack module request.
 
 ```javascript
-var url = "path/to/module.js";
-var request = loaderUtils.urlToRequest(url); // "./path/to/module.js"
+const url = "path/to/module.js";
+const request = loaderUtils.urlToRequest(url); // "./path/to/module.js"
 ```
 
 #### Module URLs
@@ -112,8 +125,8 @@ var request = loaderUtils.urlToRequest(url); // "./path/to/module.js"
 Any URL containing a `~` will be interpreted as a module request. Anything after the `~` will be considered the request path.
 
 ```javascript
-var url = "~path/to/module.js";
-var request = loaderUtils.urlToRequest(url); // "path/to/module.js"
+const url = "~path/to/module.js";
+const request = loaderUtils.urlToRequest(url); // "path/to/module.js"
 ```
 
 #### Root-relative URLs
@@ -121,17 +134,17 @@ var request = loaderUtils.urlToRequest(url); // "path/to/module.js"
 URLs that are root-relative (start with `/`) can be resolved relative to some arbitrary path by using the `root` parameter:
 
 ```javascript
-var url = "/path/to/module.js";
-var root = "./root";
-var request = loaderUtils.urlToRequest(url, root); // "./root/path/to/module.js"
+const url = "/path/to/module.js";
+const root = "./root";
+const request = loaderUtils.urlToRequest(url, root); // "./root/path/to/module.js"
 ```
 
 To convert a root-relative URL into a module URL, specify a `root` value that starts with `~`:
 
 ```javascript
-var url = "/path/to/module.js";
-var root = "~";
-var request = loaderUtils.urlToRequest(url, root); // "path/to/module.js"
+const url = "/path/to/module.js";
+const root = "~";
+const request = loaderUtils.urlToRequest(url, root); // "path/to/module.js"
 ```
 
 ### `interpolateName`
@@ -140,7 +153,7 @@ Interpolates a filename template using multiple placeholders and/or a regular ex
 The template and regular expression are set as query params called `name` and `regExp` on the current loader's context.
 
 ```javascript
-var interpolatedName = loaderUtils.interpolateName(loaderContext, name, options);
+const interpolatedName = loaderUtils.interpolateName(loaderContext, name, options);
 ```
 
 The following tokens are replaced in the `name` parameter:
@@ -203,7 +216,7 @@ loaderUtils.interpolateName(loaderContext, "script-[1].[ext]", { regExp: "page-(
 ### `getHashDigest`
 
 ``` javascript
-var digestString = loaderUtils.getHashDigest(buffer, hashType, digestType, maxLength);
+const digestString = loaderUtils.getHashDigest(buffer, hashType, digestType, maxLength);
 ```
 
 * `buffer` the content that should be hashed

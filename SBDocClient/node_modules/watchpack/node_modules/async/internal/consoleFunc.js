@@ -9,15 +9,21 @@ var _arrayEach = require('lodash/_arrayEach');
 
 var _arrayEach2 = _interopRequireDefault(_arrayEach);
 
-var _rest = require('./rest');
+var _slice = require('./slice');
 
-var _rest2 = _interopRequireDefault(_rest);
+var _slice2 = _interopRequireDefault(_slice);
+
+var _wrapAsync = require('./wrapAsync');
+
+var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function consoleFunc(name) {
-    return (0, _rest2.default)(function (fn, args) {
-        fn.apply(null, args.concat((0, _rest2.default)(function (err, args) {
+    return function (fn /*, ...args*/) {
+        var args = (0, _slice2.default)(arguments, 1);
+        args.push(function (err /*, ...args*/) {
+            var args = (0, _slice2.default)(arguments, 1);
             if (typeof console === 'object') {
                 if (err) {
                     if (console.error) {
@@ -29,7 +35,8 @@ function consoleFunc(name) {
                     });
                 }
             }
-        })));
-    });
+        });
+        (0, _wrapAsync2.default)(fn).apply(null, args);
+    };
 }
 module.exports = exports['default'];

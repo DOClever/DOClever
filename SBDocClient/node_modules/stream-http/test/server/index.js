@@ -32,13 +32,17 @@ app.get('/testHeaders', function (req, res) {
 	})
 
 	res.setHeader('Content-Type', 'application/json')
+	res.setHeader('Cache-Control', 'no-cache')
 
 	// Request headers are sent in the body as json
 	var reqHeaders = {}
 	Object.keys(req.headers).forEach(function (key) {
 		key = key.toLowerCase()
-		if (key.indexOf('test-') === 0)
-			reqHeaders[key] = req.headers[key]
+		if (key.indexOf('test-') === 0) {
+			// different browsers format request headers with multiple values
+			// slightly differently, so normalize
+			reqHeaders[key] = req.headers[key].replace(', ', ',')
+		}
 	})
 
 	var body = JSON.stringify(reqHeaders)

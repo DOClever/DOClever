@@ -7025,6 +7025,8 @@ var Identifier$1 = (function (Node$$1) {
 			!(this.parent.type === 'MemberExpression' && this.parent.property === this && !this.parent.computed) &&
 			// not in an Array destructure pattern
 			!(this.parent.type === 'ArrayPattern') &&
+			// not in an Object destructure pattern
+			!(this.parent.parent.type === 'ObjectPattern') &&
 			// skip globals + commonly used shorthands
 			!hash[this.name] &&
 			// not already in scope

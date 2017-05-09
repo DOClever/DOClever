@@ -15,7 +15,7 @@ browsers:
   - name: iphone
     version: '8.1..latest'
   - name: android
-    version: '4.0..latest'
+    version: '4.4..latest'
 server: ./test/server/index.js
 scripts:
   - "/ie8-polyfill.js"
