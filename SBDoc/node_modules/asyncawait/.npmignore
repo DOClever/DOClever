@@ -1,6 +1,0 @@
-*.sln
-*.suo
-*.user
-*.map
-obj/
-node_modules/
