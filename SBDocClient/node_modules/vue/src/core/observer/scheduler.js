@@ -2,18 +2,14 @@
 
 import type Watcher from './watcher'
 import config from '../config'
-import { callHook, activateChildComponent } from '../instance/lifecycle'
-
+import { callHook } from '../instance/lifecycle'
 import {
   warn,
   nextTick,
   devtools
 } from '../util/index'
 
-export const MAX_UPDATE_COUNT = 100
-
 const queue: Array<Watcher> = []
-const activatedChildren: Array<Component> = []
 let has: { [key: number]: ?true } = {}
 let circular: { [key: number]: number } = {}
 let waiting = false
@@ -24,7 +20,7 @@ let index = 0
  * Reset the scheduler's state.
  */
 function resetSchedulerState () {
-  queue.length = activatedChildren.length = 0
+  queue.length = 0
   has = {}
   if (process.env.NODE_ENV !== 'production') {
     circular = {}
@@ -37,7 +33,7 @@ function resetSchedulerState () {
  */
 function flushSchedulerQueue () {
   flushing = true
-  let watcher, id
+  let watcher, id, vm
 
   // Sort queue before flush.
   // This ensures that:
@@ -59,7 +55,7 @@ function flushSchedulerQueue () {
     // in dev build, check and stop circular updates.
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
-      if (circular[id] > MAX_UPDATE_COUNT) {
+      if (circular[id] > config._maxUpdateCount) {
         warn(
           'You may have an infinite update loop ' + (
             watcher.user
@@ -73,50 +69,23 @@ function flushSchedulerQueue () {
     }
   }
 
-  // keep copies of post queues before resetting state
-  const activatedQueue = activatedChildren.slice()
-  const updatedQueue = queue.slice()
-
-  resetSchedulerState()
-
-  // call component updated and activated hooks
-  callActivatedHooks(activatedQueue)
-  callUpdateHooks(updatedQueue)
+  // call updated hooks
+  index = queue.length
+  while (index--) {
+    watcher = queue[index]
+    vm = watcher.vm
+    if (vm._watcher === watcher && vm._isMounted) {
+      callHook(vm, 'updated')
+    }
+  }
 
   // devtool hook
   /* istanbul ignore if */
   if (devtools && config.devtools) {
     devtools.emit('flush')
   }
-}
 
-function callUpdateHooks (queue) {
-  let i = queue.length
-  while (i--) {
-    const watcher = queue[i]
-    const vm = watcher.vm
-    if (vm._watcher === watcher && vm._isMounted) {
-      callHook(vm, 'updated')
-    }
-  }
-}
-
-/**
- * Queue a kept-alive component that was activated during patch.
- * The queue will be processed after the entire tree has been patched.
- */
-export function queueActivatedComponent (vm: Component) {
-  // setting _inactive to false here so that a render function can
-  // rely on checking whether it's in an inactive tree (e.g. router-view)
-  vm._inactive = false
-  activatedChildren.push(vm)
-}
-
-function callActivatedHooks (queue) {
-  for (let i = 0; i < queue.length; i++) {
-    queue[i]._inactive = true
-    activateChildComponent(queue[i], true /* true */)
-  }
+  resetSchedulerState()
 }
 
 /**

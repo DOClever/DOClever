@@ -119,18 +119,20 @@ $.startLoading=function () {
 }
 
 $.stopLoading=function () {
-    var ele=document.getElementById("SBDocStartLoading");
-    if(ele)
-    {
-        $.addClass(ele,"animated fadeOut");
-        $.once(ele,"webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend",function () {
-            var ele=document.getElementById("SBDocStartLoading");
-            if(ele)
-            {
-                ele.parentNode.removeChild(ele);
-            }
-        })
-    }
+    setTimeout(function () {
+        var ele=document.getElementById("SBDocStartLoading");
+        if(ele)
+        {
+            $.addClass(ele,"animated fadeOut");
+            $.once(ele,"webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend",function () {
+                var ele=document.getElementById("SBDocStartLoading");
+                if(ele)
+                {
+                    ele.parentNode.removeChild(ele);
+                }
+            })
+        }
+    },100);
 }
 
 $.animate=function (ele,style) {
@@ -373,6 +375,25 @@ $.parseURL=function(url) {
     };
 }
 
+$.createUrlObject=function(obj) {
+    if (window.createObjectURL != undefined) { // basic
+        return window.createObjectURL(obj);
+    }  else if (window.URL != undefined) { // mozilla(firefox)
+        return window.URL.createObjectURL(obj);
+    } else if (window.webkitURL != undefined) { // webkit or chrome
+        return window.webkitURL.createObjectURL(obj);
+    }
+}
+
+$.revokeUrlObject=function(obj) {
+    if (window.createObjectURL != undefined) { // basic
+        return window.revokeObjectURL(obj);
+    }  else if (window.URL != undefined) { // mozilla(firefox)
+        return window.URL.revokeObjectURL(obj);
+    } else if (window.webkitURL != undefined) { // webkit or chrome
+        return window.webkitURL.revokeObjectURL(obj);
+    }
+}
 
 module.exports=$;
 

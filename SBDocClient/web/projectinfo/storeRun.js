@@ -2,6 +2,7 @@
  * Created by sunxin on 2017/2/28.
  */
 var config=require("../util/config")
+var bus=require("../bus/projectInfoBus")
 module.exports=new Vuex.Store({
     state:{
         interface:{},
@@ -877,9 +878,14 @@ module.exports=new Vuex.Store({
                 }
                 else if(result.header["content-type"] && result.header["content-type"].indexOf("image/")>-1)
                 {
+                    if(context.state.imgUrl)
+                    {
+                        $.revokeUrlObject(context.state.imgUrl);
+                        context.state.imgUrl=""
+                    }
                     context.state.type="img";
                     context.state.rawData="";
-                    context.state.imgUrl=baseUrl+path;
+                    context.state.imgUrl=$.createUrlObject(result.data);
                     context.state.errorCount=0;
                 }
                 else
@@ -907,6 +913,11 @@ module.exports=new Vuex.Store({
             })
         },
         save:function (context) {
+            if(context.state.imgUrl)
+            {
+                $.revokeUrlObject(context.state.imgUrl);
+                context.state.imgUrl=""
+            }
             var method=context.state.interface.method;
             var baseUrl=$.trim(context.state.baseUrl);
             var path=$.trim(context.state.interface.url);
@@ -1087,9 +1098,9 @@ module.exports=new Vuex.Store({
                         $.stopHud();
                         if(data.code==200)
                         {
+                            bus.$emit("addBaseUrl",baseUrl);
                             $.notify("添加baseUrl成功",1);
                             return pro;
-
                         }
                         else
                         {

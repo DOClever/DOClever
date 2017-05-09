@@ -166,6 +166,9 @@ module.exports=new Vuex.Store({
         setBaseUrls:function (state,data) {
             state.baseUrls=data;
         },
+        addBaseUrls:function (state,data) {
+            state.baseUrls.push(data);
+        },
         setSearch:function (state,data) {
             state.search=data;
         },

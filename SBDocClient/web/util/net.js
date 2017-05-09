@@ -3,7 +3,7 @@
  */
 var config=require("./config");
 var resource=require("vue-resource")
-Vue.use(resource);
+Vue.use(resource)
 var net={};
 function getAllHeaders(obj) {
     var result={};
@@ -11,7 +11,7 @@ function getAllHeaders(obj) {
     {
         if(obj.map.hasOwnProperty(key))
         {
-            result[key]=obj.map[key][0];
+            result[key.toLowerCase()]=obj.map[key][0];
         }
     }
     return result;

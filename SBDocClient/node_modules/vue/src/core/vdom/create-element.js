@@ -1,22 +1,10 @@
 /* @flow */
 
-import config from '../config'
 import VNode, { createEmptyVNode } from './vnode'
+import config from '../config'
 import { createComponent } from './create-component'
-
-import {
-  warn,
-  isDef,
-  isUndef,
-  isTrue,
-  isPrimitive,
-  resolveAsset
-} from '../util/index'
-
-import {
-  normalizeChildren,
-  simpleNormalizeChildren
-} from './helpers/index'
+import { normalizeChildren, simpleNormalizeChildren } from './helpers/index'
+import { warn, resolveAsset, isPrimitive } from '../util/index'
 
 const SIMPLE_NORMALIZE = 1
 const ALWAYS_NORMALIZE = 2
@@ -36,9 +24,7 @@ export function createElement (
     children = data
     data = undefined
   }
-  if (isTrue(alwaysNormalize)) {
-    normalizationType = ALWAYS_NORMALIZE
-  }
+  if (alwaysNormalize) normalizationType = ALWAYS_NORMALIZE
   return _createElement(context, tag, data, children, normalizationType)
 }
 
@@ -49,7 +35,7 @@ export function _createElement (
   children?: any,
   normalizationType?: number
 ): VNode {
-  if (isDef(data) && isDef((data: any).__ob__)) {
+  if (data && data.__ob__) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
       'Always create fresh vnode data objects in each render!',
@@ -83,7 +69,7 @@ export function _createElement (
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
-    } else if (isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+    } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
@@ -99,7 +85,7 @@ export function _createElement (
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children)
   }
-  if (isDef(vnode)) {
+  if (vnode) {
     if (ns) applyNS(vnode, ns)
     return vnode
   } else {
@@ -113,10 +99,10 @@ function applyNS (vnode, ns) {
     // use default namespace inside foreignObject
     return
   }
-  if (isDef(vnode.children)) {
+  if (vnode.children) {
     for (let i = 0, l = vnode.children.length; i < l; i++) {
       const child = vnode.children[i]
-      if (isDef(child.tag) && isUndef(child.ns)) {
+      if (child.tag && !child.ns) {
         applyNS(child, ns)
       }
     }

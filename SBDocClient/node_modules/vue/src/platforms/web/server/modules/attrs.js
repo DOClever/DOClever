@@ -1,12 +1,5 @@
 /* @flow */
 
-import { escape } from 'he'
-
-import {
-  isDef,
-  isUndef
-} from 'shared/util'
-
 import {
   isBooleanAttr,
   isEnumeratedAttr,
@@ -18,14 +11,14 @@ export default function renderAttrs (node: VNodeWithData): string {
   let res = ''
 
   let parent = node.parent
-  while (isDef(parent)) {
-    if (isDef(parent.data) && isDef(parent.data.attrs)) {
+  while (parent) {
+    if (parent.data && parent.data.attrs) {
       attrs = Object.assign({}, attrs, parent.data.attrs)
     }
     parent = parent.parent
   }
 
-  if (isUndef(attrs)) {
+  if (!attrs) {
     return res
   }
 
@@ -47,7 +40,7 @@ export function renderAttr (key: string, value: string): string {
   } else if (isEnumeratedAttr(key)) {
     return ` ${key}="${isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'}"`
   } else if (!isFalsyAttrValue(value)) {
-    return ` ${key}="${typeof value === 'string' ? escape(value) : value}"`
+    return ` ${key}="${value}"`
   }
   return ''
 }

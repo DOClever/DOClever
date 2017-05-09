@@ -1,18 +1,18 @@
 /* @flow */
 
-import { isDef, isUndef, isObject } from 'shared/util'
+import { isObject } from 'shared/util'
 
 export function genClassForVnode (vnode: VNode): string {
   let data = vnode.data
   let parentNode = vnode
   let childNode = vnode
-  while (isDef(childNode.componentInstance)) {
+  while (childNode.componentInstance) {
     childNode = childNode.componentInstance._vnode
     if (childNode.data) {
       data = mergeClassData(childNode.data, data)
     }
   }
-  while (isDef(parentNode = parentNode.parent)) {
+  while ((parentNode = parentNode.parent)) {
     if (parentNode.data) {
       data = mergeClassData(data, parentNode.data)
     }
@@ -26,7 +26,7 @@ function mergeClassData (child: VNodeData, parent: VNodeData): {
 } {
   return {
     staticClass: concat(child.staticClass, parent.staticClass),
-    class: isDef(child.class)
+    class: child.class
       ? [child.class, parent.class]
       : parent.class
   }
@@ -35,7 +35,7 @@ function mergeClassData (child: VNodeData, parent: VNodeData): {
 function genClassFromData (data: Object): string {
   const dynamicClass = data.class
   const staticClass = data.staticClass
-  if (isDef(staticClass) || isDef(dynamicClass)) {
+  if (staticClass || dynamicClass) {
     return concat(staticClass, stringifyClass(dynamicClass))
   }
   /* istanbul ignore next */
@@ -47,18 +47,18 @@ export function concat (a: ?string, b: ?string): string {
 }
 
 export function stringifyClass (value: any): string {
-  if (isUndef(value)) {
-    return ''
+  let res = ''
+  if (!value) {
+    return res
   }
   if (typeof value === 'string') {
     return value
   }
-  let res = ''
   if (Array.isArray(value)) {
     let stringified
     for (let i = 0, l = value.length; i < l; i++) {
-      if (isDef(value[i])) {
-        if (isDef(stringified = stringifyClass(value[i])) && stringified !== '') {
+      if (value[i]) {
+        if ((stringified = stringifyClass(value[i]))) {
           res += stringified + ' '
         }
       }

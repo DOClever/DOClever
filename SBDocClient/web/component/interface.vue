@@ -697,10 +697,18 @@
                                     var arrQuery1=arrQuery[i].split("=");
                                     arrStoreQuery.push({
                                         name:arrQuery1[0],
-                                        value:arrQuery1[1]?[{
-                                            value:decodeURIComponent(arrQuery1[1]),
-                                            remark:""
-                                        }]:[],
+                                        value:arrQuery1[1]?{
+                                            type:0,
+                                            status:"",
+                                            data:[{
+                                                value:decodeURIComponent(arrQuery1[1]),
+                                                remark:""
+                                            }]
+                                        }:{
+                                            type:0,
+                                            status:"",
+                                            data:[]
+                                        },
                                         must:1,
                                         remark:""
                                     })
@@ -765,6 +773,9 @@
             })
             bus.$on("baseUrl",function (data) {
                 store.commit("setBaseUrls",data);
+            })
+            bus.$on("addBaseUrl",function (data) {
+                store.commit("addBaseUrls",data);
             })
             bus.$on("initStatus",function (data) {
                 store.commit("setStatus",data);

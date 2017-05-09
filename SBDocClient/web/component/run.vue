@@ -69,7 +69,7 @@
             <el-row class="row" style="padding: 15px;margin-top: 15px;background-color: white;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
                 <el-row class="row" style="padding: 10px;margin-bottom: 10px">
             <span style="font-size: 18px;">
-                Result:&nbsp;&nbsp;<span :style="{color:status.match(/^2/)?'green':'red'}">{{status=='0'?'ERROR':status}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 18px;color: #50a3ff">{{second?("耗时"+second+"秒"):""}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span v-if="errorCount>0" style="color: red">Error:&nbsp;{{errorCount}}</span>
+                Result:&nbsp;&nbsp;<span :style="{color:statusStr.match(/^2/)?'green':'red'}">{{statusStr=='0'?'ERROR':statusStr}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 18px;color: #50a3ff">{{second?("耗时"+second+"秒"):""}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span v-if="errorCount>0" style="color: red">Error:&nbsp;{{errorCount}}</span>
             </span>
                     <el-popover ref="error" placement="bottom" width="400" trigger="hover" v-if="errorCount>0" content="切换到Advance Tab页，移动到红色的行上面即可看到错误信息">
                     </el-popover>
@@ -139,6 +139,7 @@
     var runParam=require("./runParam.vue")
     var runInject=require("./runInject.vue")
     var store=require("../projectinfo/storeRun")
+    var bus=require("../bus/projectInfoBus");
     module.exports={
         props:["interfaceEdit","baseUrls","status","globalBefore","globalAfter"],
         data:function () {
@@ -206,7 +207,7 @@
             bodyRawShow:function () {
                 return store.state.bodyRawShow;
             },
-            status:function () {
+            statusStr:function () {
                 return store.state.status;
             },
             second:function () {
@@ -362,7 +363,18 @@
                                     var arrQuery1=arrQuery[i].split("=");
                                     arrStoreQuery.push({
                                         name:arrQuery1[0],
-                                        value:arrQuery1[1]?[decodeURIComponent(arrQuery1[1])]:[],
+                                        value:arrQuery1[1]?{
+                                            type:0,
+                                            status:"",
+                                            data:[{
+                                                value:decodeURIComponent(arrQuery1[1]),
+                                                remark:""
+                                            }]
+                                        }:{
+                                            type:0,
+                                            status:"",
+                                            data:[]
+                                        },
                                         must:1,
                                         remark:"",
                                         selValue:arrQuery1[1]?decodeURIComponent(arrQuery1[1]):"",

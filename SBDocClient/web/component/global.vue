@@ -177,6 +177,9 @@
             bus.$on("initStatus",function (data) {
                 _this.status=data;
             })
+            bus.$on("addBaseUrl",function (data) {
+                _this.baseUrl.push(data);
+            })
         }
     }
 </script>

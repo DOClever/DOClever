@@ -11,15 +11,14 @@ export * from './element'
  */
 export function query (el: string | Element): Element {
   if (typeof el === 'string') {
-    const selected = document.querySelector(el)
-    if (!selected) {
+    const selector = el
+    el = document.querySelector(el)
+    if (!el) {
       process.env.NODE_ENV !== 'production' && warn(
-        'Cannot find element: ' + el
+        'Cannot find element: ' + selector
       )
       return document.createElement('div')
     }
-    return selected
-  } else {
-    return el
   }
+  return el
 }

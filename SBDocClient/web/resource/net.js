@@ -27,7 +27,14 @@ var filterResHeader = function (headers) {
     var ret = {};
     for (var i in headers) {
         if (!/Access-/i.test(i)) {
-            ret[i] = headers[i];
+            if(/set-cookie/i.test(i))
+            {
+                ret[i]=headers[i][0].split(" ")[0];
+            }
+            else
+            {
+                ret[i] = headers[i];
+            }
         }
     }
     return ret;
