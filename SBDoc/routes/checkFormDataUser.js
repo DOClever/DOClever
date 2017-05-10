@@ -3,6 +3,7 @@
  */
 var express=require("express");
 var multiparty=require("multiparty");
+var pathLib=require("path");
 var user=require("../model/userModel");
 var e=require("../util/error.json");
 var con=require("../../config.json");
@@ -43,12 +44,12 @@ function formData(path) {
                 {
                     if(files[index] instanceof Array)
                     {
-                        var path=files[index][0].path;
-                        var i=path.lastIndexOf("/");
-                        i=path.lastIndexOf("/",i-1);
-                        path=path.substring(i);
-                        files[index][0].dbPath=path;
-                        req.clientParam[index]=path;
+                        var filePath=files[index][0].path;
+                        var i=filePath.lastIndexOf(pathLib.sep);
+                        i=filePath.lastIndexOf(pathLib.sep,i-1);
+                        filePath=filePath.substring(i).replace(/\\/g,"/");
+                        files[index][0].dbPath=filePath;
+                        req.clientParam[index]=filePath;
                         req.arrFile.push(files[index][0]);
                     }
                 }

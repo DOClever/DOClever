@@ -286,13 +286,13 @@ function validateParam(val,validate) {
     return true;
 }
 
-function  delImg(path) {
-    if(path)
+function  delImg(filePath) {
+    if(filePath)
     {
-        fs.exists(con.filePath+path,function (exist) {
+        fs.exists(con.filePath+filePath.replace(/\//g,path.sep),function (exist) {
             if(exist)
             {
-                fs.unlink(con.filePath+path);
+                fs.unlink(con.filePath+filePath);
             }
         })
     }

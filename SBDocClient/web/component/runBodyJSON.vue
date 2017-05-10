@@ -11,7 +11,7 @@
                             &nbsp;
                         </el-col>
                         <el-col class="col" :span="22">
-                            <el-input style="width: 90%;" placeholder="请填写名称" v-model="item.name" v-if="item.name!=null" @focus="focus(item)" @blur="blur(item)"></el-input>
+                            <el-input style="width: 90%;" placeholder="请填写名称" v-model.trim="item.name" v-if="item.name!=null" @focus="focus(item)" @blur="blur(item)"></el-input>
                             <el-input style="width: 90%;" placeholder="该字段没有名称" disabled v-else></el-input>
                         </el-col>
                     </td>

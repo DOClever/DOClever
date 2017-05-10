@@ -1264,8 +1264,31 @@ helper.handleTestInterface=function (inter,data,status) {
     inter.method=data.method;
     inter.finish=data.finish;
     inter.remark=data.remark;
-    inter.before=data.before;
-    inter.after=data.after;
+    if(data.before) {
+        if (typeof(data.before) == "object") {
+            inter.before = data.before;
+        }
+        else
+        {
+            inter.before ={
+                mode:0,
+                code:data.before
+            }
+        }
+    }
+    if(data.after)
+    {
+        if (typeof(data.after) == "object") {
+            inter.after = data.after;
+        }
+        else
+        {
+            inter.after ={
+                mode:0,
+                code:data.after
+            }
+        }
+    }
     inter.updatedAt=data.updatedAt;
     data.restParam.forEach(function (item) {
         var obj;
@@ -1946,7 +1969,7 @@ helper.runTestCode=async function (code,test,global,opt,root) {
         var text;
         if(type=="1")
         {
-            text="function (opt) {return helper.runTest("+obj+",'"+opt.baseUrl+"',"+"{before:'"+opt.before+"',after:'"+opt.after+"'}"+",test,root,opt)}"
+            text="(function (opt) {return helper.runTest("+obj+",'"+opt.baseUrl+"',"+"{before:'"+opt.before+"',after:'"+opt.after+"'}"+",test,root,opt)})"
         }
         else if(type=="2")
         {
@@ -1971,7 +1994,7 @@ helper.runTestCode=async function (code,test,global,opt,root) {
             {
                 return;
             }
-            text="function () {return helper.runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;")+"',"+JSON.stringify(testObj)+",global,"+JSON.stringify(opt)+",root)}"
+            text="(function () {return helper.runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;")+"',"+JSON.stringify(testObj)+",global,"+JSON.stringify(opt)+",root)})"
         }
         else
         {

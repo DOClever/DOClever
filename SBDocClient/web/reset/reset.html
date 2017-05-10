@@ -36,12 +36,12 @@
                 <el-button type="primary" :loading="resetPending" style="width: 300px;" @click.prevent="reset">立即重置</el-button>
             </el-form-item>
         </el-form>
-        <el-form style="width: 50%;margin: 0 auto;padding: 20px 20px 0px 20px" label-width="100px" v-else>
-            <el-form-item style="text-align: center" label="用户名">
-                <el-input  placeholder="您要找回密码的用户名" style="width: 300px;"  v-model="username"></el-input>
+        <el-form style="width: 400px;margin: 0 auto;padding: 20px 20px 0px 20px" v-else>
+            <el-form-item style="text-align: center">
+                <el-input  placeholder="您要找回密码的用户名" style="width: 400px;"  v-model="username"></el-input>
             </el-form-item>
-            <el-form-item style="text-align: left">
-                <el-button type="primary" :loading="questionPending" style="width: 300px;" @click.prevent="getQuestion">立即找回</el-button>
+            <el-form-item style="text-align: center">
+                <el-button type="primary" :loading="questionPending" style="width: 400px;" @click.prevent="getQuestion">立即找回</el-button>
             </el-form-item>
         </el-form>
     </div>

@@ -4,7 +4,7 @@
             <template v-for="(item,index) in arr">
                 <tr :style="{textAlign: 'center',verticalAlign: 'middle',backgroundColor:item.enable?'white':'lightgray'}">
                     <td style="width: 20%;text-align: center;vertical-align: middle;height: 50px">
-                        <el-input style="width: 90%;" placeholder="请填写参数名称" v-model="item.name" :disabled="!item.enable"></el-input>
+                        <el-input style="width: 90%;" placeholder="请填写参数名称" v-model.trim="item.name" :disabled="!item.enable"></el-input>
                     </td>
                     <td style="width: 10%;" >
                         <span style="display: inline-block;">

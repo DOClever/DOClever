@@ -31,33 +31,40 @@
             },
             run:async function(){
                 var index=0;
-                for(var i=0;i<this.source.length;i++)
+                try
                 {
-                    var ret=await helper.runTestCode(this.source[i].code,this.source[i],{},this.opt,this.obj);
-                    var val;
-                    if(ret===undefined)
+                    for(var i=0;i<this.source.length;i++)
                     {
-                        val=0;
+                        var ret=await helper.runTestCode(this.source[i].code,this.source[i],{},this.opt,this.obj);
+                        var val;
+                        if(ret===undefined)
+                        {
+                            val=0;
+                        }
+                        else if(Boolean(ret)==true)
+                        {
+                            val=1
+                        }
+                        else
+                        {
+                            val=2
+                        }
+                        var output=this.obj.output.substr(index);
+                        index=this.obj.output.length;
+                        await net.put("/test/status",{
+                            id:this.source[i]._id,
+                            status:val,
+                            output:output
+                        })
+                        var node=this.$parent.$refs.tree.$refs.tree.store.getNode(this.source[i].id);
+                        node.data.status=val;
                     }
-                    else if(Boolean(ret)==true)
-                    {
-                        val=1
-                    }
-                    else
-                    {
-                        val=2
-                    }
-                    var output=this.obj.output.substr(index);
-                    index=this.obj.output.length;
-                    await net.put("/test/status",{
-                        id:this.source[i]._id,
-                        status:val,
-                        output:output
-                    })
-                    var node=this.$parent.$refs.tree.$refs.tree.store.getNode(this.source[i].id);
-                    node.data.status=val;
                 }
-
+                catch (err)
+                {
+                    this.obj.output+=err+"<br>"
+                    this.finish=true;
+                }
                 this.obj.output+="全部运行完成<br>"
                 this.finish=true;
             },

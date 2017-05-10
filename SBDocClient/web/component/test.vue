@@ -442,6 +442,9 @@
                     },this.test).then(function (ret) {
                         _this.runPending=false;
                         $.notify("运行完成",1);
+                    }).catch(function (err) {
+                        _this.runPending=false;
+                        _this.test.output+=err+"<br>"
                     })
                 }
                 catch(e)
