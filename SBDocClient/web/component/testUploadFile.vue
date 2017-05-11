@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="选择文件"  size="small" ref="box" >
+    <el-dialog title="选择文件"  size="small" ref="box" :close-on-click-modal="false">
         <el-row class="row" style="height: 50px;line-height: 50px">
             {{name+"("+url+"):"}}
         </el-row>

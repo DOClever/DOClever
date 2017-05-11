@@ -126,10 +126,18 @@
                 })
             },
             exportJSON:function (item) {
-                var link=document.createElement("a");
-                link.href="/status/exportjson?id="+item._id;
-                link.download=item.name+".json";
-                link.click();
+                var type=navigator.userAgent;
+                if(type.indexOf("Firefox")>-1)
+                {
+                    window.open(location.protocol+"//"+location.host+"/status/exportjson?id="+item._id);
+                }
+                else
+                {
+                    var link=document.createElement("a");
+                    link.href="/status/exportjson?id="+item._id;
+                    link.download=item.name+".json";
+                    link.click();
+                }
             },
             importJSON:function () {
                 var _this=this;

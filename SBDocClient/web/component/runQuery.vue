@@ -15,7 +15,7 @@
                         {{item.remark?item.remark:"无备注"}}
                     </td>
                     <td style="width: 25%;height: 50px;line-height: 50px">
-                        <div  style="height: 100%;width: 90%;display: inline-block;" v-if="item.value && (item.value.data.length>0 || item.value.status)">
+                        <div  style="width: 90%;display: inline-block;" v-if="item.value && (item.value.data.length>0 || item.value.status)">
                             <el-autocomplete class="inline-input" v-model="item.selValue" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" icon="caret-bottom" :on-icon-click="showAutoComplete" @mouseenter.native="focus(item)" :disabled="!item.enable" style="width:100%" popper-class="my-autocomplete" custom-item="itemauto"></el-autocomplete>
                         </div>
                         <el-input v-else style="width: 90%" v-model="item.selValue" :disabled="!item.enable"></el-input>

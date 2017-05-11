@@ -1747,6 +1747,11 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
                         child.$on("save",function (obj) {
                             resolve(obj);
                         })
+                        child.$refs.box.$on("close",function (obj) {
+                            resolve({
+                                files:[]
+                            });
+                        })
                     }))
                     if(file.files.length>0)
                     {
@@ -1859,6 +1864,9 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
                         }
                         read.readAsArrayBuffer(file);
                     })
+                    child.$refs.box.$on("close",function (obj) {
+                        resolve("");
+                    })
                 }))
                 body=file;
             }
@@ -1957,6 +1965,21 @@ helper.runTestCode=async function (code,test,global,opt,root) {
     }
     function log(text) {
         root.output+=text+"<br>";
+    }
+    function input(title,data) {
+        return new Promise(function (resolve,reject) {
+            var child=$.showBox(window.vueObj,"testRunInput",{
+                title:title,
+                data:data,
+                name:test.name
+            });
+            child.$on("save",function (obj) {
+                resolve(obj);
+            })
+            child.$refs.box.$on("close",function (obj) {
+                resolve("");
+            })
+        })
     }
     var ele=document.createElement("div");
     ele.innerHTML=code;

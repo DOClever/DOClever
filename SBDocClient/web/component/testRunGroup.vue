@@ -10,7 +10,6 @@
         </el-row>
     </el-dialog>
 </template>
-
 <script>
     module.exports={
         props:["source","opt"],
@@ -70,7 +69,13 @@
             },
         },
         created:function () {
-            this.run();
+
+        },
+        mounted:function () {
+            var _this=this;
+            setTimeout(function () {
+                _this.run();
+            },100);
         }
     }
 </script>

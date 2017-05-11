@@ -339,6 +339,7 @@
                     {
                         var child=$.showBox(_this,"testTestRun",{
                             source:data.data,
+                            self:_this.test.id
                         });
                         child.$on("save",function (obj) {
                             var a=document.createElement("a");
@@ -383,7 +384,8 @@
                         {
                             var child=$.showBox(_this,"testTestRun",{
                                 source:obj1.data,
-                                test:obj2.data
+                                test:obj2.data,
+                                self:_this.test.id
                             });
                             child.$on("save",function (obj) {
                                 ele.setAttribute("data",obj.id);

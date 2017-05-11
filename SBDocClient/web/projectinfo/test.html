@@ -25,6 +25,7 @@
             sx:"ddd"
         }
     });
+    var text=await input("请输入值",res.data)
     log(res.status);
     return true;
         </pre>
@@ -43,6 +44,7 @@
     </p>
     <p>
         内置变量：<br>
+        input:输入框，第一个参数是给用户的提示信息，第二个参数是展示给用户的数据
         global:全局对象，可用于在不同的用例之间传输数据<br>
         log:输出函数，只有一个参数，为需要输出的数据<br>
         Base64,MD5,SHA1,SHA256,SHA512,SHA3,RIPEMD160:这些加密函数只有一个参数，为加密的字符串<br>

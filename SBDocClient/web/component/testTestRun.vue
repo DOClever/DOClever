@@ -19,17 +19,23 @@
 
 <script>
     module.exports={
-        props:["source","test"],
+        props:["source","test","self"],
         data:function () {
             return {
                 arrTest:function () {
+                    var _this=this;
                     return this.source.map(function (obj) {
                         var arr=obj.data.map(function (obj) {
                             var arr=obj.data.map(function (obj) {
-                                return {
+                                var ret={
                                     label:obj.name,
                                     value:obj.id,
+                                };
+                                if(_this.self && _this.self==obj.id)
+                                {
+                                    ret.disabled=true;
                                 }
+                                return ret;
                             })
                             return {
                                 label:obj.name,

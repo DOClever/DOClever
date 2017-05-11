@@ -231,10 +231,18 @@
                 }
             },
             exportJSON:function () {
-                var link=document.createElement("a");
-                link.href="/project/exportjson?id="+session.get("projectId");
-                link.download=session.get("projectName")+".json";
-                link.click();
+                var type=navigator.userAgent;
+                if(type.indexOf("Firefox")>-1)
+                {
+                    window.open(location.protocol+"//"+location.host+"/project/exportjson?id="+session.get("projectId"));
+                }
+                else
+                {
+                    var link=document.createElement("a");
+                    link.href="/project/exportjson?id="+session.get("projectId");
+                    link.download=session.get("projectName")+".json";
+                    link.click();
+                }
             },
             importMember:function () {
                 var _this=this;

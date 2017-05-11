@@ -356,16 +356,32 @@
                 })
             },
             exportGroup:function (item) {
-                var link=document.createElement("a");
-                link.href="/group/exportjson?group="+item._id;
-                link.download=item.name+".json";
-                link.click();
+                var type=navigator.userAgent;
+                if(type.indexOf("Firefox")>-1)
+                {
+                    window.open(location.protocol+"//"+location.host+"/group/exportjson?group="+item._id);
+                }
+                else
+                {
+                    var link=document.createElement("a");
+                    link.href="/group/exportjson?group="+item._id;
+                    link.download=item.name+".json";
+                    link.click();
+                }
             },
             exportInterface:function (item) {
-                var link=document.createElement("a");
-                link.href="/interface/exportjson?id="+item._id;
-                link.download=item.name+".json";
-                link.click();
+                var type=navigator.userAgent;
+                if(type.indexOf("Firefox")>-1)
+                {
+                    window.open(location.protocol+"//"+location.host+"/interface/exportjson?id="+item._id);
+                }
+                else
+                {
+                    var link=document.createElement("a");
+                    link.href="/interface/exportjson?id="+item._id;
+                    link.download=item.name+".json";
+                    link.click();
+                }
             }
         }
     }
