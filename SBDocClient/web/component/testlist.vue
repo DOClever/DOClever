@@ -23,7 +23,7 @@
         methods:{
             renderContent:function(h, { node, data, store }) {
                 return (
-                    <span>
+                    <span style="white-space: normal;">
                         <span style="float:right;margin-right: 20px;white-space: nowrap;text-align: center" onclick="event.stopPropagation()">
                             <el-dropdown trigger="click" style="cursor: pointer">
                                 <div class="el-dropdown-link">
