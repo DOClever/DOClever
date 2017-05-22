@@ -116,23 +116,23 @@
                     </el-row>
                 </el-row>
                 <el-row class="row" style="background-color: white;padding: 20px;margin-top: 15px;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
-                    <el-tabs type="card">
-                        <el-tab-pane :label="paramTab" v-if="param.length>0">
+                    <el-tabs type="card" v-model="tabType">
+                        <el-tab-pane :label="paramTab" v-if="param.length>0" name="param">
                             <restparam></restparam>
                         </el-tab-pane>
-                        <el-tab-pane :label="queryTab">
+                        <el-tab-pane :label="queryTab" name="query">
                             <inparamquery></inparamquery>
                             <el-button size="small" type="primary" style="margin-top: 10px;margin-left: 10px" @click="importQuery">导入Query字符串</el-button>
                         </el-tab-pane>
-                        <el-tab-pane :label="headerTab">
+                        <el-tab-pane :label="headerTab" name="header">
                             <inparamheader></inparamheader>
                             <el-button size="small" type="primary" style="margin-top: 10px;margin-left: 10px" @click="importHeader">导入HTTP Header字符串</el-button>
                         </el-tab-pane>
-                        <el-tab-pane :label="bodyTab" v-if="interfaceEdit.method=='POST' || interfaceEdit.method=='PUT'">
+                        <el-tab-pane :label="bodyTab" v-if="interfaceEdit.method=='POST' || interfaceEdit.method=='PUT'" name="body">
                             <inparambody></inparambody>
                             <el-button size="small" type="primary" style="margin-top: 10px;margin-left: 10px" @click="importBody" v-if="bodyInfo.type==0">导入Body字符串</el-button>
                         </el-tab-pane>
-                        <el-tab-pane label="Inject">
+                        <el-tab-pane label="Inject" name="inject">
                             <inparaminject></inparaminject>
                         </el-tab-pane>
                     </el-tabs>
@@ -439,6 +439,7 @@
           return {
               session:$.clone(session.raw()),
               savePending:false,
+              tabType:"query"
           }
         },
         store:store,
@@ -787,6 +788,17 @@
             bus.$on("globalInject",function (data) {
                 store.commit("setGlobalBefore",data.before);
                 store.commit("setGlobalAfter",data.after);
+            })
+            var _this=this;
+            bus.$on("interfaceInfo",function () {
+                if(_this.interfaceEdit.method=="POST" || _this.interfaceEdit.method=="PUT")
+                {
+                    _this.tabType="body"
+                }
+                else
+                {
+                    _this.tabType="query"
+                }
             })
         },
     }

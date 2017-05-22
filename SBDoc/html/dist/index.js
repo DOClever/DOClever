@@ -1,0 +1,1 @@
+webpackJsonp([0],{26:function(n,t,i){(function(n){var t=i(10),e=i(9),a=i(11),o=i(8),c=(i(7),i(3));new n({el:"#app",data:{type:0},components:{mainnav:t,interface:e,setting:a,global:o},mounted:function(){c.$emit("initInterface",window.interface),c.$emit("initInfo",window.project),c.$emit("initStatus",window.state)}})}).call(t,i(2))}},[26]);

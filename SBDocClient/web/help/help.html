@@ -15,20 +15,22 @@
 </head>
 <body style="width: 100%">
 <div class="container" style="margin: 0;width: 100%;overflow: hidden" v-cloak id="app">
-    <mainnav>
-        <el-button type="text" style="font-size: 15px" slot="slot3" onclick="window.open('https://github.com/sx1989827/SBDoc','_blank')">开源</el-button>
+    <mainnav :transparent="1">
+        <el-button type="text" style="font-size: 15px;color: white" slot="slot3" onclick="window.open('https://github.com/sx1989827/SBDoc','_blank')">开源</el-button>
         <el-popover ref="popover" placement="bottom" width="250" trigger="hover" slot="other">
             <span style="font-size: 15px;color: #20A0FF">
                 欢迎加入QQ讨论群：<span style="color: red">611940610</span>
             </span>
         </el-popover>
-        <el-button type="text" style="font-size: 15px" v-popover:popover slot="slot4">QQ群</el-button>
-        <el-button type="text" style="font-size: 15px" slot="slot1" v-if="!isLogin" onclick="location.href='../about/about.html'">关于</el-button>
-        <el-button type="text" style="font-size: 15px" slot="slot2" v-if="!isLogin" onclick="location.href='../help/help.html'">帮助</el-button>
-        <span style="color: #20A0FF;font-size: 25px" slot="title">帮助中心</span>
+        <el-button type="text" style="font-size: 15px;color: white" v-popover:popover slot="slot4">QQ群</el-button>
+        <el-button type="text" style="font-size: 15px;color: white" slot="slot1" v-if="!isLogin" onclick="location.href='../about/about.html'">关于</el-button>
+        <el-button type="text" style="font-size: 15px;color: white" slot="slot2" v-if="!isLogin" onclick="location.href='../help/help.html'">帮助</el-button>
     </mainnav>
-    <el-row class="row" style="text-align: center;margin-top: 20px;height: 700px">
-        <el-col class="col" :span="4" style="font-size: larger;color: #50a3ff;font-weight: bold">
+    <el-row class="row" style="background-image: url('../pic/help/back.png');background-position:center center;background-size: cover;height: 500px;">
+
+    </el-row>
+    <el-row class="row" style="text-align: center;height: 700px;background-color: white;padding-top: 20px">
+        <el-col class="col" :span="4" style="font-size: larger;color: #50a3ff;font-weight: bold;">
             基础
             <ul style="font-size:15px;color: gray;padding: 0">
                 <li style="list-style-type:none;">
@@ -70,26 +72,19 @@
             </ul>
         </el-col>
         <el-col class="col" :span="20">
-            <el-row class="row" style="text-align: center;font-size: 20px;color: gray" id="title">
+            <el-row class="row" style="text-align: center;font-size: 20px;color: gray;margin-bottom: 20px" id="title">
                 注册登录
             </el-row>
             <iframe frameborder="0" width="640" height="498" src="https://v.qq.com/iframe/player.html?vid=b0385i031zz&tiny=0&auto=0" allowfullscreen id="video"></iframe>
         </el-col>
     </el-row>
-    <el-row class="row" style="height: 200px;background-color: rgb(39,52,68);">
-        <el-col class="col" :span="4" style="display: inline-block;color: white;text-align: center;line-height: 200px;font-size: larger;">
-            <a href="../about/about.html" style="color: white;text-decoration: none" target="_blank">关于我们</a>
-        </el-col>
-        <el-col class="col" :span="4" style="display: inline-block;color: white;text-align: center;line-height: 200px;font-size: larger;">
-            <a href="../donate/donate.html" style="color: white;text-decoration: none" target="_blank">支持我们</a>
-        </el-col>
-        <el-col class="col" :span="4" style="display: inline-block;color: white;text-align: center;line-height: 200px;font-size: larger;height: 100%">
-            <a href="../help/help.html" style="color: white;text-decoration: none" target="_blank">帮助中心</a>
-        </el-col>
-        <el-col class="col" :span="12" style="color: white;height: 100%">
-            <img src="../pic/logo.png" width="100" height="100" style="float: right;margin-top: 50px;margin-right: 50px">
-        </el-col>
-        <el-row class="row" style="position: absolute;bottom: 0px;left:0px;height: 30px;color: lightgray;text-align: center">
+    <el-row class="row" style="background-color: rgb(39,52,68);color: white">
+        <el-row class="row" style="text-align: center;padding-top: 50px;padding-bottom: 30px">
+            <a href="../about/about.html" style="text-decoration: none;color: white" target="_blank">关于我们</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <a href="../donate/donate.html" style="text-decoration: none;color: white" target="_blank">支持我们</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <a href="../help/help.html" style="text-decoration: none;color: white" target="_blank">帮助中心</a>
+        </el-row>
+        <el-row class="row" style="text-align: center;color: white;margin-bottom: 30px">
             Copyright&nbsp;©&nbsp;2016～2017&nbsp;合肥市胖胖羊信息科技有限责任公司&nbsp;皖ICP备17002996号
         </el-row>
     </el-row>

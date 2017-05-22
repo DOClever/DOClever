@@ -234,6 +234,20 @@ var interface=[
         handle:[project.inProject,project.exportJSON]
     },
     {
+        "method":"GET",
+        "path":"/project/exporthtml",
+        "param": {
+            id:{
+                type:String
+            },
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.inProject,project.exportHTML]
+    },
+    {
         "method":"POST",
         "path":"/project/importjson",
         "param": {

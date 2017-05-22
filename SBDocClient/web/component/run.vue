@@ -162,10 +162,18 @@
             },
             baseUrl:{
                 get:function () {
-                    return store.state.baseUrl;
+                    if((store.state.baseUrl && false) || session.get("lastBaseUrl"))
+                    {
+                        return session.get("lastBaseUrl")
+                    }
+                    else
+                    {
+                        return store.state.baseUrl;
+                    }
                 },
                 set:function (val) {
                     store.commit("setBaseUrl",val);
+                    session.set("lastBaseUrl",val);
                 }
             },
             paramTab:function () {

@@ -18,9 +18,9 @@
             <template v-for="(item,index) in arr">
                 <tr style="text-align: center;vertical-align: middle">
                     <td style="width: 20%;text-align: center;vertical-align: middle;height: 50px">
-                        <el-input style="width: 90%" placeholder="请填写参数名称" v-model.trim="item.name"></el-input>
+                        <el-input style="width: 90%" placeholder="请填写参数名称" v-model.trim="item.name" @input="index==arr.length-1?arr.push({name:'',type:0,must:0,remark:''}):void(0)"></el-input>
                     </td>
-                    <td style="width: 10%;text-align: center;vertical-align: middle;height: 50px">
+                    <td style="width: 15%;text-align: center;vertical-align: middle;height: 50px">
                         <el-select v-model="item.type" style="width: 90%">
                             <el-option :value="0" label="文本"></el-option>
                             <el-option :value="1" label="文件"></el-option>
@@ -38,10 +38,7 @@
                         <el-button type="text" size="small" @click="configValue(item)" v-if="item.type==0" style="font-size: 15px">{{(item.value && (item.value.data.length>0 || item.value.status))?"已填值":"未填值"}}</el-button>
                     </td>
                     <td style="width: 5%">
-                        <el-button type="text" style="color: red;font-size: 15px" size="small" icon="close" @click="remove(index)"></el-button>
-                    </td>
-                    <td style="width: 5%">
-                        <el-button type="text" size="small" v-if="index==arr.length-1" icon="plus" @click="arr.push({name:'',type:0,must:0,remark:''})" style="font-size: 15px"></el-button>
+                        <el-button type="text" style="color: red;font-size: 15px" size="small" icon="close" @click="remove(index)" v-if="index!=arr.length-1"></el-button>
                     </td>
                 </tr>
             </template>
@@ -203,25 +200,7 @@
         },
         methods:{
             remove:function (index) {
-                if(this.arr.length>1)
-                {
-                    this.arr.splice(index,1)
-                }
-                else
-                {
-                    this.arr[0].name="";
-                    this.arr[0].must=0;
-                    this.arr[0].type=0;
-                    this.arr[0].remark="";
-                    if(this.arr[0].value)
-                    {
-                        this.arr[0].value={
-                            type:0,
-                            data:[],
-                            status:""
-                        };
-                    }
-                }
+                this.arr.splice(index,1)
             },
             configValue:function (item) {
                 if(!item.value)
@@ -273,7 +252,7 @@
                     var result=[];
                     for(var key in obj)
                     {
-                        helper.handleResultData(key,obj[key],result,null,1)
+                        helper.handleResultData(key,obj[key],result,null,1,1)
                     }
                     _this.info.rawJSON=result;
                     return true;

@@ -44,10 +44,10 @@
             </el-dropdown>
         </el-col>
         <el-col class="col" :span="2" style="text-align: center;line-height: 60px" v-if="!isLogin">
-            <el-button type="primary" onclick="location='/html/web/login/login.html'">登录</el-button>
+            <el-button type="info" onclick="location='/html/web/login/login.html'">登录</el-button>
         </el-col>
         <el-col class="col" :span="2" style="text-align: center;line-height: 60px" v-if="!isLogin">
-            <el-button type="primary"  onclick="location='/html/web/register/register.html'">注册</el-button>
+            <el-button type="success"  onclick="location='/html/web/register/register.html'">注册</el-button>
         </el-col>
     </el-row>
 </template>
@@ -159,7 +159,7 @@
                     {
                         ele.style.position="fixed";
                         ele.style.top=0;
-                        ele.style.backgroundColor="white"
+                        ele.style.backgroundColor="rgb(39,52,68)"
                     }
                     else
                     {

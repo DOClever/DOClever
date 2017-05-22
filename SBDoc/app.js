@@ -11,7 +11,8 @@ var checkFormDataUser=require("./routes/checkFormDataUser");
 var con=require("./../config.json");
 var util=require("./util/util");
 var proxy=require("./routes/proxy/proxy");
-var mock=require("./routes/mock/mock")
+var mock=require("./routes/mock/mock");
+require("./event/event");
 var app = express();
 util.createDir(con.filePath)
 util.createDir(con.imgPath)

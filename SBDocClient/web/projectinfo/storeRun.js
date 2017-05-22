@@ -780,7 +780,7 @@ module.exports=new Vuex.Store({
                     {
                         var obj={};
                         var result=helper.resultSave(context.state.bodyInfo.rawJSON);
-                        helper.convertToJSON(result,obj);
+                        helper.convertToJSON(result,obj,null,1);
                         body=obj;
                     }
                     else
@@ -826,7 +826,7 @@ module.exports=new Vuex.Store({
             header["__headers"]=JSON.stringify(objHeaders);
             var proxyUrl="/proxy";
             var bNet=false;
-            if(/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl) && !bMock)
+            if((/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl)) && !bMock)
             {
                 bNet=true;
                 proxyUrl="http://127.0.0.1:36742";

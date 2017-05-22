@@ -4,7 +4,7 @@
             <template v-for="(item,index) in arr">
                 <tr style="text-align: center;vertical-align: middle">
                     <td style="width: 20%;height: 50px">
-                        <el-autocomplete style="width: 90%" class="inline-input" placeholder="请填写header" v-model="item.name" :fetch-suggestions="querySearchKey"></el-autocomplete>
+                        <el-autocomplete style="width: 90%" class="inline-input" placeholder="请填写header" v-model="item.name" :fetch-suggestions="querySearchKey" @input="index==arr.length-1?add():void(0)"></el-autocomplete>
                     </td>
                     <td style="width: 30%">
                         <el-autocomplete style="width: 90%;" class="inline-input" placeholder="请填写value" v-model="item.value" :fetch-suggestions="querySearchValue" @mouseenter.native="focus(item)"></el-autocomplete>
@@ -12,11 +12,8 @@
                     <td style="width: 40%">
                         <el-input style="width: 90%;font-size: 15px" placeholder="请填写备注" v-model="item.remark"></el-input>
                     </td>
-                    <td style="width: 5%">
-                        <el-button type="text" icon="close" size="small" style="color: red;font-size: 15px" @click="remove(index)"></el-button>
-                    </td>
-                    <td style="width: 5%">
-                        <el-button type="text" size="small" v-if="index==arr.length-1" @click="add" icon="plus" style="font-size: 15px"></el-button>
+                    <td style="width: 10%">
+                        <el-button type="text" icon="close" size="small" style="color: red;font-size: 15px" @click="remove(index)" v-if="index!=arr.length-1"></el-button>
                     </td>
                 </tr>
             </template>
@@ -83,16 +80,7 @@
                 this.arr.push({name:'',value:'',remark:''});
             },
             remove:function (index) {
-                if(this.arr.length>1)
-                {
-                    this.arr.splice(index,1)
-                }
-                else
-                {
-                    this.arr[0].name="";
-                    this.arr[0].value="";
-                    this.arr[0].remark="";
-                }
+                this.arr.splice(index,1)
             }
         },
         created:function () {

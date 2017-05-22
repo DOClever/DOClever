@@ -4,7 +4,7 @@
             <template v-for="(item,index) in arr">
                 <tr :style="{textAlign: 'center',verticalAlign: 'middle',backgroundColor:item.enable?'white':'lightgray'}">
                     <td style="width: 20%;text-align: center;vertical-align: middle;height: 50px">
-                        <el-input style="width: 90%;" placeholder="请填写参数名称" v-model.trim="item.name" :disabled="!item.enable"></el-input>
+                        <el-input style="width: 90%;" placeholder="请填写参数名称" v-model.trim="item.name" :disabled="!item.enable" @input="index==arr.length-1?add():void(0)"></el-input>
                     </td>
                     <td style="width: 10%;" >
                         <span style="display: inline-block;">
@@ -26,11 +26,8 @@
                     <td style="width: 5%">
                         <el-button size="small" type="text" style="font-size: 15px;" @click="toggleEnable(item,index)"><span :class="item.enable?'fa fa-eye-slash':'fa fa-eye'" :title="item.enable?'发送时不包含此字段':'发送时包含此字段'"></span></el-button>
                     </td>
-                    <td style="width: 5%">
-                        <el-button type="text" size="small" icon="close" style="color: red;font-size: 15px;" @click="remove(index)"></el-button>
-                    </td>
-                    <td style="width: 5%">
-                        <el-button type="text" size="small" icon="plus" style="font-size: 15px" v-if="index==arr.length-1" @click="add"></el-button>
+                    <td style="width: 10%">
+                        <el-button type="text" size="small" icon="close" style="color: red;font-size: 15px;" @click="remove(index)" v-if="index!=arr.length-1"></el-button>
                     </td>
                 </tr>
             </template>
@@ -51,23 +48,7 @@
         },
         methods:{
             remove:function (index) {
-                if(this.arr.length>1)
-                {
-                    this.arr.splice(index,1)
-                }
-                else
-                {
-                    this.arr[0].name="";
-                    this.arr[0].must=0;
-                    this.arr[0].remark="";
-                    this.arr[0].enable=1;
-                    this.arr[0].value={
-                        type: 0,
-                        data: [],
-                        status: ""
-                    };
-                    this.arr[0].selValue="";
-                }
+                this.arr.splice(index,1)
             },
             add:function () {
                 this.arr.push({

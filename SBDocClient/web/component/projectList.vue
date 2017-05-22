@@ -52,6 +52,7 @@
                 session.set("projectName",item.name);
                 session.set("role",item.role);
                 session.set("own",item.own);
+                session.set("lastBaseUrl","");
                 location.href="/html/web/projectinfo/projectinfo.html";
             },
             setting:function (item) {

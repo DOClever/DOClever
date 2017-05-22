@@ -5,7 +5,7 @@
             <el-radio class="radio" :label="1" v-model="type" :checked="type==1" id="bodyRaw">SBDoc JSON</el-radio>&nbsp;&nbsp;
         </el-row>
         <el-row class="row" v-if="type==0">
-            <el-input type="textarea" :rows="10" placeholder="请输入JSON" v-model="text" style="margin-bottom: 10px">
+            <el-input v-drag="'text'" type="textarea" :rows="10" placeholder="请输入JSON" v-model="text" style="margin-bottom: 10px">
             </el-input>
             请编辑BaseUrl：
             <el-checkbox v-model="ignore" :true-label="1" :false-label="0" style="float: right;margin-right: 20px">
@@ -26,7 +26,7 @@
             </template>
         </el-row>
         <el-row class="row" v-else>
-            <el-input type="textarea" :rows="10" placeholder="请输入JSON" v-model="textMy">
+            <el-input v-drag="'textMy'" type="textarea" :rows="10" placeholder="请输入JSON" v-model="textMy">
             </el-input>
         </el-row>
         <el-row class="row">{{status}}</el-row>
@@ -39,6 +39,7 @@
 </template>
 
 <script>
+    var dragFile=require("../director/dragFile")
     module.exports={
         data:function () {
             return {
@@ -52,6 +53,9 @@
                 status:"",
                 ignore:0
             }
+        },
+        directives:{
+            drag:dragFile
         },
         computed:{
 

@@ -11,8 +11,22 @@
                             &nbsp;
                         </el-col>
                         <el-col class="col" :span="22">
-                            <el-input style="width: 90%;" placeholder="请填写名称" v-model.trim="item.name" v-if="item.name!=null && (level!=0 || type!=1)" @focus="focus(item)" @blur="blur(item)"></el-input>
-                            <el-input style="width: 90%;" placeholder="该字段没有名称" disabled v-else></el-input>
+                            <el-input style="width: 90%;" placeholder="请填写名称" v-model.trim="item.name" v-if="item.name!=null && (level!=0 || type!=1)" @focus="focus(item)" @blur="blur(item)">
+                                <el-popover slot="append" placement="bottom" width="100" trigger="hover" v-if="(item.type==0 || item.type==1) && statusExist">
+                                    <el-row class="row" style="font-size: 15px;color: #20A0FF;text-align: center">
+                                        {{statusValid(item)}}
+                                    </el-row>
+                                    <el-button type="text" style="width:30px" slot="reference" @click="editStatus(item)"><i class="fa fa-tag"></i></el-button>
+                                </el-popover>
+                            </el-input>
+                            <el-input style="width: 90%;" placeholder="该字段没有名称" disabled v-else>
+                                <el-popover slot="append" placement="bottom" width="100" trigger="hover" v-if="(item.type==0 || item.type==1) && statusExist">
+                                    <el-row class="row" style="font-size: 15px;color: #20A0FF;text-align: center">
+                                        {{statusValid(item)}}
+                                    </el-row>
+                                    <el-button type="text" style="width:30px" slot="reference" @click="editStatus(item)"><i class="fa fa-tag"></i></el-button>
+                                </el-popover>
+                            </el-input>
                         </el-col>
                     </td>
                     <td style="width: 14%">
@@ -40,18 +54,7 @@
                         <el-button type="text" icon="close" style="color: red;font-size: 15px" @click="remove(item,index,level)" size="small"></el-button>
                     </td>
                     <td style="width: 5%">
-                        <el-button type="text" style="font-size: 15px" icon="plus" size="small"  @click="add(arr)" v-if="(item.type==2 || item.type==5)"></el-button>
-                        <template v-else-if="item.type==0 || item.type==1">
-                            <el-button type="text" style="font-size: 15px" icon="plus" size="small"  @click="add(arr)" v-if="!statusExist"></el-button>
-                            <el-dropdown v-else>
-                                <el-button type="text" icon="plus" size="small" style="font-size: 15px">
-                                </el-button>
-                                <el-dropdown-menu slot="dropdown">
-                                    <el-dropdown-item @click.native="add(arr)">兄弟节点</el-dropdown-item>
-                                    <el-dropdown-item @click.native="editStatus(item)">{{statusValid(item)?"修改状态码":"绑定状态码"}}</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </el-dropdown>
-                        </template>
+                        <el-button type="text" style="font-size: 15px" icon="plus" size="small"  @click="add(arr)" v-if="(item.type==2 || item.type==5 || item.type==0 || item.type==1)"></el-button>
                         <el-dropdown v-else>
                             <el-button type="text" icon="plus" size="small" style="font-size: 15px">
                             </el-button>
@@ -337,25 +340,26 @@
             statusValid:function (item) {
                 if(!item.status)
                 {
-                    return false;
+                    return "没有绑定状态码";
                 }
                 else
                 {
-                    var bFind=false;
+                    var bFind=false,name="";
                     this.$store.state.status.forEach(function (obj) {
                         if(obj.id==item.status)
                         {
                             bFind=true;
+                            name=obj.name;
                         }
                     })
                     if(bFind)
                     {
-                        return item.status;
+                        return "状态码:"+name;
                     }
                     else
                     {
                         item.status="";
-                        return ""
+                        return "状态码已不存在"
                     }
                 }
             }

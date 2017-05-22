@@ -4,7 +4,7 @@
             <template v-for="(item,index) in arr">
                 <tr style="text-align: center;vertical-align: middle">
                     <td style="width: 20%;height: 50px">
-                        <el-autocomplete style="width: 90%" class="inline-input" placeholder="请填写header" v-model="item.name" :fetch-suggestions="querySearchKey"></el-autocomplete>
+                        <el-autocomplete style="width: 90%" class="inline-input" placeholder="请填写header" v-model="item.name" :fetch-suggestions="querySearchKey" @input="index==arr.length-1?add():void(0)"></el-autocomplete>
                     </td>
                     <td style="width: 30%">
                         <el-autocomplete style="width: 90%;" class="inline-input" placeholder="请填写value" v-model="item.value" :fetch-suggestions="querySearchValue" @mouseenter.native="focus(item)"></el-autocomplete>
@@ -15,11 +15,8 @@
                     <td style="width: 10%;height: 50px;">
                         <el-button type="text" size="small" style="font-size: 15px" @click="encrypt(item)">{{(item.encrypt && item.encrypt.type)?item.encrypt.type:"未加密"}}</el-button>
                     </td>
-                    <td style="width: 5%">
-                        <el-button type="text" style="font-size: 15px;color:red" size="small" icon="close" @click="remove(index)"></el-button>
-                    </td>
-                    <td style="width: 5%">
-                        <el-button type="text" style="font-size: 15px" size="small" icon="plus" v-if="index==arr.length-1" @click="add"></el-button>
+                    <td style="width: 10%">
+                        <el-button type="text" style="font-size: 15px;color:red" size="small" icon="close" @click="remove(index)" v-if="index!=arr.length-1"></el-button>
                     </td>
                 </tr>
             </template>
@@ -86,16 +83,7 @@
                 this.arr.push({name:'',value:'',remark:''});
             },
             remove:function (index) {
-                if(this.arr.length>1)
-                {
-                    this.arr.splice(index,1)
-                }
-                else
-                {
-                    this.arr[0].name="";
-                    this.arr[0].value="";
-                    this.arr[0].remark="";
-                }
+                this.arr.splice(index,1)
             },
             encrypt:function (item) {
                 if(!item.encrypt)

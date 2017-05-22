@@ -1,6 +1,7 @@
 /**
  * Created by sunxin on 2017/2/23.
  */
+var bus=require("../bus/projectInfoBus");
 module.exports=new Vuex.Store({
     state:{
         interfaceList:[],
@@ -276,6 +277,7 @@ module.exports=new Vuex.Store({
         initInterface:function (state,data) {
             if(state.interfaceEdit.queryParam.length>0)
             {
+                var obj=state.query[0];
                 state.query=state.interfaceEdit.queryParam;
                 state.query.forEach(function (item) {
                     if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
@@ -292,6 +294,7 @@ module.exports=new Vuex.Store({
                         }
                     }
                 })
+                state.query.push(obj);
             }
             else
             {
@@ -299,6 +302,7 @@ module.exports=new Vuex.Store({
             }
             if(state.interfaceEdit.bodyParam.length>0)
             {
+                var obj=state.body[0];
                 state.body=state.interfaceEdit.bodyParam;
                 state.body.forEach(function (item) {
                     if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
@@ -315,6 +319,7 @@ module.exports=new Vuex.Store({
                         }
                     }
                 })
+                state.body.push(obj);
             }
             else
             {
@@ -322,7 +327,9 @@ module.exports=new Vuex.Store({
             }
             if(state.interfaceEdit.header.length>0)
             {
+                var obj=state.header[0];
                 state.header=state.interfaceEdit.header;
+                state.header.push(obj);
             }
             else
             {
@@ -844,6 +851,7 @@ module.exports=new Vuex.Store({
                 });
             }
             context.commit("initInterface");
+            bus.$emit("interfaceInfo");
         },
         getAllInterface:function (context,data) {
             context.commit("initInterfaceList",data.data);
@@ -1041,6 +1049,7 @@ module.exports=new Vuex.Store({
                 helper.convertToJSON(result,obj,info);
                 context.commit("setDrawMix",helper.format(JSON.stringify(obj),1,result,context.state.status).draw);
             }
+            bus.$emit("interfaceInfo");
         },
         move:function (context,obj) {
             return net.put("/interface/move",{

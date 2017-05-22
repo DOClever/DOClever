@@ -139,7 +139,7 @@ helper.eachResult=function (item,pItem,arr,json) {
     }
 }
 
-helper.convertToJSON=function (data,obj,info) {
+helper.convertToJSON=function (data,obj,info,run) {
     var mock=function (data) {
         if(!data.mock || $.trim(data.mock)[0]!="@")
         {
@@ -151,7 +151,7 @@ helper.convertToJSON=function (data,obj,info) {
                 }
                 else
                 {
-                    return "mock"
+                    return run?"":"mock"
                 }
             }
             else if(data.type==1)
@@ -162,7 +162,7 @@ helper.convertToJSON=function (data,obj,info) {
                 }
                 else
                 {
-                    return 1
+                    return run?null:1
                 }
             }
             else if(data.type==2)
@@ -173,7 +173,7 @@ helper.convertToJSON=function (data,obj,info) {
                 }
                 else
                 {
-                    return true
+                    return run?null:true
                 }
             }
             else if(data.type==5)
@@ -184,12 +184,16 @@ helper.convertToJSON=function (data,obj,info) {
                 }
                 else
                 {
-                    return "mixed"
+                    return run?null:"mixed"
                 }
             }
         }
         else
         {
+            if(run)
+            {
+                return data.mock;
+            }
             var str=$.trim(data.mock).substr(1);
             if(/^date/i.test(str))
             {
@@ -248,7 +252,7 @@ helper.convertToJSON=function (data,obj,info) {
                         var arr;
                         try
                         {
-                            arr=eval(val);
+                            arr=eval("("+val+")");
                         }
                         catch (err)
                         {
@@ -797,7 +801,7 @@ helper.format=function (txt,mix,outParam,status) {
     };
 }
 
-helper.handleResultData=function (name,data,result,originObj,show) {
+helper.handleResultData=function (name,data,result,originObj,show,input) {
     name=typeof(name)=="string"?name:null;
     if(typeof(data)=="string")
     {
@@ -812,6 +816,19 @@ helper.handleResultData=function (name,data,result,originObj,show) {
         if(show)
         {
             obj.show=0
+        }
+        if(input)
+        {
+            obj.value={
+                type:0,
+                status:"",
+                data:[
+                    {
+                        value:obj.mock,
+                        remark:""
+                    }
+                ]
+            }
         }
         result.push(obj)
     }
@@ -829,6 +846,19 @@ helper.handleResultData=function (name,data,result,originObj,show) {
         {
             obj.show=0
         }
+        if(input)
+        {
+            obj.value={
+                type:0,
+                status:"",
+                data:[
+                    {
+                        value:obj.mock,
+                        remark:""
+                    }
+                ]
+            }
+        }
         result.push(obj)
     }
     else if(typeof(data)=="boolean")
@@ -844,6 +874,19 @@ helper.handleResultData=function (name,data,result,originObj,show) {
         if(show)
         {
             obj.show=0
+        }
+        if(input)
+        {
+            obj.value={
+                type:0,
+                status:"",
+                data:[
+                    {
+                        value:obj.mock,
+                        remark:""
+                    }
+                ]
+            }
         }
         result.push(obj)
     }
@@ -866,7 +909,7 @@ helper.handleResultData=function (name,data,result,originObj,show) {
         if(data.length>0)
         {
             var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[0]:null):null;
-            arguments.callee(null,data[0],obj.data,resultObj,show)
+            arguments.callee(null,data[0],obj.data,resultObj,show,input)
         }
     }
     else if(typeof(data)=="object" && !(data instanceof Array))
@@ -888,7 +931,7 @@ helper.handleResultData=function (name,data,result,originObj,show) {
         for(var key in data)
         {
             var resultObj=helper.findObj(originObj?originObj.data:null,key);
-            arguments.callee(key,data[key],obj.data,resultObj,show)
+            arguments.callee(key,data[key],obj.data,resultObj,show,input)
         }
     }
     else
@@ -1070,7 +1113,7 @@ helper.runBefore=function (code,url,path,method,query,header,body) {
     var Base64=BASE64.encoder,MD5=CryptoJS.MD5,SHA1=CryptoJS.SHA1,SHA256=CryptoJS.SHA256,SHA512=CryptoJS.SHA512,SHA3=CryptoJS.SHA3,RIPEMD160=CryptoJS.RIPEMD160,AES=CryptoJS.AES.encrypt,TripleDES=CryptoJS.TripleDES.encrypt,DES=CryptoJS.DES.encrypt,Rabbit=CryptoJS.Rabbit.encrypt,RC4=CryptoJS.RC4.encrypt,RC4Drop=CryptoJS.RC4Drop.encrypt;
     try
     {
-        eval(code);
+        eval("("+code+")");
     }
     catch (err)
     {
@@ -1081,7 +1124,7 @@ helper.runBefore=function (code,url,path,method,query,header,body) {
 helper.runAfter=function (code,status,header,data) {
     try
     {
-        eval(code);
+        eval("("+code+")");
     }
     catch (err)
     {
@@ -1664,10 +1707,6 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
             query[obj.name]=obj.selValue;
         }
     })
-    if(opt && opt.query)
-    {
-        Object.assign(query,opt.query);
-    }
     var header={},arrHeaders=["host","connection","origin","referer","user-agent"],objHeaders={};
     obj.header.forEach(function (obj) {
         if(!obj.name || !obj.enable)
@@ -1701,10 +1740,6 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
 
         }
     })
-    if(opt && opt.header)
-    {
-        Object.assign(header,opt.header);
-    }
     var body={},bUpload=false;
     if(method=="POST" || method=="PUT")
     {
@@ -1764,10 +1799,6 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
                     }
                 }
             }
-            if(opt && opt.body)
-            {
-                Object.assign(body,opt.body);
-            }
         }
         else
         {
@@ -1782,52 +1813,13 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
                 {
                     body=obj.bodyInfo.rawText;
                 }
-                if(opt && opt.body!==undefined)
-                {
-                    body=opt.body;
-                }
             }
             else if(obj.bodyInfo.rawType==2)
             {
                 var obj1={};
                 var result=helper.resultSave(obj.bodyInfo.rawJSON);
-                helper.convertToJSON(result,obj1);
+                helper.convertToJSON(result,obj1,null,1);
                 body=obj1;
-                if(opt && opt.body)
-                {
-                    for(var key in opt.body)
-                    {
-                        var val=opt.body[key];
-                        var arr=key.split(".");
-                        if(arr.length>1)
-                        {
-                            var obj1=body;
-                            for(var i=0;i<arr.length;i++)
-                            {
-                                var key1=arr[i];
-                                if(i!=arr.length-1)
-                                {
-                                    if(obj1[key1]!==undefined)
-                                    {
-                                        obj1=obj1[key1];
-                                    }
-                                    else
-                                    {
-                                        obj1=obj1[key1]={};
-                                    }
-                                }
-                                else
-                                {
-                                    obj1[key1]=val;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            body[key]=val;
-                        }
-                    }
-                }
             }
             else
             {
@@ -1884,9 +1876,82 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
     {
         helper.runBefore(obj.before.code,baseUrl,path,method,query,header,body)
     }
-    if((method=="POST" || method=="PUT") && obj.bodyInfo.type==1 && obj.bodyInfo.rawType==2)
+    if(opt && opt.query)
     {
-        body=JSON.stringify(body);
+        Object.assign(query,opt.query);
+    }
+    if(opt && opt.header)
+    {
+        for(var key in opt.header)
+        {
+            if($.inArr(key,arrHeaders))
+            {
+                objHeaders[key]=opt.header[key];
+            }
+            else
+            {
+                header[key]=opt.header[key];
+            }
+        }
+    }
+    if((method=="POST" || method=="PUT") && obj.bodyInfo)
+    {
+        if(obj.bodyInfo.type==0)
+        {
+            if(opt && opt.body)
+            {
+                Object.assign(body,opt.body);
+            }
+        }
+        else
+        {
+            if(obj.bodyInfo.rawType==0)
+            {
+                if(opt && opt.body!==undefined)
+                {
+                    body=opt.body;
+                }
+            }
+            else if(obj.bodyInfo.rawType==2)
+            {
+                if(opt && opt.body)
+                {
+                    for(var key in opt.body)
+                    {
+                        var val=opt.body[key];
+                        var arr=key.split(".");
+                        if(arr.length>1)
+                        {
+                            var obj1=body;
+                            for(var i=0;i<arr.length;i++)
+                            {
+                                var key1=arr[i];
+                                if(i!=arr.length-1)
+                                {
+                                    if(obj1[key1]!==undefined)
+                                    {
+                                        obj1=obj1[key1];
+                                    }
+                                    else
+                                    {
+                                        obj1=obj1[key1]={};
+                                    }
+                                }
+                                else
+                                {
+                                    obj1[key1]=val;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            body[key]=val;
+                        }
+                    }
+                }
+                body=JSON.stringify(body);
+            }
+        }
     }
     query=$.param(query);
     if(query.length>0)

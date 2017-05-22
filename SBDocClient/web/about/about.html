@@ -15,59 +15,62 @@
 </head>
 <body>
     <div class="container" v-cloak id="app">
-        <mainnav>
-            <el-button type="text" style="font-size: 15px" slot="slot3" onclick="window.open('https://github.com/sx1989827/SBDoc','_blank')">开源</el-button>
+        <mainnav :transparent="1">
+            <el-button type="text" style="font-size: 15px;color: white" slot="slot3" onclick="window.open('https://github.com/sx1989827/SBDoc','_blank')">开源</el-button>
             <el-popover ref="popover" placement="bottom" width="250" trigger="hover" slot="other">
             <span style="font-size: 15px;color: #20A0FF">
                 欢迎加入QQ讨论群：<span style="color: red">611940610</span>
             </span>
             </el-popover>
-            <el-button type="text" style="font-size: 15px" v-popover:popover slot="slot4">QQ群</el-button>
-            <el-button type="text" style="font-size: 15px" slot="slot1" v-if="!isLogin" onclick="location.href='../about/about.html'">关于</el-button>
-            <el-button type="text" style="font-size: 15px" slot="slot2" v-if="!isLogin" onclick="location.href='../help/help.html'">帮助</el-button>
+            <el-button type="text" style="font-size: 15px;color: white" v-popover:popover slot="slot4">QQ群</el-button>
+            <el-button type="text" style="font-size: 15px;color: white" slot="slot1" v-if="!isLogin" onclick="location.href='../about/about.html'">关于</el-button>
+            <el-button type="text" style="font-size: 15px;color: white" slot="slot2" v-if="!isLogin" onclick="location.href='../help/help.html'">帮助</el-button>
         </mainnav>
-        <el-row class="row" style="padding: 10px;height: 700px">
-            <el-row class="row" style="padding: 0 20px">
-                <h3>
-                    关于我们
-                </h3>
-                <p style="font-size: larger;color: gray">
-                    合肥胖胖羊信息科技有限公司创建于2016年，致力于成为中国领先的移动互联网产品供应商，公司核心团队有着数年上市互联网公司的研发经验，开发过数十个移动APP，与行业合作伙伴保持业务沟通。公司位于合肥政务区美丽的天鹅湖畔，是一家拥有自主知识产权的移动互联网企业。
-                </p>
-                <h3 style="margin-top: 50px">
-                    我们的目标
-                </h3>
-                <p style="font-size: larger;color: gray">
-                    SBDoc是我们团队内部接口测试工具，因为热爱，我们希望她能得到更多的人来使用，致力于服务数百万开发者，为开发人员提供全套的API系统解决方案。
-                </p>
-                <h3 style="margin-top: 50px">
-                    产品介绍
-                </h3>
-                <p style="font-size: larger;color: gray">
-                    SBDoc是一个可视化接口管理工具 ,可以分析接口结构，校验接口正确性， 围绕接口定义文档，通过一系列自动化工具提升我们的协作效率。SBDoc前后端全部采用了javascript来作为我们的开发语言，前端用的是vue+element UI，后端是express+mongodb，这样的框架集成了高并发，迭代快的特点，保证系统的稳定可靠。
-                </p>
-                <h3 style="margin-top: 50px">
-                    联系方式
-                </h3>
-                <p style="font-size: larger;color: gray">
-                    商务合作QQ：395414574<br>   技术支持QQ群：611940610
-                </p>
-            </el-row>
+        <el-row class="row" style="background-image: url('../pic/about/back.png');background-position:center center;background-size: cover;height: 500px">
+
         </el-row>
-        <el-row class="row" style="height: 200px;background-color: rgb(39,52,68);">
-            <el-col class="col" :span="4" style="display: inline-block;color: white;text-align: center;line-height: 200px;font-size: larger;">
-                <a href="../about/about.html" style="color: white;text-decoration: none" target="_blank">关于我们</a>
-            </el-col>
-            <el-col class="col" :span="4" style="display: inline-block;color: white;text-align: center;line-height: 200px;font-size: larger;">
-                <a href="../donate/donate.html" style="color: white;text-decoration: none" target="_blank">支持我们</a>
-            </el-col>
-            <el-col class="col" :span="4" style="display: inline-block;color: white;text-align: center;line-height: 200px;font-size: larger;height: 100%">
-                <a href="../help/help.html" style="color: white;text-decoration: none" target="_blank">帮助中心</a>
-            </el-col>
-            <el-col class="col" :span="12" style="color: white;height: 100%">
-                <img src="../pic/logo.png" width="100" height="100" style="float: right;margin-top: 50px;margin-right: 50px">
-            </el-col>
-            <el-row class="row" style="position: absolute;bottom: 0px;left:0px;height: 30px;color: lightgray;text-align: center">
+        <el-row class="row" style="padding: 10px;height: 700px;background-color: white;">
+            <el-tabs v-model="type" style="width: 90%;margin: 0 auto;">
+                <el-tab-pane label="关于我们" name="first">
+                    <p style="font-size: larger;color: gray">
+                        合肥胖胖羊信息科技有限公司创建于2016年，致力于成为中国领先的移动互联网产品供应商，公司核心团队有着数年上市互联网公司的研发经验，开发过数十个移动APP，与行业合作伙伴保持业务沟通。<br>公司位于合肥政务区美丽的天鹅湖畔，是一家拥有自主知识产权的移动互联网企业。
+                    </p>
+                    <el-row class="row">
+                        <el-col class="col" :span="8">
+                            <img src="../pic/about/1.png" style="width: 90%">
+                        </el-col>
+                        <el-col class="col" :span="8">
+                            <img src="../pic/about/2.png" style="width: 90%">
+                        </el-col>
+                        <el-col class="col" :span="8">
+                            <img src="../pic/about/3.png" style="width: 90%">
+                        </el-col>
+                    </el-row>
+                </el-tab-pane>
+                <el-tab-pane label="我们的目标" name="second">
+                    <p style="font-size: larger;color: gray">
+                        SBDoc是我们团队内部接口测试工具，因为热爱，我们希望她能得到更多的人来使用，致力于服务数百万开发者，为开发人员提供全套的API系统解决方案。
+                    </p>
+                </el-tab-pane>
+                <el-tab-pane label="产品介绍" name="third">
+                    <p style="font-size: larger;color: gray">
+                        SBDoc是一个可视化接口管理工具 ,可以分析接口结构，校验接口正确性， 围绕接口定义文档，通过一系列自动化工具提升我们的协作效率。SBDoc前后端全部采用了javascript来作为我们的开发语言，前端用的是vue+element UI，后端是express+mongodb，这样的框架集成了高并发，迭代快的特点，保证系统的稳定可靠。
+                    </p>
+                </el-tab-pane>
+                <el-tab-pane label="联系方式" name="fourth">
+                    <p style="font-size: larger;color: gray">
+                        商务合作QQ：395414574<br>   技术支持QQ群：611940610
+                    </p>
+                </el-tab-pane>
+            </el-tabs>
+        </el-row>
+        <el-row class="row" style="background-color: rgb(39,52,68);color: white">
+            <el-row class="row" style="text-align: center;padding-top: 50px;padding-bottom: 30px">
+                <a href="../about/about.html" style="text-decoration: none;color: white" target="_blank">关于我们</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+                <a href="../donate/donate.html" style="text-decoration: none;color: white" target="_blank">支持我们</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+                <a href="../help/help.html" style="text-decoration: none;color: white" target="_blank">帮助中心</a>
+            </el-row>
+            <el-row class="row" style="text-align: center;color: white;margin-bottom: 30px">
                 Copyright&nbsp;©&nbsp;2016～2017&nbsp;合肥市胖胖羊信息科技有限责任公司&nbsp;皖ICP备17002996号
             </el-row>
         </el-row>

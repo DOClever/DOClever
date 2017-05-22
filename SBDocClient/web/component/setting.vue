@@ -87,7 +87,11 @@
                         </h4>
                     </el-row>
                     <el-row class="row" style="text-align: center">
-                        <el-button type="primary" style="width: 200px;margin-bottom: 20px" @click="exportJSON">导出为JSON文件</el-button>
+                        <el-radio class="radio" :label="0" v-model="exportType">JSON</el-radio>&nbsp;&nbsp;
+                        <el-radio class="radio" :label="1" v-model="exportType">HTML</el-radio>
+                    </el-row>
+                    <el-row class="row" style="text-align: center;margin-top: 20px">
+                        <el-button type="primary" style="width: 200px;margin-bottom: 20px" @click="exportJSON">导出</el-button>
                     </el-row>
                 </el-row>
                 <el-row v-else-if="type==3" class="row">
@@ -123,6 +127,7 @@
                 infoPending:false,
                 deletePending:false,
                 mockUrl:config.baseUrl+"/mock/"+session.get("projectId"),
+                exportType:0
             }
         },
         computed:{
@@ -234,13 +239,13 @@
                 var type=navigator.userAgent;
                 if(type.indexOf("Firefox")>-1)
                 {
-                    window.open(location.protocol+"//"+location.host+"/project/exportjson?id="+session.get("projectId"));
+                    window.open(location.protocol+"//"+location.host+"/project/"+(this.exportType==0?"exportjson":"exporthtml")+"?id="+session.get("projectId"));
                 }
                 else
                 {
                     var link=document.createElement("a");
-                    link.href="/project/exportjson?id="+session.get("projectId");
-                    link.download=session.get("projectName")+".json";
+                    link.href="/project/"+(this.exportType==0?"exportjson":"exporthtml")+"?id="+session.get("projectId");
+                    link.download=session.get("projectName")+(this.exportType==0?".json":".zip");
                     link.click();
                 }
             },

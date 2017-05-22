@@ -14,8 +14,16 @@ var status=require("../../model/statusModel")
 var test=require("../../model/testModel")
 var testModule=require("../../model/testModuleModel")
 var testGroup=require("../../model/testGroupModel")
+var temp=require("../../model/tempModel")
+var blue=require("bluebird");
 var fs=require("fs");
 var uuid=require("uuid/v1");
+var zip=require("archiver");
+var path=require("path");
+var copy=require("recursive-copy");
+var rm=require("rimraf");
+var nunjucks=require("nunjucks");
+blue.promisifyAll(fs);
 let refreshInterface=async (function (id) {
     let query={
         project:id
@@ -869,6 +877,110 @@ function importMember(req,res) {
     }
 }
 
+function exportHTML(req,res) {
+    try
+    {
+        let arr=await (temp.findAsync({
+            user:req.userInfo._id,
+            project:req.obj._id
+        }))
+        for(let obj of arr)
+        {
+            let pathName=path.join(con.tempPath,obj.name+".zip");
+            if(await (fs.existsAsync(pathName)))
+            {
+                await (fs.unlinkAsync(pathName));
+            }
+            await (obj.removeAsync());
+        }
+        let name=req.obj.name+"-"+req.userInfo.name+"-"+Date.now();
+        let obj=await (temp.createAsync({
+            name:name,
+            user:req.userInfo._id,
+            project:req.obj._id,
+        }))
+        await (copy(path.resolve(__dirname,"../../html"),path.join(con.tempPath,name)));
+        let arrGroup=await (group.findAsync({
+            project:req.obj._id
+        },null,{
+            sort:"name"
+        }));
+        for(let obj of arrGroup)
+        {
+            let arrInterface=await (interface.findAsync({
+                group:obj._id
+            },null,{
+                sort:"name"
+            }));
+            arrInterface=await (interface.populateAsync(arrInterface,{
+                path:"project",
+                select:"name"
+            }))
+            arrInterface=await (interface.populateAsync(arrInterface,{
+                path:"group",
+                select:"name"
+            }))
+            arrInterface=await (interface.populateAsync(arrInterface,{
+                path:"owner",
+                select:"name"
+            }))
+            arrInterface=await (interface.populateAsync(arrInterface,{
+                path:"editor",
+                select:"name"
+            }))
+            obj._doc.data=arrInterface;
+        }
+        let arrStatus=await (status.findAsync({
+            project:req.obj._id
+        },null,{
+            sort:"name"
+        }));
+        nunjucks.configure(path.join(con.tempPath,name), {  });
+        var str=nunjucks.render("index.html",{
+            interface:JSON.stringify(arrGroup),
+            project:JSON.stringify(req.obj),
+            status:JSON.stringify(arrStatus),
+            name:req.obj.name
+        })
+        await (fs.writeFileAsync(path.join(con.tempPath,name,"index.html"),str));
+        var pathName=path.join(con.tempPath,name+".zip");
+        var output=fs.createWriteStream(pathName);
+        var archive = zip('zip', {
+            zlib: { level: 9 }
+        });
+        output.on('close', function() {
+            rm(path.join(con.tempPath,name),{},function (err) {
+
+            });
+            res.download(pathName,req.obj.name+".zip",function (err) {
+                if(!err)
+                {
+                    obj.removeAsync();
+                    fs.exists(pathName,function (exist) {
+                        if(exist)
+                        {
+                            fs.unlink(pathName);
+                        }
+                    })
+                }
+            });
+        });
+        archive.on('error', function(err) {
+            rm(path.join(con.tempPath,name),{},function (err) {
+
+            });
+            throw err;
+        });
+        archive.pipe(output);
+        archive.directory(path.join(con.tempPath,name),req.obj.name);
+        archive.finalize();
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
 exports.validateUser=async (validateUser);
 exports.inProject=async (inProject);
 exports.create=async (create);
@@ -890,7 +1002,7 @@ exports.setInject=async (setInject);
 exports.urlList=async (urlList);
 exports.getImportMember=async (getImportMember);
 exports.importMember=async (importMember);
-
+exports.exportHTML=async (exportHTML);
 
 
 

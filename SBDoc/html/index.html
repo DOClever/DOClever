@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link rel="stylesheet" href="./lib/element/index.css">
+    <link href="./lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./common/common.css">
+    <title>项目主页</title>
+</head>
+<body>
+<div class="container" id="app"  v-cloak>
+    <mainnav ref="nav">
+        <el-row class="row" style="text-align: center;height: 60px;line-height: 60px;font-size: 25px;color: #20A0FF" slot="title">{{ name }}</el-row>
+    </mainnav>
+    <el-row class="row" style="margin-top: 20px;padding-left: 80px;">
+        <div style="background-color: rgb(39,52,68);width: 80px;left: 0;top: 80px;position: fixed;height: calc(100% - 80px)">
+            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==0?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=0">
+                <span class="fa fa-list" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
+                接口
+            </div>
+            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==2?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=2">
+                <span class="fa fa-globe" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
+                全局
+            </div>
+            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==3?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=3">
+                <span class="fa fa-cog" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
+                设置
+            </div>
+        </div>
+        <el-col class="col" :span="24" style="height: calc(100vh - 80px);overflow-x: hidden;overflow-y: auto">
+            <interface v-show="type==0"></interface>
+            <global v-show="type==2"></global>
+            <setting v-show="type==3"></setting>
+        </el-col>
+    </el-row>
+</div>
+<script>
+    var interface={{ interface|safe }};
+    var project={{ project|safe }};
+    var state={{ status|safe }};
+</script>
+<script src="./dist/vendor.bundle.js"></script>
+<script src="./lib/element/index.js"></script>
+<script src="./dist/index.js"></script>
+
+</body>
+</html>
