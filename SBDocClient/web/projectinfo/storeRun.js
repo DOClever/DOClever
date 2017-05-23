@@ -323,6 +323,10 @@ module.exports=new Vuex.Store({
                         drag:1
                     }]);
                 }
+                else
+                {
+                    helper.initResultShow(state.bodyInfo.rawJSON);
+                }
             }
         },
         setFileResult:function (state,data) {
@@ -482,7 +486,7 @@ module.exports=new Vuex.Store({
             }
         },
         changeMethod:function (state) {
-            if(state.interface.method=="POST" || state.interface.method=="PUT")
+            if(state.interface.method=="POST" || state.interface.method=="PUT" || state.interface.method=="PATCH")
             {
                 if(state.header.length==1 && !state.header[0].name)
                 {
@@ -708,7 +712,7 @@ module.exports=new Vuex.Store({
                 }
             })
             var body={},bUpload=false;
-            if(method=="POST" || method=="PUT")
+            if(method=="POST" || method=="PUT" || method=="PATCH")
             {
                 if(context.state.bodyInfo.type==0)
                 {
@@ -810,7 +814,7 @@ module.exports=new Vuex.Store({
             {
                 helper.runBefore(context.state.interface.before.code,baseUrl,path,method,query,header,body)
             }
-            if((method=="POST" || method=="PUT") && context.state.bodyInfo.type==1 && context.state.bodyInfo.rawType==2)
+            if((method=="POST" || method=="PUT" || method=="PATCH") && context.state.bodyInfo.type==1 && context.state.bodyInfo.rawType==2)
             {
                 body=JSON.stringify(body);
             }
@@ -962,7 +966,7 @@ module.exports=new Vuex.Store({
                 })
             })
             var body=[],bUpload=false;
-            if(method=="POST" || method=="PUT")
+            if(method=="POST" || method=="PUT" || method=="PATCH")
             {
                 if(context.state.bodyInfo.type==0)
                 {
@@ -1054,7 +1058,7 @@ module.exports=new Vuex.Store({
                 before:context.state.interface.before,
                 after:context.state.interface.after
             }
-            if(method=="POST" || method=="PUT")
+            if(method=="POST" || method=="PUT" || method=="PATCH")
             {
                 obj.bodyInfo=context.state.bodyInfo;
                 if(obj.bodyInfo.type==1 && obj.bodyInfo.rawType==2 && obj.bodyInfo.rawJSON)

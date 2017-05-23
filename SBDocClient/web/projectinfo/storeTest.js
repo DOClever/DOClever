@@ -373,7 +373,7 @@ module.exports=new Vuex.Store({
                     }
                 }
             });
-            if(obj.interface.method=="POST" || obj.interface.method=="PUT")
+            if(obj.interface.method=="POST" || obj.interface.method=="PUT" || obj.interface.method=="PATCH")
             {
                 if(obj.originInterface && obj.originInterface.id==obj.interface.id)
                 {

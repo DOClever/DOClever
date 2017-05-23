@@ -34,7 +34,7 @@ function route(category) {
         }
         var clientParam;
         var id;
-        if(req.method=="POST" || req.method=="PUT")
+        if(req.method=="POST" || req.method=="PUT" || req.method=="PATCH")
         {
             if(!req.clientParam)
             {

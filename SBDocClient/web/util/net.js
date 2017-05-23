@@ -324,9 +324,13 @@ net.upload=function (method,path,data,headers,beforeFunc,run,bNet) {
         {
             request=Vue.http.post;
         }
-        else
+        else if(method.toLowerCase()=="put")
         {
             request=Vue.http.put;
+        }
+        else if(method.toLowerCase()=="patch")
+        {
+            request=Vue.http.patch;
         }
         return request.call(Vue.http,config.baseUrl+path,form,{
             headers:headers,

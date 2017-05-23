@@ -387,6 +387,10 @@ module.exports=new Vuex.Store({
                         drag:1
                     }]);
                 }
+                else
+                {
+                    helper.initResultShow(state.bodyInfo.rawJSON);
+                }
                 var bFind=false;
                 for(var i=0;i<state.header.length;i++)
                 {
@@ -481,7 +485,7 @@ module.exports=new Vuex.Store({
             }
         },
         changeMethod:function (state) {
-            if(state.interfaceEdit.method=="POST" || state.interfaceEdit.method=="PUT")
+            if(state.interfaceEdit.method=="POST" || state.interfaceEdit.method=="PUT" || state.interfaceEdit.method=="PATCH")
             {
                 if(state.header.length==1 && !state.header[0].name)
                 {

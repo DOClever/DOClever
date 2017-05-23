@@ -20,6 +20,10 @@ helper.methodColor=function (m) {
     {
         return "skyblue"
     }
+    else if(m=="patch")
+    {
+        return "purple"
+    }
 }
 
 helper.initResultShow=function (data) {

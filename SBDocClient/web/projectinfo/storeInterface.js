@@ -394,6 +394,10 @@ module.exports=new Vuex.Store({
                         drag:1
                     }]);
                 }
+                else
+                {
+                    helper.initResultShow(state.bodyInfo.rawJSON);
+                }
                 var bFind=false;
                 for(var i=0;i<state.header.length;i++)
                 {
@@ -624,7 +628,7 @@ module.exports=new Vuex.Store({
             state.interfaceEdit.bodyParam=arr;
         },
         changeMethod:function (state) {
-            if(state.interfaceEdit.method=="POST" || state.interfaceEdit.method=="PUT")
+            if(state.interfaceEdit.method=="POST" || state.interfaceEdit.method=="PUT" || state.interfaceEdit.method=="PATCH")
             {
                 if(state.header.length==1 && !state.header[0].name)
                 {
@@ -806,22 +810,9 @@ module.exports=new Vuex.Store({
                         mock:"",
                         drag:1
                     }],
-                    "bodyParam": [{
-                        name:"",
-                        type:0,
-                        must:0,
-                        remark:"",
-                    }],
-                    "queryParam": [{
-                        name:"",
-                        must:0,
-                        remark:""
-                    }],
-                    "header": [{
-                        name:"",
-                        value:"",
-                        remark:""
-                    }],
+                    "bodyParam": [],
+                    "queryParam": [],
+                    "header": [],
                     "bodyInfo":{
                         type:0,
                         rawType:0,
@@ -1109,7 +1100,7 @@ module.exports=new Vuex.Store({
             }
             obj.header=JSON.stringify(context.getters.headerSave);
             obj.queryparam=JSON.stringify(context.getters.querySave);
-            if(context.state.interfaceEdit.method=="POST" || context.state.interfaceEdit.method=="PUT")
+            if(context.state.interfaceEdit.method=="POST" || context.state.interfaceEdit.method=="PUT" || context.state.interfaceEdit.method=="PATCH")
             {
                 if(context.state.bodyInfo.type==0)
                 {
@@ -1276,7 +1267,7 @@ module.exports=new Vuex.Store({
                         before:data.data.before,
                         after:data.data.after
                     }
-                    if(method=="POST" || method=="PUT")
+                    if(method=="POST" || method=="PUT" || method=="PATCH")
                     {
                         obj.bodyInfo=data.data.bodyInfo;
                     }

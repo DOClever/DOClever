@@ -74,6 +74,7 @@
                                 <el-option  value="POST"></el-option>
                                 <el-option  value="PUT"></el-option>
                                 <el-option  value="DELETE"></el-option>
+                                <el-option  value="PATCH"></el-option>
                             </el-select>
                         </el-col>
                     </el-row>
@@ -116,7 +117,7 @@
                         <el-tab-pane :label="headerTab">
                             <inparamheader></inparamheader>
                         </el-tab-pane>
-                        <el-tab-pane :label="bodyTab" v-if="interfaceEdit.method=='POST' || interfaceEdit.method=='PUT'">
+                        <el-tab-pane :label="bodyTab" v-if="interfaceEdit.method=='POST' || interfaceEdit.method=='PUT' || interfaceEdit.method=='PATCH'">
                             <inparambody></inparambody>
                         </el-tab-pane>
                         <el-tab-pane label="Inject">
@@ -282,10 +283,10 @@
                         </tbody>
                     </table>
                 </el-row>
-                <el-row class="row" style="padding:0 10px;height: 50px;line-height: 50px;color: #50a3ff" v-if="(interfaceEdit.method=='PUT' || interfaceEdit.method=='POST') && (bodySave.length>0 || bodyInfo.type==1)">
+                <el-row class="row" style="padding:0 10px;height: 50px;line-height: 50px;color: #50a3ff" v-if="(interfaceEdit.method=='PUT' || interfaceEdit.method=='POST' || interfaceEdit.method=='PATCH') && (bodySave.length>0 || bodyInfo.type==1)">
                     Body:
                 </el-row>
-                <el-row class="row" style="padding:0 30px;" v-if="(interfaceEdit.method=='PUT' || interfaceEdit.method=='POST') && (bodySave.length>0 || bodyInfo.type==1)">
+                <el-row class="row" style="padding:0 30px;" v-if="(interfaceEdit.method=='PUT' || interfaceEdit.method=='POST' || interfaceEdit.method=='PATCH') && (bodySave.length>0 || bodyInfo.type==1)">
                     <table style="width: 100%;font-size: 17px;border-collapse: collapse" border="1" v-if="bodyInfo.type==0" bordercolor="#ddd">
                         <thead style="background-color: #50a3ff;color:white;text-align: center;vertical-align: middle">
                         <td style="width: 30%">

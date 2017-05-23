@@ -22,6 +22,10 @@ helper.methodColor=function (m) {
     {
         return "skyblue"
     }
+    else if(m=="patch")
+    {
+        return "purple"
+    }
 }
 
 helper.initResultShow=function (data) {
@@ -1741,7 +1745,7 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
         }
     })
     var body={},bUpload=false;
-    if(method=="POST" || method=="PUT")
+    if(method=="POST" || method=="PUT" || method=="PATCH")
     {
         if(obj.bodyInfo.type==0)
         {
@@ -1894,7 +1898,7 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
             }
         }
     }
-    if((method=="POST" || method=="PUT") && obj.bodyInfo)
+    if((method=="POST" || method=="PUT" || method=="PATCH") && obj.bodyInfo)
     {
         if(obj.bodyInfo.type==0)
         {

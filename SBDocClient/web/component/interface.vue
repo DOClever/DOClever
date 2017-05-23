@@ -84,6 +84,7 @@
                                 <el-option  value="POST"></el-option>
                                 <el-option  value="PUT"></el-option>
                                 <el-option  value="DELETE"></el-option>
+                                <el-option  value="PATCH"></el-option>
                             </el-select>
                         </el-col>
                     </el-row>
@@ -128,7 +129,7 @@
                             <inparamheader></inparamheader>
                             <el-button size="small" type="primary" style="margin-top: 10px;margin-left: 10px" @click="importHeader">导入HTTP Header字符串</el-button>
                         </el-tab-pane>
-                        <el-tab-pane :label="bodyTab" v-if="interfaceEdit.method=='POST' || interfaceEdit.method=='PUT'" name="body">
+                        <el-tab-pane :label="bodyTab" v-if="interfaceEdit.method=='POST' || interfaceEdit.method=='PUT' || interfaceEdit.method=='PATCH'" name="body">
                             <inparambody></inparambody>
                             <el-button size="small" type="primary" style="margin-top: 10px;margin-left: 10px" @click="importBody" v-if="bodyInfo.type==0">导入Body字符串</el-button>
                         </el-tab-pane>
@@ -305,10 +306,10 @@
                         </tbody>
                     </table>
                 </el-row>
-                <el-row class="row" style="padding:0 10px;height: 50px;line-height: 50px;color: #50a3ff" v-if="(interfaceEdit.method=='PUT' || interfaceEdit.method=='POST') && (bodySave.length>0 || bodyInfo.type==1)">
+                <el-row class="row" style="padding:0 10px;height: 50px;line-height: 50px;color: #50a3ff" v-if="(interfaceEdit.method=='PUT' || interfaceEdit.method=='POST' || interfaceEdit.method=='PATCH') && (bodySave.length>0 || bodyInfo.type==1)">
                     Body:
                 </el-row>
-                <el-row class="row" style="padding:0 30px;" v-if="(interfaceEdit.method=='PUT' || interfaceEdit.method=='POST') && (bodySave.length>0 || bodyInfo.type==1)">
+                <el-row class="row" style="padding:0 30px;" v-if="(interfaceEdit.method=='PUT' || interfaceEdit.method=='POST' || interfaceEdit.method=='PATCH') && (bodySave.length>0 || bodyInfo.type==1)">
                     <table style="width: 100%;font-size: 17px;border-collapse: collapse" border="1" v-if="bodyInfo.type==0" bordercolor="#ddd">
                         <thead style="background-color: #50a3ff;color:white;text-align: center;vertical-align: middle">
                         <td style="width: 30%">
@@ -629,6 +630,14 @@
             },
             changeMethod:function () {
                 store.commit("changeMethod");
+                if(this.tabType=="query" && (this.interfaceEdit.method=="POST" || this.interfaceEdit.method=="PUT" || this.interfaceEdit.method=="PATCH"))
+                {
+                    this.tabType="body";
+                }
+                else if(this.tabType=="body" && (this.interfaceEdit.method=="GET" || this.interfaceEdit.method=="DELETE"))
+                {
+                    this.tabType="query";
+                }
             },
             save:function () {
                 if(!this.interfaceEdit.name)
@@ -791,7 +800,7 @@
             })
             var _this=this;
             bus.$on("interfaceInfo",function () {
-                if(_this.interfaceEdit.method=="POST" || _this.interfaceEdit.method=="PUT")
+                if(_this.interfaceEdit.method=="POST" || _this.interfaceEdit.method=="PUT" || _this.interfaceEdit.method=="PATCH")
                 {
                     _this.tabType="body"
                 }

@@ -10,6 +10,7 @@
                                 <el-option  value="POST" label="POST"></el-option>
                                 <el-option  value="PUT" label="PUT"></el-option>
                                 <el-option  value="DELETE" label="DELETE"></el-option>
+                                <el-option  value="PATCH" label="PATCH"></el-option>
                             </el-select>
                         </div>
                     </el-col>
@@ -42,26 +43,26 @@
                 </el-row>
             </el-row>
             <el-row class="row" style="padding: 20px;margin-top: 15px;background-color: white;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
-                <el-tabs type="card">
-                    <el-tab-pane :label="paramTab" v-if="param.length>0">
+                <el-tabs type="card" v-model="tabType">
+                    <el-tab-pane :label="paramTab" v-if="param.length>0" name="param">
                         <runparam></runparam>
                     </el-tab-pane>
-                    <el-tab-pane :label="queryTab">
+                    <el-tab-pane :label="queryTab" name="query">
                         <runquery v-show="!queryRawShow"></runquery>
                         <el-input type="textarea" :rows="3" style="height: 100px;margin-top: 10px" placeholder="在这里编辑原始的url参数字符串，以&符合分割" v-show="queryRawShow" v-model="queryRawStr"></el-input>
                         <el-button type="primary" size="small" style="margin-top: 20px" @click="toggleQuery">{{queryRawShow?'Commit Raw':'Edit Raw'}}</el-button>
                     </el-tab-pane>
-                    <el-tab-pane :label="headerTab">
+                    <el-tab-pane :label="headerTab" name="header">
                         <runheader v-show="!headerRawShow"></runheader>
                         <el-input  type="textarea" :rows="3" style="height: 100px;margin-top: 10px" placeholder="在这里编辑原始的header字符串，以回车分割" v-show="headerRawShow" v-model="headerRawStr"></el-input>
                         <el-button type="primary" size="small" style="margin-top: 20px" @click="toggleHeader">{{headerRawShow?'Commit Raw':'Edit Raw'}}</el-button>
                     </el-tab-pane>
-                    <el-tab-pane :label="bodyTab" v-if="interface.method=='POST' || interface.method=='PUT'">
+                    <el-tab-pane :label="bodyTab" v-if="interface.method=='POST' || interface.method=='PUT' || interface.method=='PATCH'" name="body">
                         <runbody v-show="!bodyRawShow"></runbody>
                         <el-input type="textarea" :rows="3" style="height: 100px;margin-top: 10px" placeholder="在这里编辑原始的url参数字符串，以&符合分割，文件类型用[FILE]代替" v-show="bodyRawShow" v-model="bodyRawStr"></el-input>
                         <el-button type="primary" size="small" style="margin-top: 20px" @click="toggleBody" v-if="bodyInfo.type==0">{{bodyRawShow?'Commit Raw':'Edit Raw'}}</el-button>
                     </el-tab-pane>
-                    <el-tab-pane label="Inject">
+                    <el-tab-pane label="Inject" name="inject">
                         <runinject></runinject>
                     </el-tab-pane>
                 </el-tabs>
@@ -146,6 +147,7 @@
             return {
                 session:$.clone(session.raw()),
                 runPending:false,
+                tabType:"query"
             }
         },
         store:store,
@@ -285,7 +287,11 @@
             },
             save:function () {
                 var _this=this;
-                store.dispatch("save").then(function () {
+                store.dispatch("save").then(function (data) {
+                    if(data && data.code!=200)
+                    {
+                        $.tip(data.msg,0);
+                    }
                     _this.$emit("save");
                     _this.$refs.box.close();
                 })
@@ -350,6 +356,14 @@
             },
             changeMethod:function () {
                 store.commit("changeMethod")
+                if(this.tabType=="query" && (this.interfaceEdit.method=="POST" || this.interfaceEdit.method=="PUT" || this.interfaceEdit.method=="PATCH"))
+                {
+                    this.tabType="body";
+                }
+                else if(this.tabType=="body" && (this.interfaceEdit.method=="GET" || this.interfaceEdit.method=="DELETE"))
+                {
+                    this.tabType="query";
+                }
             },
             paste:function () {
                 setTimeout(function () {
@@ -419,8 +433,19 @@
             store.commit("setArrStatus",this.$options.propsData.status);
             store.commit("setGlobalBefore",this.globalBefore);
             store.commit("setGlobalAfter",this.globalAfter);
-            store.commit("setBaseUrls",this.baseUrls);
             store.commit("initData",this.interfaceEdit);
+            if(this.interface.method=="GET" || this.interface.method=="DELETE")
+            {
+                this.tabType="query"
+            }
+            else
+            {
+                this.tabType="body"
+            }
+            if(session.get("lastBaseUrl"))
+            {
+                store.commit("setBaseUrl",session.get("lastBaseUrl"));
+            }
         },
     }
 </script>

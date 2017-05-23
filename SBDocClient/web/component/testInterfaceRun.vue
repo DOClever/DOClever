@@ -65,7 +65,7 @@
                 <el-tab-pane :label="headerTab">
                     <testheader :interface="objInterface"></testheader>
                 </el-tab-pane>
-                <el-tab-pane :label="bodyTab" v-if="objInterface.method=='POST' || objInterface.method=='PUT'">
+                <el-tab-pane :label="bodyTab" v-if="objInterface.method=='POST' || objInterface.method=='PUT' || objInterface.method=='PATCH'">
                     <testbody :interface="objInterface" :status="status"></testbody>
                 </el-tab-pane>
                 <el-tab-pane label="Inject">

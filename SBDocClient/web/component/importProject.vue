@@ -219,7 +219,7 @@
                                         remark:""
                                     }
                                 }));
-                                if(obj.method.toLowerCase()=="post" || obj.method.toLowerCase()=="put")
+                                if(obj.method.toLowerCase()=="post" || obj.method.toLowerCase()=="put" || obj.method.toLowerCase()=="patch")
                                 {
                                     var body,bodyInfo;
                                     if(item.request.body.mode=="urlencoded" || item.request.body.mode=="formdata")

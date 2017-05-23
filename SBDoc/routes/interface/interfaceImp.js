@@ -42,7 +42,7 @@ var interface=[
                 type:String,
                 uppercase:1,
                 validate:{
-                    in:["GET","POST","PUT","DELETE"]
+                    in:["GET","POST","PUT","DELETE","PATCH"]
                 }
             },
             header:{
