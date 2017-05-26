@@ -4,7 +4,7 @@
             <template v-for="(item,index) in arr">
                 <tr style="text-align: center;vertical-align: middle">
                     <td style="width: 20%;height: 50px">
-                        <el-autocomplete style="width: 90%" class="inline-input" placeholder="请填写header" v-model="item.name" :fetch-suggestions="querySearchKey" @input="index==arr.length-1?add():void(0)"></el-autocomplete>
+                        <el-autocomplete style="width: 90%" class="inline-input" placeholder="请填写header" v-model="item.name" :fetch-suggestions="querySearchKey" @input="index==arr.length-1?add():''"></el-autocomplete>
                     </td>
                     <td style="width: 30%">
                         <el-autocomplete style="width: 90%;" class="inline-input" placeholder="请填写value" v-model="item.value" :fetch-suggestions="querySearchValue" @mouseenter.native="focus(item)"></el-autocomplete>

@@ -360,6 +360,14 @@ module.exports=new Vuex.Store({
                         })
                     }
                 }
+                arr.push({
+                    name:"",
+                    must:0,
+                    remark:"",
+                    value:"",
+                    selValue:"",
+                    enable:1
+                })
                 state.query=arr;
             }
             else
@@ -411,14 +419,11 @@ module.exports=new Vuex.Store({
                         })
                     }
                 }
-                if(arrHeader.length==0)
-                {
-                    arrHeader.push({
-                        name:"",
-                        value:"",
-                        remark:""
-                    })
-                }
+                arrHeader.push({
+                    name:"",
+                    value:"",
+                    remark:""
+                })
                 state.header=arrHeader;
             }
             else
@@ -454,7 +459,7 @@ module.exports=new Vuex.Store({
                             valueObj.selValue=selValue;
                         }
                         arr.push({
-                            name:param2[0],
+                            name:decodeURIComponent(param2[0]),
                             type:valueObj?valueObj.type:(selValue=="[FILE]"?1:0),
                             must:valueObj?valueObj.must:1,
                             remark:valueObj?valueObj.remark:"",
@@ -469,6 +474,17 @@ module.exports=new Vuex.Store({
                         })
                     }
                 }
+                arr.push(
+                    {
+                        name:"",
+                        type:0,
+                        must:0,
+                        remark:"",
+                        value:"",
+                        selValue:"",
+                        enable:1
+                    }
+                )
                 state.body=arr;
             }
             else

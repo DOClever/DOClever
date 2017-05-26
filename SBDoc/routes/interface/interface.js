@@ -278,6 +278,49 @@ function info(req,res) {
     }
 }
 
+function share(req,res) {
+    try
+    {
+        let inter=await (interface.findOneAsync({
+            _id:req.clientParam.id
+        }));
+        if(!inter)
+        {
+            util.throw(e.interfaceNotFound,"接口不存在");
+        }
+        let obj=await (interface.populateAsync(inter,{
+            path:"project",
+            select:"name"
+        }))
+        if(obj.group)
+        {
+            obj=await (interface.populateAsync(obj,{
+                path:"group",
+                select:"name"
+            }))
+        }
+        if(obj.owner)
+        {
+            obj=await (interface.populateAsync(obj,{
+                path:"owner",
+                select:"name"
+            }))
+        }
+        if(obj.editor)
+        {
+            obj=await (interface.populateAsync(obj,{
+                path:"editor",
+                select:"name"
+            }))
+        }
+        util.ok(res,obj,"ok");
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
 function destroy(req,res) {
     try
     {
@@ -377,7 +420,7 @@ exports.info=async (info);
 exports.destroy=async (destroy);
 exports.exportJSON=async (exportJSON);
 exports.importJSON=async (importJSON);
-
+exports.share=async (share);
 
 
 

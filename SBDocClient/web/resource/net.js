@@ -212,7 +212,6 @@ function redirect(res,bHttps,opt,location) {
             path:     objUrl.path,
             method:   "GET",
             port:objUrl.port?objUrl.port:80,
-            headers:opt.headers
         }
         request1=http.request;
         bHttps=false;
@@ -224,7 +223,6 @@ function redirect(res,bHttps,opt,location) {
             path:     objUrl.path,
             method:   "GET",
             port:objUrl.port?objUrl.port:443,
-            headers:opt.headers,
             rejectUnauthorized: false,
             requestCert: true,
         }

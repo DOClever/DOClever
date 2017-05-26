@@ -149,6 +149,17 @@ var interface=[
     },
     {
         "method":"GET",
+        "path":"/interface/share",
+        "param": {
+            id:{
+                type:String
+            }
+        },
+        "data":String,
+        handle:inter.share
+    },
+    {
+        "method":"GET",
         "path":"/interface/exportjson",
         "param": {
             id:{

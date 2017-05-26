@@ -82,7 +82,7 @@ net.post=function (path,data,headers,beforeFunc,run,bNet) {
     {
         if(bEncode || !bFind)
         {
-            data=$.param(data);
+            data=$.param(data,1);
             if(!bFind)
             {
                 if(headers)
@@ -179,7 +179,7 @@ net.put=function (path,data,headers,beforeFunc) {
     {
         if(bEncode || !bFind)
         {
-            data=$.param(data);
+            data=$.param(data,1);
             if(!bFind)
             {
                 if(headers)

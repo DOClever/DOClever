@@ -107,6 +107,14 @@
                             </el-select>
                         </el-col>
                     </el-row>
+                    <el-row class="row" style="height: 50px;line-height: 50px;text-align: center">
+                        <el-col class="col" :span="2" style="text-align: center;color: gray">
+                            分享
+                        </el-col>
+                        <el-col class="col" :span="22" style="text-align: left">
+                            <el-input style="width: 95%" v-model="shareUrl" disabled></el-input>
+                        </el-col>
+                    </el-row>
                     <el-row class="row" style="height: 90px;line-height: 90px;text-align: center">
                         <el-col class="col" :span="2" style="text-align: center;color: gray">
                             简介
@@ -434,7 +442,8 @@
     var run=require("./run.vue")
     var encrypt=require("./encrypt.vue")
     var store=require("../projectinfo/storeInterface");
-    var bus=require("../bus/projectInfoBus")
+    var bus=require("../bus/projectInfoBus");
+    var con=require("../util/config")
     module.exports={
         data:function () {
           return {
@@ -469,6 +478,9 @@
             }
         },
         computed:{
+            shareUrl:function () {
+                return con.baseUrl+"/html/web/share/share.html#"+this.interfaceEdit._id;
+            },
             searchText:{
                 get:function () {
                     return store.state.searchText;

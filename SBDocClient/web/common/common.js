@@ -327,11 +327,11 @@ $.showBox=function (vue,type,attr) {
     return child;
 }
 
-$.param=function (obj) {
+$.param=function (obj,bKey) {
     var arr=[];
     for(var key in obj)
     {
-        arr.push(key+"="+encodeURIComponent(obj[key]));
+        arr.push((bKey?encodeURIComponent(key):key)+"="+encodeURIComponent(obj[key]));
     }
     return arr.join("&");
 }

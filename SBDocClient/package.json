@@ -23,11 +23,11 @@
     "crypto-js": "^3.1.9-1",
     "css-loader": "^0.26.4",
     "html-loader": "^0.4.5",
-    "vue": "2.1.10",
+    "vue": "^2.1.10",
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^11.3.4",
     "vue-resource": "1.2.0",
-    "vue-template-compiler": "2.1.10",
+    "vue-template-compiler": "^2.1.10",
     "vuex": "^2.3.1",
     "webpack": "^2.2.1"
   }

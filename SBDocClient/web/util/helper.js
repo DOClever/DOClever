@@ -5,6 +5,10 @@ var CryptoJS=require("crypto-js")
 require("./Base64")
 var helper={};
 helper.methodColor=function (m) {
+    if(!m)
+    {
+        return "";
+    }
     var m=m.toLowerCase();
     if(m=="get")
     {
@@ -916,6 +920,33 @@ helper.handleResultData=function (name,data,result,originObj,show,input) {
             arguments.callee(null,data[0],obj.data,resultObj,show,input)
         }
     }
+    else  if(typeof(data)=="object" && data===null)
+    {
+        var obj={
+            name:name,
+            must:originObj?originObj.must:1,
+            type:5,
+            remark:originObj?originObj.remark:"",
+            data:[],
+            mock:"",
+            drag:1
+        };
+        if(show)
+        {
+            obj.show=0
+        }
+        result.push(obj);
+        if(input)
+        {
+            obj.value={
+                type:0,
+                status:"",
+                data:[
+
+                ]
+            }
+        }
+    }
     else if(typeof(data)=="object" && !(data instanceof Array))
     {
         var obj={
@@ -1117,7 +1148,10 @@ helper.runBefore=function (code,url,path,method,query,header,body) {
     var Base64=BASE64.encoder,MD5=CryptoJS.MD5,SHA1=CryptoJS.SHA1,SHA256=CryptoJS.SHA256,SHA512=CryptoJS.SHA512,SHA3=CryptoJS.SHA3,RIPEMD160=CryptoJS.RIPEMD160,AES=CryptoJS.AES.encrypt,TripleDES=CryptoJS.TripleDES.encrypt,DES=CryptoJS.DES.encrypt,Rabbit=CryptoJS.Rabbit.encrypt,RC4=CryptoJS.RC4.encrypt,RC4Drop=CryptoJS.RC4Drop.encrypt;
     try
     {
-        eval("("+code+")");
+        if(code)
+        {
+            eval("("+code+")");
+        }
     }
     catch (err)
     {
@@ -1128,7 +1162,10 @@ helper.runBefore=function (code,url,path,method,query,header,body) {
 helper.runAfter=function (code,status,header,data) {
     try
     {
-        eval("("+code+")");
+        if(code)
+        {
+            eval("("+code+")");
+        }
     }
     catch (err)
     {
@@ -1246,7 +1283,7 @@ helper.handleMockInfo=function (type,param,query,header,body,state) {
     {
         info.body=body;
     }
-    if(state.interfaceEdit || state.interface)
+    if(state && (state.interfaceEdit || state.interface))
     {
         info.global={
             name:type==0?state.interfaceEdit.name:state.interface.name,

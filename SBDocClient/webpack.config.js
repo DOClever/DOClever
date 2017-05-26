@@ -15,7 +15,8 @@ module.exports = {
         reset:"./web/reset/reset",
         about:"./web/about/about",
         help:"./web/help/help",
-        donate:"./web/donate/donate"
+        donate:"./web/donate/donate",
+        share:"./web/share/share"
     },
     output: {
         path: path.join(__dirname, 'dist'),

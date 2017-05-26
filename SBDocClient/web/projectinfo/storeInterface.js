@@ -549,6 +549,11 @@ module.exports=new Vuex.Store({
                     })
                 }
             }
+            arr.push({
+                name:"",
+                must:0,
+                remark:""
+            })
             state.query=arr;
             state.interfaceEdit.queryParam=arr;
         },
@@ -578,14 +583,11 @@ module.exports=new Vuex.Store({
                     })
                 }
             }
-            if(arrHeader.length==0)
-            {
-                arrHeader.push({
-                    name:"",
-                    value:"",
-                    remark:""
-                })
-            }
+            arrHeader.push({
+                name:"",
+                value:"",
+                remark:""
+            })
             state.header=arrHeader;
             state.interfaceEdit.header=arrHeader;
         },
@@ -599,7 +601,7 @@ module.exports=new Vuex.Store({
                 if(param2.length>0)
                 {
                     arr.push({
-                        name:param2[0],
+                        name:decodeURIComponent(param2[0]),
                         type:param2[1]=="[FILE]"?1:0,
                         must:1,
                         remark:"",
@@ -624,6 +626,12 @@ module.exports=new Vuex.Store({
                     })
                 }
             }
+            arr.push({
+                name:"",
+                type:0,
+                must:0,
+                remark:"",
+            })
             state.body=arr;
             state.interfaceEdit.bodyParam=arr;
         },
@@ -842,6 +850,7 @@ module.exports=new Vuex.Store({
                 });
             }
             context.commit("initInterface");
+            context.commit("setPreview",0);
             bus.$emit("interfaceInfo");
         },
         getAllInterface:function (context,data) {

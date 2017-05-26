@@ -35,7 +35,7 @@
                     </td>
                     <td style="width: 30%">
                         <el-autocomplete class="inline-input" v-model="item.mock" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" icon="caret-bottom" :on-icon-click="showAutoComplete" @mouseenter.native="focusAuto(item)" style="width:100%" popper-class="my-autocomplete" custom-item="itemauto" v-if="item.value && (item.value.data.length>0 || item.value.status)"></el-autocomplete>
-                        <el-input placeholder="请填写值" v-model="item.mock" v-else-if="item.type!=3 && item.type!=4 && !item.value"></el-input>
+                        <el-input placeholder="请填写值" v-model="item.mock" v-else-if="item.type!=3 && item.type!=4 && (!item.value || (item.value.data.length==0 && !item.value.status))"></el-input>
                     </td>
                 </tr>
                 <tr v-if="(item.type==4 || item.type==3) && (item.data && item.data.length>0) && item.show">

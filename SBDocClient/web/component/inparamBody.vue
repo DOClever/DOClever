@@ -18,7 +18,7 @@
             <template v-for="(item,index) in arr">
                 <tr style="text-align: center;vertical-align: middle">
                     <td style="width: 20%;text-align: center;vertical-align: middle;height: 50px">
-                        <el-input style="width: 90%" placeholder="请填写参数名称" v-model.trim="item.name" @input="index==arr.length-1?arr.push({name:'',type:0,must:0,remark:''}):void(0)"></el-input>
+                        <el-input style="width: 90%" placeholder="请填写参数名称" v-model.trim="item.name" @input="index==arr.length-1?arr.push({name:'',type:0,must:0,remark:''}):''"></el-input>
                     </td>
                     <td style="width: 15%;text-align: center;vertical-align: middle;height: 50px">
                         <el-select v-model="item.type" style="width: 90%">
@@ -84,7 +84,7 @@
                     })
                     if(!bFind)
                     {
-                        this.$store.state.header.push({
+                        this.$store.state.header.unshift({
                             name:'Content-Type',
                             value:value,
                             remark:''
@@ -148,7 +148,7 @@
                         })
                         if(!bFind)
                         {
-                            this.$store.state.header.push({
+                            this.$store.state.header.unshift({
                                 name:'Content-Type',
                                 value:value,
                                 remark:''
@@ -187,7 +187,7 @@
                         {
                             if(!bFind)
                             {
-                                this.$store.state.header.push({
+                                this.$store.state.header.unshift({
                                     name:'Content-Type',
                                     value:value,
                                     remark:''

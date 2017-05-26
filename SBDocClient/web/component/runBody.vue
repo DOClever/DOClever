@@ -22,7 +22,7 @@
             <template v-for="(item,index) in arr">
                 <tr :style="{textAlign: 'center',verticalAlign: 'middle',backgroundColor:item.enable?'white':'lightgray'}">
                     <td style="width: 20%;text-align: center;vertical-align: middle;height: 50px">
-                        <el-input style="width: 90%;" placeholder="请填写参数名称" v-model.trim="item.name" :disabled="!item.enable" @input="index==arr.length-1?add():void(0)"></el-input>
+                        <el-input style="width: 90%;" placeholder="请填写参数名称" v-model.trim="item.name" :disabled="!item.enable" @input="index==arr.length-1?add():''"></el-input>
                     </td>
                     <td style="width: 15%;text-align: center;vertical-align: middle;height: 50px">
                         <el-select v-model="item.type" style="width: 90%">
@@ -30,7 +30,7 @@
                             <el-option :value="1" label="文件"></el-option>
                         </el-select>
                     </td>
-                    <td style="width: 20%;text-align: center;vertical-align: middle;height: 50px;line-height: 50px">
+                    <td style="width: 20%;text-align: center;vertical-align: middle;height: 50px;line-height: 50px;overflow: auto">
                         <div  style="width: 90%;display: inline-block;" v-if="item.type==0 && item.value && (item.value.data.length>0 || item.value.status)">
                             <el-autocomplete class="inline-input" v-model="item.selValue" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" icon="caret-bottom" :on-icon-click="showAutoComplete" @mouseenter.native="focus(item)" :disabled="!item.enable" custom style="width:100%" popper-class="my-autocomplete" custom-item="itemauto"></el-autocomplete>
                         </div>
@@ -130,7 +130,7 @@
                     })
                     if(!bFind)
                     {
-                        this.$store.state.header.push({
+                        this.$store.state.header.unshift({
                             name:'Content-Type',
                             value:value,
                             remark:''
@@ -205,7 +205,7 @@
                         })
                         if(!bFind)
                         {
-                            this.$store.state.header.push({
+                            this.$store.state.header.unshift({
                                 name:'Content-Type',
                                 value:value,
                                 remark:''
@@ -244,7 +244,7 @@
                         {
                             if(!bFind)
                             {
-                                this.$store.state.header.push({
+                                this.$store.state.header.unshift({
                                     name:'Content-Type',
                                     value:value,
                                     remark:''
