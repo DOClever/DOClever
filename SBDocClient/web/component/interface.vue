@@ -93,7 +93,7 @@
                             分组
                         </el-col>
                         <el-col class="col" :span="10" style="text-align: left">
-                            <el-select style="width: 90%;text-align: center" v-model="interfaceEdit.group._id">
+                            <el-select style="width: 90%;text-align: center" v-model="interfaceEdit.group._id" :disabled="objSnapshot.id">
                                 <el-option v-for="item in interfaceList" :value="item._id" :label="item.name"></el-option>
                             </el-select>
                         </el-col>
@@ -107,7 +107,7 @@
                             </el-select>
                         </el-col>
                     </el-row>
-                    <el-row class="row" style="height: 50px;line-height: 50px;text-align: center">
+                    <el-row class="row" style="height: 50px;line-height: 50px;text-align: center" v-if="interfaceEdit.id">
                         <el-col class="col" :span="2" style="text-align: center;color: gray">
                             分享
                         </el-col>
@@ -121,6 +121,48 @@
                         </el-col>
                         <el-col class="col" :span="22" style="text-align: left">
                             <el-input type="textarea" :rows="3" style="width: 95%;vertical-align: middle" placeholder="请输入关于该接口的简介" v-model="interfaceEdit.remark"></el-input>
+                        </el-col>
+                    </el-row>
+                </el-row>
+                <el-row class="row" style="background-color: white;padding: 10px 20px 10px 20px;margin-top: 15px;border-radius: 5px;box-shadow: 0px 2px 2px #888888;" v-if="interfaceEdit._id">
+                    <el-row class="row" style="height: 50px;line-height: 50px">
+                        <el-col class="col" :span="2" style="text-align: center;color: gray">
+                            快照
+                        </el-col>
+                        <el-col class="col" :span="19" style="padding-left: 30px">
+                            <span v-if="!objSnapshot.id">
+                                当前为主干
+                            </span>
+                            <span v-else>
+                                {{objSnapshot.date}}
+                            </span>
+                        </el-col>
+                        <el-col class="col" :span="3" style="text-align: center">
+                            <el-dropdown>
+                                <el-button type="primary" class="el-dropdown-link" size="small">
+                                    操作<i class="el-icon-caret-bottom el-icon--right"></i>
+                                </el-button>
+                                <el-dropdown-menu slot="dropdown">
+                                    <template v-if="objSnapshot.id">
+                                        <el-dropdown-item @click.native="returnMaster">返回主干</el-dropdown-item>
+                                        <el-dropdown-item @click.native="snapshotList">列表</el-dropdown-item>
+                                        <el-dropdown-item @click.native="rollSnapshot" style="color: red">回滚</el-dropdown-item>
+                                        <el-dropdown-item @click.native="removeSnapshot" style="color: red">删除</el-dropdown-item>
+                                    </template>
+                                    <template v-else>
+                                        <el-dropdown-item @click.native="snapshotList">列表</el-dropdown-item>
+                                        <el-dropdown-item @click.native="createSnapshot">创建</el-dropdown-item>
+                                    </template>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+                        </el-col>
+                    </el-row>
+                    <el-row class="row" v-if="objSnapshot.id">
+                        <el-col class="col" :span="2" style="text-align: center;color: gray">
+                            描述
+                        </el-col>
+                        <el-col class="col" :span="22" style="text-align: center;color: gray">
+                            <el-input type="textarea" :rows="2" style="width: 90%" v-model="objSnapshot.dis"></el-input>
                         </el-col>
                     </el-row>
                 </el-row>
@@ -449,7 +491,8 @@
           return {
               session:$.clone(session.raw()),
               savePending:false,
-              tabType:"query"
+              tabType:"query",
+              snapshot:{}
           }
         },
         store:store,
@@ -475,11 +518,37 @@
                 {
                     $.tip("请不要在路径里面包含baseUrl",0);
                 }
-            }
+            },
+            "objSnapshot.dis":function (val) {
+                session.set("snapshotDis",val);
+            },
         },
         computed:{
+            objSnapshot:function () {
+                if(this.interfaceEdit)
+                {
+                    this.snapshot= {
+                        id:session.get("snapshotId"),
+                        dis:session.get("snapshotDis"),
+                        creator:session.get("snapshotCreator"),
+                        date:session.get("snapshotDate")
+                    }
+                }
+                else
+                {
+                    this.snapshot= {};
+                }
+                return this.snapshot;
+            },
             shareUrl:function () {
-                return con.baseUrl+"/html/web/share/share.html#"+this.interfaceEdit._id;
+                if(this.interfaceEdit)
+                {
+                    return con.baseUrl+"/html/web/share/share.html#"+this.interfaceEdit._id;
+                }
+                else
+                {
+                    return ""
+                }
             },
             searchText:{
                 get:function () {
@@ -787,6 +856,182 @@
             },
             changeJSONType:function () {
                 store.commit("toggleResultType");
+            },
+            createSnapshot:function () {
+                if(!this.interfaceEdit.name)
+                {
+                    $.tip("请填入接口名称",0);
+                    return;
+                }
+                else if(!this.interfaceEdit.url)
+                {
+                    $.tip("请填入接口地址",0);
+                    return;
+                }
+                var _this=this;
+                $.inputMul(this,"请输入快照信息",function (val) {
+                    if(!val)
+                    {
+                        $.tip("请输入快照信息",0);
+                        return false
+                    }
+                    $.startHud();
+                    store.dispatch("save").then(function (data) {
+                        if(data.code==200)
+                        {
+                            return net.post("/interface/snapshot",{
+                                id:_this.interfaceEdit._id,
+                                dis:val
+                            })
+                        }
+                        else
+                        {
+                            throw data.msg
+                        }
+                    }).then(function (data) {
+                        if(data.code==200)
+                        {
+                            $.stopHud();
+                            $.notify("创建成功",1);
+                        }
+                        else
+                        {
+                            throw data.msg
+                        }
+                    }).catch(function (err) {
+                        $.stopHud();
+                        $.notify(err,0)
+                    })
+                    return true;
+                })
+            },
+            snapshotList:function () {
+                var _this=this;
+                $.startHud();
+                net.get("/interface/snapshotlist",{
+                    id:this.interfaceEdit._id,
+                    page:0
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        var child=$.showBox(_this,"snapshotList",{
+                            arr:data.data,
+                        });
+
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
+            },
+            returnMaster:function () {
+                session.remove("snapshotId");
+                session.remove("snapshotDis");
+                session.remove("snapshotCreator");
+                session.remove("snapshotDate");
+                $.startHud();
+                this.$store.dispatch("info",{
+                    item1:{
+                        "_id":this.interfaceEdit.id,
+                    },
+                    item:{
+                        "_id":""
+                    }
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        $.notify("切换成功",1);
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
+            },
+            removeSnapshot:function () {
+                var _this=this;
+                $.confirm("是否删除该快照",function () {
+                    $.startHud();
+                    net.delete("/interface/snapshot",{
+                        id:_this.interfaceEdit._id
+                    }).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("删除成功",1);
+                            session.remove("snapshotId");
+                            session.remove("snapshotDis");
+                            session.remove("snapshotCreator");
+                            session.remove("snapshotDate");
+                            _this.$store.dispatch("info",{
+                                item1:{
+                                    "_id":_this.interfaceEdit.id,
+                                },
+                                item:{
+                                    "_id":""
+                                }
+                            }).then(function (data) {
+                                $.stopHud();
+                                if(data.code==200)
+                                {
+                                    $.notify("切换到主干",1);
+                                }
+                                else
+                                {
+                                    $.notify(data.msg,0);
+                                }
+                            })
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0)
+                        }
+                    })
+                })
+            },
+            rollSnapshot:function () {
+                var _this=this;
+                $.confirm("是否回滚该快照",function () {
+                    $.startHud();
+                    net.put("/interface/snapshotroll",{
+                        id:_this.interfaceEdit._id
+                    }).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("回滚成功",1);
+                            session.remove("snapshotId");
+                            session.remove("snapshotDis");
+                            session.remove("snapshotCreator");
+                            session.remove("snapshotDate");
+                            _this.$store.dispatch("info",{
+                                item1:{
+                                    "_id":_this.interfaceEdit.id,
+                                },
+                                item:{
+                                    "_id":""
+                                }
+                            }).then(function (data) {
+                                $.stopHud();
+                                if(data.code==200)
+                                {
+                                    $.notify("切换到主干",1);
+                                }
+                                else
+                                {
+                                    $.notify(data.msg,0);
+                                }
+                            })
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
+                })
             }
         },
         created:function () {

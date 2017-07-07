@@ -141,6 +141,36 @@ var interface=[
         },
         handle:user.question
     },
+    {
+        "method":"GET",
+        "path":"/user/applylist",
+        "param": {
+
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:user.applyList
+    },
+    {
+        "method":"PUT",
+        "path":"/user/handleapply",
+        "param": {
+            apply:{
+                type:String
+            },
+            state:{
+                type:Number,
+                in:[1,2]
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:user.handleApply
+    },
 ];
 
 module.exports=interface;

@@ -206,6 +206,10 @@
                 {
                     return;
                 }
+                session.remove("snapshotId");
+                session.remove("snapshotDis");
+                session.remove("snapshotCreator");
+                session.remove("snapshotDate");
                 $.startHud("#body");
                 this.$store.dispatch("info",{
                     item:item,
@@ -225,6 +229,10 @@
 
             },
             addInterface:function (item) {
+                session.remove("snapshotId");
+                session.remove("snapshotDis");
+                session.remove("snapshotCreator");
+                session.remove("snapshotDate");
                 this.$store.dispatch("add",{
                     item:null,
                     id:item._id

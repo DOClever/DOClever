@@ -17,6 +17,19 @@ function getAllHeaders(obj) {
     return result;
 }
 
+function handleVersionHeaders(headers) {
+    var header=headers || {};
+    if(session.get("versionId"))
+    {
+        header["docleverversion"]=session.get("versionId");
+    }
+    if(session.get("snapshotId"))
+    {
+        header["docleversnapshot"]=session.get("snapshotId");
+    }
+    return header;
+}
+
 function convertHeader(data) {
     if(data.length>0)
     {
@@ -38,6 +51,7 @@ function convertHeader(data) {
     }
 }
 net.get=function (path,params,headers,beforeFunc) {
+    headers=handleVersionHeaders(headers);
     if(!params)
     {
         params={};
@@ -54,6 +68,13 @@ net.get=function (path,params,headers,beforeFunc) {
         {
             location.href="/html/web/login/login.html"
         }
+        else if(json.code==35)
+        {
+            session.remove("versionId");
+            session.remove("versionName");
+            session.remove("versionDis");
+            location.reload();
+        }
         else
         {
             return json;
@@ -62,6 +83,10 @@ net.get=function (path,params,headers,beforeFunc) {
 }
 
 net.post=function (path,data,headers,beforeFunc,run,bNet) {
+    if(!run)
+    {
+        headers=handleVersionHeaders(headers);
+    }
     var bEncode=false,bFind=false;
     if(headers)
     {
@@ -140,6 +165,13 @@ net.post=function (path,data,headers,beforeFunc,run,bNet) {
             {
                 location.href="/html/web/login/login.html"
             }
+            else if(json.code==35)
+            {
+                session.remove("versionId");
+                session.remove("versionName");
+                session.remove("versionDis");
+                location.reload();
+            }
             else
             {
                 return json;
@@ -159,6 +191,7 @@ net.post=function (path,data,headers,beforeFunc,run,bNet) {
 }
 
 net.put=function (path,data,headers,beforeFunc) {
+    headers=handleVersionHeaders(headers);
     var bEncode=false,bFind=false;
     if(headers)
     {
@@ -209,6 +242,13 @@ net.put=function (path,data,headers,beforeFunc) {
         {
             location.href="/html/web/login/login.html"
         }
+        else if(json.code==35)
+        {
+            session.remove("versionId");
+            session.remove("versionName");
+            session.remove("versionDis");
+            location.reload();
+        }
         else
         {
             return json;
@@ -217,6 +257,7 @@ net.put=function (path,data,headers,beforeFunc) {
 }
 
 net.delete=function (path,params,headers,beforeFunc) {
+    headers=handleVersionHeaders(headers);
     return Vue.http.delete(config.baseUrl+path,{
         headers:headers,
         params:params,
@@ -228,6 +269,13 @@ net.delete=function (path,params,headers,beforeFunc) {
         {
             location.href="/html/web/login/login.html"
         }
+        else if(json.code==35)
+        {
+            session.remove("versionId");
+            session.remove("versionName");
+            session.remove("versionDis");
+            location.reload();
+        }
         else
         {
             return json;
@@ -236,6 +284,10 @@ net.delete=function (path,params,headers,beforeFunc) {
 }
 
 net.upload=function (method,path,data,headers,beforeFunc,run,bNet) {
+    if(!run)
+    {
+        headers=handleVersionHeaders(headers);
+    }
     var form;
     if(typeof(data)=="string" || (data instanceof ArrayBuffer))
     {
@@ -341,6 +393,13 @@ net.upload=function (method,path,data,headers,beforeFunc,run,bNet) {
             if(json.code==13)
             {
                 location.href="/html/web/login/login.html"
+            }
+            else if(json.code==35)
+            {
+                session.remove("versionId");
+                session.remove("versionName");
+                session.remove("versionDis");
+                location.reload();
             }
             else
             {

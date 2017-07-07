@@ -10,8 +10,33 @@ var project=require("../../model/projectModel")
 var group=require("../../model/groupModel")
 var interface=require("../../model/interfaceModel")
 var status=require("../../model/statusModel")
+var statusVersion=require("../../model/statusVersionModel")
+var version=require("../../model/versionModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
+function validate(req,res) {
+    try
+    {
+        req.statusModel=status;
+        if(req.headers["docleverversion"])
+        {
+            req.version=await (version.findOneAsync({
+                _id:req.headers["docleverversion"]
+            }))
+            if(!req.version)
+            {
+                util.throw(e.versionInvalidate,"版本不可用");
+            }
+            req.statusModel=statusVersion;
+        }
+        util.next();
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
 function save(req,res) {
     try
     {
@@ -31,7 +56,7 @@ function save(req,res) {
         let ret;
         if(req.clientParam.id)
         {
-            ret=await (status.findOneAndUpdateAsync({
+            ret=await (req.statusModel.findOneAndUpdateAsync({
                 _id:req.clientParam.id
             },obj,{
                 new:true
@@ -40,7 +65,11 @@ function save(req,res) {
         else
         {
             obj.id=uuid();
-            ret=await (status.createAsync(obj));
+            if(req.headers["docleverversion"])
+            {
+                obj.version=req.headers["docleverversion"]
+            }
+            ret=await (req.statusModel.createAsync(obj));
         }
         util.ok(res,ret,"ok");
     }
@@ -53,7 +82,7 @@ function save(req,res) {
 function remove(req,res) {
     try
     {
-        await (status.removeAsync({
+        await (req.statusModel.removeAsync({
             _id:req.clientParam.id
         }))
         util.ok(res,"ok");
@@ -67,9 +96,14 @@ function remove(req,res) {
 function list(req,res) {
     try
     {
-        let arr=await (status.findAsync({
+        let query={
             project:req.clientParam.id
-        },null,{
+        }
+        if(req.headers["docleverversion"])
+        {
+            query.version=req.headers["docleverversion"]
+        }
+        let arr=await (req.statusModel.findAsync(query,null,{
             sort:"-createdAt"
         }))
         util.ok(res,arr,"ok");
@@ -83,7 +117,7 @@ function list(req,res) {
 function exportJSON(req,res) {
     try
     {
-        let ret=await (status.findOneAsync({
+        let ret=await (req.statusModel.findOneAsync({
             _id:req.clientParam.id
         }));
         if(!ret)
@@ -147,7 +181,11 @@ function importJSON(req,res) {
             data:obj.data,
             id:obj.id
         }
-        let ret=await (status.createAsync(newObj));
+        if(req.headers["docleverversion"])
+        {
+            newObj.version=req.headers["docleverversion"]
+        }
+        let ret=await (req.statusModel.createAsync(newObj));
         util.ok(res,ret,"ok");
     }
     catch (err)
@@ -156,6 +194,7 @@ function importJSON(req,res) {
     }
 }
 
+exports.validate=async (validate);
 exports.save=async (save);
 exports.remove=async (remove);
 exports.list=async (list);

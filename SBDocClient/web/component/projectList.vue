@@ -1,6 +1,10 @@
 <template>
     <div style="width: 100%;">
         <table style="background-color: transparent;width: 100%;height: 100%">
+            <thead>
+                <th style="text-align: left;font-size: 20px">项目:</th>
+            </thead>
+            <tbody>
             <template v-for="n in arrLength">
                 <tr>
                     <template v-for="index in 4">
@@ -9,14 +13,14 @@
                                 {{arr[(n-1)*4+(index-1)].name}}
                                 <el-row class="row" style="height: 30px;line-height:30px;font-size: 15px;color: gray;position: absolute;left: 0;bottom: 0;text-align: left;background-color: rgba(215,215,215,0.51)">
                                     &nbsp;{{"成员:"+arr[(n-1)*4+(index-1)].userCount}}&nbsp;
-                                        {{"接口:"+arr[(n-1)*4+(index-1)].interfaceCount}}
+                                    {{"接口:"+arr[(n-1)*4+(index-1)].interfaceCount}}
                                 </el-row>
                             </div>
                         </td>
                     </template>
                 </tr>
-
             </template>
+            </tbody>
         </table>
     </div>
 </template>
@@ -26,10 +30,10 @@
     }
     @keyframes up {
         from {top:0px}
-        to {top:-20px}
+        to {top:-10px}
     }
     @keyframes down {
-        from {top:-20px}
+        from {top:-10px}
         to {top:0px}
     }
 </style>
@@ -54,12 +58,6 @@
                 session.set("own",item.own);
                 session.set("lastBaseUrl","");
                 location.href="/html/web/projectinfo/projectinfo.html";
-            },
-            setting:function (item) {
-                session.set("projectId",item._id);
-                session.set("projectName",item.name);
-                session.set("role",item.role);
-                session.set("own",item.own);
             },
             up:function (event) {
                 event.target.style.animation="up 0.2s ease-out forwards"

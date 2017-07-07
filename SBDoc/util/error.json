@@ -23,5 +23,17 @@
   "statusNotFound":21,
   "testNotFound":22,
   "testModuleNotFound":23,
-  "testGroupNotFound":24
+  "testGroupNotFound":24,
+  "userInProject":25,
+  "userNotInTeam":26,
+  "teamGroupNotEmpty":27,
+  "teamGroupNotFound":28,
+  "applyNotFound":29,
+  "applyAlreadyHandle":30,
+  "userAlreadyInTeam":31,
+  "projectAlreadyJoinTeam":32,
+  "teamNotFound":33,
+  "versionNotFound":34,
+  "versionInvalidate":35,
+  "pollNotFound":36
 }

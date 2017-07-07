@@ -26,7 +26,7 @@ var interface=[
         },
         "data":String,
         user:1,
-        handle:status.save
+        handle:[status.validate,status.save]
     },
     {
         "method":"DELETE",
@@ -38,7 +38,7 @@ var interface=[
         },
         "data":String,
         user:1,
-        handle:status.remove
+        handle:[status.validate,status.remove]
     },
     {
         "method":"GET",
@@ -50,7 +50,7 @@ var interface=[
         },
         "data":String,
         user:1,
-        handle:status.list
+        handle:[status.validate,status.list]
     },
     {
         "method":"GET",
@@ -62,7 +62,7 @@ var interface=[
         },
         "data":String,
         user:1,
-        handle:status.exportJSON
+        handle:[status.validate,status.exportJSON]
     },
     {
         "method":"POST",
@@ -77,7 +77,7 @@ var interface=[
         },
         "data":String,
         user:1,
-        handle:status.importJSON
+        handle:[status.validate,status.importJSON]
     },
 ];
 

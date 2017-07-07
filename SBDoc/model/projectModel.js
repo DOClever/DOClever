@@ -34,6 +34,10 @@ var model=new mongoose.Schema({
         type:String,
         default:""
     },
+    team:{
+        type:mongoose.Schema.ObjectId,
+        ref:"Team"
+    }
 },{
     timestamps:true
 });

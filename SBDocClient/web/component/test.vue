@@ -5,7 +5,10 @@
                 <el-col class="col" :span="6" style="line-height: 50px;text-align: center;font-weight: bold;font-size: 15px;padding: 0">
                     模块
                 </el-col>
-                <el-col :span="12" class="col"></el-col>
+                <el-col :span="9" class="col"></el-col>
+                <el-col :span="3" class="col" style="text-align: center;line-height: 50px;cursor: pointer;" @click.native="poll" title="轮询">
+                    <i class="fa fa-clock-o"></i>
+                </el-col>
                 <el-col :span="3" class="col" style="text-align: center;line-height: 50px;cursor: pointer;" @click.native="setBaseUrl" title="设置BaseUrl">
                     <i class="fa fa-link"></i>
                 </el-col>
@@ -146,7 +149,14 @@
                 return store.state.selNode
             },
             editInfo:function () {
-                return this.test.owner.name+"在"+this.test.createdAt+"创建，最近修改被"+this.test.editor.name+"在"+this.test.updatedAt+"改动";
+                if(this.test)
+                {
+                    return this.test.owner.name+"在"+this.test.createdAt+"创建，最近修改被"+this.test.editor.name+"在"+this.test.updatedAt+"改动";
+                }
+                else
+                {
+                    return ""
+                }
             },
             arrGroup:function () {
                 var arr=this.$refs.tree.$refs.tree.root.childNodes.map(function (obj) {
@@ -484,6 +494,76 @@
                         before:this.before,
                         after:this.after
                     }
+                })
+            },
+            poll:function () {
+                var _this=this;
+                $.startHud();
+                Promise.all([
+                    net.get("/poll/item",{
+                        project:session.get("projectId")
+                    }),
+                    net.get("/test/list",{
+                        project:session.get("projectId")
+                    }),
+                    net.get("/project/users",{
+                        id:session.get("projectId")
+                    }),
+                    net.get("/project/urllist",{
+                        id:session.get("projectId")
+                    })
+                ]).then(function (data) {
+                    $.stopHud();
+                    var obj1=data[0];
+                    var obj2=data[1];
+                    var obj3=data[2];
+                    var obj4=data[3];
+                    var poll,test,user,baseUrl;
+                    if(obj1.code==200)
+                    {
+                        poll=obj1.data;
+                    }
+                    else if(obj1.code==36)
+                    {
+                        poll=null;
+                    }
+                    else
+                    {
+                        throw obj1.msg;
+                    }
+                    if(obj2.code==200)
+                    {
+                        test=obj2.data;
+                    }
+                    else
+                    {
+                        throw obj2.msg;
+                    }
+                    if(obj3.code==200)
+                    {
+                        user=obj3.data;
+                    }
+                    else
+                    {
+                        throw obj3.msg;
+                    }
+                    if(obj4.code==200)
+                    {
+                        baseUrl=obj4.data;
+                    }
+                    else
+                    {
+                        throw obj4.msg;
+                    }
+                    $.showBox(_this,"poll",{
+                        "propPoll":poll,
+                        "propTest":test,
+                        "propUser":user,
+                        "propBaseUrl":baseUrl
+                    })
+                }).catch(function (err) {
+                    $.stopHud();
+                    $.notify(err,0);
                 })
             }
         },

@@ -1150,7 +1150,7 @@ helper.runBefore=function (code,url,path,method,query,header,body) {
     {
         if(code)
         {
-            eval("("+code+")");
+            eval(code);
         }
     }
     catch (err)
@@ -1164,7 +1164,7 @@ helper.runAfter=function (code,status,header,data) {
     {
         if(code)
         {
-            eval("("+code+")");
+            eval(code);
         }
     }
     catch (err)
@@ -2050,13 +2050,13 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
         {
             if(global.after)
             {
-                helper.runBefore(global.after,baseUrl,path,method,query,header,body)
+                helper.runAfter(global.after,result.status,result.header,result.data)
             }
-            helper.runBefore(obj.after.code,baseUrl,path,method,query,header,body)
+            helper.runAfter(obj.after.code,result.status,result.header,result.data)
         }
         else
         {
-            helper.runBefore(obj.after.code,baseUrl,path,method,query,header,body)
+            helper.runAfter(obj.after.code,result.status,result.header,result.data)
         }
         root.output+="结束运行接口："+obj.name+"(耗时：<span style='color: green'>"+res.second+"秒</span>)<br>"
         return res;
@@ -2070,6 +2070,10 @@ helper.runTestCode=async function (code,test,global,opt,root) {
         global={};
     }
     function log(text) {
+        if(typeof(text)=="object")
+        {
+            text=JSON.stringify(text);
+        }
         root.output+=text+"<br>";
     }
     function input(title,data) {

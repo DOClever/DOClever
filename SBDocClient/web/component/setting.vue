@@ -8,8 +8,10 @@
                 修改项目组员
             </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=2">
                 导出
-            </el-button><el-button type="primary" style="margin: 20px 0 20px 0;width: 80%;" @click="type=3">
+            </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=3">
                 Mock
+            </el-button><el-button type="primary" style="margin: 20px 0 20px 0;width: 80%;" @click="type=4" v-if="!session.teamId && session.role==0">
+                团队申请
             </el-button>
             </el-row>
         </el-col>
@@ -31,6 +33,11 @@
                         <el-form-item label="创建时间" style="text-align: center">
                             <div style="width: 80%;display: inline-block;text-align: left">
                                 {{project.createdAt}}
+                            </div>
+                        </el-form-item>
+                        <el-form-item label="项目ID" style="text-align: center">
+                            <div style="width: 80%;display: inline-block;text-align: left">
+                                {{project._id}}
                             </div>
                         </el-form-item>
                         <el-row class="row" style="text-align: center">
@@ -106,6 +113,28 @@
                         使用方法：在本地用node运行net.js ,加上mock server地址和你需要请求的真实地址的根地址，当您的接口文档的状态为开发完成的时候，net.js不会去请求mock server地址而去请求真实地址（举例：node net.js {{mockUrl}} http://localhost:8081) ,然后将您开发工程下的根地址替换为localhost:36742即可开启您的Mock之旅！
                     </el-row>
                 </el-row>
+                <el-row v-else-if="type==4" class="row">
+                    <el-row class="row" style="height: 60px">
+                        <h4 style="margin-left: 10px;color: gray">
+                            团队申请
+                        </h4>
+                    </el-row>
+                    <el-form ref="form" label-width="100px">
+                        <el-form-item label="团队ID" style="text-align: center">
+                            <el-input style="margin-top: 8px;width: 80%" v-model="teamId"></el-input>
+                        </el-form-item>
+                        <el-form-item label="备注" style="text-align: center">
+                            <el-input type="textarea" :rows="3" style="width: 80%;height: 80%;margin-top: 8px;" v-model="teamDis"></el-input>
+                        </el-form-item>
+                        <el-row class="row" style="text-align: center">
+                            <el-col class="col" :span="24" style="text-align: center">
+                                <el-button type="primary" style="width: 50%;margin-top: 20px;margin-bottom: 20px" @click.prevent="applyTeam" :loading="applyPending">
+                                    保存
+                                </el-button>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                </el-row>
             </el-row>
         </el-col>
     </el-row>
@@ -126,8 +155,10 @@
                 invitePending:false,
                 infoPending:false,
                 deletePending:false,
-                mockUrl:config.baseUrl+"/mock/"+session.get("projectId"),
-                exportType:0
+                exportType:0,
+                teamId:"",
+                teamDis:"",
+                applyPending:false
             }
         },
         computed:{
@@ -144,6 +175,16 @@
                     }
                 })
                 return this.project.users;
+            },
+            mockUrl:function () {
+                if(session.get("versionId"))
+                {
+                    return config.baseUrl+"/mock/"+session.get("projectId")+session.get("versionId")
+                }
+                else
+                {
+                    return config.baseUrl+"/mock/"+session.get("projectId")
+                }
             }
         },
         components:{
@@ -276,6 +317,32 @@
                         child.$on("save",function (arr) {
                             _this.project.users=_this.project.users.concat(arr);
                         })
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
+            },
+            applyTeam:function () {
+                if(!this.teamId)
+                {
+                    $.tip("请输入团队ID",0);
+                    return;
+                }
+                var _this=this;
+                this.applyPending=true;
+                net.put("/team/projectapply",{
+                    id:this.teamId,
+                    project:session.get("projectId"),
+                    dis:this.teamDis
+                }).then(function (data) {
+                    _this.applyPending=false;
+                    _this.teamId="";
+                    _this.teamDis="";
+                    if(data.code==200)
+                    {
+                        $.notify("已发送申请，等待团队管理员响应",1);
                     }
                     else
                     {

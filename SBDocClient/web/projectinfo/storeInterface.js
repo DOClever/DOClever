@@ -868,6 +868,10 @@ module.exports=new Vuex.Store({
             context.commit("searchInterface");
         },
         refresh:function (context) {
+            session.remove("snapshotId");
+            session.remove("snapshotDis");
+            session.remove("snapshotCreator");
+            session.remove("snapshotDate");
             return net.get("/project/interface",{
                 id:session.get("projectId")
             }).then(function (data) {
@@ -981,7 +985,7 @@ module.exports=new Vuex.Store({
             })
         },
         showInfo:function (context,data) {
-            if(context.state.interface)
+            if(context.state.interface && !session.get("snapshotId"))
             {
                 context.state.interface.select=0;
             }
@@ -1163,10 +1167,15 @@ module.exports=new Vuex.Store({
                 obj.outparam="[]";
                 obj.outinfo=JSON.stringify(context.state.outInfo)
             }
-            obj.restparam=JSON.stringify(context.state.param)
-            return net.post("/interface/create",obj,{
+            obj.restparam=JSON.stringify(context.state.param);
+            var header={
                 "content-type":"application/x-www-form-urlencoded"
-            }).then(function (data) {
+            };
+            if(session.get("snapshotId"))
+            {
+                header.docleversnapshotdis=session.get("snapshotDis");
+            }
+            return net.post("/interface/create",obj,header).then(function (data) {
                 if(data.code==200)
                 {
                     if(typeof(data.data)=="string")
@@ -1209,6 +1218,7 @@ module.exports=new Vuex.Store({
                         else
                         {
                             context.state.interfaceEdit._id=data.data._id;
+                            context.state.interfaceEdit.id=data.data.id;
                             Vue.set(context.state.interfaceEdit,"owner",{name:session.get("name")});
                             Vue.set(context.state.interfaceEdit,"editor",{name:session.get("name")});
                             Vue.set(context.state.interfaceEdit,"createdAt",data.data.createdAt);

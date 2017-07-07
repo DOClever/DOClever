@@ -919,13 +919,13 @@ module.exports=new Vuex.Store({
                 {
                     if(context.state.globalAfter)
                     {
-                        helper.runBefore(context.state.globalAfter,baseUrl,path,method,query,header,body)
+                        helper.runAfter(context.state.globalAfter,result.status,result.header,result.data)
                     }
-                    helper.runBefore(context.state.interface.after.code,baseUrl,path,method,query,header,body)
+                    helper.runAfter(context.state.interface.after.code,result.status,result.header,result.data)
                 }
                 else
                 {
-                    helper.runBefore(context.state.interface.after.code,baseUrl,path,method,query,header,body)
+                    helper.runAfter(context.state.interface.after.code,result.status,result.header,result.data)
                 }
                 return {
                     code:200
@@ -1060,6 +1060,7 @@ module.exports=new Vuex.Store({
                 bodyParam:body,
                 outParam:result,
                 restParam:param,
+                id:context.state.interface.id,
                 group:{
                     _id:context.state.interface.group._id
                 },

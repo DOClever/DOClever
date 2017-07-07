@@ -16,10 +16,10 @@
 <body>
 <div class="container" id="app"  v-cloak>
     <mainnav ref="nav">
-        <el-row class="row" style="text-align: center;height: 60px;line-height: 60px;font-size: 25px;color: #20A0FF" slot="title">{{session.projectName}}</el-row>
+        <el-row class="row" style="text-align: center;height: 60px;line-height: 60px;font-size: 25px;color: #20A0FF" slot="title">{{session.projectName}}{{session.versionId?("("+session.versionName+")"):""}}</el-row>
     </mainnav>
     <el-row class="row" style="margin-top: 20px;padding-left: 80px;">
-        <div style="background-color: rgb(39,52,68);width: 80px;left: 0;top: 80px;position: fixed;height: calc(100% - 80px)">
+        <div style="background-color: rgb(39,52,68);width: 80px;left: 0;top: 80px;position: fixed;height: calc(100% - 80px);overflow-y: auto">
             <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==0?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=0">
                 <span class="fa fa-list" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
                 接口
@@ -36,14 +36,51 @@
                 <span class="fa fa-cog" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
                 设置
             </div>
+            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==4?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=4">
+                <span class="fa fa-cog" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
+                版本
+            </div>
         </div>
         <el-col class="col" :span="24" style="height: calc(100vh - 80px);overflow-x: hidden;overflow-y: auto">
             <interface v-show="type==0"></interface>
             <test v-show="type==1"></test>
             <global v-show="type==2"></global>
             <setting v-show="type==3"></setting>
+            <version v-show="type==4"></version>
         </el-col>
     </el-row>
+    <el-dialog title="请求列表" v-model="showApply" size="small">
+        <el-row class="row" style="height: 300px;overflow-y: auto">
+            <table class="table-hover" style="width: 100%">
+                <template v-for="item in arrApply">
+                    <tr class="row"  style="height: 40px;text-align: center;vertical-align: middle">
+                        <td style="width: 70%">
+                            团队<span style="color: #00adef">{{item.from.name}}</span>拉项目加入
+                        </td>
+                        <td style="width: 30%">
+                            <template v-if="item.handle==0">
+                                <el-button type="primary" @click="handleApply(item,1)">
+                                    同意
+                                </el-button>&nbsp;&nbsp;
+                                <el-button type="primary" @click="handleApply(item,2)">
+                                    拒绝
+                                </el-button>
+                            </template>
+                            <span v-else-if="item.handle==1">
+                            已同意
+                            </span>
+                            <span v-else-if="item.handle==2">
+                            已拒绝
+                            </span>
+                            <span v-else>
+                            已忽略
+                            </span>
+                        </td>
+                    </tr>
+                </template>
+            </table>
+        </el-row>
+    </el-dialog>
 </div>
 <script src="../../dist/vendor.bundle.js"></script>
 <script src="../lib/element/index.js"></script>

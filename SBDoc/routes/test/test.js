@@ -11,16 +11,36 @@ var group=require("../../model/groupModel")
 var interface=require("../../model/interfaceModel")
 var status=require("../../model/statusModel")
 var test=require("../../model/testModel")
+var testVersion=require("../../model/testVersionModel")
 var testModule=require("../../model/testModuleModel")
+var testModuleVersion=require("../../model/testModuleVersionModel")
 var testGroup=require("../../model/testGroupModel")
+var testGroupVersion=require("../../model/testGroupVersionModel")
+var version=require("../../model/versionModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
 function validateUser(req,res) {
     try
     {
+        req.testModuleModel=testModule;
+        req.testGroupModel=testGroup;
+        req.testModel=test;
+        if(req.headers["docleverversion"])
+        {
+            req.version=await (version.findOneAsync({
+                _id:req.headers["docleverversion"]
+            }))
+            if(!req.version)
+            {
+                util.throw(e.versionInvalidate,"版本不可用");
+            }
+            req.testModuleModel=testModuleVersion;
+            req.testGroupModel=testGroupVersion;
+            req.testModel=testVersion;
+        }
         if(req.clientParam.id)
         {
-            req.test=await (test.findOneAsync(req.clientParam.id.length==24?{
+            req.test=await (req.testModel.findOneAsync(req.clientParam.id.length==24?{
                 _id:req.clientParam.id
             }:{
                 id:req.clientParam.id
@@ -34,7 +54,7 @@ function validateUser(req,res) {
             {
                 util.throw(e.testNotFound,"用例没有找到");
             }
-            req.test=await (test.populateAsync(req.test,{
+            req.test=await (req.testModel.populateAsync(req.test,{
                 path:"editor",
                 select:"name"
             }))
@@ -51,7 +71,7 @@ function validateUser(req,res) {
         }
         if(req.clientParam.module)
         {
-            req.module=await (testModule.findOneAsync({
+            req.module=await (req.testModuleModel.findOneAsync({
                 _id:req.clientParam.module
             }))
             if(!req.module)
@@ -61,7 +81,7 @@ function validateUser(req,res) {
         }
         if(req.clientParam.group)
         {
-            req.group=await (testGroup.findOneAsync({
+            req.group=await (req.testGroupModel.findOneAsync({
                 _id:req.clientParam.group
             }))
             if(!req.group)
@@ -88,7 +108,7 @@ function save(req,res) {
                 obj[key]=req.clientParam[key];
             }
         }
-        let objModule=await (testModule.findOneAsync({
+        let objModule=await (req.testModuleModel.findOneAsync({
             _id:req.group.module
         }))
         if(!objModule)
@@ -115,7 +135,7 @@ function save(req,res) {
         if(req.clientParam.id)
         {
             obj.editor=req.userInfo._id;
-            ret=await (test.findOneAndUpdateAsync({
+            ret=await (req.testModel.findOneAndUpdateAsync({
                 _id:req.clientParam.id
             },obj,{
                 new:true
@@ -125,7 +145,11 @@ function save(req,res) {
         {
             obj.owner=obj.editor=req.userInfo._id;
             obj.id=uuid();
-            ret=await (test.createAsync(obj));
+            if(req.headers["docleverversion"])
+            {
+                obj.version=req.headers["docleverversion"]
+            }
+            ret=await (req.testModel.createAsync(obj));
         }
         util.ok(res,ret,"ok");
     }
@@ -138,21 +162,26 @@ function save(req,res) {
 function list(req,res) {
     try
     {
-        let arrModule=await (testModule.findAsync({
+        let query={
             project:req.clientParam.project
-        },null,{
+        }
+        if(req.headers["docleverversion"])
+        {
+            query.version=req.headers["docleverversion"]
+        }
+        let arrModule=await (req.testModuleModel.findAsync(query,null,{
             sort:"name"
         }));
         for(let objModule of arrModule)
         {
-            let arrGroup=await (testGroup.findAsync({
+            let arrGroup=await (req.testGroupModel.findAsync({
                 module:objModule._id
             },null,{
                 sort:"name"
             }));
             for(let objGroup of arrGroup)
             {
-                let arrTest=await (test.findAsync({
+                let arrTest=await (req.testModel.findAsync({
                     group:objGroup._id
                 },"name id status group",{
                     sort:"name"
@@ -175,7 +204,7 @@ function saveModule(req,res) {
         let obj;
         if(req.clientParam.module)
         {
-            obj=await (testModule.findOneAndUpdateAsync({
+            obj=await (req.testModuleModel.findOneAndUpdateAsync({
                 _id:req.clientParam.module
             },{
                 name:req.clientParam.name
@@ -185,11 +214,16 @@ function saveModule(req,res) {
         }
         else
         {
-            obj=await (testModule.createAsync({
+            let query={
                 name:req.clientParam.name,
                 project:req.clientParam.project,
                 id:uuid()
-            }))
+            }
+            if(req.headers["docleverversion"])
+            {
+                query.version=req.headers["docleverversion"]
+            }
+            obj=await (req.testModuleModel.createAsync(query))
         }
         util.ok(res,obj,"ok");
     }
@@ -205,7 +239,7 @@ function saveGroup(req,res) {
         let obj;
         if(req.clientParam.group)
         {
-            obj=await (testGroup.findOneAndUpdateAsync({
+            obj=await (req.testGroupModel.findOneAndUpdateAsync({
                 _id:req.clientParam.group
             },{
                 name:req.clientParam.name
@@ -215,11 +249,16 @@ function saveGroup(req,res) {
         }
         else
         {
-            obj=await (testGroup.createAsync({
+            let query={
                 name:req.clientParam.name,
                 module:req.clientParam.module,
                 id:uuid()
-            }))
+            }
+            if(req.headers["docleverversion"])
+            {
+                query.version=req.headers["docleverversion"]
+            }
+            obj=await (req.testGroupModel.createAsync(query))
         }
         util.ok(res,obj,"ok");
     }
@@ -232,25 +271,25 @@ function saveGroup(req,res) {
 function removeModule(req,res) {
     try
     {
-       let arrGroup=await (testGroup.findAsync({
+       let arrGroup=await (req.testGroupModel.findAsync({
            module:req.clientParam.module
        }));
        for(let objGroup of arrGroup)
        {
-           let arrTest=await (test.findAsync({
+           let arrTest=await (req.testModel.findAsync({
                group:objGroup._id
            }));
            for(let objTest of arrTest)
            {
-               await (test.removeAsync({
+               await (req.testModel.removeAsync({
                    _id:objTest._id
                }))
            }
-           await (testGroup.removeAsync({
+           await (req.testGroupModel.removeAsync({
                _id:objGroup._id
            }))
        }
-        await (testModule.removeAsync({
+        await (req.testModuleModel.removeAsync({
             _id:req.clientParam.module
         }))
         util.ok(res,"ok");
@@ -264,16 +303,16 @@ function removeModule(req,res) {
 function removeGroup(req,res) {
     try
     {
-        let arrTest=await (test.findAsync({
+        let arrTest=await (req.testModel.findAsync({
             group:req.clientParam.group
         }));
         for(let objTest of arrTest)
         {
-            await (test.removeAsync({
+            await (req.testModel.removeAsync({
                 _id:objTest._id
             }))
         }
-        await (testGroup.removeAsync({
+        await (req.testGroupModel.removeAsync({
             _id:req.clientParam.group
         }))
         util.ok(res,"ok");
@@ -287,7 +326,7 @@ function removeGroup(req,res) {
 function removeTest(req,res) {
     try
     {
-        await (test.removeAsync({
+        await (req.testModel.removeAsync({
             _id:req.clientParam.id
         }))
         util.ok(res,"ok");

@@ -75,7 +75,7 @@ var interface=[
         },
         "data":String,
         user:1,
-        handle:[group.importJSON]
+        handle:[group.validateUser,group.importJSON]
     },
 ];
 

@@ -4,7 +4,7 @@
             <el-radio class="radio" :label="0" v-model="type" :checked="type==0" id="bodyKey">PostMan V2 JSON</el-radio>&nbsp;&nbsp;
             <el-radio class="radio" :label="1" v-model="type" :checked="type==1" id="bodyRaw">SBDoc JSON</el-radio>&nbsp;&nbsp;
         </el-row>
-        <el-row class="row" v-if="type==0">
+        <el-row class="row" v-show="type==0">
             <el-input v-drag="'text'" type="textarea" :rows="10" placeholder="请输入JSON" v-model="text" style="margin-bottom: 10px">
             </el-input>
             请编辑BaseUrl：
@@ -25,7 +25,7 @@
                 </el-row>
             </template>
         </el-row>
-        <el-row class="row" v-else>
+        <el-row class="row" v-show="type==1">
             <el-input v-drag="'textMy'" type="textarea" :rows="10" placeholder="请输入JSON" v-model="textMy">
             </el-input>
         </el-row>
@@ -39,7 +39,8 @@
 </template>
 
 <script>
-    var dragFile=require("../director/dragFile")
+    var dragFile=require("../director/dragFile");
+    var bus=require("../bus/projectInfoBus");
     module.exports={
         data:function () {
             return {
@@ -83,11 +84,16 @@
                     _this.savePending=true;
                     _this.status="正在创建项目"+obj.info.name;
                     var projectID,groupID;
-                    var pro=net.post("/project/create",{
+                    var update={
                         name:obj.info.name,
                         dis:obj.info.description,
                         import:1
-                    }).then(function (data) {
+                    };
+                    if(session.get("teamId"))
+                    {
+                        update.team=session.get("teamId")
+                    }
+                    var pro=net.post("/project/create",update).then(function (data) {
                         if(data.code==200)
                         {
                             _this.$parent.projectList.unshift(data.data);
@@ -345,7 +351,11 @@
                     }).then(function () {
                         _this.savePending=false;
                         _this.$refs.box.close();
-                        $.notify("导入成功",1)
+                        $.notify("导入成功",1);
+                        if(session.get("teamId"))
+                        {
+                            bus.$emit("updateTeamProject",1,count);
+                        }
                     }).catch(function (err) {
                         _this.savePending=false;
                         $.tip(err,0);
@@ -411,14 +421,27 @@
                     }
                     var _this=this;
                     this.savePending=true;
-                    net.post("/project/importjson",{
+                    var update={
                         json:this.textMy
-                    }).then(function (data) {
+                    };
+                    if(session.get("teamId"))
+                    {
+                        update.team=session.get("teamId")
+                    }
+                    net.post("/project/importjson",update).then(function (data) {
                         _this.savePending=false;
                         if(data.code==200)
                         {
                             $.notify("导入成功",1);
-                            _this.$parent.projectList.unshift(data.data);
+                            if(session.get("teamId"))
+                            {
+                                _this.$parent.obj.project.unshift(data.data);
+                                bus.$emit("updateTeamProject",1,data.data.interfaceCount);
+                            }
+                            else
+                            {
+                                _this.$parent.projectList.unshift(data.data);
+                            }
                             _this.$refs.box.close();
                         }
                         else

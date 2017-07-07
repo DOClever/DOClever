@@ -82,7 +82,7 @@ var interface=[
             id:{
                 type:String,
                 optional:1
-            },
+            }
         },
         "data":String,
         user:1,
@@ -184,6 +184,56 @@ var interface=[
         "data":String,
         user:1,
         handle:inter.importJSON
+    },
+    {
+        "method":"POST",
+        "path":"/interface/snapshot",
+        "param": {
+            id:{
+                type:String
+            },
+            dis:String
+        },
+        "data":String,
+        user:1,
+        handle:inter.createSnapshot
+    },
+    {
+        "method":"GET",
+        "path":"/interface/snapshotlist",
+        "param": {
+            id:{
+                type:String
+            },
+            page:Number
+        },
+        "data":String,
+        user:1,
+        handle:inter.snapshotList
+    },
+    {
+        "method":"DELETE",
+        "path":"/interface/snapshot",
+        "param": {
+            id:{
+                type:String
+            }
+        },
+        "data":String,
+        user:1,
+        handle:inter.removeSnapshot
+    },
+    {
+        "method":"PUT",
+        "path":"/interface/snapshotroll",
+        "param": {
+            id:{
+                type:String
+            }
+        },
+        "data":String,
+        user:1,
+        handle:inter.snapshotRoll
     },
 ];
 

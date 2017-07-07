@@ -3,8 +3,8 @@
  */
 var mongoose = require('mongoose');
 var data=require("./../../config.json");
-var util=require("./util");
 require("../third/schemaExtend");
+var util=require("./util");
 mongoose.Promise = require('bluebird');
 var db=mongoose.createConnection(data.db,{
     server: {

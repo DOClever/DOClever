@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link href="../pic/logo.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="../lib/element/index.css">
+    <link rel="stylesheet" href="../../node_modules/animate.css/animate.min.css">
+    <link href="../lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../common/common.css">
+    <title>团队主页</title>
+</head>
+<body>
+<div class="container" id="app"  v-cloak>
+    <mainnav ref="nav">
+        <el-row class="row" style="text-align: center;height: 60px;line-height: 60px;font-size: 25px;color: #20A0FF" slot="title">{{session.teamName}}</el-row>
+        <el-popover ref="popover" placement="bottom" width="250" trigger="hover" slot="other">
+            <span style="font-size: 15px;color: red">
+                支持postman v2格式的JSON导入和SBDoc导出JSON的导入
+            </span>
+        </el-popover>
+        <el-button type="text" style="font-size: 15px;width:40px;height: 60px" slot="slot2" title="添加项目" @click="showAdd=true" v-if="type==1 && session.teamRole!=1">
+            添加
+        </el-button>
+        <el-button type="text" style="font-size: 15px;width:40px;height: 60px" slot="slot2" title="添加部门" @click="addGroup" v-if="type==2 && session.teamRole!=1">
+            添加
+        </el-button>
+        <el-button type="text" v-popover:popover style="font-size: 15px;width:40px;height: 60px" slot="slot1" title="导入项目" @click="importProject" v-if="type==1 && session.teamRole!=1">
+            导入
+        </el-button>
+    </mainnav>
+    <el-row class="row" style="margin-top: 20px;padding-left: 80px;">
+        <div style="background-color: rgb(39,52,68);width: 80px;left: 0;top: 80px;position: fixed;height: calc(100% - 80px)">
+            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==0?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=0">
+                <span class="fa fa-info-circle" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
+                概况
+            </div>
+            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==1?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=1">
+                <span class="fa fa-list" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
+                项目
+            </div>
+            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==2?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=2">
+                <span class="fa fa-users" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
+                成员
+            </div>
+        </div>
+        <el-col class="col" :span="24" style="height: calc(100vh - 80px);overflow-x: hidden;overflow-y: auto">
+            <teaminfo v-show="type==0" :obj="obj"></teaminfo>
+            <teamprojectlist v-show="type==1" :arr="obj.project"></teamprojectlist>
+            <teamuser v-show="type==2" :arr="obj.user"></teamuser>
+        </el-col>
+    </el-row>
+    <el-dialog title="新建项目" v-model="showAdd" size="small">
+        <el-row class="row" style="height: 30px;line-height: 30px">
+            <el-radio class="radio" :label="0" v-model="newType">新项目</el-radio>&nbsp;&nbsp;
+            <el-radio class="radio" :label="1" v-model="newType">已有项目</el-radio>&nbsp;&nbsp;
+        </el-row>
+        <el-form ref="form" label-width="100px" v-show="newType==0" style="margin-top: 10px;">
+            <el-form-item label="名称">
+                <el-input  style="width: 80%"  v-model="name" placeholder="请输入新项目的名称"></el-input>
+            </el-form-item>
+            <el-form-item label="描述">
+                <el-input type="textarea" :rows="2"  style="width: 80%"  v-model="dis" placeholder="请输入新项目的简介"></el-input>
+            </el-form-item>
+        </el-form>
+        <el-form ref="form" label-width="100px" v-show="newType==1" style="margin-top: 10px;">
+            <el-form-item label="项目ID">
+                <el-input  style="width: 80%"  v-model="id" placeholder="请输入项目的ID"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="showAdd = false">取 消</el-button>
+            <el-button type="primary" @click="addProject" :loading="addPending">确 定</el-button>
+        </span>
+    </el-dialog>
+    <el-dialog title="请求列表" v-model="showApply" size="small">
+        <el-row class="row" style="height: 300px;overflow-y: auto">
+            <table class="table-hover" style="width: 100%">
+                <template v-for="item in arrApply">
+                    <tr class="row"  style="height: 40px;text-align: center;vertical-align: middle">
+                        <td style="width: 60%">
+                            {{item.type==2?"人员":"项目"}}<span style="color: #00adef">{{item.from.name}}</span>申请加入<br>
+                            备注：{{item.dis?item.dis:"无"}}
+                        </td>
+                        <td style="width: 40%">
+                            <template v-if="item.handle==0">
+                                <el-button type="primary" @click="handleApply(item,1)">
+                                    同意
+                                </el-button>&nbsp;&nbsp;
+                                <el-button type="primary" @click="handleApply(item,2)">
+                                    拒绝
+                                </el-button>
+                            </template>
+                            <span v-else-if="item.handle==1">
+                            已同意
+                            </span>
+                            <span v-else-if="item.handle==2">
+                            已拒绝
+                            </span>
+                            <span v-else>
+                            已忽略
+                            </span>
+                        </td>
+                    </tr>
+                </template>
+            </table>
+        </el-row>
+    </el-dialog>
+    <el-dialog title="设置用户部门权限" v-model="showUserApply" size="small" :modal="false">
+        <el-form ref="form" label-width="100px">
+            <el-form-item label="部门" style="text-align: center">
+                <el-select v-model="newUserGroup">
+                    <el-option :value="item._id" :label="item.name" v-for="item in obj.user"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="角色" style="text-align: center">
+                <el-select v-model="newUserRole">
+                    <el-option :value="0" label="项目管理员"></el-option>
+                    <el-option :value="1" label="项目成员"></el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="handleUserApply" :loading="applyPending">确 定</el-button>
+        </span>
+    </el-dialog>
+</div>
+<script src="../../dist/vendor.bundle.js"></script>
+<script src="../lib/element/index.js"></script>
+<script src="../../dist/team.js"></script>
+</body>
+</html>

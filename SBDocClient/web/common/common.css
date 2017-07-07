@@ -114,5 +114,8 @@ span.el-cascader__label
     font-family: "Microsoft YaHei";
 }
 
+.hover .row:hover {
+    background-color:rgb(247,246,242) ;
+}
 
 

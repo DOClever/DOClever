@@ -1,0 +1,74 @@
+/**
+ * Created by sunxin on 2017/7/5.
+ */
+var mongoose = require('mongoose');
+var mongoomise=require("mongoomise")
+var db=require("../util/db.js");
+var model=new mongoose.Schema({
+    project:{
+        type:mongoose.Schema.ObjectId,
+        ref:"Project"
+    },
+    users:{
+        type:[{
+            type:mongoose.Schema.ObjectId,
+            ref:"User"
+        }],
+        default:[]
+    },
+    date:{
+        type:[Number],
+        default:[]
+    },
+    time:{
+        type:[Number],
+        default:[]
+    },
+    version:{
+        type:mongoose.Schema.ObjectId,
+        ref:"Version"
+    },
+    sendInfo:{
+        user:{
+            type:String,
+            default:""
+        },
+        password:{
+            type:String,
+            default:""
+        },
+        smtp:{
+            type:String,
+            default:""
+        },
+        port:{
+            type:Number,
+            default:465
+        }
+    },
+    testType:String,
+    test:{
+        type:[{
+            type:mongoose.Schema.ObjectId,
+            refPath:"testType"
+        }],
+        default:[]
+    },
+    baseUrl:{
+        type:String,
+        default:""
+    },
+    count:{
+        type:Number,
+        default:0
+    }
+},{
+    timestamps:true
+});
+model.configOutputField(null,[
+    "createdAt",
+    "updatedAt"
+]);
+var dbManage=db.model("Poll",model);
+mongoomise.promisifyAll(dbManage,require("bluebird"));
+module.exports=dbManage;

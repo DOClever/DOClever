@@ -2,7 +2,7 @@
  * Created by sunxin on 16/8/22.
  */
 var path = require('path')
-var webpack = require('webpack')
+var webpack = require('webpack');
 module.exports = {
     entry: {
         vendor:["vue","vuex","./web/common/common","./web/util/net","./web/util/local"],
@@ -16,7 +16,8 @@ module.exports = {
         about:"./web/about/about",
         help:"./web/help/help",
         donate:"./web/donate/donate",
-        share:"./web/share/share"
+        share:"./web/share/share",
+        team:"./web/team/team"
     },
     output: {
         path: path.join(__dirname, 'dist'),
@@ -50,27 +51,30 @@ module.exports = {
         loaders: [
             {
                 test: /\.css$/,
-                loaders: ['style', 'css']
+                loaders: ['style', 'css'],
+                include: path.resolve(__dirname, 'web/component')
             },
             {
                 test: /\.vue$/,
-                //loaders: ["happypack/loader"]
-                loader:"vue-loader"
+                loader:"vue-loader",
+                include: path.resolve(__dirname, 'web/component')
             },
             {
                 test: /helper\.js/,
-                //loaders: ["happypack/loader"]
-                loader:"babel-loader"
+                loader:"babel-loader?cacheDirectory",
+                include: path.resolve(__dirname, 'web/util')
             },
             {
                 test: /\.html$/,
-                loader: "html?attrs=img:src img:data-src"
+                loader: "html?attrs=img:src img:data-src",
+                include: path.resolve(__dirname, 'web')
             }
          ]
     },
-    //devtool: 'module-source-map',
+    //devtool: 'cheap-eval-source-map',
     devtool: 'source-map',
     resolve: {
+        modules: [path.resolve(__dirname, 'node_modules')],
         alias: {
             "vue": path.join(__dirname, 'node_modules/vue/dist/vue.min'),
             "vuex": path.join(__dirname, 'node_modules/vuex/dist/vuex.min')

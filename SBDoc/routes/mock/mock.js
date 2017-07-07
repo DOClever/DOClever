@@ -11,6 +11,7 @@ var user=require("../../model/userModel")
 var project=require("../../model/projectModel")
 var group=require("../../model/groupModel")
 var interface=require("../../model/interfaceModel")
+var interfaceVersion=require("../../model/interfaceVersionModel")
 var fs=require("fs");
 var router=express.Router();
 router.use("/:id",async (validate))
@@ -24,12 +25,19 @@ function validate(req,res,next) {
         req.arrFile.forEach(function (obj) {
             util.delImg(obj.dbPath);
         })
-        if(req.params.id.length!=24)
+        if(req.params.id.length!=24 && req.params.id.length!=48)
         {
             util.throw(e.projectNotFound,"项目不存在");
         }
+        let projectId=req.params.id.substr(0,24);
+        let versionId=req.params.id.substr(24,24);
+        req.interfaceModel=interface;
+        if(versionId)
+        {
+            req.interfaceModel=interfaceVersion;
+        }
         let obj=await (project.findOneAsync({
-            _id:req.params.id
+            _id:projectId
         }))
         if(!obj)
         {
@@ -45,20 +53,30 @@ function validate(req,res,next) {
         {
             util.throw(e.systemReason,"接口path不存在");
         }
-        let objInter=await (interface.findOneAsync({
+        let query={
             url:{
                 $in:[mockUrl,mockUrl.substr(1)]
             },
             project:obj._id,
             method:req.method,
-        }))
+        };
+        if(versionId)
+        {
+            query.version=versionId;
+        }
+        let objInter=await (req.interfaceModel.findOneAsync(query))
         if(!objInter)
         {
             let mockArr=mockUrl.split("/");
-            let arr=await (interface.findAsync({
+            let query={
                 method:req.method,
                 project:obj._id
-            }));
+            }
+            if(versionId)
+            {
+                query.version=versionId;
+            }
+            let arr=await (req.interfaceModel.findAsync(query));
             for(let o of arr)
             {
                 let arrUrl=o.url.split("/");

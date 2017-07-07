@@ -26,7 +26,7 @@ app.all('*', function(req, res, next) {
 app.use(logger('dev'));
 app.use("/proxy",proxy);
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: false,limit:"100000kb" }));
 app.use(cookieParser());
 app.use(session({
   cookie: {maxAge: 1000*3600*6 },
@@ -40,6 +40,9 @@ app.use("/group",checkFormDataUser(con.imgPath),checkParam("group"),checkUser);
 app.use("/interface",checkFormDataUser(con.imgPath),checkParam("interface"),checkUser);
 app.use("/status",checkFormDataUser(con.imgPath),checkParam("status"),checkUser);
 app.use("/test",checkFormDataUser(con.imgPath),checkParam("test"),checkUser);
+app.use("/team",checkFormDataUser(con.imgPath),checkParam("team"),checkUser);
+app.use("/version",checkFormDataUser(con.imgPath),checkParam("version"),checkUser);
+app.use("/poll",checkFormDataUser(con.imgPath),checkParam("poll"),checkUser);
 app.use("/mock",checkFormDataUser(con.tempPath),mock);
 app.use("/html",express.static(path.join(__dirname, '../SBDocClient')));
 app.use("/img",express.static(con.imgPath));

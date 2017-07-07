@@ -23,8 +23,9 @@ var getHeader = function (req) {
     return ret
 };
 
-var filterResHeader = function (headers) {
+var filterResHeader = function (headers,res) {
     var ret = {};
+    var resHeaders=res.getHeader("Access-Control-Expose-Headers").toLowerCase();
     for (var i in headers) {
         if (!/Access-/i.test(i)) {
             if(/set-cookie/i.test(i))
@@ -35,6 +36,10 @@ var filterResHeader = function (headers) {
             {
                 ret[i] = headers[i];
             }
+        }
+        if(resHeaders.indexOf(i.toLowerCase()+",")==-1 && resHeaders.indexOf(","+i.toLowerCase())==-1)
+        {
+            res.setHeader("Access-Control-Expose-Headers",res.getHeader("Access-Control-Expose-Headers")+","+i);
         }
     }
     return ret;
@@ -107,7 +112,7 @@ function mock(req,res) {
     var req2 = http.request(opt, function (res2) {
         if(!realUrl || res2.headers["__finish"]=="0")
         {
-            res.writeHead(res2.statusCode, filterResHeader(res2.headers));
+            res.writeHead(res2.statusCode, filterResHeader(res2.headers,res));
             res2.pipe(res);
             res2.on('end', function () {
 
@@ -143,7 +148,7 @@ function mock(req,res) {
                 request1=https.request;
             }
             var req3=request1(opt1,function (res3) {
-                res.writeHead(res3.statusCode, filterResHeader(res3.headers));
+                res.writeHead(res3.statusCode, filterResHeader(res3.headers,res));
                 res3.pipe(res);
                 res3.on('end', function () {
 
@@ -236,7 +241,7 @@ function redirect(res,bHttps,opt,location) {
         }
         else
         {
-            res.writeHead(res3.statusCode, filterResHeader(res3.headers));
+            res.writeHead(res3.statusCode, filterResHeader(res3.headers,res));
             res3.pipe(res);
             res3.on('end', function () {
 
@@ -287,7 +292,7 @@ function proxy(req,res) {
         }
         else
         {
-            res.writeHead(res2.statusCode, filterResHeader(res2.headers));
+            res.writeHead(res2.statusCode, filterResHeader(res2.headers,res));
             res2.pipe(res);
             res2.on('end', function () {
 
