@@ -47,7 +47,7 @@ var j1=schedule.scheduleJob("0 * * * *",(async (function () {
     try
     {
         let date=moment();
-        let weekDay=date.weekday();
+        let weekDay=date.weekday()-1;
         let hour=date.hour();
         let arr=await (poll.findAsync({
             date:weekDay,

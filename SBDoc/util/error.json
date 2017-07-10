@@ -35,5 +35,6 @@
   "teamNotFound":33,
   "versionNotFound":34,
   "versionInvalidate":35,
-  "pollNotFound":36
+  "pollNotFound":36,
+  "articleNotFound":37
 }

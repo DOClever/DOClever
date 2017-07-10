@@ -22,13 +22,13 @@
                 支持postman v2格式的JSON导入和SBDoc导出JSON的导入
             </span>
         </el-popover>
-        <el-button type="text" style="font-size: 15px;width:40px;height: 60px" slot="slot2" title="添加项目" @click="showAdd=true" v-if="type==1 && session.teamRole!=1">
+        <el-button type="text" style="font-size: 15px;width:40px;height: 60px" slot="slot2" title="添加项目" @click="showAdd=true" v-if="type==1 && (session.teamRole==0 || session.teamRole==2)">
             添加
         </el-button>
         <el-button type="text" style="font-size: 15px;width:40px;height: 60px" slot="slot2" title="添加部门" @click="addGroup" v-if="type==2 && session.teamRole!=1">
             添加
         </el-button>
-        <el-button type="text" v-popover:popover style="font-size: 15px;width:40px;height: 60px" slot="slot1" title="导入项目" @click="importProject" v-if="type==1 && session.teamRole!=1">
+        <el-button type="text" v-popover:popover style="font-size: 15px;width:40px;height: 60px" slot="slot1" title="导入项目" @click="importProject" v-if="type==1 && (session.teamRole==0 || session.teamRole==2)">
             导入
         </el-button>
     </mainnav>
@@ -90,7 +90,7 @@
                                 <el-button type="primary" @click="handleApply(item,1)">
                                     同意
                                 </el-button>&nbsp;&nbsp;
-                                <el-button type="primary" @click="handleApply(item,2)">
+                                <el-button type="danger" @click="handleApply(item,2)">
                                     拒绝
                                 </el-button>
                             </template>

@@ -12,6 +12,8 @@
                 Mock
             </el-button><el-button type="primary" style="margin: 20px 0 20px 0;width: 80%;" @click="type=4" v-if="!session.teamId && session.role==0">
                 团队申请
+            </el-button><el-button type="primary" style="margin: 20px 0 20px 0;width: 80%;" @click="type=4" v-if="session.teamId && session.role==0">
+                退出团队
             </el-button>
             </el-row>
         </el-col>
@@ -114,26 +116,47 @@
                     </el-row>
                 </el-row>
                 <el-row v-else-if="type==4" class="row">
-                    <el-row class="row" style="height: 60px">
-                        <h4 style="margin-left: 10px;color: gray">
-                            团队申请
-                        </h4>
-                    </el-row>
-                    <el-form ref="form" label-width="100px">
-                        <el-form-item label="团队ID" style="text-align: center">
-                            <el-input style="margin-top: 8px;width: 80%" v-model="teamId"></el-input>
-                        </el-form-item>
-                        <el-form-item label="备注" style="text-align: center">
-                            <el-input type="textarea" :rows="3" style="width: 80%;height: 80%;margin-top: 8px;" v-model="teamDis"></el-input>
-                        </el-form-item>
-                        <el-row class="row" style="text-align: center">
-                            <el-col class="col" :span="24" style="text-align: center">
-                                <el-button type="primary" style="width: 50%;margin-top: 20px;margin-bottom: 20px" @click.prevent="applyTeam" :loading="applyPending">
-                                    保存
-                                </el-button>
-                            </el-col>
+                    <template v-if="!session.teamId && session.role==0">
+                        <el-row class="row" style="height: 60px">
+                            <h4 style="margin-left: 10px;color: gray">
+                                团队申请
+                            </h4>
                         </el-row>
-                    </el-form>
+                        <el-form ref="form" label-width="100px">
+                            <el-form-item label="团队ID" style="text-align: center">
+                                <el-input style="margin-top: 8px;width: 80%" v-model="teamId"></el-input>
+                            </el-form-item>
+                            <el-form-item label="备注" style="text-align: center">
+                                <el-input type="textarea" :rows="3" style="width: 80%;height: 80%;margin-top: 8px;" v-model="teamDis"></el-input>
+                            </el-form-item>
+                            <el-row class="row" style="text-align: center">
+                                <el-col class="col" :span="24" style="text-align: center">
+                                    <el-button type="primary" style="width: 50%;margin-top: 20px;margin-bottom: 20px" @click.prevent="applyTeam" :loading="applyPending">
+                                        保存
+                                    </el-button>
+                                </el-col>
+                            </el-row>
+                        </el-form>
+                    </template>
+                    <template v-else-if="session.teamId && session.role==0">
+                        <el-row class="row" style="height: 60px">
+                            <h4 style="margin-left: 10px;color: gray">
+                                退出团队
+                            </h4>
+                        </el-row>
+                        <el-form ref="form" label-width="100px">
+                            <el-form-item label="团队名称" style="text-align: center">
+                                {{session.teamName}}
+                            </el-form-item>
+                            <el-row class="row" style="text-align: center">
+                                <el-col class="col" :span="24" style="text-align: center">
+                                    <el-button type="danger" style="width: 50%;margin-top: 20px;margin-bottom: 20px" @click.prevent="quitTeam" :loading="quitPending">
+                                        退出
+                                    </el-button>
+                                </el-col>
+                            </el-row>
+                        </el-form>
+                    </template>
                 </el-row>
             </el-row>
         </el-col>
@@ -158,7 +181,8 @@
                 exportType:0,
                 teamId:"",
                 teamDis:"",
-                applyPending:false
+                applyPending:false,
+                quitPending:false
             }
         },
         computed:{
@@ -348,6 +372,29 @@
                     {
                         $.notify(data.msg,0);
                     }
+                })
+            },
+            quitTeam:function () {
+                var _this=this;
+                $.confirm("是否退出该团队",function () {
+                    _this.quitPending=true;
+                    net.delete("/team/project",{
+                        id:session.get("teamId"),
+                        project:session.get("projectId")
+                    }).then(function (data) {
+                        _this.quitPending=false;
+                        if(data.code==200)
+                        {
+                            $.notify("退出成功",1);
+                            setTimeout(function () {
+                                location.href="/html/web/team/team.html"
+                            },1500)
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0)
+                        }
+                    })
                 })
             }
         },

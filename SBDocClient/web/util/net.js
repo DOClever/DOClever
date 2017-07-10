@@ -149,7 +149,43 @@ net.post=function (path,data,headers,beforeFunc,run,bNet) {
             }
             else
             {
-                resObj=res.body;
+                if(typeof (res.body)=="object" && (res.body instanceof Blob) && res.body.size<=1024*5)
+                {
+                    return new Promise(function (resolve,reject) {
+                        var reader = new FileReader();
+                        reader.onload = function(){
+                            var content = reader.result;
+                            try
+                            {
+                                resObj=JSON.parse(content);
+                            }
+                            catch (err)
+                            {
+                                resObj=res.body;
+                            }
+                            var obj={
+                                data:resObj,
+                                status:res.status,
+                                header:getAllHeaders(res.headers),
+                            }
+                            resolve(obj);
+                        };
+                        reader.onerror = function(event){
+                            resObj=res.body;
+                            var obj={
+                                data:resObj,
+                                status:res.status,
+                                header:getAllHeaders(res.headers),
+                            }
+                            resolve(obj);
+                        };
+                        reader.readAsText(res.body);
+                    })
+                }
+                else
+                {
+                    resObj=res.body;
+                }
             }
             var obj={
                 data:resObj,
@@ -437,7 +473,42 @@ net.upload=function (method,path,data,headers,beforeFunc,run,bNet) {
                     }
                     else
                     {
-                        resObj=xhr.response;
+                        if(xhr.responseType=="blob" &&  xhr.response.size<=1024*5)
+                        {
+                            var reader = new FileReader();
+                            reader.onload = function(){
+                                var content = reader.result;
+                                try
+                                {
+                                    resObj=JSON.parse(content);
+                                }
+                                catch (err)
+                                {
+                                    resObj=xhr.response;
+                                }
+                                var obj={
+                                    data:resObj,
+                                    status:xhr.status,
+                                    header:convertHeader(xhr.getAllResponseHeaders()),
+                                }
+                                resolve(obj);
+                            };
+                            reader.onerror = function(event){
+                                resObj=xhr.response;
+                                var obj={
+                                    data:resObj,
+                                    status:xhr.status,
+                                    header:convertHeader(xhr.getAllResponseHeaders()),
+                                }
+                                resolve(obj);
+                            };
+                            reader.readAsText(xhr.response);
+                            return;
+                        }
+                        else
+                        {
+                            resObj=xhr.response;
+                        }
                     }
                     var obj={
                         data:resObj,

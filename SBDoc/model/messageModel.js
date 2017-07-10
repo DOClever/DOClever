@@ -17,7 +17,11 @@ var model=new mongoose.Schema({
         type:mongoose.Schema.ObjectId,
         ref:"User"
     },
-    type:Number  //0 个人申请消息  1  项目申请消息
+    type:Number,  //0 个人申请消息  1  项目申请消息
+    read:{
+        type:Number,
+        default:0
+    }
 },{
     timestamps:true
 });

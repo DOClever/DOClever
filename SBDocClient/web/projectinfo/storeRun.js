@@ -846,7 +846,7 @@ module.exports=new Vuex.Store({
             header["__headers"]=JSON.stringify(objHeaders);
             var proxyUrl="/proxy";
             var bNet=false;
-            if((/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl)) && !bMock)
+            if((/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl)) && !bMock && session.get("proxy"))
             {
                 bNet=true;
                 proxyUrl="http://127.0.0.1:36742";
@@ -1064,8 +1064,8 @@ module.exports=new Vuex.Store({
                 group:{
                     _id:context.state.interface.group._id
                 },
-                name:!context.state.interface._id?"":context.state.interface.name,
-                remark:!context.state.interface._id?"":context.state.interface.remark,
+                name:context.state.interface.name,
+                remark:context.state.interface.remark,
                 owner:!context.state.interface._id?"":context.state.interface.owner,
                 editor:!context.state.interface._id?"":context.state.interface.editor,
                 createdAt:!context.state.interface._id?"":context.state.interface.createdAt,

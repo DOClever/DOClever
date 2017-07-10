@@ -448,7 +448,7 @@ function projectUser(req,res) {
                 }
                 else
                 {
-                    let index=util.inArr(obj1.user._id.toString(),arr,"user");
+                    let index=util.inArrKey(obj1.user._id.toString(),arr,"user");
                     if(index>-1)
                     {
                         obj1._doc.select=1;

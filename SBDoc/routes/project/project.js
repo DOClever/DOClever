@@ -28,6 +28,7 @@ var apply=require("../../model/applyModel")
 var message=require("../../model/messageModel");
 var version=require("../../model/versionModel")
 var poll=require("../../model/pollModel")
+var article=require("../../model/articleModel")
 var blue=require("bluebird");
 var fs=require("fs");
 var uuid=require("uuid/v1");
@@ -36,6 +37,7 @@ var path=require("path");
 var copy=require("recursive-copy");
 var rm=require("rimraf");
 var nunjucks=require("nunjucks");
+var moment=require("moment");
 blue.promisifyAll(fs);
 let refreshInterface=async (function (req,id) {
     let query={
@@ -305,16 +307,16 @@ function create(req,res) {
                 }
                 await (req.groupModel.createAsync(query))
             }
-            let query={
+            let query1={
                 name:"#回收站",
                 project:obj._id,
                 type:1
             }
             if(req.headers["docleverversion"])
             {
-                query.version=req.headers["docleverversion"]
+                query1.version=req.headers["docleverversion"]
             }
-            await (req.groupModel.createAsync(query))
+            await (req.groupModel.createAsync(query1))
             obj._doc.role=0;
             obj._doc.userCount=1;
             obj._doc.interfaceCount=0;
@@ -910,6 +912,17 @@ function exportJSON(req,res) {
                 after:req.obj.after
             }
         }
+        let arr=await (article.findAsync({
+            project:req.obj._id
+        },"content title",{
+            sort:"-updatedAt"
+        }))
+        obj.global.article=arr.map(function (obj) {
+            return {
+                title:obj.title,
+                content:obj.content
+            }
+        });
         let query={
             project:req.obj._id
         }
@@ -1044,6 +1057,17 @@ function importJSON(req,res) {
             query.team=req.clientParam.team;
         }
         let objProject=await (project.createAsync(query));
+        if(obj.global.article && obj.global.article.length>0)
+        {
+            await (article.insertMany(obj.global.article.map(function (obj) {
+                return {
+                    title:obj.title,
+                    content:obj.content,
+                    project:objProject._id,
+                    creator:req.userInfo._id
+                }
+            })));
+        }
         if(obj.global.status.length>0)
         {
             for(let item of obj.global.status)
@@ -1390,6 +1414,23 @@ function exportHTML(req,res) {
             req.obj.before=req.version.before;
             req.obj.after=req.version.after;
         }
+        arr=await (article.findAsync({
+            project:req.obj._id
+        },null,{
+            sort:"-updatedAt",
+            populate:{
+                path:"creator",
+                select:"name"
+            }
+        }))
+        req.obj.article=req.obj._doc.article=arr.map(function (obj) {
+            return {
+                title:obj.title,
+                content:obj.content,
+                updatedAt:moment(obj.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
+                creator:obj.creator
+            }
+        });
         nunjucks.configure(path.join(con.tempPath,name), {  });
         var str=nunjucks.render("index.html",{
             interface:JSON.stringify(arrGroup),
@@ -1519,6 +1560,10 @@ function handleApply(req,res) {
                 select:"name"
             }
         }));
+        obj=await (apply.populateAsync(obj,{
+            path:"to",
+            select:"name"
+        }))
         if(!obj)
         {
             util.throw(e.applyNotFound,"申请不存在");
@@ -1540,7 +1585,7 @@ function handleApply(req,res) {
         {
             obj.state=3;
             await (obj.saveAsync());
-            if(objProject.team.toString()==obj.to.toString())
+            if(objProject.team.toString()==obj.to._id.toString())
             {
                 util.throw(e.projectAlreadyJoinTeam,"项目已加入其他团队")
             }
@@ -1597,7 +1642,7 @@ function handleApply(req,res) {
             }
             await (message.createAsync({
                 name:req.clientParam.state==1?"您已同意项目加入团队":"您已拒绝项目加入团队",
-                dis:`您已${req.clientParam.state==1?"通过":"拒绝"}项目${objProject.name}加入团队${obj.to.name}`,
+                dis:`您已${req.clientParam.state==1?"通过":"拒绝"}项目${objProject.name}加入团队${obj.from.name}`,
                 user:req.userInfo._id,
                 type:1
             }))
@@ -1652,7 +1697,9 @@ function getUsers(req,res) {
             path:"users.user",
             select:"name photo"
         }));
-        let arr=[req.obj.owner].concat(req.obj.users);
+        let arr=[req.obj.owner].concat(req.obj.users.map(function (obj) {
+            return obj.user
+        }));
         util.ok(res,arr,"ok");
     }
     catch (err)

@@ -787,7 +787,7 @@ function handleMockInfo(param,query,body,header,objInterface,url) {
     return info;
 }
 
-function inArr(str,arr,key) {
+function inArrKey(str,arr,key) {
     for(var i=0;i<arr.length;i++)
     {
         if(str.toLowerCase()==arr[i][key].toLowerCase())
@@ -1153,14 +1153,7 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
     {
         for(var key in opt.header)
         {
-            if(inArr(key,arrHeaders))
-            {
-                objHeaders[key]=opt.header[key];
-            }
-            else
-            {
-                header[key]=opt.header[key];
-            }
+            header[key]=opt.header[key];
         }
     }
     if((method=="POST" || method=="PUT" || method=="PATCH") && obj.bodyInfo)
@@ -1335,7 +1328,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
                 path:"group",
                 select:"name"
             }))
-            text="(function () {return runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;")+"',"+JSON.stringify(testObj)+",global,"+JSON.stringify(opt)+",root)})"
+            text="(function () {return runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'")+"',"+JSON.stringify(testObj)+",global,"+JSON.stringify(opt)+",root)})"
         }
         else
         {
@@ -1489,7 +1482,7 @@ exports.convertToJSON=convertToJSON;
 exports.mock=mock;
 exports.createDir=createDir;
 exports.handleMockInfo=handleMockInfo;
-exports.inArr=inArr;
+exports.inArrKey=inArrKey;
 exports.runTestCode=runTestCode;
 exports.sendMail=sendMail;
 

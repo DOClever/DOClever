@@ -11,7 +11,7 @@
                                 <el-row class="row" style="height: 30px;line-height:30px;font-size: 15px;color: gray;position: absolute;left: 0;bottom: 0;text-align: left;background-color: rgba(215,215,215,0.51)">
                                     &nbsp;{{"成员:"+arr[(n-1)*4+(index-1)].userCount}}&nbsp;
                                     {{"接口:"+arr[(n-1)*4+(index-1)].interfaceCount}}
-                                    <el-dropdown style="float: right;height: 30px" v-if="session.teamRole!=1">
+                                    <el-dropdown style="float: right;height: 30px" v-if="session.teamRole==0 || session.teamRole==2">
                                         <el-button type="text" style="width:40px;height: 30px" class="el-dropdown-link" @click.stop="">
                                             管理
                                         </el-button>

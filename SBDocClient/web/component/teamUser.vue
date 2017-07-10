@@ -10,7 +10,7 @@
                             <span style="font-size: 15px">
                                 {{item.name+"("+item.users.length+")"}}
                             </span>&nbsp;&nbsp;&nbsp;
-                        <el-dropdown v-if="session.teamRole!=1">
+                        <el-dropdown v-if="session.teamRole==0 || session.teamRole==2">
                             <el-button type="text" icon="setting" class="el-dropdown-link" @click.stop="">
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
@@ -30,7 +30,7 @@
                             </el-col>
                             <el-col class="col" :span="6">
                                 <template v-if="item1.role!=2">
-                                    <el-select v-if="session.teamRole!=1" v-model="item1.role" @input="changeRole(item1)">
+                                    <el-select v-if="session.teamRole==0 || session.teamRole==2" v-model="item1.role" @input="changeRole(item1)">
                                         <el-option :value="0" label="团队管理员"></el-option>
                                         <el-option :value="1" label="团队成员"></el-option>
                                     </el-select>
@@ -43,7 +43,7 @@
                                 </span>
                             </el-col>
                             <el-col class="col" :span="4">
-                                <el-dropdown v-if="session.teamRole!=1">
+                                <el-dropdown v-if="session.teamRole==0 || session.teamRole==2">
                                     <el-button type="text"  class="el-dropdown-link" @click.stop="">
                                         操作
                                     </el-button>

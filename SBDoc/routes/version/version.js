@@ -136,9 +136,12 @@ function save(req,res) {
                delete o._doc._id;
                o._doc.version = obj._id
            }
-           await(statusVersion.insertMany(arr.map(function (obj) {
-               return obj._doc
-           })));
+           if(arr.length>0)
+           {
+               await(statusVersion.insertMany(arr.map(function (obj) {
+                   return obj._doc
+               })));
+           }
            arr = await(testModule.findAsync({
                project: req.clientParam.project
            }));
@@ -300,9 +303,12 @@ function roll(req,res) {
             delete o._doc._id;
             delete o._doc.version
         }
-        await(status.insertMany(arr.map(function (obj) {
-            return obj._doc
-        })));
+        if(arr.length>0)
+        {
+            await(status.insertMany(arr.map(function (obj) {
+                return obj._doc
+            })));
+        }
         arr = await(testModuleVersion.findAsync({
             project: req.project._id,
             version:req.version._id

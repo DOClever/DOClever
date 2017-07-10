@@ -6,8 +6,10 @@
                     BaseUrl
                 </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=1">
                 状态码
-            </el-button><el-button type="primary" style="margin: 20px 0 20px 0;width: 80%;" @click="type=2">
+            </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=2">
                 环境注入
+            </el-button><el-button type="primary" style="margin: 20px 0 20px 0;width: 80%;" @click="type=3">
+                文档
             </el-button>
             </el-row>
         </el-col>
@@ -45,10 +47,36 @@
                     </el-row>
                     <inject :before="before" :after="after" @save="saveInject"></inject>
                 </el-row>
+                <el-row v-if="type==3" class="row">
+                    <el-row class="row" style="height: 60px;">
+                        <h4 style="margin-left: 10px;color: gray;display: inline-block">
+                            文档
+                        </h4>
+                    </el-row>
+                    <el-row class="row">
+                        <template v-for="item in arrArticle">
+                            <el-row class="row article" @click.native="editArticle(item,index)" style="margin-left: 20px;cursor: pointer">
+                                <el-row class="row" style="font-size: 20px">
+                                    {{item.title}}
+                                </el-row>
+                                <el-row class="row" style="color: gray">
+                                    {{item.updatedAt}}&nbsp;&nbsp;&nbsp;
+                                    </el-button>
+                                </el-row>
+                            </el-row>
+                        </template>
+                    </el-row>
+                </el-row>
             </el-row>
         </el-col>
     </el-row>
 </template>
+
+<style>
+    .article:hover {
+        background-color: rgb(247,246,242) ;
+    }
+</style>
 
 <script>
     var bus=require("../bus/projectInfoBus")
@@ -62,6 +90,7 @@
                 status:[],
                 before:"",
                 after:"",
+                arrArticle:[],
             }
         },
         computed:{
@@ -78,6 +107,12 @@
                     source:item
                 });
             },
+            editArticle:function(item,index)
+            {
+                var child=$.showBox(this,"article",{
+                    propObj:item
+                });
+            }
         },
         created:function () {
             var _this=this;
@@ -85,6 +120,7 @@
                 _this.baseUrl=data.baseUrls;
                 _this.before=data.before;
                 _this.after=data.after;
+                _this.arrArticle=data.article;
             })
             bus.$on("initStatus",function (data) {
                 _this.status=data;

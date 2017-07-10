@@ -6,8 +6,10 @@
                     修改BaseUrl
                 </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=1">
                 状态码
-            </el-button><el-button type="primary" style="margin: 20px 0 20px 0;width: 80%;" @click="type=2">
+            </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=2">
                 环境注入
+            </el-button><el-button type="primary" style="margin: 20px 0 20px 0;width: 80%;" @click="type=3">
+                文档
             </el-button>
             </el-row>
         </el-col>
@@ -54,15 +56,47 @@
                     </el-row>
                     <inject :before="before" :after="after" @save="saveInject"></inject>
                 </el-row>
+                <el-row v-if="type==3" class="row">
+                    <el-row class="row" style="height: 60px;">
+                        <h4 style="margin-left: 10px;color: gray;display: inline-block">
+                            文档
+                        </h4>
+                        <el-button type="primary" style="float: right;margin-right: 20px;margin-top: 15px" @click="createArticle"  v-if="session.role==0">
+                            创建文档
+                        </el-button>
+                    </el-row>
+                    <el-row class="row">
+                        <template v-for="item in arrArticle">
+                            <el-row class="row article" @click.native="editArticle(item,index)" style="margin-left: 20px;cursor: pointer">
+                                <el-row class="row" style="font-size: 20px">
+                                    {{item.title}}
+                                </el-row>
+                                <el-row class="row" style="color: gray">
+                                    {{item.updatedAt}}&nbsp;&nbsp;&nbsp;
+                                    <el-button type="text" size="small" style="color:#FF4949" icon="delete2" @click.stop="removeArticle(item,index)" titile="删除">
+                                    </el-button>
+                                </el-row>
+                            </el-row>
+                        </template>
+                    </el-row>
+                    <page @change="changePage"></page>
+                </el-row>
             </el-row>
         </el-col>
     </el-row>
 </template>
 
+<style>
+    .article:hover {
+        background-color: rgb(247,246,242) ;
+    }
+</style>
+
 <script>
     var bus=require("../bus/projectInfoBus")
     var urlList=require("./urlList.vue")
     var inject=require("./globalInject.vue")
+    var page=require("./page.vue")
     module.exports={
         data:function () {
             return {
@@ -72,6 +106,8 @@
                 status:[],
                 before:"",
                 after:"",
+                arrArticle:[],
+                page:0
             }
         },
         computed:{
@@ -79,7 +115,8 @@
         },
         components:{
             "urllist":urlList,
-            "inject":inject
+            "inject":inject,
+            "page":page
         },
         methods:{
             saveUrls:function (arr) {
@@ -173,6 +210,75 @@
                     before:before,
                     after:after
                 })
+            },
+            removeArticle:function(item,index)
+            {
+                var _this=this;
+                $.confirm("是否删除该文章?",function () {
+                    $.startHud();
+                    net.delete("/article/item",{
+                        id:item._id
+                    }).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("删除成功",1);
+                            _this.arrArticle.splice(index,1);
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0)
+                        }
+                    })
+                })
+            },
+            changePage:function (page) {
+                var _this=this;
+                net.get("/article/list",{
+                    project:session.get("projectId"),
+                    page:page
+                }).then(function (data) {
+                    if(data.code==200)
+                    {
+                        _this.arrArticle=data.data;
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0)
+                    }
+                })
+            },
+            createArticle:function () {
+                var _this=this;
+                var child=$.showBox(this,"article",{
+                    propNew:1
+                });
+                child.$on("save",function (obj) {
+                    _this.arrArticle.unshift(obj);
+                })
+            },
+            editArticle:function(item,index)
+            {
+                var _this=this;
+                $.startHud();
+                net.get("/article/item",{
+                    id:item._id
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        var child=$.showBox(_this,"article",{
+                            propObj:data.data
+                        });
+                        child.$on("save",function (obj) {
+                            _this.arrArticle.splice(index,1,obj);
+                        })
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
             }
         },
         created:function () {
@@ -187,6 +293,19 @@
             })
             bus.$on("addBaseUrl",function (data) {
                 _this.baseUrl.push(data);
+            })
+            net.get("/article/list",{
+                project:session.get("projectId"),
+                page:this.page
+            }).then(function (data) {
+                if(data.code==200)
+                {
+                    _this.arrArticle=data.data;
+                }
+                else
+                {
+                    $.notify(data.msg,0)
+                }
             })
         }
     }

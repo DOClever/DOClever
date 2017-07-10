@@ -31,15 +31,32 @@
             <img v-proxy="img" style="width: 40px;height: 40px; border-radius:50%;margin-top: 10px">&nbsp;
             <el-dropdown @command="handleCommand" style="top: -15px;">
                 <span class="el-dropdown-link" style="color: #20A0FF;cursor: pointer">
-                    {{name}}<i class="el-icon-caret-bottom el-icon--right"></i>
+                    <el-badge is-dot class="msgBadge" v-if="newMsg">
+                        {{name}}
+                    </el-badge>
+                    <span v-else>
+                        {{name}}
+                    </span>
+                    <i class="el-icon-caret-bottom el-icon--right"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item command="team" v-if="team">团队首页</el-dropdown-item>
                     <el-dropdown-item command="list">返回列表</el-dropdown-item>
                     <el-dropdown-item command="apply">团队申请</el-dropdown-item>
                     <el-dropdown-item command="setting">个人设置</el-dropdown-item>
-                    <el-dropdown-item command="help">帮助</el-dropdown-item>
-                    <el-dropdown-item command="about">关于</el-dropdown-item>
+                    <el-dropdown-item command="message">
+                        <el-badge is-dot class="msgBadge" v-if="newMsg">
+                            消息中心
+                        </el-badge>
+                        <span v-else>
+                            消息中心
+                        </span>
+                    </el-dropdown-item>
+                    <el-dropdown-item>
+                        Proxy:<br>
+                        <el-switch v-model="proxy" on-color="#13ce66" off-color="#ff4949" @click.native.stop="">
+                        </el-switch>
+                    </el-dropdown-item>
                     <el-dropdown-item command="update">检查更新</el-dropdown-item>
                     <el-dropdown-item command="quit">退出</el-dropdown-item>
                 </el-dropdown-menu>
@@ -81,11 +98,27 @@
                 showTeam:false,
                 applyPending:false,
                 applyName:"",
-                applyDis:""
+                applyDis:"",
+                newMsg:false,
+                proxy:session.get("proxy")?true:false
             }
         },
         directives:{
             proxy:proxyImg
+        },
+        watch:{
+            proxy:function (val) {
+                if(val)
+                {
+                    session.set("proxy",1);
+                    $.tip("Proxy代理已开启",1)
+                }
+                else
+                {
+                    session.remove("proxy");
+                    $.tip("Proxy代理已关闭",1)
+                }
+            }
         },
         methods:{
             handleCommand:function (command) {
@@ -109,13 +142,30 @@
                 {
                     location.href="/html/web/person/person.html"
                 }
-                else if(command=="help")
+                else if(command=="message")
                 {
-                    location.href="/html/web/help/help.html"
-                }
-                else if(command=="about")
-                {
-                    location.href="/html/web/about/about.html"
+                    var _this=this;
+                    $.startHud();
+                    net.get("/message/list",{
+                        page:0
+                    }).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            _this.newMsg=false;
+                            document.getElementById("navBar").style.zIndex="";
+                            var child=$.showBox(_this,"message",{
+                                propArr:data.data
+                            });
+                            child.$on("close",function () {
+                                document.getElementById("navBar").style.zIndex=100;
+                            })
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0)
+                        }
+                    })
                 }
                 else if(command=="update")
                 {
@@ -231,6 +281,19 @@
             this.$parent.$on("updatePhoto",function (val) {
                 _this.img=val;
             })
+            if(session.get("id"))
+            {
+                net.get("/message/new").then(function (data) {
+                    if(data.code==200)
+                    {
+                        _this.newMsg=data.data;
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0)
+                    }
+                })
+            }
         }
     }
 </script>

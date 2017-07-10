@@ -35,7 +35,7 @@
                 <el-button type="danger" style="width: 90px;position: absolute;right: 50px" @click.prevent="removeTeam" :loading="deletePending">
                     {{session.teamOwn==1?'删除团队':'退出团队'}}
                 </el-button>
-                <el-button type="primary" style="width: 80px;position: absolute;right: 160px" @click.prevent="saveInfo" :loading="infoPending" v-if="session.teamRole!=1">
+                <el-button type="primary" style="width: 80px;position: absolute;right: 160px" @click.prevent="saveInfo" :loading="infoPending" v-if="session.teamRole==0 || session.teamRole==2">
                     保存
                 </el-button>
             </el-form-item>
@@ -47,7 +47,7 @@
                         <span style="font-size: 15px">
                             团队公告
                         </span>&nbsp;&nbsp;&nbsp;
-                        <el-button type="text" icon="plus" @click.stop="addNotice" v-if="session.teamRole!=1"></el-button>
+                        <el-button type="text" icon="plus" @click.stop="addNotice" v-if="session.teamRole==0 || session.teamRole==2"></el-button>
                     </template>
                     <template v-for="(item,index) in obj.notice">
                         <el-row class="row">

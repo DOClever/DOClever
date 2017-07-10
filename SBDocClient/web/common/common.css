@@ -118,4 +118,11 @@ span.el-cascader__label
     background-color:rgb(247,246,242) ;
 }
 
+msgBadge {
+    margin-top: 20px;
+    margin-right: 40px;
+}
 
+.el-dropdown-link .el-badge__content.is-fixed {
+    top:15px
+}

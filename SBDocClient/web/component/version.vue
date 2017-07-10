@@ -280,7 +280,7 @@
                         {
                             $.notify("删除成功",1);
                             _this.versionList.splice(index,1);
-                            if(item._id==session.get("versionId"))
+                            if((index!==undefined && item._id==session.get("versionId")) || index===undefined)
                             {
                                 session.remove("versionId");
                                 session.remove("versionName");
