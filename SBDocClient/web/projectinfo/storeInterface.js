@@ -165,10 +165,10 @@ module.exports=new Vuex.Store({
             state.interfaceList=arr;
         },
         setBaseUrls:function (state,data) {
-            state.baseUrls=data;
+            state.baseUrls=$.clone(data);
         },
         addBaseUrls:function (state,data) {
-            state.baseUrls.push(data);
+            state.baseUrls.push($.clone(data));
         },
         setSearch:function (state,data) {
             state.search=data;

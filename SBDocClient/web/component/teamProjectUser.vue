@@ -53,7 +53,8 @@
             return {
                 searchName:"",
                 arrUser:this.arr,
-                savePending:false
+                savePending:false,
+                arrUserSearch:[],
             }
         },
         computed:{
@@ -62,7 +63,7 @@
                 {
                     return this.arrUser;
                 }
-                var arr=[];
+                this.arrUserSearch=[];
                 var _this=this;
                 this.arrUser.forEach(function (obj) {
                     var objCopy=$.clone(obj);
@@ -78,10 +79,10 @@
                     })
                     if(objCopy.users.length>0)
                     {
-                        arr.push(objCopy);
+                        _this.arrUserSearch.push(objCopy);
                     }
                 })
-                return arr;
+                return this.arrUserSearch;
             }
         },
         directives:{

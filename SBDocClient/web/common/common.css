@@ -89,8 +89,9 @@ td {
     text-overflow: ellipsis;
     overflow: hidden;
 }
+
 .my-autocomplete li .remark {
-    font-size: 12px;
+    font-size: 13px;
     color: #b4b4b4;
 }
 .my-autocomplete li .highlighted .remark {

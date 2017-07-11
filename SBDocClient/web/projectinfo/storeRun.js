@@ -1119,7 +1119,10 @@ module.exports=new Vuex.Store({
                         $.stopHud();
                         if(data.code==200)
                         {
-                            bus.$emit("addBaseUrl",baseUrl);
+                            bus.$emit("addBaseUrl",{
+                                url:baseUrl,
+                                remark:""
+                            });
                             $.notify("添加baseUrl成功",1);
                             return pro;
                         }

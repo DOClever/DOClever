@@ -14,7 +14,7 @@
             <el-col class="col" :span="10">
                 <el-select style="width: 90%;text-align: center" v-model="baseUrl">
                     <el-option value="defaultUrl" label="defaultUrl"></el-option>
-                    <el-option v-for="item in arrUrl" :value="item" :label="item"></el-option>
+                    <el-option v-for="item in arrUrl" :value="item.url" style="height: auto"><span>{{item.url}}</span><br><span style="font-size: 13px;color: gray">{{item.remark}}</span></el-option>
                 </el-select>
             </el-col>
         </el-row>

@@ -19,7 +19,7 @@ var model=new mongoose.Schema({
         ref:"User"
     },
     baseUrls:{
-        type:[String],
+        type:mongoose.Schema.Types.Mixed,
         default:[]
     },
     before:{

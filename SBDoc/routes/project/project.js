@@ -127,6 +127,20 @@ function validateUser(req,res) {
             req.testModuleModel=testModuleVersion;
             req.testGroupModel=testGroupVersion;
             req.testModel=testVersion;
+            if(req.version.baseUrls.length>0 && typeof(req.version.baseUrls[0])=="string")
+            {
+                req.version.baseUrls=req.version.baseUrls.map(function (obj) {
+                    return {
+                        url:obj,
+                        remark:""
+                    }
+                })
+                await (version.updateAsync({
+                    _id:req.version._id
+                },{
+                    baseUrls:req.version.baseUrls
+                }));
+            }
         }
         if(req.clientParam.id)
         {
@@ -182,6 +196,20 @@ function validateUser(req,res) {
             else
             {
                 req.obj=obj;
+                if(obj.baseUrls.length>0 && typeof(obj.baseUrls[0])=="string")
+                {
+                    obj.baseUrls=obj.baseUrls.map(function (obj) {
+                        return {
+                            url:obj,
+                            remark:""
+                        }
+                    })
+                    await (project.updateAsync({
+                        _id:obj._id
+                    },{
+                        baseUrls:obj.baseUrls
+                    }));
+                }
                 util.next();
             }
         }
@@ -220,6 +248,20 @@ function inProject(req,res) {
             req.testModuleModel=testModuleVersion;
             req.testGroupModel=testGroupVersion;
             req.testModel=testVersion;
+            if(req.version.baseUrls.length>0 && typeof(req.version.baseUrls[0])=="string")
+            {
+                req.version.baseUrls=req.version.baseUrls.map(function (obj) {
+                    return {
+                        url:obj,
+                        remark:""
+                    }
+                })
+                await (version.updateAsync({
+                    _id:req.version._id
+                },{
+                    baseUrls:req.version.baseUrls
+                }));
+            }
         }
         let obj=await (project.findOneAsync({
             _id:req.clientParam.id,
@@ -268,6 +310,20 @@ function inProject(req,res) {
         else
         {
             req.obj=obj;
+            if(obj.baseUrls.length>0 && typeof(obj.baseUrls[0])=="string")
+            {
+                obj.baseUrls=obj.baseUrls.map(function (obj) {
+                    return {
+                        url:obj,
+                        remark:""
+                    }
+                })
+                await (project.updateAsync({
+                    _id:obj._id
+                },{
+                    baseUrls:obj.baseUrls
+                }));
+            }
             util.next();
         }
     }
@@ -595,11 +651,11 @@ function list(req,res) {
 function url(req,res) {
     try
     {
-        let arr=req.clientParam.urls?req.clientParam.urls.split(","):[];
+        let arr=JSON.parse(req.clientParam.urls);
         arr=arr.map(function (obj) {
-            if(!obj.startsWith("http://") && !obj.startsWith("https://"))
+            if(!obj.url.startsWith("http://") && !obj.url.startsWith("https://"))
             {
-                obj="http://"+obj;
+                obj.url="http://"+obj.url;
             }
             return obj;
         })
@@ -864,7 +920,10 @@ function addUrl(req,res) {
             },{
                 $addToSet:
                     {
-                        baseUrls:url
+                        baseUrls:{
+                            url:url,
+                            remark:""
+                        }
                     }
             }))
         }
@@ -875,7 +934,10 @@ function addUrl(req,res) {
             },{
                 $addToSet:
                     {
-                        baseUrls:url
+                        baseUrls:{
+                            url:url,
+                            remark:""
+                        }
                     }
             }))
         }

@@ -8,7 +8,7 @@ var model=new mongoose.Schema({
     name:String,
     dis:String,
     baseUrls:{
-        type:[String],
+        type:mongoose.Schema.Types.Mixed,
         default:[]
     },
     owner:{

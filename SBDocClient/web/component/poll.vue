@@ -49,7 +49,7 @@
             </el-form-item>
             <el-form-item label="baseUrl" style="text-align: center">
                 <el-select v-model="poll.baseUrl" style="width: 80%">
-                    <el-option v-for="item in arrBaseUrl" :value="item" :label="item"></el-option>
+                    <el-option v-for="item in arrBaseUrl" :value="item.url" style="height: auto"><span>{{item.url}}</span><br><span style="font-size: 13px;color: gray">{{item.remark}}</span></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="发件人邮箱账户" style="text-align: center">
@@ -98,7 +98,7 @@
                                 smtp:"",
                                 port:465
                             },
-                            baseUrl:this.propBaseUrl.length>0?this.propBaseUrl[0]:""
+                            baseUrl:this.propBaseUrl.length>0?this.propBaseUrl[0].url:""
                         }
                    }
                 }.call(this),

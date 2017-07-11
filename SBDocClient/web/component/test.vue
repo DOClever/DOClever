@@ -424,7 +424,7 @@
                     {
                         if(data.data.length>0 && !_this.baseUrl)
                         {
-                            _this.baseUrl=data.data[0]
+                            _this.baseUrl=data.data[0].url
                         }
                         var child=$.showBox(_this,"testBaseUrl",{
                             url:_this.baseUrl,
@@ -573,7 +573,7 @@
                 store.commit("init",data);
             })
             bus.$on("initInfo",function (data) {
-                _this.baseUrl=data.baseUrls.length>0?data.baseUrls[0]:"";
+                _this.baseUrl=data.baseUrls.length>0?data.baseUrls[0].url:"";
                 _this.before=data.before;
                 _this.after=data.after;
             })

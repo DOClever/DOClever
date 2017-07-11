@@ -10,7 +10,7 @@
             作者：{{obj.creator.name}}&nbsp;&nbsp;最后修改：{{obj.updatedAt}}
         </el-row>
         <el-row class="row">
-            <textarea v-tab style="height: 500px;width: 100%" v-model="obj.content" v-if="edit"></textarea>
+            <textarea v-tab style="height: 500px;width: 100%" v-model="obj.content" v-if="edit" placeholder="支持markdown语法编写"></textarea>
             <el-row class="row" style="height: 500px;overflow-y: auto" v-html="preContent" v-else></el-row>
         </el-row>
         <el-row class="dialog-footer" slot="footer">

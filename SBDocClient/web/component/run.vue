@@ -15,7 +15,7 @@
                         </div>
                     </el-col>
                     <el-col class="col" :span="7" style="line-height: 50px;text-align: center">
-                        <el-autocomplete style="width: 100%" class="inline-input" v-model="baseUrl" :fetch-suggestions="querySearch" placeholder="选择或者填入你的BaseUrl" icon="caret-bottom" :on-icon-click="showAutoComplete" @input="changeBaseUrl"></el-autocomplete>
+                        <el-autocomplete style="width: 100%" class="inline-input" v-model="baseUrl" :fetch-suggestions="querySearch" placeholder="选择或者填入你的BaseUrl" icon="caret-bottom" :on-icon-click="showAutoComplete" @input="changeBaseUrl" popper-class="my-autocomplete" custom-item="itemauto"></el-autocomplete>
                     </el-col>
                     <el-col class="col" :span="2" style="line-height: 50px;text-align: left">
                         <el-popover ref="popover1" placement="bottom" width="400" trigger="hover">
@@ -312,12 +312,16 @@
                 var _this=this;
                 setTimeout(function () {
                     var results=_this.baseUrls.map(function (obj) {
-                        return {value:obj}
+                        return {
+                            value:obj.url,
+                            remark:obj.remark
+                        }
                     })
                     if(_this.interfaceEdit._id)
                     {
                         results.push({
-                            value:"MockServer"
+                            value:"MockServer",
+                            remark:""
                         })
                     }
                     if(queryString)
@@ -429,7 +433,9 @@
         },
         created:function () {
             store.commit("clear");
-            store.commit("setBaseUrls",this.baseUrls);
+            store.commit("setBaseUrls",this.baseUrls.map(function (obj) {
+                return obj.url
+            }));
             store.commit("setArrStatus",this.$options.propsData.status);
             store.commit("setGlobalBefore",this.globalBefore);
             store.commit("setGlobalAfter",this.globalAfter);
