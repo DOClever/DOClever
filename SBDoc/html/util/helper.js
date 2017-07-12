@@ -803,7 +803,7 @@ helper.format=function (txt,mix,outParam,status) {
     };
 }
 
-helper.handleResultData=function (name,data,result,originObj,show) {
+helper.handleResultData=function (name,data,result,originObj,show,bArr) {
     name=typeof(name)=="string"?name:null;
     if(typeof(data)=="string")
     {
@@ -871,8 +871,19 @@ helper.handleResultData=function (name,data,result,originObj,show) {
         result.push(obj);
         if(data.length>0)
         {
-            var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[0]:null):null;
-            arguments.callee(null,data[0],obj.data,resultObj,show)
+            if(bArr)
+            {
+                for(var i=0;i<data.length;i++)
+                {
+                    var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[i]:null):null;
+                    arguments.callee(null,data[i],obj.data,resultObj,show,input)
+                }
+            }
+            else
+            {
+                var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[0]:null):null;
+                arguments.callee(null,data[0],obj.data,resultObj,show,input)
+            }
         }
     }
     else if(typeof(data)=="object" && !(data instanceof Array))

@@ -12,6 +12,10 @@
                 <el-option value="application/xml" label="XML(application/xml)"></el-option>
                 <el-option value="text/xml" label="XML(text/xml)"></el-option>
                 <el-option value="application/javascript" label="JAVASCRIPT"></el-option>
+            </el-select>&nbsp;&nbsp;&nbsp;&nbsp;
+            <el-select v-model="rawJSONType" v-if="info.type==1 && info.rawType==2">
+                <el-option :value="0" label="Object"></el-option>
+                <el-option :value="1" label="Array"></el-option>
             </el-select>
         </el-row>
         <table width="100%" v-if="info.type==0">
@@ -95,6 +99,22 @@
             },
             info:function () {
                 return this.$store.state.bodyInfo
+            },
+            rawJSONType:{
+                get:function () {
+                    return this.info.rawJSONType
+                },
+                set:function (val) {
+                    this.info.rawJSONType=val;
+                    if(val)
+                    {
+                        this.info.rawJSON=this.$store.state.rawJSONArray;
+                    }
+                    else
+                    {
+                        this.info.rawJSON=this.$store.state.rawJSONObject;
+                    }
+                }
             },
             rawType:{
                 get:function () {

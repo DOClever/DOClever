@@ -25,7 +25,7 @@ var getHeader = function (req) {
 
 var filterResHeader = function (headers,res) {
     var ret = {};
-    var resHeaders=res.getHeader("Access-Control-Expose-Headers").toLowerCase();
+    var resHeaders=res.getHeader("Access-Control-Expose-Headers")?res.getHeader("Access-Control-Expose-Headers").toLowerCase():"";
     for (var i in headers) {
         if (!/Access-/i.test(i)) {
             if(/set-cookie/i.test(i))
@@ -37,7 +37,11 @@ var filterResHeader = function (headers,res) {
                 ret[i] = headers[i];
             }
         }
-        if(resHeaders.indexOf(i.toLowerCase()+",")==-1 && resHeaders.indexOf(","+i.toLowerCase())==-1)
+        if(!resHeaders)
+        {
+            res.setHeader("Access-Control-Expose-Headers",i);
+        }
+        else if(resHeaders.indexOf(i.toLowerCase()+",")==-1 && resHeaders.indexOf(","+i.toLowerCase())==-1)
         {
             res.setHeader("Access-Control-Expose-Headers",res.getHeader("Access-Control-Expose-Headers")+","+i);
         }

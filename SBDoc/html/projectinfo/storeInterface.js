@@ -33,16 +33,27 @@ module.exports=new Vuex.Store({
             rawTextRemark:"",
             rawFileRemark:"",
             rawText:"",
-            rawJSON:[{
-                name:"",
-                must:1,
-                type:0,
-                remark:"",
-                show:1,
-                mock:"",
-                drag:1
-            }]
+            rawJSON:[],
+            rawJSONType:0
         },
+        rawJSONObject:[{
+            name:"",
+            must:1,
+            type:0,
+            remark:"",
+            show:1,
+            mock:"",
+            drag:1
+        }],
+        rawJSONArray:[{
+            name:null,
+            must:1,
+            type:0,
+            remark:"",
+            show:1,
+            mock:"",
+            drag:1
+        }],
         outInfo:{
             type:0,
             rawRemark:"",
@@ -135,6 +146,7 @@ module.exports=new Vuex.Store({
             var bJSON=false,obj={};
             if(state.bodyInfo.type==1 && state.bodyInfo.rawType==2 && state.bodyInfo.rawJSON)
             {
+                obj=state.bodyInfo.rawJSONType==0?{}:[];
                 bJSON=true;
                 var result=helper.resultSave(state.bodyInfo.rawJSON);
                 helper.convertToJSON(result,obj);
@@ -143,6 +155,7 @@ module.exports=new Vuex.Store({
             return helper.mock(state.outInfo.rawMock,info);
         },
         rawJSON:function (state) {
+            var obj=state.bodyInfo.rawJSONType==0?{}:[];
             var obj={};
             var result=helper.resultSave(state.bodyInfo.rawJSON);
             helper.convertToJSON(result,obj);
@@ -249,21 +262,32 @@ module.exports=new Vuex.Store({
                 drag:1,
                 mock:""
             })
+            state.rawJSONObject=[{
+                name:"",
+                must:1,
+                type:0,
+                remark:"",
+                show:1,
+                mock:"",
+                drag:1
+            }];
+            state.rawJSONArray=[{
+                name:null,
+                must:1,
+                type:0,
+                remark:"",
+                show:1,
+                mock:"",
+                drag:1
+            }];
             state.bodyInfo={
                 type:0,
                 rawType:0,
                 rawTextRemark:"",
                 rawFileRemark:"",
                 rawText:"",
-                rawJSON:[{
-                    name:"",
-                    must:1,
-                    type:0,
-                    remark:"",
-                    show:1,
-                    mock:"",
-                    drag:1
-                }]
+                rawJSON:state.rawJSONObject,
+                rawJSONType:0
             };
             state.outInfo={
                 type:0,
@@ -375,21 +399,25 @@ module.exports=new Vuex.Store({
                 {
                     Vue.set(state.bodyInfo,"rawFileRemark","");
                 }
+                if(state.bodyInfo.rawJSONType===undefined)
+                {
+                    Vue.set(state.bodyInfo,"rawJSONType",0);
+                }
                 if(state.bodyInfo.rawJSON==undefined)
                 {
-                    Vue.set(state.bodyInfo,"rawJSON",[{
-                        name:"",
-                        must:1,
-                        type:0,
-                        remark:"",
-                        show:1,
-                        mock:"",
-                        drag:1
-                    }]);
+                    Vue.set(state.bodyInfo,"rawJSON",state.rawJSONObject);
                 }
                 else
                 {
                     helper.initResultShow(state.bodyInfo.rawJSON);
+                    if(state.bodyInfo.rawJSONType==0)
+                    {
+                        state.rawJSONObject=state.bodyInfo.rawJSON;
+                    }
+                    else
+                    {
+                        state.rawJSONArray=state.bodyInfo.rawJSON;
+                    }
                 }
                 var bFind=false;
                 for(var i=0;i<state.header.length;i++)
@@ -417,9 +445,10 @@ module.exports=new Vuex.Store({
                         var result=[];
                         for(var key in obj)
                         {
-                            helper.handleResultData(key,obj[key],result,null,1)
+                            helper.handleResultData(key,obj[key],result,null,1,null,1)
                         }
                         state.bodyInfo.rawJSON=result;
+                        state.bodyInfo.rawJSONType=(obj instanceof Array)?1:0;
                         state.bodyInfo.rawText="";
                         state.bodyInfo.rawType=2;
                     }
@@ -689,15 +718,8 @@ module.exports=new Vuex.Store({
                         rawTextRemark:"",
                         rawFileRemark:"",
                         rawText:"",
-                        rawJSON:[{
-                            name:"",
-                            must:1,
-                            type:0,
-                            remark:"",
-                            show:1,
-                            mock:"",
-                            drag:1
-                        }]
+                        rawJSON:context.state.rawJSONObject,
+                        rawJSONType:0
 
                     },
                     outInfo:{

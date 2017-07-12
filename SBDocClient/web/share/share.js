@@ -129,6 +129,7 @@ var vue=new Vue({
             var bJSON=false,obj={};
             if(this.bodyInfo.type==1 && this.bodyInfo.rawType==2 && this.bodyInfo.rawJSON)
             {
+                obj=this.bodyInfo.rawJSONType==0?{}:[];
                 bJSON=true;
                 var result=helper.resultSave(this.bodyInfo.rawJSON);
                 helper.convertToJSON(result,obj);
@@ -137,7 +138,7 @@ var vue=new Vue({
             return helper.mock(this.outInfo.rawMock,info);
         },
         rawJSON:function () {
-            var obj={};
+            var obj=this.bodyInfo.rawJSONType==0?{}:[];
             var result=helper.resultSave(this.bodyInfo.rawJSON);
             helper.convertToJSON(result,obj);
             return helper.format(JSON.stringify(obj),1,result,this.status).draw;
@@ -381,6 +382,7 @@ var vue=new Vue({
             var bJSON=false,objJSON={};
             if(this.bodyInfo.type==1 && this.bodyInfo.rawType==2 && this.bodyInfo.rawJSON)
             {
+                objJSON=this.bodyInfo.rawJSONType==0?{}:[];
                 bJSON=true;
                 var result1=helper.resultSave(this.bodyInfo.rawJSON);
                 helper.convertToJSON(result1,objJSON);

@@ -11,7 +11,7 @@
                             &nbsp;
                         </el-col>
                         <el-col class="col" :span="22">
-                            <el-input style="width: 90%;" placeholder="请填写名称" v-model.trim="item.name" v-if="item.name!=null" @focus="focus(item)" @blur="blur(item)" :disabled="true"></el-input>
+                            <el-input style="width: 90%;" placeholder="请填写名称" v-model.trim="item.name" v-if="item.name!=null && (level!=0 || type!=1)" @focus="focus(item)" @blur="blur(item)" :disabled="true"></el-input>
                             <el-input style="width: 90%;" placeholder="该字段没有名称" disabled v-else></el-input>
                         </el-col>
                     </td>
@@ -60,6 +60,9 @@
         computed:{
             arr:function () {
                 return this.source?this.source:this.$store.state.bodyInfo.rawJSON
+            },
+            type:function () {
+                return this.$store.state.bodyInfo.rawJSONType;
             }
         },
         methods:{
@@ -98,7 +101,7 @@
             },
             add:function (arr) {
                 arr.push({
-                    name:(this.parent && this.parent.type==3)?null:"",
+                    name:((this.parent && this.parent.type==3) || (this.level==0 && this.type==1))?null:"",
                     must:1,
                     type:0,
                     remark:"",

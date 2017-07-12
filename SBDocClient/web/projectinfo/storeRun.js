@@ -37,16 +37,27 @@ module.exports=new Vuex.Store({
             rawTextRemark:"",
             rawFileRemark:"",
             rawText:"",
-            rawJSON:[{
-                name:"",
-                must:1,
-                type:0,
-                remark:"",
-                show:1,
-                mock:"",
-                drag:1
-            }]
+            rawJSON:[],
+            rawJSONType:0
         },
+        rawJSONObject:[{
+            name:"",
+            must:1,
+            type:0,
+            remark:"",
+            show:1,
+            mock:"",
+            drag:1
+        }],
+        rawJSONArray:[{
+            name:null,
+            must:1,
+            type:0,
+            remark:"",
+            show:1,
+            mock:"",
+            drag:1
+        }],
         fileResult:"",
         resHeader:[],
         status:"",
@@ -153,16 +164,27 @@ module.exports=new Vuex.Store({
                 rawTextRemark:"",
                 rawFileRemark:"",
                 rawText:"",
-                rawJSON:[{
-                    name:"",
-                    must:1,
-                    type:0,
-                    remark:"",
-                    show:1,
-                    mock:"",
-                    drag:1
-                }]
+                rawJSON:[],
+                rawJSONType:0
             };
+            state.rawJSONObject=[{
+                name:"",
+                must:1,
+                type:0,
+                remark:"",
+                show:1,
+                mock:"",
+                drag:1
+            }];
+            state.rawJSONArray=[{
+                name:null,
+                must:1,
+                type:0,
+                remark:"",
+                show:1,
+                mock:"",
+                drag:1
+            }];
             state.fileResult="";
             state.resHeader=[];
             state.status="";
@@ -311,21 +333,25 @@ module.exports=new Vuex.Store({
                 {
                     Vue.set(state.bodyInfo,"rawFileRemark","");
                 }
+                if(state.bodyInfo.rawJSONType===undefined)
+                {
+                    Vue.set(state.bodyInfo,"rawJSONType",0);
+                }
                 if(state.bodyInfo.rawJSON==undefined)
                 {
-                    Vue.set(state.bodyInfo,"rawJSON",[{
-                        name:"",
-                        must:1,
-                        type:0,
-                        remark:"",
-                        show:1,
-                        mock:"",
-                        drag:1
-                    }]);
+                    Vue.set(state.bodyInfo,"rawJSON",state.rawJSONObject);
                 }
                 else
                 {
                     helper.initResultShow(state.bodyInfo.rawJSON);
+                    if(state.bodyInfo.rawJSONType==0)
+                    {
+                        state.rawJSONObject=state.bodyInfo.rawJSON;
+                    }
+                    else
+                    {
+                        state.rawJSONArray=state.bodyInfo.rawJSON;
+                    }
                 }
             }
         },
@@ -798,7 +824,7 @@ module.exports=new Vuex.Store({
                     }
                     else if(context.state.bodyInfo.rawType==2)
                     {
-                        var obj={};
+                        var obj=context.state.bodyInfo.rawJSONType==0?{}:[];
                         var result=helper.resultSave(context.state.bodyInfo.rawJSON);
                         helper.convertToJSON(result,obj,null,1);
                         body=obj;

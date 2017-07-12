@@ -809,7 +809,7 @@ helper.format=function (txt,mix,outParam,status) {
     };
 }
 
-helper.handleResultData=function (name,data,result,originObj,show,input) {
+helper.handleResultData=function (name,data,result,originObj,show,input,bArr) {
     name=typeof(name)=="string"?name:null;
     if(typeof(data)=="string")
     {
@@ -916,8 +916,19 @@ helper.handleResultData=function (name,data,result,originObj,show,input) {
         result.push(obj);
         if(data.length>0)
         {
-            var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[0]:null):null;
-            arguments.callee(null,data[0],obj.data,resultObj,show,input)
+            if(bArr)
+            {
+                for(var i=0;i<data.length;i++)
+                {
+                    var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[i]:null):null;
+                    arguments.callee(null,data[i],obj.data,resultObj,show,input)
+                }
+            }
+            else
+            {
+                var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[0]:null):null;
+                arguments.callee(null,data[0],obj.data,resultObj,show,input)
+            }
         }
     }
     else  if(typeof(data)=="object" && data===null)
@@ -1493,7 +1504,7 @@ helper.handleTestInterface=function (inter,data,status) {
     data.bodyParam.forEach(function (item) {
         var obj;
         inter.bodyParam.forEach(function (item1) {
-            if(item.name==item1.name)
+            if(item.name==item1.name && item.type==item1.type)
             {
                 obj=item1;
             }
@@ -1857,7 +1868,7 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
             }
             else if(obj.bodyInfo.rawType==2)
             {
-                var obj1={};
+                var obj1=obj.bodyInfo.rawJSONType==0?{}:[];
                 var result=helper.resultSave(obj.bodyInfo.rawJSON);
                 helper.convertToJSON(result,obj1,null,1);
                 body=obj1;
