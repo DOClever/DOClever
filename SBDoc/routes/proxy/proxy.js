@@ -54,11 +54,23 @@ var getPath = function (req) {
     return url;
 };
 
+function getClientIp(req) {
+    return req.headers['x-forwarded-for'] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress;
+};
+
 function getHost(req) {
     var url=req.headers["__url"];
     url=url.replace(/^(http:\/\/|https:\/\/)/i,"");
     var arr=url.split(":");
-    return arr[0];
+    var ret=arr[0];
+    if(ret=="127.0.0.1" || ret.toLowerCase()=="localhost")
+    {
+        ret=getClientIp(req);
+    }
+    return ret;
 }
 
 function getPort(req) {

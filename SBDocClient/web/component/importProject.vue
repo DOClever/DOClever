@@ -165,8 +165,9 @@
                                 indexInterface++;
                                 _this.$parent.projectList[0].interfaceCount=indexInterface;
                                 _this.status="正在导入第"+indexInterface+"个接口"+item.name+"，一共"+count+"个接口";
-                                var objUrl=$.parseURL(item.request.url);
-                                var url=objUrl.source,index=url.indexOf("?");
+                                var objUrl=$.parseURL(item.request.url.raw);
+                                var url=objUrl.source;
+                                var index=url.indexOf("?");
                                 if(index>-1)
                                 {
                                     url=url.substr(0,index);
@@ -187,6 +188,15 @@
                                         break;
                                     }
                                 }
+                                if(item.request.url.path)
+                                {
+                                    item.request.url.path.forEach(function (obj) {
+                                        if(obj[0]==":")
+                                        {
+                                            url=url.replace(obj,"{"+obj.substr(1)+"}");
+                                        }
+                                    })
+                                }
                                 var obj={
                                     name:item.name,
                                     url:url,
@@ -198,6 +208,18 @@
                                     before:"",
                                     after:"",
                                 };
+                                var restParam=[];
+                                if(item.request.url.variable)
+                                {
+                                    item.request.url.variable.forEach(function (obj) {
+                                        restParam.push({
+                                            name:obj.key,
+                                            remark:obj.description,
+                                            value:[obj.value]
+                                        })
+                                    })
+                                }
+                                obj.restparam=JSON.stringify(restParam);
                                 var param=[];
                                 for(var key in objUrl.params)
                                 {
@@ -324,7 +346,6 @@
                                     rawRemark:"",
                                     rawMock:"",
                                 });
-                                obj.restparam="[]";
                                 return net.post("/interface/create",obj).then(function (data) {
                                     if(data.code!=200)
                                     {
@@ -341,7 +362,12 @@
                     pro=pro.then(function () {
                         return net.put("/project/url",{
                             id:projectID,
-                            urls:arr.join(",")
+                            urls:JSON.stringify(arr.map(function (obj) {
+                                return {
+                                    url:obj,
+                                    remark:""
+                                }
+                            }))
                         }).then(function (data) {
                             if(data.code!=200)
                             {
