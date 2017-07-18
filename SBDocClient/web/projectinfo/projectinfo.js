@@ -133,20 +133,23 @@ var vue=new Vue({
             {
                 throw obj4.msg;
             }
-            if(obj5.code==200)
+            if(session.get("role")==0)
             {
-                obj5.data.forEach(function (obj) {
-                    obj.handle=0;
-                })
-                _this.arrApply=obj5.data;
-                if(_this.arrApply.length>0)
+                if(obj5.code==200)
                 {
-                    _this.showApply=true;
+                    obj5.data.forEach(function (obj) {
+                        obj.handle=0;
+                    })
+                    _this.arrApply=obj5.data;
+                    if(_this.arrApply.length>0)
+                    {
+                        _this.showApply=true;
+                    }
                 }
-            }
-            else
-            {
-                throw obj5.msg;
+                else
+                {
+                    throw obj5.msg;
+                }
             }
             if(obj6.code==200)
             {

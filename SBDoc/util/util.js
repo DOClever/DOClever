@@ -1485,7 +1485,7 @@ exports.handleMockInfo=handleMockInfo;
 exports.inArrKey=inArrKey;
 exports.runTestCode=runTestCode;
 exports.sendMail=sendMail;
-
+exports.clone=clone;
 
 
 

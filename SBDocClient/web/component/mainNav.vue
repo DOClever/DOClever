@@ -15,7 +15,7 @@
         <el-col class="col" :span="1" style="text-align: center;line-height: 60px;">
 
         </el-col>
-        <el-col class="col" :span="8" style="text-align: center;line-height: 60px;font-size: 25px;color: #20A0FF">
+        <el-col class="col" :span="8" style="text-align: center;line-height: 60px;font-size: 25px;color: #20A0FF;white-space: nowrap;text-overflow:ellipsis">
             <slot name="title">
             </slot>
         </el-col>

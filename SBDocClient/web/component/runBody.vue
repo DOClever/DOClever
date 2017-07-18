@@ -1,6 +1,6 @@
 <template>
     <el-row class="row">
-        <el-row class="row" style="padding:0 0 0 20px;height: 50px;line-height: 50px">
+        <el-row class="row" style="padding:0 0 0 20px;height: 50px;line-height: 50px;white-space: nowrap">
             <el-radio class="radio" :label="0" v-model="info.type" id="bodyKey">
                 Key-Value
             </el-radio>

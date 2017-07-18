@@ -38,6 +38,7 @@ var copy=require("recursive-copy");
 var rm=require("rimraf");
 var nunjucks=require("nunjucks");
 var moment=require("moment");
+var request=require("../../third/requestAsync");
 blue.promisifyAll(fs);
 let refreshInterface=async (function (req,id) {
     let query={
@@ -355,7 +356,8 @@ function create(req,res) {
             {
                 let query={
                     name:"未命名",
-                    project:obj._id
+                    project:obj._id,
+                    id:uuid()
                 }
                 if(req.headers["docleverversion"])
                 {
@@ -366,7 +368,8 @@ function create(req,res) {
             let query1={
                 name:"#回收站",
                 project:obj._id,
-                type:1
+                type:1,
+                id:uuid()
             }
             if(req.headers["docleverversion"])
             {
@@ -1192,7 +1195,8 @@ function importJSON(req,res) {
             await (group.createAsync({
                 name:"#回收站",
                 project:objProject._id,
-                type:1
+                type:1,
+                id:uuid()
             }))
         }
         objProject._doc.role=0;
@@ -1770,6 +1774,754 @@ function getUsers(req,res) {
     }
 }
 
+function importRap(req,res) {
+    try
+    {
+        let obj=JSON.parse(req.clientParam.json);
+        let query={
+            name:obj.name,
+            owner:req.userInfo._id
+        }
+        if(req.clientParam.team)
+        {
+            query.team=req.clientParam.team
+        }
+        let objProject=await (project.createAsync(query));
+        await (group.createAsync({
+            name:"#回收站",
+            project:objProject._id,
+            type:1,
+            id:uuid()
+        }));
+        let interfaceCount=0;
+        for(let objModule of obj.moduleList)
+        {
+            for(let objPage of objModule.pageList)
+            {
+                let groupName;
+                if(obj.moduleList.length>1)
+                {
+                    groupName=objModule.name;
+                    groupName+="-"+objPage.name;
+                }
+                else
+                {
+                    groupName=objPage.name;
+                }
+                let query={
+                    name:groupName,
+                    project:objProject._id,
+                    type:0,
+                    id:uuid()
+                }
+                let objGroup=await (group.createAsync(query));
+                for(let objAction of objPage.actionList)
+                {
+                    interfaceCount++;
+                    let arrMethod=["GET","POST","PUT","DELETE"];
+                    let update={
+                        name:objAction.name,
+                        project:objProject._id,
+                        group:objGroup._id,
+                        url:objAction.requestUrl,
+                        remark:objAction.description,
+                        method:arrMethod[objAction.requestType-1],
+                        owner:req.userInfo._id,
+                        editor:req.userInfo._id,
+                        before:{
+                            mode:0,
+                            code:""
+                        },
+                        after:{
+                            mode:0,
+                            code:""
+                        },
+                        id:uuid()
+                    };
+                    let rest=[];
+                    let arrMatch=update.url.match(/(\/):(\w+?)(?=[\b?#\/])/g);
+                    if(arrMatch && arrMatch.length>0)
+                    {
+                        arrMatch.forEach(function (obj) {
+                            rest.push({
+                                value:{
+                                    "status" : "",
+                                    "data" : [],
+                                    "type" : 0
+                                },
+                                name:obj.substr(2),
+                                remark:""
+                            })
+                        })
+                        update.url=update.url.replace(/(\/):(\w+?)(?=[\b?#\/])/g,"$1{$2}");
+                    }
+                    update.restParam=rest;
+                    let query=[],body=[],header=[];
+                    if(update.method=="GET" || update.method=="DELETE")
+                    {
+                        objAction.requestParameterList.forEach(function (obj) {
+                            query.push({
+                                name:obj.identifier.split("|")[0].trim(),
+                                remark:obj.name,
+                                must:1,
+                                value:{
+                                    "status" : "",
+                                    "data" : [],
+                                    "type" : 0
+                                }
+                            })
+                        })
+                    }
+                    else
+                    {
+                        let bodyInfo;
+                        if(req.clientParam.bodytype==0)
+                        {
+                            bodyInfo={
+                                type:0,
+                                rawType:0,
+                                rawTextRemark:"",
+                                rawFileRemark:"",
+                                rawText:"",
+                                rawJSON:[],
+                                rawJSONType:0
+                            };
+                            objAction.requestParameterList.forEach(function (obj) {
+                                body.push({
+                                    name:obj.identifier.split("|")[0].trim(),
+                                    remark:obj.name,
+                                    must:1,
+                                    value:{
+                                        "status" : "",
+                                        "data" : [],
+                                        "type" : 0
+                                    },
+                                    type:0
+                                })
+                            })
+                            header.push({
+                                name:"Content-Type",
+                                value:"application/x-www-form-urlencoded",
+                                remark:""
+                            })
+                        }
+                        else
+                        {
+                            bodyInfo={
+                                type:1,
+                                rawType:2,
+                                rawTextRemark:"",
+                                rawFileRemark:"",
+                                rawText:"",
+                                rawJSON:[],
+                                rawJSONType:0
+                            };
+                            for(let o of objAction.requestParameterList)
+                            {
+                                handleJSON(o,bodyInfo.rawJSON);
+                            }
+                            header.push({
+                                name:"Content-Type",
+                                value:"application/json",
+                                remark:""
+                            })
+                        }
+                        update.bodyInfo=bodyInfo;
+                    }
+                    update.queryParam=query;
+                    update.bodyParam=body;
+                    update.header=header;
+                    let result=[];
+                    function handleJSON(obj,arrRaw,bArr) {
+                        if(obj.dataType=="string")
+                        {
+                            let o={
+                                mock : "",
+                                remark : obj.name,
+                                type : 0,
+                                must : 1,
+                                name : bArr?null:obj.identifier.split("|")[0].trim()
+                            }
+                            arrRaw.push(o);
+                        }
+                        else if(obj.dataType=="number")
+                        {
+                            let o={
+                                mock : "",
+                                remark : obj.name,
+                                type : 1,
+                                must : 1,
+                                name : bArr?null:obj.identifier.split("|")[0].trim()
+                            }
+                            arrRaw.push(o);
+                        }
+                        else if(obj.dataType=="boolean")
+                        {
+                            let o={
+                                mock : "",
+                                remark : obj.name,
+                                type : 2,
+                                must : 1,
+                                name : bArr?null:obj.identifier.split("|")[0].trim()
+                            }
+                            arrRaw.push(o);
+                        }
+                        else if(obj.dataType=="object" || obj.dataType=="array")
+                        {
+                            let o={
+                                mock : "",
+                                remark : obj.name,
+                                type : obj.dataType=="array"?3:4,
+                                must : 1,
+                                name : bArr?null:obj.identifier.split("|")[0].trim(),
+                                data:[]
+                            }
+                            arrRaw.push(o);
+                            for(let o1 of obj.parameterList)
+                            {
+                                arguments.callee(o1,o.data,obj.dataType=="array"?1:null)
+                            }
+                        }
+                        else if(obj.dataType=="array<string>" || obj.dataType=="array<number>" || obj.dataType=="array<boolean>")
+                        {
+                            let o={
+                                mock : "",
+                                remark : obj.name,
+                                type : 3,
+                                must : 1,
+                                name : bArr?null:obj.identifier.split("|")[0].trim(),
+                                data:[{
+                                    mock : "",
+                                    remark : "",
+                                    type : obj.dataType=="array<string>"?0:(obj.dataType=="array<number>"?1:2),
+                                    must : 1,
+                                    name : null
+                                }]
+                            }
+                            arrRaw.push(o);
+                        }
+                        else if(obj.dataType=="array<object>")
+                        {
+                            let o={
+                                mock : "",
+                                remark : obj.name,
+                                type : 3,
+                                must : 1,
+                                name : bArr?null:obj.identifier.split("|")[0].trim(),
+                                data:[{
+                                    mock : "",
+                                    remark : "",
+                                    type :4,
+                                    must : 1,
+                                    name : null,
+                                    data:[]
+                                }]
+                            }
+                            arrRaw.push(o);
+                            for(let o1 of obj.parameterList)
+                            {
+                                arguments.callee(o1,o.data[0].data)
+                            }
+                        }
+                    }
+                    for(let o of objAction.responseParameterList)
+                    {
+                        handleJSON(o,result);
+                    }
+                    update.outParam=result;
+                    update.outInfo={
+                        "jsonType" : 0,
+                        "rawMock" : "",
+                        "rawRemark" : "",
+                        "type" : 0
+                    }
+                    await (interface.createAsync(update));
+                }
+            }
+        }
+        objProject._doc.role=0;
+        objProject._doc.userCount=1;
+        objProject._doc.interfaceCount=interfaceCount;
+        objProject._doc.own=1;
+        util.ok(res,objProject,"导入成功");
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
+function importSwagger(req,res) {
+    try
+    {
+        let data=req.clientParam.json;
+        if(req.clientParam.url)
+        {
+            data=await (request({
+                method:"GET",
+                url:req.clientParam.url
+            }).then(function (response) {
+                return response.body;
+            }))
+        }
+        let obj=JSON.parse(data);
+        let update={
+            name:obj.info.title,
+            owner:req.userInfo._id
+        }
+        if(req.clientParam.team)
+        {
+            update.team=req.clientParam.team
+        }
+        if(obj.host)
+        {
+            let url=obj.host;
+            if(obj.basePath && obj.basePath!="/")
+            {
+                url+=obj.basePath
+            }
+            if(obj.schemes && obj.schemes.length>0)
+            {
+                url=obj.schemes[0]+"://"+url;
+            }
+            else
+            {
+                url="http://"+url;
+            }
+            update.baseUrls=[{
+                url:url,
+                remark:""
+            }]
+        }
+        let objProject=await (project.createAsync(update));
+        await (group.createAsync({
+            name:"#回收站",
+            project:objProject._id,
+            type:1,
+            id:uuid()
+        }));
+        let objGroup={};
+        obj.tags.forEach(function (obj) {
+            objGroup[obj.name]=await (group.createAsync({
+                name:obj.name,
+                project:objProject._id,
+                type:0,
+                id:uuid()
+            }));
+        })
+        let objDef={};
+        function handleDef(def,root) {
+            let ref=false,obj,key;
+            if(def.$ref)
+            {
+                ref=true;
+                key=def.$ref.substr(14);
+                if(objDef[key])
+                {
+                    return objDef[key];
+                }
+                else
+                {
+                    obj=root[key];
+                }
+            }
+            else
+            {
+                obj=def;
+            }
+            if(!obj)
+            {
+                return null;
+            }
+            let objRaw={
+                mock : "",
+                remark : "",
+                type : 0,
+                must : 1,
+                name : null
+            };
+            if(obj.type=="string" || obj.type=="byte" || obj.type=="binary" || obj.type=="date" || obj.type=="dateTime" || obj.type=="password")
+            {
+                objRaw.type=0;
+            }
+            else if(obj.type=="integer" || obj.type=="long" || obj.type=="float" || obj.type=="double")
+            {
+                objRaw.type=1;
+            }
+            else if(obj.type=="boolean")
+            {
+                objRaw.type=2;
+            }
+            else if(obj.type=="array")
+            {
+                objRaw.type=3;
+                objRaw.data=[];
+                let obj1=util.clone(arguments.callee(obj.items,root));
+                objRaw.data.push(obj1);
+            }
+            else if(obj.type=="object")
+            {
+                objRaw.type=4;
+                objRaw.data=[];
+                for(let key in obj.properties)
+                {
+                    let obj1=util.clone(arguments.callee(obj.properties[key],root));
+                    obj1.name=key;
+                    objRaw.data.push(obj1);
+                }
+            }
+            if(obj.description)
+            {
+                objRaw.remark=obj.description;
+            }
+            if(obj.default!==undefined)
+            {
+                objRaw.mock=obj.default;
+            }
+            if(obj.example!==undefined || obj.enum!==undefined)
+            {
+                objRaw.value={
+                    type:0,
+                    status:"",
+                    data:[]
+                };
+                if(obj.example!==undefined)
+                {
+                    objRaw.value.data.push({
+                        value:obj.example,
+                        remark:""
+                    })
+                }
+                if(obj.enum!==undefined)
+                {
+                    objRaw.value.data=objRaw.value.data.concat(obj.enum.map(function (obj) {
+                        return {
+                            value:obj,
+                            remark:""
+                        }
+                    }));
+                }
+            }
+            if(def.$ref)
+            {
+                objDef[key]=objRaw;
+            }
+            return objRaw;
+        }
+        if(obj.definitions)
+        {
+            for(let key in obj.definitions)
+            {
+                let val=obj.definitions[key];
+                let o=handleDef(val,obj.definitions,1);
+                objDef[key]=o;
+            }
+        }
+        let interfaceCount=0;
+        let arrMethod=["GET","POST","PUT","DELETE","PATCH"]
+        for(let path in obj.paths)
+        {
+            let obj1=obj.paths[path];
+            for(let method in obj1)
+            {
+                let interRaw=obj1[method];
+                if(arrMethod.indexOf(method.toUpperCase())==-1)
+                {
+                    continue;
+                }
+                interfaceCount++;
+                let update={
+                    name:interRaw.summary,
+                    project:objProject._id,
+                    group:objGroup[interRaw.tags[0]]._id,
+                    url:path,
+                    remark:interRaw.description,
+                    method:method.toUpperCase(),
+                    owner:req.userInfo._id,
+                    editor:req.userInfo._id,
+                    before:{
+                        mode:0,
+                        code:""
+                    },
+                    after:{
+                        mode:0,
+                        code:""
+                    },
+                    id:uuid()
+                };
+                let rest=[],query=[],header=[],body=[],result=[];
+                let bodyInfo={
+                    type:0,
+                    rawType:0,
+                    rawTextRemark:"",
+                    rawFileRemark:"",
+                    rawText:"",
+                    rawJSON:[],
+                    rawJSONType:0
+                };
+                let outInfo={
+                    type:0,
+                    rawRemark:"",
+                    rawMock:"",
+                    jsonType:0
+                };
+                let contentType=interRaw.consumes?interRaw.consumes[0]:null;
+                if(contentType)
+                {
+                    header.push({
+                        name:"Content-Type",
+                        value:contentType,
+                        remark:""
+                    });
+                    if(contentType=="application/json")
+                    {
+                        bodyInfo={
+                            type:1,
+                            rawType:2,
+                            rawTextRemark:"",
+                            rawFileRemark:"",
+                            rawText:"",
+                            rawJSON:[],
+                            rawJSONType:0
+                        };
+                    }
+                }
+                for(let o of interRaw.parameters)
+                {
+                    if(o.in=="path")
+                    {
+                        rest.push({
+                            value:{
+                                "status" : "",
+                                "data" : [],
+                                "type" : 0
+                            },
+                            name:o.name,
+                            remark:o.description?o.description:""
+                        })
+                    }
+                    else if(o.in=="query")
+                    {
+                        query.push({
+                            name:o.name,
+                            remark:o.description?o.description:"",
+                            must:o.required?1:0,
+                            value:{
+                                "status" : "",
+                                "data" : (o.items && o.items.enum)?o.items.enum.map(function (obj) {
+                                    return {
+                                        value:obj,
+                                        remark:""
+                                    }
+                                }):[],
+                                "type" : 0
+                            }
+                        })
+                    }
+                    else if(o.in=="header")
+                    {
+                        header.push({
+                            name:o.name,
+                            remark:o.description?o.description:"",
+                            value:""
+                        })
+                    }
+                    else if(o.in=="body")
+                    {
+                        if(bodyInfo.type==0)
+                        {
+                            let objBody={
+                                name:o.name,
+                                type:0,
+                                must:o.required?1:0,
+                                remark:o.description?o.description:""
+                            };
+                            body.push(objBody);
+                        }
+                        else if(bodyInfo.type==1 && bodyInfo.rawType==2)
+                        {
+                            let objBody={
+                                mock : "",
+                                remark : o.description,
+                                type : 1,
+                                must : o.required?1:0,
+                                name :o.name
+                            };
+                            if(o.schema)
+                            {
+                                if(o.schema.$ref)
+                                {
+                                    let key=o.schema.$ref.substr(14);
+                                    if(objDef[key])
+                                    {
+                                        let o1=util.clone(objDef[key]);
+                                        o1.remark=objBody.remark;
+                                        o1.must=objBody.must;
+                                        o1.name=objBody.name;
+                                        objBody=o1;
+                                        bodyInfo.rawJSON.push(objBody);
+                                    }
+                                }
+                                else
+                                {
+                                    if(o.schema.items)
+                                    {
+                                        objBody.data=[];
+                                        objBody.type=3;
+                                        if(o.schema.items.$ref)
+                                        {
+                                            let key=o.schema.items.$ref.substr(14);
+                                            if(objDef[key])
+                                            {
+                                                let o1=util.clone(objDef[key]);
+                                                objBody.data.push(o1);
+                                                bodyInfo.rawJSON.push(objBody);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            let type;
+                                            let o1=o.schema.items;
+                                            if(o1.type=="string" || o1.type=="byte" || o1.type=="binary" || o1.type=="date" || o1.type=="dateTime" || o1.type=="password")
+                                            {
+                                                type=0;
+                                            }
+                                            else if(o1.type=="integer" || o1.type=="long" || o1.type=="float" || o1.type=="double")
+                                            {
+                                                type=1;
+                                            }
+                                            else if(o1.type=="boolean")
+                                            {
+                                                type=2;
+                                            }
+                                            let o2={
+                                                mock : o1.default!==undefined?o1.default:"",
+                                                remark : o1.description?o1.description:"",
+                                                type : type,
+                                                must : 1,
+                                                name :null
+                                            }
+                                            objBody.data.push(o2);
+                                            bodyInfo.rawJSON.push(objBody);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if(o.in=="formData")
+                    {
+                        let objBody={
+                            name:o.name,
+                            type:o.type!="file"?0:1,
+                            must:o.required?1:0,
+                            remark:o.description?o.description:""
+                        };
+                        body.push(objBody);
+                        header["Content-Type"]="multipart/form-data";
+                    }
+                }
+                for(let status in interRaw.responses)
+                {
+                    if(status==200)
+                    {
+                        let objRes=interRaw.responses["200"];
+                        if(objRes.schema.$ref)
+                        {
+                            let key=objRes.schema.$ref.substr(14);
+                            if(objDef[key])
+                            {
+                                let o1=util.clone(objDef[key]);
+                                if(o1.type==4)
+                                {
+                                    result=o1.data;
+                                }
+                                else
+                                {
+                                    outInfo.type=1;
+                                    outInfo.rawMock=o1.mock?o1.mock:"";
+                                    outInfo.rawRemark=objRes.description?objRes.description:"";
+                                }
+                            }
+                        }
+                        else if(objRes.schema.items)
+                        {
+                            outInfo.jsonType=1;
+                            result=[
+                                {
+                                    name:null,
+                                    must:1,
+                                    type:0,
+                                    remark:"",
+                                    mock:"",
+                                }
+                            ]
+                            if(objRes.schema.items.$ref)
+                            {
+                                let key=objRes.schema.items.$ref.substr(14);
+                                if(objDef[key])
+                                {
+                                    let o1=util.clone(objDef[key]);
+                                    if(o1.type==4)
+                                    {
+                                        result[0].type=4;
+                                        result[0].data=o1.data;
+                                    }
+                                    else
+                                    {
+                                        for(let key in o1)
+                                        {
+                                            result[0][key]=o1[key];
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                let type;
+                                let o1=objRes.schema.items;
+                                if(o1.type=="string" || o1.type=="byte" || o1.type=="binary" || o1.type=="date" || o1.type=="dateTime" || o1.type=="password")
+                                {
+                                    type=0;
+                                }
+                                else if(o1.type=="integer" || o1.type=="long" || o1.type=="float" || o1.type=="double")
+                                {
+                                    type=1;
+                                }
+                                else if(o1.type=="boolean")
+                                {
+                                    type=2;
+                                }
+                                result[0].type=type;
+                            }
+                        }
+                    }
+                }
+                update.restParam=rest;
+                update.queryParam=query;
+                update.header=header;
+                update.outParam=result;
+                update.outInfo=outInfo;
+                if(update.method=="POST" || update.method=="PUT" || update.method=="PATCH")
+                {
+                    update.bodyParam=body;
+                    update.bodyInfo=bodyInfo;
+                }
+                await (interface.createAsync(update));
+            }
+        }
+        objProject._doc.role=0;
+        objProject._doc.userCount=1;
+        objProject._doc.interfaceCount=interfaceCount;
+        objProject._doc.own=1;
+        util.ok(res,objProject,"导入成功");
+    }
+    catch (err)
+    {
+        util.catch(res,err);
+    }
+}
+
 exports.validateUser=async (validateUser);
 exports.inProject=async (inProject);
 exports.create=async (create);
@@ -1797,4 +2549,5 @@ exports.applyList=async (applyList);
 exports.handleApply=async (handleApply);
 exports.setUser=async (setUser);
 exports.getUsers=async (getUsers);
-
+exports.importRap=async (importRap);
+exports.importSwagger=async (importSwagger);

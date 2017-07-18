@@ -6,7 +6,10 @@ var mongoomise=require("mongoomise")
 var db=require("../util/db.js");
 var model=new mongoose.Schema({
     name:String,
-    dis:String,
+    dis:{
+        type:String,
+        default:""
+    },
     baseUrls:{
         type:mongoose.Schema.Types.Mixed,
         default:[]

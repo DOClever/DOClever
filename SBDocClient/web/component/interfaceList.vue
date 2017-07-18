@@ -5,7 +5,7 @@
                 <el-col class="col" :span="4" style="font-size: large;text-align: center;white-space: nowrap" @click.native="item.show=!item.show">
                     <span :class="item.show?'el-icon-caret-bottom':'el-icon-caret-right'" style="color:#c7c7c7 "></span>
                 </el-col>
-                <el-col class="col" :span="12" :style="{margin: 0,fontSize: 'larger',color: item.type==0?'#20A0FF':'red',whiteSpace: 'nowrap',padding: 0,textOverflow:'ellipsis',overflow:'hidden'}" @click.native="item.show=!item.show">
+                <el-col class="col" :span="12" :style="{margin: 0,fontSize: 'larger',color: item.type==0?'#20A0FF':'red',whiteSpace: 'nowrap',padding: 0,textOverflow:'ellipsis',overflow:'hidden'}" @click.native="item.show=!item.show" :title="item.name">
                     {{item.name}}({{item.data.length}})
                 </el-col>
                 <el-col class="col" :span="4" style="height: 40px;white-space: nowrap" @click.native="item.show=!item.show">

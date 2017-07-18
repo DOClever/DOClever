@@ -1,6 +1,6 @@
 <template>
     <el-row class="row">
-        <el-row class="row" style="padding:0 0 0 20px;height: 50px;line-height: 50px">
+        <el-row class="row" style="padding:0 0 0 20px;height: 50px;line-height: 50px;white-space: nowrap">
             <el-radio class="radio" :label="0" v-model="info.type" :checked="info.type==0" id="bodyKey">Key-Value</el-radio>&nbsp;&nbsp;
             <el-radio class="radio" :label="1" v-model="info.type" :checked="info.type==1" id="bodyRaw">Raw</el-radio>&nbsp;&nbsp;&nbsp;&nbsp;
             <el-select v-model="rawType" v-if="info.type==1">

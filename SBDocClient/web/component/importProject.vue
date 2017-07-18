@@ -1,9 +1,15 @@
 <template>
     <el-dialog title="导入"  size="small" ref="box">
-        <el-row class="row" style="height: 30px;line-height: 30px">
-            <el-radio class="radio" :label="0" v-model="type" :checked="type==0" id="bodyKey">PostMan V2 JSON</el-radio>&nbsp;&nbsp;
-            <el-radio class="radio" :label="1" v-model="type" :checked="type==1" id="bodyRaw">SBDoc JSON</el-radio>&nbsp;&nbsp;
+        <el-row class="row" style="height: 50px;line-height: 50px">
+            导入类型：&nbsp;&nbsp;&nbsp;
+            <el-select v-model="type">
+                <el-option label="PostMan V2 JSON" :value="0"></el-option>
+                <el-option label="SBDoc JSON" :value="1"></el-option>
+                <el-option label="RAP JSON" :value="2"></el-option>
+                <el-option label="Swagger" :value="3"></el-option>
+            </el-select>
         </el-row>
+        <el-row class="row" style="height: 1px;background-color: rgb(247,246,242);margin-bottom: 10px"></el-row>
         <el-row class="row" v-show="type==0">
             <el-input v-drag="'text'" type="textarea" :rows="10" placeholder="请输入JSON" v-model="text" style="margin-bottom: 10px">
             </el-input>
@@ -29,6 +35,28 @@
             <el-input v-drag="'textMy'" type="textarea" :rows="10" placeholder="请输入JSON" v-model="textMy">
             </el-input>
         </el-row>
+        <el-row class="row" v-show="type==2">
+            <el-input v-drag="'textRap'" type="textarea" :rows="10" placeholder="请输入JSON" v-model="textRap">
+            </el-input>
+            <el-row class="row" style="height:20px">
+            </el-row>
+            <el-row class="row">
+                Body Type:&nbsp;&nbsp;&nbsp;
+                <el-select v-model="rapBodyType">
+                    <el-option :value="0" label="x-www-form-urlencoded"></el-option>
+                    <el-option :value="1" label="application/json"></el-option>
+                </el-select>
+            </el-row>
+        </el-row>
+        <el-row class="row" v-show="type==3">
+            Swagger类型:&nbsp;&nbsp;&nbsp;
+            <el-select v-model="swaggerType">
+                <el-option :value="0" label="URL"></el-option>
+                <el-option :value="1" label="JSON"></el-option>
+            </el-select><br><br>
+            <el-input placeholder="请输入Swagger URL" v-model="textSwaggerURL" v-show="swaggerType==0"></el-input>
+            <el-input v-drag="'textSwaggerJSON'" type="textarea" :rows="10" placeholder="请输入Swagger Url" v-model="textSwaggerJSON" v-show="swaggerType==1"></el-input>
+        </el-row>
         <el-row class="row">{{status}}</el-row>
         <el-row class="dialog-footer" slot="footer">
             <el-button type="primary" :loading="savePending" @click="save">
@@ -52,7 +80,12 @@
                 }],
                 savePending:false,
                 status:"",
-                ignore:0
+                ignore:0,
+                textRap:"",
+                rapBodyType:0,
+                swaggerType:0,
+                textSwaggerJSON:"",
+                textSwaggerURL:""
             }
         },
         directives:{
@@ -423,7 +456,7 @@
                     }
                     postman(obj,arr)
                 }
-                else
+                else if(this.type==1)
                 {
                     if(!this.textMy)
                     {
@@ -455,6 +488,124 @@
                         update.team=session.get("teamId")
                     }
                     net.post("/project/importjson",update).then(function (data) {
+                        _this.savePending=false;
+                        if(data.code==200)
+                        {
+                            $.notify("导入成功",1);
+                            if(session.get("teamId"))
+                            {
+                                _this.$parent.obj.project.unshift(data.data);
+                                bus.$emit("updateTeamProject",1,data.data.interfaceCount);
+                            }
+                            else
+                            {
+                                _this.$parent.projectList.unshift(data.data);
+                            }
+                            _this.$refs.box.close();
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
+                }
+                else if(this.type==2)
+                {
+                    if(!this.textRap)
+                    {
+                        $.tip("请输入JSON",0);
+                        return;
+                    }
+                    var obj;
+                    try
+                    {
+                        obj=JSON.parse(this.textRap);
+                        obj=eval("("+obj.modelJSON+")");
+                    }
+                    catch(e)
+                    {
+                        $.tip("JSON格式有错误",0);
+                        return;
+                    }
+                    var _this=this;
+                    this.savePending=true;
+                    var update={
+                        json:JSON.stringify(obj),
+                        bodytype:this.rapBodyType
+                    };
+                    if(session.get("teamId"))
+                    {
+                        update.team=session.get("teamId")
+                    }
+                    net.post("/project/importrap",update).then(function (data) {
+                        _this.savePending=false;
+                        if(data.code==200)
+                        {
+                            $.notify("导入成功",1);
+                            if(session.get("teamId"))
+                            {
+                                _this.$parent.obj.project.unshift(data.data);
+                                bus.$emit("updateTeamProject",1,data.data.interfaceCount);
+                            }
+                            else
+                            {
+                                _this.$parent.projectList.unshift(data.data);
+                            }
+                            _this.$refs.box.close();
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
+                }
+                else if(this.type==3)
+                {
+                    if(this.swaggerType==0)
+                    {
+                        if(!this.textSwaggerURL)
+                        {
+                            $.tip("请输入url地址",0);
+                            return;
+                        }
+                    }
+                    else if(this.swaggerType==1)
+                    {
+                        if(!this.textSwaggerJSON)
+                        {
+                            $.tip("请输入JSON",0);
+                            return;
+                        }
+                    }
+                    var obj;
+                    if(this.swaggerType==1)
+                    {
+                        try
+                        {
+                            obj=JSON.parse(this.textSwaggerJSON);
+                        }
+                        catch(e)
+                        {
+                            $.tip("JSON格式有错误",0);
+                            return;
+                        }
+                    }
+                    var _this=this;
+                    this.savePending=true;
+                    var update={};
+                    if(this.swaggerType==0)
+                    {
+                        update.url=this.textSwaggerURL;
+                    }
+                    else
+                    {
+                        update.json=this.textSwaggerJSON;
+                    }
+                    if(session.get("teamId"))
+                    {
+                        update.team=session.get("teamId")
+                    }
+                    net.post("/project/importswagger",update).then(function (data) {
                         _this.savePending=false;
                         if(data.code==200)
                         {

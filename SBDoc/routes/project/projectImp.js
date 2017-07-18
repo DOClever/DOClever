@@ -395,6 +395,50 @@ var interface=[
         user:1,
         handle:[project.validateUser,project.getUsers]
     },
+    {
+        "method":"POST",
+        "path":"/project/importrap",
+        "param": {
+            json:{
+                type:String
+            },
+            team:{
+                type:String,
+                optional:1
+            },
+            bodytype:{
+                type:Number     //0 urlencoded  1  json
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.importRap]
+    },
+    {
+        "method":"POST",
+        "path":"/project/importswagger",
+        "param": {
+            json:{
+                type:String,
+                optional:1
+            },
+            team:{
+                type:String,
+                optional:1
+            },
+            url:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.importSwagger]
+    },
 ];
 
 module.exports=interface;
