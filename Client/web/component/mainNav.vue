@@ -204,7 +204,7 @@
                             }
                         }
                     }
-                    xml.open("GET","https://api.github.com/repos/sx1989827/SBDoc/tags?timestamp="+(new Date()).getTime(),true);
+                    xml.open("GET","https://api.github.com/repos/sx1989827/DOClever/tags?timestamp="+(new Date()).getTime(),true);
                     xml.send();
                 }
                 else if(command=="quit")

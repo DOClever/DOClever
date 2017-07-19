@@ -2,7 +2,7 @@
  * Created by sunxin on 16/8/22.
  */
 var path = require('path')
-var webpack = require('../../SBDocClient/node_modules/webpack')
+var webpack = require('../../Client/node_modules/webpack')
 module.exports = {
     entry: {
         vendor:["vue","vuex","./common/common"],
