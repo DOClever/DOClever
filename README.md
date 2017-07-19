@@ -25,7 +25,9 @@
   "port":10000,  //SBDoc启动的端口号  
   "version":"1.0.0"  //SBDoc的版本号（无需修改）  
 }  
-#### 4.在命令行下运行node SBDoc的根目录/SBDoc/bin/www即可启动SBDoc（如果是windows环境下，请修改目录分隔符)，在浏览器里输入localhost:SBDoc启动的端口号,出现首页表示部署成功。
+#### 4.在SBdoc和SBDocClient目录执行npm install
+#### 5.在SBDocClient目录下执行webpack 如未安装webpack 执行npm install -g webpack进行安装
+#### 6.在命令行下运行node SBDoc的根目录/SBDoc/bin/www即可启动SBDoc（如果是windows环境下，请修改目录分隔符)，在浏览器里输入localhost:SBDoc启动的端口号,出现首页表示部署成功。
 ## 问题反馈
 #### 如果你有任何问题和建议，请在issues里面指出，每个月的1号和15号会发布功能迭代版本，根据bug情况不定期的会发布bug迭代版本。如果你想加入开源的大家庭，欢迎加入qq群：611940610
 ## 注意
