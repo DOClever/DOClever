@@ -2,7 +2,7 @@
     <el-row id="navBar" class="row" :style="transparent?{height:'60px','backgroundColor':'rgba(0,0,0,0.3)',left:0,top:0,position:'absolute'}:{height:'60px','backgroundColor':'white'}">
         <slot name="other"></slot>
         <el-col class="col" :span="3" style="text-align: left;line-height: 60px;color:#20A0FF ;font-size: 30px;padding-left: 20px">
-            SBDoc
+            DOClever
         </el-col>
         <el-col class="col" :span="2" style="text-align: center;line-height: 60px;">
             <slot name="slot3">

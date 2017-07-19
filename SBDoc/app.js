@@ -32,7 +32,7 @@ app.use(session({
   cookie: {maxAge: 1000*3600*6 },
   resave:true,
   saveUninitialized:false,
-  secret: 'SBDoc'
+  secret: 'DOClever'
 }))
 app.use("/user",checkFormDataUser(con.imgPath),checkParam("user"),checkUser);
 app.use("/project",checkFormDataUser(con.imgPath),checkParam("project"),checkUser);
@@ -46,7 +46,7 @@ app.use("/poll",checkFormDataUser(con.imgPath),checkParam("poll"),checkUser);
 app.use("/article",checkFormDataUser(con.imgPath),checkParam("article"),checkUser);
 app.use("/message",checkFormDataUser(con.imgPath),checkParam("message"),checkUser);
 app.use("/mock",checkFormDataUser(con.tempPath),mock);
-app.use("/html",express.static(path.join(__dirname, '../SBDocClient')));
+app.use("/html",express.static(path.join(__dirname, '../Client')));
 app.use("/img",express.static(con.imgPath));
 app.use("/",function (req,res) {
     res.redirect("/html/web/index.html");

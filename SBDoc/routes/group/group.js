@@ -263,7 +263,7 @@ function importJSON(req,res) {
         }
         if(obj.flag!="SBDoc")
         {
-            util.throw(e.systemReason,"不是SBDoc的导出格式");
+            util.throw(e.systemReason,"不是DOClever的导出格式");
             return;
         }
         let objProject=await (project.findOneAsync({

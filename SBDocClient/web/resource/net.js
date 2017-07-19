@@ -318,7 +318,7 @@ var mockUrl=arguments[0];
 var realUrl=arguments[1];
 var server = http.createServer(onProxy);
 server.listen(36742);
-console.log(arguments.length>0?"内网测试，Mock数据正待命运行中！":"正在运行中，请用SBDoc的接口测试页面进行内网测试！");
+console.log(arguments.length>0?"内网测试，Mock数据正待命运行中！":"正在运行中，请用DOClever的接口测试页面进行内网测试！");
 
 
 

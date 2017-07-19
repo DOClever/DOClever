@@ -71,7 +71,7 @@
                             路径
                         </el-col>
                         <el-col class="col" :span="10">
-                            <el-popover placement="bottom" title="路径信息" width="500" trigger="focus" content="路径不包含baseUrl，baseUrl请前往右上角项目管理里面设置。例如http://abc.com/login,http://abc.com是baseUrl,这里输入/login即可,支持restful url形式，例如：/info/{name} 支持路径参数的粘贴，系统会自动识别路径和query参数">
+                            <el-popover placement="bottom" title="路径信息" width="500" trigger="focus" content="路径不包含baseUrl，baseUrl请前往左边全局标签页里面设置。例如http://abc.com/login,http://abc.com是baseUrl,这里输入/login即可,支持restful url形式，例如：/info/{name} 支持路径参数的粘贴，系统会自动识别路径和query参数">
                                 <el-input style="width: 90%" placeholder="请输入接口路径(不包含BaseUrl)" v-model="interfaceEdit.url" slot="reference" @change="changeUrl" @paste.native="paste"></el-input>
                             </el-popover>
                         </el-col>
@@ -829,7 +829,7 @@
                 store.commit("setInterfaceSearchList",[]);
             },
             importGroup:function () {
-                $.inputMul(this,"请输入SBDoc导出分组的JSON",function (val) {
+                $.inputMul(this,"请输入DOClever导出分组的JSON",function (val) {
                     if(!val)
                     {
                         $.tip("请输入JSON",0);

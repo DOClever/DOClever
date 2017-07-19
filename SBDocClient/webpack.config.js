@@ -65,6 +65,11 @@ module.exports = {
                 include: path.resolve(__dirname, 'web/util')
             },
             {
+                test: /index\.js/,
+                loader:"babel-loader?cacheDirectory",
+                include: path.resolve(__dirname, 'web')
+            },
+            {
                 test: /\.html$/,
                 loader: "html?attrs=img:src img:data-src",
                 include: path.resolve(__dirname, 'web')

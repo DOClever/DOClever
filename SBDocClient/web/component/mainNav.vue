@@ -1,8 +1,8 @@
 <template>
     <el-row id="navBar" class="row" :style="transparent?{height:'60px','backgroundColor':'rgba(0,0,0,0.3)',left:0,top:0,position:'absolute'}:{height:'60px','backgroundColor':'white'}">
         <slot name="other"></slot>
-        <el-col class="col" :span="3" style="text-align: left;line-height: 60px;color:#20A0FF ;font-size: 30px;padding-left: 20px">
-            <a style="text-decoration: none;cursor: pointer;color: inherit" href="/">SBDoc</a>
+        <el-col class="col" :span="3" style="text-align: left;line-height: 60px;color:#20A0FF ;font-size: 25px;padding-left: 20px">
+            <a style="text-decoration: none;cursor: pointer;color: inherit" href="/">DOClever</a>
         </el-col>
         <el-col class="col" :span="2" style="text-align: center;line-height: 60px;">
             <slot name="slot3">
@@ -42,7 +42,7 @@
                 <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item command="team" v-if="team">团队首页</el-dropdown-item>
                     <el-dropdown-item command="list">返回列表</el-dropdown-item>
-                    <el-dropdown-item command="apply">团队申请</el-dropdown-item>
+                    <el-dropdown-item command="apply" v-if="bShowApply">团队申请</el-dropdown-item>
                     <el-dropdown-item command="setting">个人设置</el-dropdown-item>
                     <el-dropdown-item command="message">
                         <el-badge is-dot class="msgBadge" v-if="newMsg">
@@ -100,7 +100,8 @@
                 applyName:"",
                 applyDis:"",
                 newMsg:false,
-                proxy:session.get("proxy")?true:false
+                proxy:session.get("proxy")?true:false,
+                bShowApply:document.title.indexOf("DOClever")>-1?false:true
             }
         },
         directives:{

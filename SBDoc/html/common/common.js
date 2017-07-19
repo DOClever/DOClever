@@ -115,7 +115,7 @@ $.startLoading=function () {
     ele.style.width="100%";
     ele.style.height=document.documentElement.clientHeight+"px";
     ele.style.backgroundColor="white";
-    ele.innerHTML='<div style="text-align: center;margin-top: '+(document.documentElement.clientHeight/2-100)+'px"><div class="el-icon-loading" style="color: #20A0FF;font-size: 40px;"></div><div style="margin-top: 30px;color: gray;font-size: 20px">SBDoc,做最好的接口管理平台</div></div>'
+    ele.innerHTML='<div style="text-align: center;margin-top: '+(document.documentElement.clientHeight/2-100)+'px"><div class="el-icon-loading" style="color: #20A0FF;font-size: 40px;"></div><div style="margin-top: 30px;color: gray;font-size: 20px">DOClever,做最好的接口管理平台</div></div>'
 }
 
 $.stopLoading=function () {
@@ -169,7 +169,7 @@ $.queryAll=function (str,ele) {
 }
 
 $.confirm=function (title,funcOk,funcCancel) {
-    Vue.prototype.$confirm(title, 'SBDoc', {
+    Vue.prototype.$confirm(title, 'DOClever', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -215,7 +215,7 @@ $.notify=function (content,bOk) {
 }
 
 $.input=function (title,func) {
-    Vue.prototype.$prompt(title, 'SBDoc', {
+    Vue.prototype.$prompt(title, 'DOClever', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         inputValidator:function (value) {

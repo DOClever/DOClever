@@ -134,7 +134,7 @@ var j1=schedule.scheduleJob("0 * * * *",(async (function () {
             }
             if(arr.length>0)
             {
-                let subject="[SBDoc]"+moment().format("YYYY-MM-DD HH:mm:ss")+" 项目"+obj.project.name+"轮询结果";
+                let subject="[DOClever]"+moment().format("YYYY-MM-DD HH:mm:ss")+" 项目"+obj.project.name+"轮询结果";
                 let content=`<h3>测试：${root.count}&nbsp;&nbsp;成功：${root.success}&nbsp;&nbsp;失败：${root.fail}&nbsp;&nbsp;未判定：${root.unknown}</h3>`+root.output;
                 util.sendMail(obj.sendInfo.smtp,obj.sendInfo.port,obj.sendInfo.user,obj.sendInfo.password,arr,subject,content);
             }

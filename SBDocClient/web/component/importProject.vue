@@ -4,7 +4,7 @@
             导入类型：&nbsp;&nbsp;&nbsp;
             <el-select v-model="type">
                 <el-option label="PostMan V2 JSON" :value="0"></el-option>
-                <el-option label="SBDoc JSON" :value="1"></el-option>
+                <el-option label="DOClever JSON" :value="1"></el-option>
                 <el-option label="RAP JSON" :value="2"></el-option>
                 <el-option label="Swagger" :value="3"></el-option>
             </el-select>
@@ -198,76 +198,131 @@
                                 indexInterface++;
                                 _this.$parent.projectList[0].interfaceCount=indexInterface;
                                 _this.status="正在导入第"+indexInterface+"个接口"+item.name+"，一共"+count+"个接口";
-                                var objUrl=$.parseURL(item.request.url.raw);
-                                var url=objUrl.source;
-                                var index=url.indexOf("?");
-                                if(index>-1)
+                                var obj;
+                                if(typeof(item.request.url)=="object")
                                 {
-                                    url=url.substr(0,index);
-                                }
-                                for(var i=0;i<arr.length;i++)
-                                {
-                                    if(_this.ignore)
-                                    {
-                                        index=url.toLowerCase().indexOf(arr[i].toLowerCase());
-                                    }
-                                    else
-                                    {
-                                        index=url.indexOf(arr[i]);
-                                    }
+                                    var objUrl=$.parseURL(item.request.url.raw);
+                                    var url=objUrl.source;
+                                    var index=url.indexOf("?");
                                     if(index>-1)
                                     {
-                                        url=url.substr(index+arr[i].length);
-                                        break;
+                                        url=url.substr(0,index);
                                     }
-                                }
-                                if(item.request.url.path)
-                                {
-                                    item.request.url.path.forEach(function (obj) {
-                                        if(obj[0]==":")
-                                        {
-                                            url=url.replace(obj,"{"+obj.substr(1)+"}");
-                                        }
-                                    })
-                                }
-                                var obj={
-                                    name:item.name,
-                                    url:url,
-                                    group:groupID,
-                                    remark:item.request.description,
-                                    project:projectID,
-                                    method:item.request.method,
-                                    finish:1,
-                                    before:"",
-                                    after:"",
-                                };
-                                var restParam=[];
-                                if(item.request.url.variable)
-                                {
-                                    item.request.url.variable.forEach(function (obj) {
-                                        restParam.push({
-                                            name:obj.key,
-                                            remark:obj.description,
-                                            value:[obj.value]
-                                        })
-                                    })
-                                }
-                                obj.restparam=JSON.stringify(restParam);
-                                var param=[];
-                                for(var key in objUrl.params)
-                                {
-                                    var v={
-                                        name:key,
-                                        must:1,
-                                        remark:""
-                                    };
-                                    if(objUrl.params[key]!=="" && objUrl.params[key]!==undefined)
+                                    for(var i=0;i<arr.length;i++)
                                     {
-                                        v.value=[objUrl.params[key]];
+                                        if(_this.ignore)
+                                        {
+                                            index=url.toLowerCase().indexOf(arr[i].toLowerCase());
+                                        }
+                                        else
+                                        {
+                                            index=url.indexOf(arr[i]);
+                                        }
+                                        if(index>-1)
+                                        {
+                                            url=url.substr(index+arr[i].length);
+                                            break;
+                                        }
                                     }
-                                    param.push(v);
+                                    if(item.request.url.path)
+                                    {
+                                        item.request.url.path.forEach(function (obj) {
+                                            if(obj[0]==":")
+                                            {
+                                                url=url.replace(obj,"{"+obj.substr(1)+"}");
+                                            }
+                                        })
+                                    }
+                                    obj={
+                                        name:item.name,
+                                        url:url,
+                                        group:groupID,
+                                        remark:item.request.description,
+                                        project:projectID,
+                                        method:item.request.method,
+                                        finish:1,
+                                        before:"",
+                                        after:"",
+                                    };
+                                    var restParam=[];
+                                    if(item.request.url.variable)
+                                    {
+                                        item.request.url.variable.forEach(function (obj) {
+                                            restParam.push({
+                                                name:obj.key,
+                                                remark:obj.description,
+                                                value:[obj.value]
+                                            })
+                                        })
+                                    }
+                                    obj.restparam=JSON.stringify(restParam);
+                                    var param=[];
+                                    for(var key in objUrl.params)
+                                    {
+                                        var v={
+                                            name:key,
+                                            must:1,
+                                            remark:""
+                                        };
+                                        if(objUrl.params[key]!=="" && objUrl.params[key]!==undefined)
+                                        {
+                                            v.value=[objUrl.params[key]];
+                                        }
+                                        param.push(v);
+                                    }
+                                    obj.queryparam=JSON.stringify(param);
                                 }
-                                obj.queryparam=JSON.stringify(param);
+                                else
+                                {
+                                    var objUrl=$.parseURL(item.request.url);
+                                    var url=objUrl.source,index=url.indexOf("?");
+                                    if(index>-1)
+                                    {
+                                        url=url.substr(0,index);
+                                    }
+                                    for(var i=0;i<arr.length;i++)
+                                    {
+                                        if(_this.ignore)
+                                        {
+                                            index=url.toLowerCase().indexOf(arr[i].toLowerCase());
+                                        }
+                                        else
+                                        {
+                                            index=url.indexOf(arr[i]);
+                                        }
+                                        if(index>-1)
+                                        {
+                                            url=url.substr(index+arr[i].length);
+                                            break;
+                                        }
+                                    }
+                                    obj={
+                                        name:item.name,
+                                        url:url,
+                                        group:groupID,
+                                        remark:item.request.description,
+                                        project:projectID,
+                                        method:item.request.method,
+                                        finish:1,
+                                        before:"",
+                                        after:"",
+                                    };
+                                    var param=[];
+                                    for(var key in objUrl.params)
+                                    {
+                                        var v={
+                                            name:key,
+                                            must:1,
+                                            remark:""
+                                        };
+                                        if(objUrl.params[key]!=="" && objUrl.params[key]!==undefined)
+                                        {
+                                            v.value=[objUrl.params[key]];
+                                        }
+                                        param.push(v);
+                                    }
+                                    obj.queryparam=JSON.stringify(param);
+                                }
                                 var bJSON=false;
                                 obj.header=JSON.stringify(item.request.header.map(function (obj) {
                                     if(obj.key.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application/json")
@@ -475,7 +530,7 @@
                     }
                     if(obj.flag!="SBDoc")
                     {
-                        $.tip("不是SBDoc的导出格式",0);
+                        $.tip("不是DOClever的导出格式",0);
                         return;
                     }
                     var _this=this;

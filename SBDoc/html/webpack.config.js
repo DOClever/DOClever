@@ -55,16 +55,16 @@ module.exports = {
     devtool: 'source-map',
     resolveLoader:{
         modules: [
-            path.join(__dirname,'../../SBDocClient/node_modules')
+            path.join(__dirname,'../../Client/node_modules')
         ]
     },
     resolve: {
         alias: {
-            "vue": path.join(__dirname, '../../SBDocClient/node_modules/vue/dist/vue.min'),
-            "vuex": path.join(__dirname, '../../SBDocClient/node_modules/vuex/dist/vuex.min')
+            "vue": path.join(__dirname, '../../Client/node_modules/vue/dist/vue.min'),
+            "vuex": path.join(__dirname, '../../Client/node_modules/vuex/dist/vuex.min')
         },
         modules: [
-            path.join(__dirname,'../../SBDocClient/node_modules')
+            path.join(__dirname,'../../Client/node_modules')
         ]
     }
 }

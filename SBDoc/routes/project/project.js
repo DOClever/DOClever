@@ -1094,7 +1094,7 @@ function importJSON(req,res) {
         }
         if(obj.flag!="SBDoc")
         {
-            util.throw(e.systemReason,"不是SBDoc的导出格式");
+            util.throw(e.systemReason,"不是DOClever的导出格式");
             return;
         }
         let query={
@@ -1839,7 +1839,7 @@ function importRap(req,res) {
                         id:uuid()
                     };
                     let rest=[];
-                    let arrMatch=update.url.match(/(\/):(\w+?)(?=[\b?#\/])/g);
+                    let arrMatch=update.url.match(/(\/):(.+?)(?=\b|\?|#|\/)/g);
                     if(arrMatch && arrMatch.length>0)
                     {
                         arrMatch.forEach(function (obj) {
@@ -1853,7 +1853,7 @@ function importRap(req,res) {
                                 remark:""
                             })
                         })
-                        update.url=update.url.replace(/(\/):(\w+?)(?=[\b?#\/])/g,"$1{$2}");
+                        update.url=update.url.replace(/(\/):(.+?)(?=\b|\?|#|\/)/g,"$1{$2}");
                     }
                     update.restParam=rest;
                     let query=[],body=[],header=[];

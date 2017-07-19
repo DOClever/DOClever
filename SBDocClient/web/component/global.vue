@@ -178,7 +178,7 @@
             },
             importJSON:function () {
                 var _this=this;
-                $.inputMul(this,"请输入SBDoc导出状态码的JSON",function (val) {
+                $.inputMul(this,"请输入DOClever导出状态码的JSON",function (val) {
                     if(!val)
                     {
                         $.tip("请输入JSON",0);

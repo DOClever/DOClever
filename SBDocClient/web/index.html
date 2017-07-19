@@ -7,137 +7,239 @@
     <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
     <meta HTTP-EQUIV="Expires" CONTENT="0">
     <meta name="keywords" content="API管理系统,API管理平台,API管理,API,API接口,接口管理,API接口管理,API监控,API测试,API服务,API文档管理,API接口管理系统,接口管理平台,mock,mock测试，自动化mock，接口文档管理，接口文档平台，接口文档系统，API文档管理"/>
-    <meta name="description" content="SBDoc 移动时代首选接口管理平台！"/>
+    <meta name="description" content="DOClever 移动时代首选接口管理平台！"/>
     <link href="pic/logo.ico" rel="shortcut icon">
     <link rel="stylesheet" href="./lib/element/index.css">
     <link rel="stylesheet" href="../node_modules/animate.css/animate.min.css">
+    <link rel="stylesheet" href="../node_modules/fullpage-vue/src/fullpage.css">
     <link href="./lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="common/common.css">
-    <title>SBDoc</title>
+    <title>DOClever</title>
+    <style>
+        .page-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
 <body>
-<div class="container" id="app" v-cloak>
-    <mainnav :transparent="1">
-        <el-button type="text" style="font-size: 15px;color: white" slot="slot3" onclick="window.open('https://github.com/sx1989827/SBDoc','_blank')">开源</el-button>
+<div class="page-container" id="app" v-cloak>
+    <mainnav style="position: fixed;border-bottom: 1px solid lightgray">
+        <el-button type="text" style="font-size: 15px;color: black" slot="slot3" onclick="window.open('https://github.com/sx1989827/SBDoc','_blank')">开源</el-button>
         <el-popover ref="popover" placement="bottom" width="250" trigger="hover" slot="other">
             <span style="font-size: 15px;color: #20A0FF">
                 欢迎加入QQ讨论群：<span style="color: red">611940610</span>
             </span>
         </el-popover>
-        <el-button type="text" style="font-size: 15px;color: white" v-popover:popover slot="slot4">QQ群</el-button>
-        <el-button type="text" style="font-size: 15px;color: white" slot="slot1" v-if="!isLogin" onclick="location.href='../about/about.html'">关于</el-button>
-        <el-button type="text" style="font-size: 15px;color: white" slot="slot2" v-if="!isLogin" onclick="location.href='../help/help.html'">帮助</el-button>
+        <el-button type="text" style="font-size: 15px;color: black" v-popover:popover slot="slot4">QQ群</el-button>
+        <el-button type="text" style="font-size: 15px;color: black" slot="slot1" v-if="!isLogin" onclick="location.href='../about/about.html'">关于</el-button>
+        <el-button type="text" style="font-size: 15px;color: black" slot="slot2" v-if="!isLogin" onclick="location.href='../help/help.html'">帮助</el-button>
     </mainnav>
-    <el-row class="row" style="background-image: url('pic/homeback.jpg');background-position:center center;background-size: cover;height: 500px">
-        <div class="row" style="height: 400px;text-align: center;">
-            <div style="width: 100%;margin-top: 170px;font-size: 45px;color: white;">
-                移动时代首选接口管理平台
-            </div><br>
-            <div style="font-size: 30px;font-weight: normal;font-size: 30px;color: white">
-                智能高效&nbsp;&nbsp;简单规范&nbsp;&nbsp;云端协作
-            </div>
-            <div style="margin-top: 50px">
-                <el-button type="text" style="background-color: rgb(252,100,147);color: white;width: 373px;height: 40px;" @click="start">立即开始</el-button>
+    <div class="fullpage-wp" v-fullpage="opts" ref="example">
+        <div class="page" style="background-color: white;display: table">
+            <div style="width: 100%;height: 100%;display: table-cell;vertical-align: middle;text-align: center">
+                <div style="color: lightgray;font-weight: lighter;font-size: 24px">
+                    DOClever
+                </div>
+                <h1 style="font-weight: lighter">
+                    让 接 口 更 懂 你
+                </h1>
+                <el-row class="row" style="margin-top: 50px;color:gray ">
+                    <el-col class="col" :span="7">&nbsp;</el-col>
+                    <el-col class="col" :span="10">
+                        <el-row class="row" v-animate="{value: 'zoomInDown',delay:0}">
+                            <el-col class="col" :span="8" style="border-right: dashed 1px lightgray">
+                                <i class="fa fa-users" style="font-size: 30px;margin-bottom: 10px"></i><br>
+                                协作管理
+                            </el-col>
+                            <el-col class="col" :span="8" style="border-right: dashed 1px lightgray">
+                                <i class="fa fa-link" style="font-size: 30px;margin-bottom: 10px"></i><br>
+                                自动化测试
+                            </el-col>
+                            <el-col class="col" :span="8">
+                                <i class="fa fa-codepen" style="font-size: 30px;margin-bottom: 10px"></i><br>
+                                免费开源
+                            </el-col>
+                        </el-row>
+                    </el-col>
+                    <el-col class="col" :span="7"></el-col>
+                </el-row>
             </div>
         </div>
-    </el-row>
-    <el-row class="row" style="margin: 0;padding: 20px 0 0 0;background-color: white">
-        <el-row class="row" style="height: 50px;line-height: 50px;font-size: 30px;text-align: center;margin-top: 10px">
-            为你提供了接口的一切
-        </el-row>
-        <el-row class="row" style="height: 120px;color: gray;font-size: large;text-align: center">
-            <el-col :span="8" class="col">
-                <img style="height: 35px;width: 35px;margin-top: 20px;margin-bottom: 10px;" src="./pic/icon/group.png"><br>
-                多人协作
-            </el-col>
-            <el-col :span="8" class="col">
-                <img style="height: 35px;width: 35px;margin-top: 20px;margin-bottom: 10px;" src="./pic/icon/https.png"><br>
-                HTTPS支持
-            </el-col>
-            <el-col :span="8" class="col">
-                <img style="height: 35px;width: 35px;margin-top: 20px;margin-bottom: 10px;" src="./pic/icon/mock.png"><br>
-                Mock数据
-            </el-col>
-        </el-row>
-        <el-row class="row" style="height: 120px;color: gray;font-size: larger;text-align: center">
-            <el-col :span="8" class="col">
-                <img style="height: 35px;width: 35px;margin-top: 20px;margin-bottom: 10px;" src="./pic/icon/cros.png"><br>
-                跨域请求
-            </el-col>
-            <el-col :span="8" class="col">
-                <img style="height: 35px;width: 35px;margin-top: 20px;margin-bottom: 10px;" src="./pic/icon/net.png"><br>
-                内网测试
-            </el-col>
-            <el-col :span="8" class="col">
-                <img style="height: 35px;width: 35px;margin-top: 20px;margin-bottom: 10px;" src="./pic/icon/doc.png"><br>
-                文档编写
-            </el-col>
-        </el-row>
-    </el-row>
-    <el-row class="row" style="background-color: white;text-align: center">
-        <img src="./pic/index/doc.png" style="width: 100%;display: block">
-    </el-row>
-    <el-row class="row" style="background-color: white;text-align: center">
-        <img src="./pic/index/run.png" style="width: 100%;display: block">
-    </el-row>
-    <el-row class="row" style="background-color: white;text-align: center;">
-        <img src="./pic/index/mock.png" style="width: 100%;display: block">
-    </el-row>
-    <el-row class="row" style="background-color: white;">
-        <img src="./pic/index/group.jpg" style="width: 100%;display: block">
-    </el-row>
-    <el-row class="row" style=";background-color: white;text-align: center;padding-bottom: 50px">
-        <el-row class="row" style="margin-top: 50px;margin-bottom: 50px;font-size: 30px;">
-            SBDoc已为上千项目的数万接口提供服务
-        </el-row>
-        <table style="width: 70%;margin: 0 auto" cellspacing="10">
-            <tbody>
-            <tr>
-                <td style="width: 20%;"><a href="http://element.eleme.io/#/zh-CN" target="_blank"><img src="pic/logo/element.png" style="width: 100%;"></a></td>
-                <td style="width: 20%;"><a href="http://cn.vuejs.org/" target="_blank"><img src="pic/logo/vue.png" style="width: 100%;"></a></td>
-                <td style="width: 20%;"><a href="http://www.kuaimaxueche.com/" target="_blank"><img src="pic/logo/kuaima.png" style="width: 100%;"></a></td>
-                <td style="width: 20%;"><a href="http://www.ly.com/" target="_blank"><img src="pic/logo/tongcheng.png" style="width: 100%;"></a></td>
-                <td style="width: 20%;"><a href="http://www.injedu.com/" target="_blank"><img src="pic/logo/yingjie.png" style="width: 100%;"></a></td>
-            </tr>
-            <tr>
-                <td style="width: 20%;"><a href="http://www.mealcome.com/" target="_blank"><img src="pic/logo/meal.png" style="width: 100%;"></a></td>
-                <td style="width: 20%;"><a href="http://www.yutiansut.com/" target="_blank"><img src="pic/logo/quan.png" style="width: 100%;"></a></td>
-                <td style="width: 20%;"><a href="https://www.bugclose.com/" target="_blank"><img src="pic/logo/bug.png" style="width: 100%;background: #00adef"></a></td>
-                <td style="width: 20%;"><a href="http://www.leadbank.com.cn/" target="_blank"><img src="pic/logo/deli.png" style="width: 100%;"></a></td>
-                <td style="width: 20%;"><a href="http://www.imzhangyue.com/" target="_blank"><img src="pic/logo/zhangyue.png" style="width: 100%;"></a></td>
-            </tr>
-            </tbody>
-        </table>
-    </el-row>
-    <el-row class="row" style="height: 300px;;background-image: url(./pic/index/team.jpg);background-position:center center;background-size: cover;">
-       <el-row class="row" style="text-align: center;margin-top: 50px;font-size: 30px;color: white">
-           500+的团队在使用，被百余个开发者点赞
-       </el-row>
-        <el-row class="row" style="text-align: center;margin-top: 30px">
-            <el-carousel height="150px" style="width: 70%;margin: 0 auto;color: white;font-size: small;background-image: url(./pic/index/teamdis.png);background-position:center center;background-size: cover;">
-                <el-carousel-item v-for="item in dis">
-                    <div class="row" style="height: 100%;text-align: center">
-                        <h2>
-                            {{item.title}}
-                        </h2>
-                        <h4>
-                            {{item.name}}
-                        </h4>
-                    </div>
-                </el-carousel-item>
-            </el-carousel>
-        </el-row>
-    </el-row>
-    <el-row class="row" style="background-color: rgb(39,52,68);color: white">
-        <el-row class="row" style="text-align: center;padding-top: 50px;padding-bottom: 30px">
-            <a href="./about/about.html" style="text-decoration: none;color: white" target="_blank">关于我们</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-            <a href="./donate/donate.html" style="text-decoration: none;color: white" target="_blank">支持我们</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-            <a href="./help/help.html" style="text-decoration: none;color: white" target="_blank">帮助中心</a>
-        </el-row>
-        <el-row class="row" style="text-align: center;color: white;margin-bottom: 30px">
-            Copyright&nbsp;©&nbsp;2016～2017&nbsp;合肥市胖胖羊信息科技有限责任公司&nbsp;皖ICP备17002996号
-        </el-row>
-    </el-row>
+        <div class="page" style="background-color: white;display: table">
+            <div style="width: 100%;height: 100%;display: table-cell;vertical-align: middle;text-align: center">
+                <el-row class="row">
+                    <el-col class="col" :span="2">
+                        &nbsp;
+                    </el-col>
+                    <el-col class="col" :span="11" style="padding: 0 10px 0 10px">
+                        <img src="./pic/index/1.png" style="width: 100%">
+                    </el-col>
+                    <el-col class="col" :span="9" style="text-align: left;padding-left: 20px;">
+                        <div style="font-weight: lighter;font-size: 30px">
+                            在线文档
+                        </div>
+                        <h3 style="font-weight: lighter;color: gray">
+                            restful,query,header,body,raw信息一应俱全，JSON层次采用可视化编辑,结构清晰
+                        </h3>
+                        <div style="font-weight: lighter;font-size: 30px">
+                            版本管理
+                        </div>
+                        <h3 style="font-weight: lighter;color: gray">
+                            项目版本和接口快照保证你可以实时回溯到任何状态
+                        </h3>
+                    </el-col>
+                    <el-col class="col" :span="2">
+
+                    </el-col>
+                </el-row>
+            </div>
+        </div>
+        <div class="page" style="background-color: white;display: table">
+            <div style="width: 100%;height: 100%;display: table-cell;vertical-align: middle;text-align: center">
+                <h1 style="font-weight: lighter;font-size: 35px">
+                    调试运行，接口场景自动化测试
+                </h1>
+                <h3 style="font-weight: lighter;color: gray">
+                    https,接口加密，文件上传，so easy！独有的proxy技术加持为您冲破内网的束缚
+                </h3>
+                <el-row class="row" style="margin-top: 50px">
+                    <el-col class="col" :span="3">
+                        &nbsp;
+                    </el-col>
+                    <el-col class="col" :span="18">
+                        <img src="./pic/index/2.png" style="width: 100%">
+                    </el-col>
+                    <el-col class="col" :span="3">
+
+                    </el-col>
+                </el-row>
+            </div>
+        </div>
+        <div class="page" style="background-color: white;display: table">
+            <div style="width: 100%;height: 100%;display: table-cell;vertical-align: middle;text-align: center">
+                <el-row class="row">
+                    <el-col class="col" :span="2">
+                        &nbsp;
+                    </el-col>
+                    <el-col class="col" :span="9" style="padding: 0 10px 0 10px;text-align: left">
+                        <div style="font-weight: lighter;font-size: 35px">
+                            无缝Mock
+                        </div>
+                        <h1 style="font-weight: lighter;font-size: 35px">
+                            我们要的是卓越
+                        </h1>
+                        <h3 style="font-weight: lighter;color: gray">
+                            简单强大，只需要把mock server的根地址替换成你web项目的地址，mock就会在神不知鬼不觉中悄悄进行！
+                        </h3>
+                    </el-col>
+                    <el-col class="col" :span="11" style="text-align: left;padding-left: 20px;">
+                        <img src="./pic/index/4.png" style="width: 100%">
+                    </el-col>
+                    <el-col class="col" :span="2">
+
+                    </el-col>
+                </el-row>
+            </div>
+        </div>
+        <div class="page" style="background-color: white;display: table">
+            <div style="width: 100%;height: 100%;display: table-cell;vertical-align: middle;text-align: center">
+                <h1 style="font-weight: lighter;font-size: 35px">
+                    团队协作，日常动态一网打尽
+                </h1>
+                <h3 style="font-weight: lighter;color: gray">
+                    作为团队的管理员，你可以查看团队的所有状态以及编辑项目和成员信息
+                </h3>
+                <el-row class="row" style="margin-top: 50px">
+                    <el-col class="col" :span="3">
+                        &nbsp;
+                    </el-col>
+                    <el-col class="col" :span="18">
+                        <img src="./pic/index/5.png" style="width: 755px;height: 409px">
+                    </el-col>
+                    <el-col class="col" :span="3">
+
+                    </el-col>
+                </el-row>
+            </div>
+        </div>
+        <div class="page" style="background-color: white;display: table">
+            <div style="width: 100%;height: 100%;display: table-cell;vertical-align: middle;text-align: center">
+                <el-row class="row" style=";background-color: white;text-align: center;padding-bottom: 50px">
+                    <el-row class="row" style="margin-top: 50px;margin-bottom: 50px;font-size: 30px;">
+                        DOClever已为上千项目的数万接口提供服务
+                    </el-row>
+                    <table style="width: 80%;margin: 0 auto" cellspacing="10">
+                        <tbody>
+                        <tr>
+                            <td style="width: 20%;"><a href="http://element.eleme.io/#/zh-CN" target="_blank"><img
+                                    src="pic/logo/element.png" style="width: 100%;"></a></td>
+                            <td style="width: 20%;"><a href="http://cn.vuejs.org/" target="_blank"><img
+                                    src="pic/logo/vue.png" style="width: 100%;"></a></td>
+                            <td style="width: 20%;"><a href="http://www.kuaimaxueche.com/" target="_blank"><img
+                                    src="pic/logo/kuaima.png" style="width: 100%;"></a></td>
+                            <td style="width: 20%;"><a href="http://www.ly.com/" target="_blank"><img
+                                    src="pic/logo/tongcheng.png" style="width: 100%;"></a></td>
+                            <td style="width: 20%;"><a href="http://www.injedu.com/" target="_blank"><img
+                                    src="pic/logo/yingjie.png" style="width: 100%;"></a></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;"><a href="http://www.mealcome.com/" target="_blank"><img
+                                    src="pic/logo/meal.png" style="width: 100%;"></a></td>
+                            <td style="width: 20%;"><a href="http://www.yutiansut.com/" target="_blank"><img
+                                    src="pic/logo/quan.png" style="width: 100%;"></a></td>
+                            <td style="width: 20%;"><a href="https://www.bugclose.com/" target="_blank"><img
+                                    src="pic/logo/bug.png" style="width: 100%;background: #00adef"></a></td>
+                            <td style="width: 20%;"><a href="http://www.leadbank.com.cn/" target="_blank"><img
+                                    src="pic/logo/deli.png" style="width: 100%;"></a></td>
+                            <td style="width: 20%;"><a href="http://www.imzhangyue.com/" target="_blank"><img
+                                    src="pic/logo/zhangyue.png" style="width: 100%;"></a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </el-row>
+            </div>
+        </div>
+        <div class="page" style="background-color: white;display: table">
+            <div style="width: 100%;height: 100%;display: table-cell;vertical-align: middle;text-align: center;background-image: url(./pic/index/back.jpg)">
+                <el-row class="row" style="height: 300px;background-position:center center;background-size: cover;">
+                    <el-row class="row" style="text-align: center;margin-top: 50px;font-size: 30px;color: white">
+                        500+的团队在使用，被百余个开发者点赞
+                    </el-row>
+                    <el-row class="row" style="text-align: center;margin-top: 30px">
+                        <el-carousel height="150px"
+                                     style="width: 70%;margin: 0 auto;color: white;font-size: small;background-position:center center;background-size: cover;">
+                            <el-carousel-item v-for="item in dis">
+                                <div class="row" style="height: 100%;text-align: center">
+                                    <h2>
+                                        {{item.title}}
+                                    </h2>
+                                    <h4>
+                                        {{item.name}}
+                                    </h4>
+                                </div>
+                            </el-carousel-item>
+                        </el-carousel>
+                    </el-row>
+                </el-row>
+                <el-row class="row" style="background-color: rgb(39,52,68);color: white;position: absolute;bottom: 0px">
+                    <el-row class="row" style="text-align: center;padding-top: 50px;padding-bottom: 30px">
+                        <a href="./about/about.html" style="text-decoration: none;color: white" target="_blank">关于我们</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+                        <a href="./donate/donate.html" style="text-decoration: none;color: white"
+                           target="_blank">支持我们</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+                        <a href="./help/help.html" style="text-decoration: none;color: white" target="_blank">帮助中心</a>
+                    </el-row>
+                    <el-row class="row" style="text-align: center;color: white;margin-bottom: 30px">
+                        Copyright&nbsp;©&nbsp;2016～2017&nbsp;合肥市胖胖羊信息科技有限责任公司&nbsp;皖ICP备17002996号
+                    </el-row>
+                </el-row>
+            </div>
+        </div>
+    </div>
+    <el-button type="text" style="position: fixed;bottom: 30px;font-size: 35px;color: gray;font-weight: lighter;left: 50%;margin-left: -30px;width: 60px" v-if="bShowNext" @click="moveNext"><i class="fa fa-arrow-circle-o-down"></i></el-button>
 </div>
 <script src="../dist/vendor.bundle.js"></script>
 <script src="./lib/element/index.js"></script>

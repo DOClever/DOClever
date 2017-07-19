@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="SBDoc"  size="small" ref="box" :modal="hud">
+    <el-dialog title="DOClever"  size="small" ref="box" :modal="hud">
         <el-row style="background-color: white;height: 100%;padding: 20px;" class="row">
             <el-input type="textarea" :rows="6" :placeholder="placeholder" v-model="text" :disabled="true"></el-input>
         </el-row>
