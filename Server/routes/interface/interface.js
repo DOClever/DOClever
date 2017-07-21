@@ -77,70 +77,61 @@ var validateUser =async (function validateUser(req) {
     {
         pro=req.clientParam.project;
     }
-    obj=await (project.findOneAsync({
-        _id:pro,
-        $or:[
-            {
-                owner:req.userInfo._id
-            },
-            {
-                "users.user":req.userInfo._id
-            }
-        ]
-    }))
-    if(!obj)
+    if(pro)
     {
-        util.throw(e.projectNotFound,"项目不存在");
-    }
-    else
-    {
-        req.project=obj;
-        if(obj.owner.toString()==req.userInfo._id.toString())
+        obj=await (project.findOneAsync({
+            _id:pro,
+            $or:[
+                {
+                    owner:req.userInfo._id
+                },
+                {
+                    "users.user":req.userInfo._id
+                }
+            ]
+        }))
+        if(!obj)
         {
-            req.access=1;
+            util.throw(e.projectNotFound,"项目不存在");
         }
         else
         {
-            for(let o of obj.users)
+            req.project=obj;
+            if(obj.owner.toString()==req.userInfo._id.toString())
             {
-                if(o.user.toString()==req.userInfo._id.toString())
+                req.access=1;
+            }
+            else
+            {
+                for(let o of obj.users)
                 {
-                    if(o.role==0)
+                    if(o.user.toString()==req.userInfo._id.toString())
                     {
-                        req.access=1;
+                        if(o.role==0)
+                        {
+                            req.access=1;
+                        }
+                        else
+                        {
+                            req.access=0;
+                        }
+                        break;
                     }
-                    else
-                    {
-                        req.access=0;
-                    }
-                    break;
                 }
             }
         }
     }
     if(req.clientParam.group)
     {
-        let g=await (group.findOneAsync({
+        let g=await (req.groupModel.findOneAsync({
             _id:req.clientParam.group
         }));
         if(!g)
         {
-            g=await (groupVersion.findOneAsync({
-                _id:req.clientParam.group
-            }));
-            if(!g)
-            {
-                util.throw(e.groupNotFound,"分组不存在")
-            }
-            else
-            {
-                req.groupModel=groupVersion;
-                req.group=g;
-            }
+            util.throw(e.groupNotFound,"分组不存在")
         }
         else
         {
-            req.groupModel=group;
             req.group=g;
         }
     }
@@ -336,34 +327,49 @@ function info(req,res) {
 function share(req,res) {
     try
     {
-        let inter=await (req.interfaceModel.findOneAsync({
+        let interfaceModel=interface;
+        let inter=await (interfaceModel.findOneAsync({
             _id:req.clientParam.id
         }));
         if(!inter)
         {
-            util.throw(e.interfaceNotFound,"接口不存在");
+            interfaceModel=interfaceVersion;
+            inter=await (interfaceModel.findOneAsync({
+                _id:req.clientParam.id
+            }));
+            if(!inter)
+            {
+                interfaceModel=interfaceSnapshot;
+                inter=await (interfaceModel.findOneAsync({
+                    _id:req.clientParam.id
+                }));
+                if(!inter)
+                {
+                    util.throw(e.interfaceNotFound,"接口不存在");
+                }
+            }
         }
-        let obj=await (req.interfaceModel.populateAsync(inter,{
+        let obj=await (interfaceModel.populateAsync(inter,{
             path:"project",
             select:"name"
         }))
         if(obj.group)
         {
-            obj=await (req.interfaceModel.populateAsync(obj,{
+            obj=await (interfaceModel.populateAsync(obj,{
                 path:"group",
                 select:"name"
             }))
         }
         if(obj.owner)
         {
-            obj=await (req.interfaceModel.populateAsync(obj,{
+            obj=await (interfaceModel.populateAsync(obj,{
                 path:"owner",
                 select:"name"
             }))
         }
         if(obj.editor)
         {
-            obj=await (req.interfaceModel.populateAsync(obj,{
+            obj=await (interfaceModel.populateAsync(obj,{
                 path:"editor",
                 select:"name"
             }))
@@ -438,6 +444,7 @@ function exportJSON(req,res) {
 function importJSON(req,res) {
     try
     {
+        await (validateUser(req));
         let obj;
         try
         {
@@ -454,7 +461,7 @@ function importJSON(req,res) {
             return;
         }
         let objGroup=await (req.groupModel.findOneAsync({
-            _id:req.clientParam.id
+            _id:req.clientParam.group
         }))
         if(!objGroup)
         {

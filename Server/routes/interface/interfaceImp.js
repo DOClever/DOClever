@@ -174,7 +174,7 @@ var interface=[
         "method":"POST",
         "path":"/interface/importjson",
         "param": {
-            id:{
+            group:{
                 type:String
             },
             json:{

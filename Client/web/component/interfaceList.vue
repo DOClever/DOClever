@@ -338,7 +338,7 @@
                     }
                     $.startHud();
                     net.post("/interface/importjson",{
-                        id:item._id,
+                        group:item._id,
                         json:val
                     }).then(function (data) {
                         $.stopHud();

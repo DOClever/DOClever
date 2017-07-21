@@ -29,55 +29,101 @@
     <el-row class="row" style="background-image: url('../pic/help/back.jpg');background-position:center center;background-size: cover;height: 500px;">
 
     </el-row>
-    <el-row class="row" style="text-align: center;height: 700px;background-color: white;padding-top: 20px">
-        <el-col class="col" :span="4" style="font-size: larger;color: #50a3ff;font-weight: bold;">
-            基础
-            <ul style="font-size:15px;color: gray;padding: 0">
-                <li style="list-style-type:none;">
-                    <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'b0385i031zz',this.innerText)">注册登录</a>
-                </li>
-                <li style="list-style-type:none;">
-                    <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'t0385zwcw9z',this.innerText)">创建工程</a>
-                </li>
-            </ul>
-            接口管理
-            <ul style="font-size:15px;color: gray;padding: 0">
-                <li style="list-style-type:none;">
-                    <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'s03857arrz0',this.innerText)">项目设置</a>
-                </li>
-                <li style="list-style-type:none;">
-                    <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'f0385g0cx4u',this.innerText)">分组设置</a>
-                </li>
-                <li style="list-style-type:none;">
-                    <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'c0385acs66r',this.innerText)">新建接口</a>
-                </li>
-                <li style="list-style-type:none;">
-                    <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'i03856babac',this.innerText)">接口管理</a>
-                </li>
-            </ul>
-            接口调试
-            <ul style="font-size:15px;color: gray;padding: 0">
-                <li style="list-style-type:none;">
-                    <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'z0385uxb9wz',this.innerText)">接口测试</a>
-                </li>
-                <li style="list-style-type:none;">
-                    <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'z0385uxb9wz',this.innerText)">一键生成</a>
-                </li>
-                <li style="list-style-type:none;">
-                    <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'s0385eojzym',this.innerText)">内网调试</a>
-                </li>
-                <li style="list-style-type:none;">
-                    <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'l0389pjhedx',this.innerText)">Mock数据</a>
-                </li>
-            </ul>
-        </el-col>
-        <el-col class="col" :span="20">
-            <el-row class="row" style="text-align: center;font-size: 20px;color: gray;margin-bottom: 20px" id="title">
-                注册登录
+    <el-tabs style="width: 90%;margin: 0 auto;">
+        <el-tab-pane label="视频文档">
+            <el-row class="row" style="text-align: center;height: 700px;background-color: white;padding-top: 20px">
+                <el-col class="col" :span="4" style="font-size: larger;color: #50a3ff;font-weight: bold;">
+                    基础
+                    <ul style="font-size:15px;color: gray;padding: 0">
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'',this.innerText)">注册登录(接入中)</a>
+                        </li>
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'h0527t7izca',this.innerText)">创建工程</a>
+                        </li>
+                    </ul>
+                    接口管理
+                    <ul style="font-size:15px;color: gray;padding: 0">
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'k0527970gld',this.innerText)">创建接口</a>
+                        </li>
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'j0527v03qgf',this.innerText)">接口管理</a>
+                        </li>
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'b0527f03kj2',this.innerText)">项目设置</a>
+                        </li>
+                    </ul>
+                    接口调试
+                    <ul style="font-size:15px;color: gray;padding: 0">
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'c0527ryf71k',this.innerText)">接口测试</a>
+                        </li>
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'t0527uylbvj',this.innerText)">一键生成</a>
+                        </li>
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'v0527vcmbqn',this.innerText)">内网调试</a>
+                        </li>
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'y05272f98by',this.innerText)">Mock数据</a>
+                        </li>
+                    </ul>
+                    项目设置
+                    <ul style="font-size:15px;color: gray;padding: 0">
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'b0527d6351u',this.innerText)">状态码</a>
+                        </li>
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'',this.innerText)">环境注入(接入中)</a>
+                        </li>
+                        <li style="list-style-type:none;">
+                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'l05273geo7b',this.innerText)">文档</a>
+                        </li>
+                    </ul>
+                </el-col>
+                <el-col class="col" :span="20">
+                    <el-row class="row" style="text-align: center;font-size: 20px;color: gray;margin-bottom: 20px" id="title">
+                        注册登录
+                    </el-row>
+                    <iframe frameborder="0" width="640" height="498" src="https://v.qq.com/iframe/player.html?vid=b0385i031zz&tiny=0&auto=0" allowfullscreen id="video"></iframe>
+                </el-col>
             </el-row>
-            <iframe frameborder="0" width="640" height="498" src="https://v.qq.com/iframe/player.html?vid=b0385i031zz&tiny=0&auto=0" allowfullscreen id="video"></iframe>
-        </el-col>
-    </el-row>
+        </el-tab-pane>
+        <el-tab-pane label="疑难解答">
+            <h3>
+                如果我用nginx接管了前端，那么需要注意什么呢？
+            </h3>
+            <p>如果你用nginx接管了前端页面，那么需要对nginx做一些简单的设置，因为DOClever在调试接口的时候会发送一些下划线开头的自定义http头部，而nginx默认会过滤掉这些头部，所以我们需要在nginx的配置文件中http或者server的配置项中添加underscores_in_headers on;允许在header的字段中带下划线，然后重启nginx即可
+            </p>
+            <hr>
+            <h3>
+                出现如下错误:<br>
+                <img src="../pic/help/1.png" style="width: 600px">
+            </h3>
+            <p>
+                说明你的node版本高了，导致编译不过，建议你使用6.10.0版本，这个版本为lts版本，长期维护，<a href="https://nodejs.org/en/blog/release/v6.10.0/" target="_blank">下载地址</a>
+            </p>
+            <hr>
+            <h3>
+                出现如下错误:<br>
+                <img src="../pic/help/2.png" style="width: 600px">
+            </h3>
+            <p>
+                因为你的url是内网环境，如果你是用的线上版本，请确保net.js 已经开启，如果你用的是内网部署版本，说明你内网部署的DOClever服务器和你测试的接口服务器不在同一个内网里，请确保Proxy开关打开：<br>
+                <img src="../pic/help/3.png" style="width: 300px"><br>
+                然后启动net.js
+            </p>
+            <hr>
+            <h3>
+                出现如下错误:<br>
+                <img src="../pic/help/4.jpg" style="width: 600px">
+            </h3>
+            <p>
+                说明你的mongodb没有连接上，检查mongodb是否已经开启，可以用romongodb这样的客户端根据检测，然后确保你config.json里面的数据库配置信息是否填写正确，数据库是否存在。
+            </p>
+        </el-tab-pane>
+    </el-tabs>
     <el-row class="row" style="background-color: rgb(39,52,68);color: white">
         <el-row class="row" style="text-align: center;padding-top: 50px;padding-bottom: 30px">
             <a href="../about/about.html" style="text-decoration: none;color: white" target="_blank">关于我们</a>&nbsp;&nbsp;|&nbsp;&nbsp;

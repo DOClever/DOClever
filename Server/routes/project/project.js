@@ -693,7 +693,8 @@ function info(req,res) {
             _id:req.clientParam.id
         },null,{
             populate:{
-                path:"users.user"
+                path:"users.user",
+                select:"-password"
             }
         }))
         if(req.version)
