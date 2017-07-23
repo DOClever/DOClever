@@ -64,7 +64,8 @@ var validateUser =async (function validateUser(req) {
         let obj=await (req.interfaceModel.findOneAsync(req.clientParam.id.length==24?{
             _id:req.clientParam.id
         }:{
-            id:req.clientParam.id
+            id:req.clientParam.id,
+            project:req.clientParam.project
         }));
         if(!obj)
         {
@@ -190,6 +191,26 @@ function create(req,res) {
             {
                 if(obj.group.toString()!=req.clientParam.group)
                 {
+                    if(req.interfaceModel!=interfaceSnapshot)
+                    {
+                        let query={
+                            id:obj.id,
+                            project:obj.project
+                        };
+                        if(req.headers["docleverversion"])
+                        {
+                            query.version=req.headers["docleverversion"]
+                        }
+                        else
+                        {
+                            query.version={
+                                $exists:false
+                            }
+                        }
+                        await (interfaceSnapshot.updateAsync(query,{
+                            group:req.clientParam.group
+                        }));
+                    }
                     let arr=await (refreshInterface(req,req.project._id.toString()))
                     util.ok(res,arr,"修改成功");
                     return;
@@ -244,6 +265,23 @@ function remove(req,res) {
         let obj=await (req.groupModel.findOneAsync(query))
         req.interface.group=obj._id;
         await (req.interface.saveAsync())
+        query={
+            id:req.interface.id,
+            project:req.project._id
+        };
+        if(req.headers["docleverversion"])
+        {
+            query.version=req.headers["docleverversion"]
+        }
+        else
+        {
+            query.version={
+                $exists:false
+            }
+        }
+        await (interfaceSnapshot.updateAsync(query,{
+            group:obj._id
+        }));
         let arr=await (refreshInterface(req,req.project._id));
         util.ok(res,arr,"已移到回收站");
     }
@@ -271,6 +309,21 @@ function move(req,res) {
         await (req.interfaceModel.updateAsync({
             _id:req.clientParam.id
         },update))
+        let query={
+            id:req.interface.id,
+            project:req.project._id
+        };
+        if(req.headers["docleverversion"])
+        {
+            query.version=req.headers["docleverversion"]
+        }
+        else
+        {
+            query.version={
+                $exists:false
+            }
+        }
+        await (interfaceSnapshot.updateAsync(query,update));
         util.ok(res,"移动成功");
     }
     catch (err)
@@ -391,15 +444,22 @@ function destroy(req,res) {
             util.throw(e.userForbidden,"没有权限");
 
         }
-        await (interface.removeAsync({
-            id:req.interface.id
-        }))
-        await (interfaceVersion.removeAsync({
-            id:req.interface.id
-        }))
-        await (interfaceSnapshot.removeAsync({
-            id:req.interface.id
-        }))
+        await (req.interface.removeAsync())
+        let query={
+            id:req.interface.id,
+            project:req.project._id
+        }
+        if(req.headers["docleverversion"])
+        {
+            query.version=req.headers["docleverversion"];
+        }
+        else
+        {
+            query.version={
+                $exists:false
+            }
+        }
+        await (interfaceSnapshot.removeAsync(query))
         let arr=await (refreshInterface(req,req.project._id));
         util.ok(res,arr,"删除成功");
     }

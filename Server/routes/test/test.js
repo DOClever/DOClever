@@ -43,7 +43,8 @@ function validateUser(req,res) {
             req.test=await (req.testModel.findOneAsync(req.clientParam.id.length==24?{
                 _id:req.clientParam.id
             }:{
-                id:req.clientParam.id
+                id:req.clientParam.id,
+                project:req.clientParam.project
             },null,{
                 populate:{
                     path:"owner",

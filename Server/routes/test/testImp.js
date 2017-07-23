@@ -135,18 +135,10 @@ var interface=[
             id:{
                 type:String,
             },
-        },
-        "data":String,
-        user:1,
-        handle:[test.validateUser,test.testInfo]
-    },
-    {
-        "method":"GET",
-        "path":"/test/info",
-        "param": {
-            id:{
+            project:{
                 type:String,
-            },
+                optional:1
+            }
         },
         "data":String,
         user:1,

@@ -296,7 +296,8 @@
                         id:session.get("projectId")
                     }),
                     net.get("/interface/item",{
-                        id:objInterface.id
+                        id:objInterface.id,
+                        project:session.get("projectId")
                     })
                 ]).then(function (values) {
                     $.stopHud();
@@ -382,7 +383,8 @@
                         project:session.get("projectId")
                     }),
                     net.get("/test/info",{
-                        id:id
+                        id:id,
+                        project:session.get("projectId")
                     })
                 ]).then(function (values) {
                     $.stopHud();
@@ -595,6 +597,7 @@
                         var inter=JSON.parse(obj.getAttribute("data"));
                         arrPromise.push(net.get("/interface/item",{
                             id:inter.id,
+                            project:session.get("projectId")
                         }).then(function (data) {
                             if(data.code==200)
                             {
@@ -624,6 +627,7 @@
                         var id=obj.getAttribute("data");
                         arrPromise.push(net.get("/test/info",{
                             id:id,
+                            project:session.get("projectId")
                         }).then(function (data) {
                             if(data.code==200)
                             {

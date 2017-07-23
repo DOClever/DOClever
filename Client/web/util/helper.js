@@ -2121,18 +2121,19 @@ helper.runTestCode=async function (code,test,global,opt,root) {
             try
             {
                 testObj=await net.get("/test/info",{
-                id:obj
-            }).then(function (data) {
-                if(data.code==200)
-                {
-                    return data.data
-                }
-                else
-                {
-                    $.notify(data.msg,0);
-                    throw "error";
-                }
-            })
+                    id:obj,
+                    project:session.get("projectId")
+                }).then(function (data) {
+                    if(data.code==200)
+                    {
+                        return data.data
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                        throw "error";
+                    }
+                })
             }
             catch (err)
             {

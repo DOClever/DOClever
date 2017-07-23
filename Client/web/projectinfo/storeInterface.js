@@ -961,7 +961,8 @@ module.exports=new Vuex.Store({
             var itemData;
             return net.get("/interface/item",{
                 id:obj.item1._id,
-                group:obj.item._id
+                group:obj.item._id,
+                project:session.get("projectId")
             }).then(function (data) {
                 if(data.code==200)
                 {
@@ -1041,8 +1042,11 @@ module.exports=new Vuex.Store({
             }
             else
             {
-                context.commit("setInterface",data.data1);
-                context.state.interface.select=1;
+                if(!session.get("snapshotId"))
+                {
+                    context.commit("setInterface",data.data1);
+                    context.state.interface.select=1;
+                }
                 context.commit("setInterfaceEdit",data.data);
             }
             context.commit("initParam");
@@ -1205,9 +1209,12 @@ module.exports=new Vuex.Store({
                 {
                     if(typeof(data.data)=="string")
                     {
-                        context.state.interface.name=context.state.interfaceEdit.name;
-                        context.state.interface.method=context.state.interfaceEdit.method;
-                        context.state.interface.finish=context.state.interfaceEdit.finish;
+                        if(!session.get("snapshotId"))
+                        {
+                            context.state.interface.name=context.state.interfaceEdit.name;
+                            context.state.interface.method=context.state.interfaceEdit.method;
+                            context.state.interface.finish=context.state.interfaceEdit.finish;
+                        }
                         Vue.set(context.state.interfaceEdit,"editor",{name:session.get("name")});
                         Vue.set(context.state.interfaceEdit,"updatedAt",$.getNowFormatDate("yyyy-MM-dd hh:mm:ss"))
                     }

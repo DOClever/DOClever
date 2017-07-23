@@ -34,10 +34,6 @@
     </mainnav>
     <el-row class="row" style="margin-top: 20px;padding-left: 80px;">
         <div style="background-color: rgb(39,52,68);width: 80px;left: 0;top: 80px;position: fixed;height: calc(100% - 80px)">
-            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==0?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=0">
-                <span class="fa fa-info-circle" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
-                概况
-            </div>
             <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==1?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=1">
                 <span class="fa fa-list" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
                 项目
@@ -45,6 +41,10 @@
             <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==2?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=2">
                 <span class="fa fa-users" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
                 成员
+            </div>
+            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==0?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=0">
+                <span class="fa fa-info-circle" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
+                概况
             </div>
         </div>
         <el-col class="col" :span="24" style="height: calc(100vh - 80px);overflow-x: hidden;overflow-y: auto">

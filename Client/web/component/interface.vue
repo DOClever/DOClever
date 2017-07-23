@@ -917,6 +917,7 @@
                     {
                         var child=$.showBox(_this,"snapshotList",{
                             arr:data.data,
+                            id:_this.interfaceEdit._id
                         });
 
                     }

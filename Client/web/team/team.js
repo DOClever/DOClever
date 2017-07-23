@@ -26,7 +26,7 @@ var vue=new Vue({
     el: "#app",
     data: {
         session:$.clone(session.raw()),
-        type:0,
+        type:1,
         obj:{
             notice:[],
             project:[],

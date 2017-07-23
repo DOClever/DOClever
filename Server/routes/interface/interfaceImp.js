@@ -138,6 +138,10 @@ var interface=[
                 type:String,
                 optional:1
             },
+            project:{
+                type:String,
+                optional:1
+            },
             run:{
                 optional:1,
                 type:Number

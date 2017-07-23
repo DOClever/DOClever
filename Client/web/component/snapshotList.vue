@@ -55,7 +55,7 @@
 <script>
     var page=require("./page.vue")
     module.exports={
-        props:["arr"],
+        props:["arr","id"],
         data:function () {
             return {
                 arrSnapshot:this.arr
@@ -157,7 +157,7 @@
                                 session.remove("snapshotDate");
                                 _this.$store.dispatch("info",{
                                     item1:{
-                                        "_id":item.id,
+                                        "_id":item._id,
                                     },
                                     item:{
                                         "_id":""

@@ -795,6 +795,9 @@ function clear(req,res) {
         await (req.interfaceModel.removeAsync({
             group:obj._id
         }));
+        await (interfaceSnapshot.removeAsync({
+            group:obj._id
+        }));
         let arr=await (refreshInterface(req,req.clientParam.id));
         util.ok(res,arr,"ok");
     }
@@ -2287,213 +2290,219 @@ function importSwagger(req,res) {
                         };
                     }
                 }
-                for(let o of interRaw.parameters)
+                if(interRaw.parameters)
                 {
-                    if(o.in=="path")
+                    for(let o of interRaw.parameters)
                     {
-                        rest.push({
-                            value:{
-                                "status" : "",
-                                "data" : [],
-                                "type" : 0
-                            },
-                            name:o.name,
-                            remark:o.description?o.description:""
-                        })
-                    }
-                    else if(o.in=="query")
-                    {
-                        query.push({
-                            name:o.name,
-                            remark:o.description?o.description:"",
-                            must:o.required?1:0,
-                            value:{
-                                "status" : "",
-                                "data" : (o.items && o.items.enum)?o.items.enum.map(function (obj) {
-                                    return {
-                                        value:obj,
-                                        remark:""
-                                    }
-                                }):[],
-                                "type" : 0
+                        if(o.in=="path")
+                        {
+                            rest.push({
+                                value:{
+                                    "status" : "",
+                                    "data" : [],
+                                    "type" : 0
+                                },
+                                name:o.name,
+                                remark:o.description?o.description:""
+                            })
+                        }
+                        else if(o.in=="query")
+                        {
+                            query.push({
+                                name:o.name,
+                                remark:o.description?o.description:"",
+                                must:o.required?1:0,
+                                value:{
+                                    "status" : "",
+                                    "data" : (o.items && o.items.enum)?o.items.enum.map(function (obj) {
+                                        return {
+                                            value:obj,
+                                            remark:""
+                                        }
+                                    }):[],
+                                    "type" : 0
+                                }
+                            })
+                        }
+                        else if(o.in=="header")
+                        {
+                            header.push({
+                                name:o.name,
+                                remark:o.description?o.description:"",
+                                value:""
+                            })
+                        }
+                        else if(o.in=="body")
+                        {
+                            if(bodyInfo.type==0)
+                            {
+                                let objBody={
+                                    name:o.name,
+                                    type:0,
+                                    must:o.required?1:0,
+                                    remark:o.description?o.description:""
+                                };
+                                body.push(objBody);
                             }
-                        })
-                    }
-                    else if(o.in=="header")
-                    {
-                        header.push({
-                            name:o.name,
-                            remark:o.description?o.description:"",
-                            value:""
-                        })
-                    }
-                    else if(o.in=="body")
-                    {
-                        if(bodyInfo.type==0)
+                            else if(bodyInfo.type==1 && bodyInfo.rawType==2)
+                            {
+                                let objBody={
+                                    mock : "",
+                                    remark : o.description,
+                                    type : 1,
+                                    must : o.required?1:0,
+                                    name :o.name
+                                };
+                                if(o.schema)
+                                {
+                                    if(o.schema.$ref)
+                                    {
+                                        let key=o.schema.$ref.substr(14);
+                                        if(objDef[key])
+                                        {
+                                            let o1=util.clone(objDef[key]);
+                                            o1.remark=objBody.remark;
+                                            o1.must=objBody.must;
+                                            o1.name=objBody.name;
+                                            objBody=o1;
+                                            bodyInfo.rawJSON.push(objBody);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if(o.schema.items)
+                                        {
+                                            objBody.data=[];
+                                            objBody.type=3;
+                                            if(o.schema.items.$ref)
+                                            {
+                                                let key=o.schema.items.$ref.substr(14);
+                                                if(objDef[key])
+                                                {
+                                                    let o1=util.clone(objDef[key]);
+                                                    objBody.data.push(o1);
+                                                    bodyInfo.rawJSON.push(objBody);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                let type;
+                                                let o1=o.schema.items;
+                                                if(o1.type=="string" || o1.type=="byte" || o1.type=="binary" || o1.type=="date" || o1.type=="dateTime" || o1.type=="password")
+                                                {
+                                                    type=0;
+                                                }
+                                                else if(o1.type=="integer" || o1.type=="long" || o1.type=="float" || o1.type=="double")
+                                                {
+                                                    type=1;
+                                                }
+                                                else if(o1.type=="boolean")
+                                                {
+                                                    type=2;
+                                                }
+                                                let o2={
+                                                    mock : o1.default!==undefined?o1.default:"",
+                                                    remark : o1.description?o1.description:"",
+                                                    type : type,
+                                                    must : 1,
+                                                    name :null
+                                                }
+                                                objBody.data.push(o2);
+                                                bodyInfo.rawJSON.push(objBody);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if(o.in=="formData")
                         {
                             let objBody={
                                 name:o.name,
-                                type:0,
+                                type:o.type!="file"?0:1,
                                 must:o.required?1:0,
                                 remark:o.description?o.description:""
                             };
                             body.push(objBody);
+                            header["Content-Type"]="multipart/form-data";
                         }
-                        else if(bodyInfo.type==1 && bodyInfo.rawType==2)
-                        {
-                            let objBody={
-                                mock : "",
-                                remark : o.description,
-                                type : 1,
-                                must : o.required?1:0,
-                                name :o.name
-                            };
-                            if(o.schema)
-                            {
-                                if(o.schema.$ref)
-                                {
-                                    let key=o.schema.$ref.substr(14);
-                                    if(objDef[key])
-                                    {
-                                        let o1=util.clone(objDef[key]);
-                                        o1.remark=objBody.remark;
-                                        o1.must=objBody.must;
-                                        o1.name=objBody.name;
-                                        objBody=o1;
-                                        bodyInfo.rawJSON.push(objBody);
-                                    }
-                                }
-                                else
-                                {
-                                    if(o.schema.items)
-                                    {
-                                        objBody.data=[];
-                                        objBody.type=3;
-                                        if(o.schema.items.$ref)
-                                        {
-                                            let key=o.schema.items.$ref.substr(14);
-                                            if(objDef[key])
-                                            {
-                                                let o1=util.clone(objDef[key]);
-                                                objBody.data.push(o1);
-                                                bodyInfo.rawJSON.push(objBody);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            let type;
-                                            let o1=o.schema.items;
-                                            if(o1.type=="string" || o1.type=="byte" || o1.type=="binary" || o1.type=="date" || o1.type=="dateTime" || o1.type=="password")
-                                            {
-                                                type=0;
-                                            }
-                                            else if(o1.type=="integer" || o1.type=="long" || o1.type=="float" || o1.type=="double")
-                                            {
-                                                type=1;
-                                            }
-                                            else if(o1.type=="boolean")
-                                            {
-                                                type=2;
-                                            }
-                                            let o2={
-                                                mock : o1.default!==undefined?o1.default:"",
-                                                remark : o1.description?o1.description:"",
-                                                type : type,
-                                                must : 1,
-                                                name :null
-                                            }
-                                            objBody.data.push(o2);
-                                            bodyInfo.rawJSON.push(objBody);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if(o.in=="formData")
-                    {
-                        let objBody={
-                            name:o.name,
-                            type:o.type!="file"?0:1,
-                            must:o.required?1:0,
-                            remark:o.description?o.description:""
-                        };
-                        body.push(objBody);
-                        header["Content-Type"]="multipart/form-data";
                     }
                 }
-                for(let status in interRaw.responses)
+                if(interRaw.responses)
                 {
-                    if(status==200)
+                    for(let status in interRaw.responses)
                     {
-                        let objRes=interRaw.responses["200"];
-                        if(objRes.schema.$ref)
+                        if(status==200)
                         {
-                            let key=objRes.schema.$ref.substr(14);
-                            if(objDef[key])
+                            let objRes=interRaw.responses["200"];
+                            if(objRes.schema && objRes.schema.$ref)
                             {
-                                let o1=util.clone(objDef[key]);
-                                if(o1.type==4)
-                                {
-                                    result=o1.data;
-                                }
-                                else
-                                {
-                                    outInfo.type=1;
-                                    outInfo.rawMock=o1.mock?o1.mock:"";
-                                    outInfo.rawRemark=objRes.description?objRes.description:"";
-                                }
-                            }
-                        }
-                        else if(objRes.schema.items)
-                        {
-                            outInfo.jsonType=1;
-                            result=[
-                                {
-                                    name:null,
-                                    must:1,
-                                    type:0,
-                                    remark:"",
-                                    mock:"",
-                                }
-                            ]
-                            if(objRes.schema.items.$ref)
-                            {
-                                let key=objRes.schema.items.$ref.substr(14);
+                                let key=objRes.schema.$ref.substr(14);
                                 if(objDef[key])
                                 {
                                     let o1=util.clone(objDef[key]);
                                     if(o1.type==4)
                                     {
-                                        result[0].type=4;
-                                        result[0].data=o1.data;
+                                        result=o1.data;
                                     }
                                     else
                                     {
-                                        for(let key in o1)
-                                        {
-                                            result[0][key]=o1[key];
-                                        }
+                                        outInfo.type=1;
+                                        outInfo.rawMock=o1.mock?o1.mock:"";
+                                        outInfo.rawRemark=objRes.description?objRes.description:"";
                                     }
                                 }
                             }
-                            else
+                            else if(objRes.schema && objRes.schema.items)
                             {
-                                let type;
-                                let o1=objRes.schema.items;
-                                if(o1.type=="string" || o1.type=="byte" || o1.type=="binary" || o1.type=="date" || o1.type=="dateTime" || o1.type=="password")
+                                outInfo.jsonType=1;
+                                result=[
+                                    {
+                                        name:null,
+                                        must:1,
+                                        type:0,
+                                        remark:"",
+                                        mock:"",
+                                    }
+                                ]
+                                if(objRes.schema.items.$ref)
                                 {
-                                    type=0;
+                                    let key=objRes.schema.items.$ref.substr(14);
+                                    if(objDef[key])
+                                    {
+                                        let o1=util.clone(objDef[key]);
+                                        if(o1.type==4)
+                                        {
+                                            result[0].type=4;
+                                            result[0].data=o1.data;
+                                        }
+                                        else
+                                        {
+                                            for(let key in o1)
+                                            {
+                                                result[0][key]=o1[key];
+                                            }
+                                        }
+                                    }
                                 }
-                                else if(o1.type=="integer" || o1.type=="long" || o1.type=="float" || o1.type=="double")
+                                else
                                 {
-                                    type=1;
+                                    let type;
+                                    let o1=objRes.schema.items;
+                                    if(o1.type=="string" || o1.type=="byte" || o1.type=="binary" || o1.type=="date" || o1.type=="dateTime" || o1.type=="password")
+                                    {
+                                        type=0;
+                                    }
+                                    else if(o1.type=="integer" || o1.type=="long" || o1.type=="float" || o1.type=="double")
+                                    {
+                                        type=1;
+                                    }
+                                    else if(o1.type=="boolean")
+                                    {
+                                        type=2;
+                                    }
+                                    result[0].type=type;
                                 }
-                                else if(o1.type=="boolean")
-                                {
-                                    type=2;
-                                }
-                                result[0].type=type;
                             }
                         }
                     }

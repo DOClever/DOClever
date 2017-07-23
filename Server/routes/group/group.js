@@ -11,6 +11,7 @@ var project=require("../../model/projectModel")
 var group=require("../../model/groupModel")
 var interface=require("../../model/interfaceModel")
 var interfaceVersion=require("../../model/interfaceVersionModel")
+var interfaceSnapshot=require("../../model/interfaceSnapshotModel")
 var groupVersion=require("../../model/groupVersionModel")
 var version=require("../../model/versionModel")
 var fs=require("fs");
@@ -171,6 +172,13 @@ function remove(req,res) {
                 multi:true
             }))
             await (req.group.removeAsync());
+            await (interfaceSnapshot.updateAsync({
+                group:req.group._id
+            },{
+                group:obj._id
+            },{
+                multi:true
+            }));
             let arr=await (refreshInterface(req,req.group.project));
             util.ok(res,arr,"删除成功");
         }

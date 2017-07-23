@@ -210,6 +210,7 @@ module.exports=new Vuex.Store({
             var itemData;
             return net.get("/interface/item",{
                 id:obj.id,
+                project:session.get("projectId")
             }).then(function (data) {
                 if(data.code==200)
                 {
