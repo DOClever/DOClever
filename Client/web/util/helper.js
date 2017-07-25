@@ -1297,10 +1297,10 @@ helper.handleMockInfo=function (type,param,query,header,body,state) {
     if(state && (state.interfaceEdit || state.interface))
     {
         info.global={
-            name:type==0?state.interfaceEdit.name:state.interface.name,
+            name:type==0?(state.interfaceEdit?state.interfaceEdit.name:state.interface.name):state.interface.name,
             baseurl:type==0?"":state.baseurl,
-            path:type==0?state.interfaceEdit.url:state.interface.url,
-            method:type==0?state.interfaceEdit.method:state.interface.method
+            path:type==0?(state.interfaceEdit?state.interfaceEdit.url:state.interface.url):state.interface.url,
+            method:type==0?(state.interfaceEdit?state.interfaceEdit.method:state.interface.method):state.interface.method
         }
     }
     else
