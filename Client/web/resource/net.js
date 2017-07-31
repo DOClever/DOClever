@@ -25,6 +25,9 @@ var getHeader = function (req) {
 
 var filterResHeader = function (headers,res) {
     var ret = {};
+    res.setHeader("Cache-Control", "no-cache,no-store");
+    res.setHeader("Pragrma", "no-cache");
+    res.setHeader("Expires", 0);
     var resHeaders=res.getHeader("Access-Control-Expose-Headers")?res.getHeader("Access-Control-Expose-Headers").toLowerCase():"";
     for (var i in headers) {
         if (!/Access-/i.test(i)) {

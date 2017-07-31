@@ -94,7 +94,7 @@
                             <el-row class="row" style="height: 50px">
                                 <el-button type="primary" style="margin-left: 20px" @click="insertInterface">插入接口</el-button>&nbsp;&nbsp;&nbsp;
                                 <el-button type="primary" @click="insertTest">插入用例</el-button>
-                                <a href="/html/web/projectinfo/test.html" style="float: right;margin-right: 20px;margin-top: 5px">如何编写</a>
+                                <a href="/html/web/projectinfo/test.html" style="float: right;margin-right: 20px;margin-top: 5px" target="_blank">如何编写</a>
                             </el-row>
                             <div class="row" style="height: 300px;border:1px gray solid;margin: 0 auto;width: 95%;padding: 5px;overflow: auto" contenteditable="true" id="testContent">
 

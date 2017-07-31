@@ -276,7 +276,7 @@ module.exports=new Vuex.Store({
                     }
                 }
             })
-            obj.interface.bodyParam.forEach(function (item) {
+            obj.interface.bodyParam.forEach(function (item,i) {
                 if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
                 {
                     item.value={
@@ -338,7 +338,7 @@ module.exports=new Vuex.Store({
                     Vue.set(item,"enable",1);
                 })
             }
-            obj.interface.restParam.forEach(function (item) {
+            obj.interface.restParam.forEach(function (item,i) {
                 if(obj.originInterface && obj.originInterface.id==obj.interface.id)
                 {
                     Vue.set(item,"selValue",obj.originInterface.restParam[i].selValue);

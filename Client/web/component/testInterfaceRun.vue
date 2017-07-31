@@ -43,7 +43,7 @@
                 状态
             </el-col>
             <el-col class="col" :span="10">
-                {{objInterface.finish?"已完成":"未完成"}}
+                {{objInterface.finish==1?"已完成":(objInterface.finish==2?"已废弃":"未完成")}}
             </el-col>
         </el-row>
         <el-row class="row" style="height: 60px;line-height: 60px;text-align: center">

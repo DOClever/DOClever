@@ -86,6 +86,7 @@
                             </template>
                         </el-row>
                         <img :src="imgUrl" v-else-if="type=='img'">
+                        <div v-html="draw" v-else-if="type=='html'"></div>
                         <pre v-else>{{draw}}</pre>
                     </el-tab-pane>
                     <el-tab-pane label="Advance">
@@ -101,6 +102,7 @@
                             </template>
                         </el-row>
                         <img :src="imgUrl" v-else-if="type=='img'">
+                        <div v-html="drawMix" v-else-if="type=='html'"></div>
                         <pre v-else>{{drawMix}}</pre>
                     </el-tab-pane>
                     <el-tab-pane label="Raw">

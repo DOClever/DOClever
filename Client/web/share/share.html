@@ -55,7 +55,7 @@
             开发状态：
         </el-row>
         <el-row class="row" style="padding:0 30px;">
-            {{interface.finish?"开发完成":"开发中"}}
+            {{interface.finish==1?"开发完成":(interface.finish==2?"已废弃":"开发中")}}
         </el-row>
         <el-row class="row" style="padding:0 10px;height: 50px;line-height: 50px;color: #50a3ff">
             描述：

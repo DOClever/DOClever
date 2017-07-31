@@ -32,7 +32,8 @@
             <template v-for="(item1,index1) in item.data">
                 <el-row class="row" :draggable="session.role==0" style="height: 40px;line-height: 40px;cursor: move" v-if="item.show" @mouseenter.native="mouseEnter($event,item1)" @mouseleave.native="mouseLeave($event,item1)" @click.native="info(item,item1,index1,$event)" :section="index" :row="index1" :style="{backgroundColor:item1.select?'#20A0FF':''}" @dragstart.native="dragStart($event,item1,item,index1)">
                     <el-col class="col" :span="2" style="height: 40px;line-height: 40px;text-align: right">
-                        <span class="fa fa-check" style="color: #13ce66;display: inline-block;" v-if="item1.finish"></span>
+                        <span class="fa fa-check" style="color: #13ce66;display: inline-block;" v-if="item1.finish==1"></span>
+                        <span class="fa fa-exclamation" style="color: red;display: inline-block;" v-else-if="item1.finish==2"></span>
                         <span v-else>&nbsp;</span>
                     </el-col>
                     <el-col class="col" :span="5" :style="{fontSize: 'small',margin: 0,color:methodColor(item1.method),padding:0,textAlign:'center',lineHeight:'40px'}" name="treeMethod">

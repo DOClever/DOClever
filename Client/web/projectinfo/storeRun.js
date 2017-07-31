@@ -934,6 +934,14 @@ module.exports=new Vuex.Store({
                     context.state.imgUrl=$.createUrlObject(result.data);
                     context.state.errorCount=0;
                 }
+                else if(result.header["content-type"] && result.header["content-type"].indexOf("/html")>-1)
+                {
+                    context.state.type="html";
+                    context.state.rawData=result.data;
+                    context.state.draw=result.data
+                    context.state.drawMix=result.data;
+                    context.state.errorCount=0;
+                }
                 else
                 {
                     context.state.rawData=result.data;

@@ -104,6 +104,7 @@
                             <el-select style="width: 80%;text-align: center" v-model="interfaceEdit.finish">
                                 <el-option  :value="0" label="开发中"></el-option>
                                 <el-option  :value="1" label="开发完成"></el-option>
+                                <el-option  :value="2" label="已废弃"></el-option>
                             </el-select>
                         </el-col>
                     </el-row>
@@ -255,7 +256,7 @@
                     开发状态：
                 </el-row>
                 <el-row class="row" style="padding:0 30px;">
-                    {{interfaceEdit.finish?"开发完成":"开发中"}}
+                    {{interfaceEdit.finish==1?"开发完成":(interfaceEdit.finish==2?"已废弃":"开发中")}}
                 </el-row>
                 <el-row class="row" style="padding:0 10px;height: 50px;line-height: 50px;color: #50a3ff">
                     描述：
