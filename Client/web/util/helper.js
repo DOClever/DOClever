@@ -110,7 +110,7 @@ helper.eachResult=function (item,pItem,arr,json) {
                             bFind=true;
                         }
                     })
-                    if(!bFind)
+                    if(!bFind && v)
                     {
                         item.value.data.push({
                             value:v,
@@ -118,6 +118,7 @@ helper.eachResult=function (item,pItem,arr,json) {
                         });
                     }
                 }
+                obj.value=$.clone(item.value);
             }
             else
             {

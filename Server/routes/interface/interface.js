@@ -14,6 +14,7 @@ var interface=require("../../model/interfaceModel")
 var interfaceVersion=require("../../model/interfaceVersionModel")
 var interfaceSnapshot=require("../../model/interfaceSnapshotModel")
 var version=require("../../model/versionModel")
+var teamGroup=require("../../model/teamGroupModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
 let refreshInterface=async (function (req,id) {
@@ -93,31 +94,59 @@ var validateUser =async (function validateUser(req) {
         }))
         if(!obj)
         {
-            util.throw(e.projectNotFound,"项目不存在");
-        }
-        else
-        {
-            req.project=obj;
-            if(obj.owner.toString()==req.userInfo._id.toString())
+            obj=await (project.findOneAsync({
+                _id:pro
+            }));
+            if(!obj)
             {
-                req.access=1;
+                util.throw(e.projectNotFound,"项目不存在");
+                return;
+            }
+            if(obj.team)
+            {
+                let arrUser=await (teamGroup.findAsync({
+                    team:obj.team,
+                    users:{
+                        $elemMatch:{
+                            user:req.userInfo._id,
+                            role:{
+                                $in:[0,2]
+                            }
+                        }
+                    }
+                }))
+                if(arrUser.length==0)
+                {
+                    util.throw(e.userForbidden,"你没有权限");
+                    return;
+                }
             }
             else
             {
-                for(let o of obj.users)
+                util.throw(e.userForbidden,"你没有权限");
+                return;
+            }
+        }
+        req.project=obj;
+        if(obj.owner.toString()==req.userInfo._id.toString())
+        {
+            req.access=1;
+        }
+        else
+        {
+            for(let o of obj.users)
+            {
+                if(o.user.toString()==req.userInfo._id.toString())
                 {
-                    if(o.user.toString()==req.userInfo._id.toString())
+                    if(o.role==0)
                     {
-                        if(o.role==0)
-                        {
-                            req.access=1;
-                        }
-                        else
-                        {
-                            req.access=0;
-                        }
-                        break;
+                        req.access=1;
                     }
+                    else
+                    {
+                        req.access=0;
+                    }
+                    break;
                 }
             }
         }

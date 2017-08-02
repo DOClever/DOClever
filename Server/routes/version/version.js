@@ -64,11 +64,41 @@ function validateVersion(req,res) {
                         "users.user":req.userInfo._id
                     }
                 ]
-
             }));
             if(!obj)
             {
-                util.throw(e.projectNotFound,"项目不存在");
+                obj=await (project.findOneAsync({
+                    _id:pro
+                }));
+                if(!obj)
+                {
+                    util.throw(e.projectNotFound,"项目不存在");
+                    return;
+                }
+                if(obj.team)
+                {
+                    let arrUser=await (teamGroup.findAsync({
+                        team:obj.team,
+                        users:{
+                            $elemMatch:{
+                                user:req.userInfo._id,
+                                role:{
+                                    $in:[0,2]
+                                }
+                            }
+                        }
+                    }))
+                    if(arrUser.length==0)
+                    {
+                        util.throw(e.userForbidden,"你没有权限");
+                        return;
+                    }
+                }
+                else
+                {
+                    util.throw(e.userForbidden,"你没有权限");
+                    return;
+                }
             }
             req.project=obj;
         }

@@ -303,6 +303,7 @@ function inProject(req,res) {
                 util.throw(e.projectNotFound,"项目不存在");
                 return;
             }
+            req.obj=obj;
             if(obj.team)
             {
                 let arrUser=await (teamGroup.findAsync({
@@ -310,7 +311,9 @@ function inProject(req,res) {
                     users:{
                         $elemMatch:{
                             user:req.userInfo._id,
-                            role:0
+                            role:{
+                                $in:[0,2]
+                            }
                         }
                     }
                 }))
@@ -325,6 +328,21 @@ function inProject(req,res) {
                 util.throw(e.userForbidden,"你没有权限");
                 return;
             }
+            if(obj.baseUrls.length>0 && typeof(obj.baseUrls[0])=="string")
+            {
+                obj.baseUrls=obj.baseUrls.map(function (obj) {
+                    return {
+                        url:obj,
+                        remark:""
+                    }
+                })
+                await (project.updateAsync({
+                    _id:obj._id
+                },{
+                    baseUrls:obj.baseUrls
+                }));
+            }
+            util.next()
         }
         else
         {
