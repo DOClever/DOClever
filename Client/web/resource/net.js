@@ -33,7 +33,11 @@ var filterResHeader = function (headers,res) {
         if (!/Access-/i.test(i)) {
             if(/set-cookie/i.test(i))
             {
-                ret[i]=headers[i][0].split(" ")[0];
+                for(let index=0;index<headers[i].length;index++)
+                {
+                    headers[i][index]=headers[i][index].split(" ")[0];
+                }
+                ret[i]=headers[i];
             }
             else
             {
