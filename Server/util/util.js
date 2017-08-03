@@ -373,7 +373,7 @@ function convertToJSON(data,obj,info) {
             {
                 if(data.mock)
                 {
-                    return Boolean(data.mock.trim())
+                    return Boolean(eval(data.mock.trim()))
                 }
                 else
                 {
@@ -439,7 +439,7 @@ function convertToJSON(data,obj,info) {
                 }
                 else if(data.type==2)
                 {
-                    return Boolean(temp);
+                    return Boolean(eval(temp));
                 }
             }
             else if(str.startsWith("arr"))
@@ -530,7 +530,7 @@ function convertToJSON(data,obj,info) {
                         }
                         else if(data.type==2)
                         {
-                            return Boolean(ret);
+                            return Boolean(eval(ret));
                         }
                         else if(data.type==5)
                         {
@@ -1307,7 +1307,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
         var text;
         if(type=="1")
         {
-            text="(function (opt) {return runTest("+obj+",'"+opt.baseUrl+"',"+"{before:'"+opt.before+"',after:'"+opt.after+"'}"+",test,root,opt)})"
+            text="(function (opt) {return runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"'}"+",test,root,opt)})"
         }
         else if(type=="2")
         {

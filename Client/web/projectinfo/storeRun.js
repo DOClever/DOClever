@@ -944,6 +944,15 @@ module.exports=new Vuex.Store({
                 }
                 else
                 {
+                    if(result.header["content-type"]===undefined || (result.header["content-type"] && result.header["content-type"].indexOf("/xml")==-1))
+                    {
+                        var ele=document.createElement("div");
+                        ele.innerHTML=result.data;
+                        if(ele.childNodes.length>1 || ele.childNodes[0].nodeType==1)
+                        {
+                            context.state.type="html";
+                        }
+                    }
                     context.state.rawData=result.data;
                     context.state.draw=result.data
                     context.state.drawMix=result.data;
@@ -998,7 +1007,6 @@ module.exports=new Vuex.Store({
             })
             var query=[];
             context.getters.querySave.forEach(function (obj) {
-                var value=obj.value;
                 var value=helper.handleValue(obj);
                 query.push({
                     name:obj.name,

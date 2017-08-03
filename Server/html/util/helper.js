@@ -171,7 +171,7 @@ helper.convertToJSON=function (data,obj,info,run) {
             {
                 if(data.mock)
                 {
-                    return Boolean($.trim(data.mock))
+                    return Boolean(eval($.trim(data.mock)))
                 }
                 else
                 {
@@ -241,7 +241,7 @@ helper.convertToJSON=function (data,obj,info,run) {
                 }
                 else if(data.type==2)
                 {
-                    return Boolean(temp);
+                    return Boolean(eval(temp));
                 }
             }
             else if(/^arr/i.test(str))
@@ -332,7 +332,7 @@ helper.convertToJSON=function (data,obj,info,run) {
                         }
                         else if(data.type==2)
                         {
-                            return Boolean(ret);
+                            return Boolean(eval(ret));
                         }
                         else if(data.type==5)
                         {
