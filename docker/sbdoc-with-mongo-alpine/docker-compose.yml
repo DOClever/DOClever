@@ -1,8 +1,0 @@
-version: "2"
-services:
-  sbdoc:
-    image: sx1989827/sbdoc-alpine
-    build: "."
-    container_name: "sbdoc"
-    ports:
-      - 10000:10000
