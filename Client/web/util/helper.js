@@ -1156,7 +1156,7 @@ helper.encrypt=function (type,val,salt) {
     return val;
 }
 
-helper.runBefore=function (code,url,path,method,query,header,body) {
+helper.runBefore=function (code,url,path,method,query,header,body,param) {
     var Base64=BASE64.encoder,MD5=CryptoJS.MD5,SHA1=CryptoJS.SHA1,SHA256=CryptoJS.SHA256,SHA512=CryptoJS.SHA512,SHA3=CryptoJS.SHA3,RIPEMD160=CryptoJS.RIPEMD160,AES=CryptoJS.AES.encrypt,TripleDES=CryptoJS.TripleDES.encrypt,DES=CryptoJS.DES.encrypt,Rabbit=CryptoJS.Rabbit.encrypt,RC4=CryptoJS.RC4.encrypt,RC4Drop=CryptoJS.RC4Drop.encrypt;
     try
     {
@@ -1705,39 +1705,9 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
         }
     }
     var objParam=$.clone(obj.restParam);
-    if(opt && opt.param)
-    {
-        var arr=[];
-        for(var key in opt.param)
-        {
-            var val=opt.param[key];
-            var objItem;
-            objParam.forEach(function (obj) {
-                if(obj.name==key)
-                {
-                    objItem=obj;
-                }
-            })
-            if(objItem)
-            {
-                objItem.selValue=val;
-            }
-            else
-            {
-                arr.push({
-                    name:key,
-                    remark:"",
-                    selValue:val
-                })
-            }
-        }
-        objParam=objParam.concat(arr);
-    }
+    var param={};
     objParam.forEach(function (obj) {
-        if(obj.name)
-        {
-            path=path.replace("{"+obj.name+"}",obj.selValue)
-        }
+        param[obj.name]=obj.selValue;
     })
     var query={};
     obj.queryParam.forEach(function (obj) {
@@ -1921,13 +1891,25 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
     {
         if(global.before)
         {
-            helper.runBefore(global.before,baseUrl,path,method,query,header,body)
+            helper.runBefore(global.before,baseUrl,path,method,query,header,body,param)
         }
-        helper.runBefore(obj.before.code,baseUrl,path,method,query,header,body)
+        helper.runBefore(obj.before.code,baseUrl,path,method,query,header,body,param)
     }
     else
     {
-        helper.runBefore(obj.before.code,baseUrl,path,method,query,header,body)
+        helper.runBefore(obj.before.code,baseUrl,path,method,query,header,body,param)
+    }
+    if(opt && opt.param)
+    {
+        for(var key in opt.param)
+        {
+            var val=opt.param[key];
+            param[key]=val;
+        }
+    }
+    for(var paramKey in param)
+    {
+        path=path.replace("{"+paramKey+"}",param[paramKey])
     }
     if(opt && opt.query)
     {

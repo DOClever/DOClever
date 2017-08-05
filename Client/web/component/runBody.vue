@@ -207,11 +207,7 @@
                     return type;
                 },
                 set:function (value) {
-                    if(value=="file")
-                    {
-                        this.info.rawType=1;
-                    }
-                    else if(value=="application/json")
+                    if(value=="application/json")
                     {
                         this.info.rawType=2;
                         var bFind=false,objIndex;
@@ -234,7 +230,14 @@
                     }
                     else
                     {
-                        this.info.rawType=0;
+                        if(value=="file")
+                        {
+                            this.info.rawType=1;
+                        }
+                        else
+                        {
+                            this.info.rawType=0;
+                        }
                         var bFind=false,objIndex;
                         this.$store.state.header.forEach(function (obj,index) {
                             if(obj.name && obj.name.toLowerCase()=="content-type")
@@ -244,7 +247,7 @@
                                 bFind=true;
                             }
                         })
-                        if(value=="")
+                        if(value=="" || value=="file")
                         {
                             if(bFind)
                             {

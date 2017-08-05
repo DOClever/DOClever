@@ -700,11 +700,9 @@ module.exports=new Vuex.Store({
                 baseUrl=config.baseUrl;
                 path="/mock/"+sessionStorage.getItem("projectId")+(path[0]!="/"?("/"+path):path);
             }
+            var param={};
             context.state.param.forEach(function (obj) {
-                if(obj.name)
-                {
-                    path=path.replace("{"+obj.name+"}",obj.selValue)
-                }
+                param[obj.name]=obj.selValue;
             })
             var query={};
             context.getters.querySave.forEach(function (obj) {
@@ -844,17 +842,22 @@ module.exports=new Vuex.Store({
                     }
                 }
             }
+
             if(context.state.interface.before.mode==0)
             {
                 if(context.state.globalBefore)
                 {
-                    helper.runBefore(context.state.globalBefore,baseUrl,path,method,query,header,body)
+                    helper.runBefore(context.state.globalBefore,baseUrl,path,method,query,header,body,param)
                 }
-                helper.runBefore(context.state.interface.before.code,baseUrl,path,method,query,header,body)
+                helper.runBefore(context.state.interface.before.code,baseUrl,path,method,query,header,body,param)
             }
             else
             {
-                helper.runBefore(context.state.interface.before.code,baseUrl,path,method,query,header,body)
+                helper.runBefore(context.state.interface.before.code,baseUrl,path,method,query,header,body,param)
+            }
+            for(var paramKey in param)
+            {
+                path=path.replace("{"+paramKey+"}",param[paramKey])
             }
             if((method=="POST" || method=="PUT" || method=="PATCH") && context.state.bodyInfo.type==1 && context.state.bodyInfo.rawType==2)
             {
@@ -1069,10 +1072,18 @@ module.exports=new Vuex.Store({
             var result=[];
             if(context.state.resultData)
             {
-                for(var key in context.state.resultData)
+                if((context.state.resultData instanceof Array) && context.state.resultData.length>0)
                 {
                     var resultObj=helper.findObj(context.state.interface.outParam,key);
-                    helper.handleResultData(key,context.state.resultData[key],result,resultObj)
+                    helper.handleResultData(key,context.state.resultData[0],result,resultObj)
+                }
+                else
+                {
+                    for(var key in context.state.resultData)
+                    {
+                        var resultObj=helper.findObj(context.state.interface.outParam,key);
+                        helper.handleResultData(key,context.state.resultData[key],result,resultObj)
+                    }
                 }
             }
             var outInfo;
@@ -1082,6 +1093,7 @@ module.exports=new Vuex.Store({
                     type:0,
                     rawRemark:"",
                     rawMock:"",
+                    jsonType:(context.state.resultData && (context.state.resultData instanceof Array))?1:0
                 }
             }
             else
@@ -1090,7 +1102,7 @@ module.exports=new Vuex.Store({
                     type:1,
                     rawRemark:context.state.interface.outInfo?context.state.interface.outInfo.rawRemark:"",
                     rawMock:context.state.interface.outInfo?context.state.interface.outInfo.rawMock:"",
-                    jsonType:(context.state.resultData && (context.state.resultData instanceof Array))?1:0
+                    jsonType:0
                 }
             }
             var obj={

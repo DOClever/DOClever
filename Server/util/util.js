@@ -923,7 +923,7 @@ var encrypt=function (type,val,salt) {
 }
 
 
-var runBefore=function (code,url,path,method,query,header,body) {
+var runBefore=function (code,url,path,method,query,header,body,param) {
     var Base64=BASE64.encoder,MD5=CryptoJS.MD5,SHA1=CryptoJS.SHA1,SHA256=CryptoJS.SHA256,SHA512=CryptoJS.SHA512,SHA3=CryptoJS.SHA3,RIPEMD160=CryptoJS.RIPEMD160,AES=CryptoJS.AES.encrypt,TripleDES=CryptoJS.TripleDES.encrypt,DES=CryptoJS.DES.encrypt,Rabbit=CryptoJS.Rabbit.encrypt,RC4=CryptoJS.RC4.encrypt,RC4Drop=CryptoJS.RC4Drop.encrypt;
     try
     {
@@ -995,39 +995,9 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
         }
     }
     var objParam=clone(obj.restParam);
-    if(opt && opt.param)
-    {
-        var arr=[];
-        for(var key in opt.param)
-        {
-            var val=opt.param[key];
-            var objItem;
-            objParam.forEach(function (obj) {
-                if(obj.name==key)
-                {
-                    objItem=obj;
-                }
-            })
-            if(objItem)
-            {
-                objItem.selValue=val;
-            }
-            else
-            {
-                arr.push({
-                    name:key,
-                    remark:"",
-                    selValue:val
-                })
-            }
-        }
-        objParam=objParam.concat(arr);
-    }
+    var param1={};
     objParam.forEach(function (obj) {
-        if(obj.name)
-        {
-            path=path.replace("{"+obj.name+"}",obj.selValue)
-        }
+        param1[obj.name]=obj.selValue;
     })
     var query={};
     obj.queryParam.forEach(function (obj) {
@@ -1137,13 +1107,25 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
     {
         if(global.before)
         {
-            runBefore(global.before,baseUrl,path,method,query,header,body)
+            runBefore(global.before,baseUrl,path,method,query,header,body,param1)
         }
-        runBefore(obj.before.code,baseUrl,path,method,query,header,body)
+        runBefore(obj.before.code,baseUrl,path,method,query,header,body,param1)
     }
     else
     {
-        runBefore(obj.before.code,baseUrl,path,method,query,header,body)
+        runBefore(obj.before.code,baseUrl,path,method,query,header,body,param1)
+    }
+    if(opt && opt.param)
+    {
+        for(var key in opt.param)
+        {
+            var val=opt.param[key];
+            param1[key]=val;
+        }
+    }
+    for(var paramKey in param1)
+    {
+        path=path.replace("{"+paramKey+"}",param1[paramKey])
     }
     if(opt && opt.query)
     {
@@ -1251,13 +1233,13 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
         }
     }
     func=request(objReq);
-    return func.then(function (result,body) {
+    return func.then(function (result) {
         var res={}
         res.header=result.headers;
         res.status=String(result.statusCode);
         res.second=(((new Date())-startDate)/1000).toFixed(3);
-        res.type=typeof (body);
-        res.data=body;
+        res.type=typeof (result.body);
+        res.data=result.body;
         if(obj.after.mode==0)
         {
             if(global.after)
@@ -1344,7 +1326,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
         obj.oldNode.parentNode.replaceChild(obj.newNode,obj.oldNode);
     })
     root.output+="<br><div style='background-color: #ececec'>["+moment().format("YYYY-MM-DD HH:mm:ss")+"]开始执行用例："+test.module.name+"/"+test.group.name+"/"+test.name+"<br>";
-    var text=ele.textContent;
+    var text=ele.textContent.replace(new RegExp(decodeURIComponent("%C2%A0"),"g")," ");
     function bOutside(str) {
         var a1=0,a2=0;
         for(var i=0;i<str.length;i++)
