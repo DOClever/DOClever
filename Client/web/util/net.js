@@ -155,7 +155,7 @@ net.post=function (path,data,headers,beforeFunc,run,bNet) {
                         var reader = new FileReader();
                         reader.onload = function(){
                             var content = reader.result;
-                            if(res.headers.map["content-type"]=="application/xml" || res.headers.map["content-type"]=="text/xml")
+                            if(/application\/xml/i.test(res.headers.map["content-type"][0]) || /text\/xml/i.test(res.headers.map["content-type"][0]))
                             {
                                 resObj=content;
                             }
@@ -485,7 +485,7 @@ net.upload=function (method,path,data,headers,beforeFunc,run,bNet) {
                             var reader = new FileReader();
                             reader.onload = function(){
                                 var content = reader.result;
-                                if(xhr.getResponseHeader("content-type")=="application/xml" || xhr.getResponseHeader("content-type")=="text/xml")
+                                if(/application\/xml/i.test(xhr.getResponseHeader("content-type")) || /text\/xml/i.test(xhr.getResponseHeader("content-type")))
                                 {
                                     resObj=content;
                                 }

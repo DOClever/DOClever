@@ -1238,8 +1238,20 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
         res.header=result.headers;
         res.status=String(result.statusCode);
         res.second=(((new Date())-startDate)/1000).toFixed(3);
-        res.type=typeof (result.body);
-        res.data=result.body;
+        var body=result.body;
+        if(typeof (body)=="string")
+        {
+            try
+            {
+                body=JSON.parse(result.body);
+            }
+            catch (err)
+            {
+                body=result.body;
+            }
+        }
+        res.type=typeof (body);
+        res.data=body;
         if(obj.after.mode==0)
         {
             if(global.after)

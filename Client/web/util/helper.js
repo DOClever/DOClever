@@ -2000,7 +2000,7 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
     header["__headers"]=JSON.stringify(objHeaders);
     var proxyUrl="/proxy";
     var bNet=false;
-    if((/10\./i.test(baseUrl) || /192\.168\./i.test(baseUrl) || /127\.0\.0\.1/i.test(baseUrl) || /172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)\./.test(baseUrl) || /localhost/i.test(baseUrl)) && session.get("proxy"))
+    if(session.get("proxy"))
     {
         bNet=true;
         proxyUrl="http://127.0.0.1:36742";

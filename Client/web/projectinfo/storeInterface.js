@@ -537,14 +537,14 @@ module.exports=new Vuex.Store({
             var result=[];
             if(state.outInfo.jsonType==1)
             {
-                helper.handleResultData(0,obj[0],result,null,1)
+                helper.handleResultData(0,obj[0],result,null,1,1,1)
                 state.result=state.resultArray=result;
             }
             else
             {
                 for(var key in obj)
                 {
-                    helper.handleResultData(key,obj[key],result,null,1)
+                    helper.handleResultData(key,obj[key],result,null,1,1,1)
                 }
                 state.result=state.resultObject=result;
             }
