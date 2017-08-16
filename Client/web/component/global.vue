@@ -28,8 +28,8 @@
                         <h4 style="margin-left: 10px;color: gray;float: left">
                             状态码
                         </h4>
-                        <el-button type="text" style="float: right;margin-top: 15px;margin-right: 10px" @click="createStatus">新建状态码</el-button>
-                        <el-button type="text" style="float: right;margin-top: 15px;margin-right: 10px" @click="importJSON">导入</el-button>
+                        <el-button type="text" style="float: right;margin-top: 15px;margin-right: 10px" @click="createStatus" v-if="session.role==0">新建状态码</el-button>
+                        <el-button type="text" style="float: right;margin-top: 15px;margin-right: 10px" @click="importJSON" v-if="session.role==0">导入</el-button>
                     </el-row>
                     <el-row class="row">
                         <table class="table-hover" border="1"  style="width: 100%;border-collapse: collapse" bordercolor="#ddd">
@@ -41,7 +41,7 @@
                                         </el-button>
                                     </td>
                                     <td style="width: 10%">
-                                        <el-button type="text" size="small" style="color: red;font-size: 15px;"  icon="close" @click="remove(item,index)" title="删除"></el-button>
+                                        <el-button type="text" size="small" style="color: red;font-size: 15px;"  icon="close" @click="remove(item,index)" title="删除" v-if="session.role==0"></el-button>
                                     </td>
                                 </tr>
                             </template>
@@ -73,7 +73,7 @@
                                 </el-row>
                                 <el-row class="row" style="color: gray">
                                     {{item.updatedAt}}&nbsp;&nbsp;&nbsp;
-                                    <el-button type="text" size="small" style="color:#FF4949" icon="delete2" @click.stop="removeArticle(item,index)" titile="删除">
+                                    <el-button type="text" size="small" style="color:#FF4949" icon="delete2" @click.stop="removeArticle(item,index)" titile="删除" v-if="session.role==0">
                                     </el-button>
                                 </el-row>
                             </el-row>

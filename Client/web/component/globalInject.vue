@@ -20,7 +20,7 @@
             </el-input>
         </el-row>
         <el-row class="row" style="text-align: center;">
-            <el-button type="primary" style="width: 200px;margin: 20px 0 20px 0" @click="save" :loading="savePending">保存</el-button>
+            <el-button type="primary" style="width: 200px;margin: 20px 0 20px 0" @click="save" :loading="savePending" v-if="session.role==0">保存</el-button>
         </el-row>
     </el-row>
 </template>
@@ -31,6 +31,7 @@
         props:["before","after"],
         data:function () {
             return {
+                session:$.clone(session.raw()),
                 type:0,
                 beforeEdit:this.before,
                 afterEdit:this.after,

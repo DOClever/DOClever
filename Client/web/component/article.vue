@@ -20,7 +20,7 @@
             <el-button type="primary" @click="edit=1" v-else>
                 编辑
             </el-button>
-            <el-button type="primary" @click="save" :laoding="savePending">
+            <el-button type="primary" @click="save" :laoding="savePending" v-if="session.role==0">
                 保存
             </el-button>
         </el-row>
@@ -34,6 +34,7 @@
         props:["propObj"],
         data:function () {
             return {
+                session:$.clone(session.raw()),
                 obj:this.propObj?this.propObj:{
                     title:"",
                     content:"",

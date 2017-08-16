@@ -922,13 +922,13 @@ helper.handleResultData=function (name,data,result,originObj,show,input,bArr) {
                 for(var i=0;i<data.length;i++)
                 {
                     var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[i]:null):null;
-                    arguments.callee(null,data[i],obj.data,resultObj,show,input)
+                    arguments.callee(null,data[i],obj.data,resultObj,show,input,bArr)
                 }
             }
             else
             {
                 var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[0]:null):null;
-                arguments.callee(null,data[0],obj.data,resultObj,show,input)
+                arguments.callee(null,data[0],obj.data,resultObj,show,input,bArr)
             }
         }
     }
@@ -978,7 +978,7 @@ helper.handleResultData=function (name,data,result,originObj,show,input,bArr) {
         for(var key in data)
         {
             var resultObj=helper.findObj(originObj?originObj.data:null,key);
-            arguments.callee(key,data[key],obj.data,resultObj,show,input)
+            arguments.callee(key,data[key],obj.data,resultObj,show,input,bArr)
         }
     }
     else

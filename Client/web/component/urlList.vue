@@ -10,17 +10,17 @@
                         <el-input style="width: 90%;margin: 0 auto" placeholder="请填写备注" v-model="item.remark"></el-input>
                     </td>
                     <td style="width: 10%">
-                        <el-button type="text" size="small" style="color: red;font-size: 15px;" @click="remove(index)" icon="close"></el-button>
+                        <el-button type="text" size="small" style="color: red;font-size: 15px;" @click="remove(index)" icon="close" v-if="session.role==0"></el-button>
                     </td>
                     <td style="width: 10%">
-                        <el-button style="font-size: 15px" v-if="index==arr.length-1" @click="arr.push({url:'',remark:''})" size="small" type="text" icon="plus"></el-button>
+                        <el-button style="font-size: 15px" v-if="index==arr.length-1 && session.role==0" @click="arr.push({url:'',remark:''})" size="small" type="text" icon="plus"></el-button>
                     </td>
                 </tr>
             </template>
             <tfoot>
             <tr>
                 <td style="text-align: center;vertical-align: middle;width: 100%;padding: 20px" colspan="3">
-                    <el-button type="primary" style="width: 60%" @click="save" :loading="savePending">
+                    <el-button type="primary" style="width: 60%" @click="save" :loading="savePending" v-if="session.role==0">
                         保存
                     </el-button>
                 </td>
@@ -35,6 +35,7 @@
         props:["source"],
         data:function () {
             return {
+                session:$.clone(session.raw()),
                 arr:function () {
                     if(this.source.length>0)
                     {

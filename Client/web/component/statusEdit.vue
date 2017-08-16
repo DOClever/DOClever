@@ -29,7 +29,7 @@
             </table>
         </el-row>
         <el-row class="dialog-footer" slot="footer">
-            <el-button type="primary" @click="save" :loading="savePending">
+            <el-button type="primary" @click="save" :loading="savePending" v-if="session.role==0">
                 保存
             </el-button>
         </el-row>
@@ -41,6 +41,7 @@
         props:["source"],
         data:function () {
             return {
+                session:$.clone(session.raw()),
                 obj:function () {
                     if(this.source)
                     {
