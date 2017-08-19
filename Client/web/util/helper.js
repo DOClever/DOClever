@@ -1730,7 +1730,7 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
             query[obj.name]=obj.selValue;
         }
     })
-    var header={},arrHeaders=["host","connection","origin","referer","user-agent"],objHeaders={};
+    var header={},arrHeaders=["host","connection","origin","referer","user-agent","cookie"],objHeaders={};
     obj.header.forEach(function (obj) {
         if(!obj.name || !obj.enable)
         {

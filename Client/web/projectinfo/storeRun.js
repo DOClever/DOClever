@@ -722,7 +722,7 @@ module.exports=new Vuex.Store({
                 }
 
             })
-            var header={},arrHeaders=["host","connection","origin","referer","user-agent"],objHeaders={};
+            var header={},arrHeaders=["host","connection","origin","referer","user-agent","cookie"],objHeaders={};
             context.getters.headerSave.forEach(function (obj) {
                 if(obj.encrypt && obj.encrypt.type)
                 {
