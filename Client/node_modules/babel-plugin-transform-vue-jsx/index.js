@@ -1,5 +1,6 @@
 var esutils = require('esutils')
 var groupProps = require('./lib/group-props')
+var mustUseProp = require('./lib/must-use-prop')
 
 module.exports = function (babel) {
   var t = babel.types
@@ -64,6 +65,26 @@ module.exports = function (babel) {
                 )
               )
             ]))
+          },
+          JSXOpeningElement (path) {
+            const tag = path.get('name').node.name
+            const attributes = path.get('attributes')
+            const typeAttribute = attributes.find(attributePath => attributePath.node.name && attributePath.node.name.name === 'type')
+            const type = typeAttribute && t.isStringLiteral(typeAttribute.node.value) ? typeAttribute.node.value.value : null
+
+            attributes.forEach(attributePath => {
+              const attribute = attributePath.get('name')
+
+              if (!attribute.node) {
+                return
+              }
+
+              const attr = attribute.node.name
+
+              if (mustUseProp(tag, type, attr) && t.isJSXExpressionContainer(attributePath.node.value)) {
+                attribute.replaceWith(t.JSXIdentifier(`domProps-${attr}`))
+              }
+            })
           }
         })
       }

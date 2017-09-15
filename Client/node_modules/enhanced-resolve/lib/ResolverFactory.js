@@ -78,6 +78,9 @@ exports.createResolver = function(options) {
 	// Use this cache object to unsafely cache the successful requests
 	var unsafeCache = options.unsafeCache || false;
 
+	// Whether or not the unsafeCache should include request context as part of the cache key.
+	var cacheWithContext = typeof options.cacheWithContext !== "undefined" ? options.cacheWithContext : true;
+
 	// A function which decides whether a request should be cached or not.
 	// an object is passed with `path` and `request` properties.
 	var cachePredicate = options.cachePredicate || function() {
@@ -145,7 +148,7 @@ exports.createResolver = function(options) {
 
 	// resolve
 	if(unsafeCache) {
-		plugins.push(new UnsafeCachePlugin("resolve", cachePredicate, unsafeCache, "new-resolve"));
+		plugins.push(new UnsafeCachePlugin("resolve", cachePredicate, unsafeCache, cacheWithContext, "new-resolve"));
 		plugins.push(new ParsePlugin("new-resolve", "parsed-resolve"));
 	} else {
 		plugins.push(new ParsePlugin("resolve", "parsed-resolve"));

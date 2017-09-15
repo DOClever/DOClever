@@ -12,42 +12,66 @@
     <link href="../lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../common/common.css">
     <title>项目主页</title>
+    <style>
+        #mainTab.el-tabs--card>.el-tabs__header>.el-tabs__nav-wrap>.el-tabs__nav-scroll>el-tabs__nav>.el-tabs__item.is-active
+        {
+            border-bottom-color:transparent;
+        }
+        #mainTab.el-tabs--card>.el-tabs__header>.el-tabs__nav-wrap>.el-tabs__nav-scroll>.el-tabs__nav
+        {
+            float: none;
+        }
+        #mainTab.el-tabs--card>.el-tabs__header>.el-tabs__nav-wrap>.el-tabs__nav-scroll
+        {
+            text-align: center;
+        }
+        #mainTab.el-tabs--card>.el-tabs__header>.el-tabs__nav-wrap>.el-tabs__nav-scroll>.el-tabs__nav
+        {
+            background-color: white;
+        }
+        #mainTab.el-tabs--card>.el-tabs__header
+        {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15);
+        }
+    </style>
 </head>
 <body>
 <div class="container" id="app"  v-cloak>
     <mainnav ref="nav">
-        <el-row class="row" style="text-align: center;height: 60px;line-height: 60px;font-size: 25px;color: #20A0FF" slot="title">{{session.projectName}}{{session.versionId?("("+session.versionName+")"):""}}</el-row>
+        <el-row class="row" style="text-align: center;height: 50px;line-height: 50px;font-size: 25px;color: #50bfff" slot="title">{{session.projectName}}{{session.versionId?("("+session.versionName+")"):""}}</el-row>
     </mainnav>
-    <el-row class="row" style="margin-top: 20px;padding-left: 80px;">
-        <div style="background-color: rgb(39,52,68);width: 80px;left: 0;top: 80px;position: fixed;height: calc(100% - 80px);overflow-y: auto">
-            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==0?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=0">
-                <span class="fa fa-list" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
-                接口
-            </div>
-            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==1?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=1">
-                <span class="fa fa-bolt" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
-                测试
-            </div>
-            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==2?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=2">
-                <span class="fa fa-globe" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
-                全局
-            </div>
-            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==3?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=3">
-                <span class="fa fa-cog" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
-                设置
-            </div>
-            <div style="width: 100%;height: 100px;text-align: center;cursor: pointer" :style="type==4?{backgroundColor:'white',color:'#20A0FF'}:{backgroundColor:'',color:'white'}" @click="type=4">
-                <span class="fa fa-cog" style="display: inline-block;height: 30px;width: 30px;margin-top: 25px;font-size: 30px"></span><br>
-                版本
-            </div>
+    <el-row class="row" style="margin-top: 15px;height: calc(100vh - 65px);">
+        <div style="position: absolute;top: 5px;left: 10px;z-index: 1000;">
+            项目：&nbsp;
+            <el-autocomplete class="inline-input" v-model="selProject" :fetch-suggestions="querySearch" placeholder="筛选你的项目" icon="caret-bottom" :on-icon-click="showAutoComplete" @select="changeProject" popper-class="my-autocomplete" custom-item="itemauto" id="projectChange" style="width: 170px"></el-autocomplete>
         </div>
-        <el-col class="col" :span="24" style="height: calc(100vh - 80px);overflow-x: hidden;overflow-y: auto">
-            <interface v-show="type==0"></interface>
-            <test v-show="type==1"></test>
-            <global v-show="type==2"></global>
-            <setting v-show="type==3"></setting>
-            <version v-show="type==4"></version>
-        </el-col>
+        <el-tabs v-model="type" type="card" id="mainTab">
+            <el-tab-pane label="接口" :name="0">
+                <el-col class="col" :span="24" style="overflow-x: hidden;overflow-y: auto;height: calc(100vh - 122px);">
+                    <interface></interface>
+                </el-col>
+            </el-tab-pane>
+            <el-tab-pane label="测试" :name="1">
+                <el-col class="col" :span="24" style="overflow-x: hidden;overflow-y: auto;height: calc(100vh - 122px);">
+                    <test></test>
+                </el-col>
+            </el-tab-pane>
+            <el-tab-pane label="全局" :name="2">
+                <el-col class="col" :span="24" style="overflow-x: hidden;overflow-y: auto;height: calc(100vh - 122px);">
+                    <global></global>
+                </el-col>
+            </el-tab-pane>
+            <el-tab-pane label="设置" :name="3">
+                <el-col class="col" :span="24" style="overflow-x: hidden;overflow-y: auto;height: calc(100vh - 122px);">
+                    <setting></setting>
+                </el-col>
+            </el-tab-pane>
+            <el-tab-pane label="版本" :name="4">
+                <el-col class="col" :span="24" style="overflow-x: hidden;overflow-y: auto;height: calc(100vh - 122px);">
+                    <version></version>
+                </el-col>
+            </el-tab-pane>
+        </el-tabs>
     </el-row>
     <el-dialog title="请求列表" v-model="showApply" size="small">
         <el-row class="row" style="height: 300px;overflow-y: auto">

@@ -216,4 +216,7 @@ Inserts the `insertion` before char `pos` (0-indexed).
 
 Location represents location in the original source and is not influenced by other replacements or insertions.
 
+#### `original`
+
+Get decorated `Source`.
 

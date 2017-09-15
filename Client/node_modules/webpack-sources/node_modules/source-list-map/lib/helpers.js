@@ -2,9 +2,11 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra
 */
+"use strict";
+
 exports.getNumberOfLines = function getNumberOfLines(str) {
-	var nr = -1;
-	var idx = -1;
+	let nr = -1;
+	let idx = -1;
 	do {
 		nr++
 		idx = str.indexOf("\n", idx + 1);
@@ -13,7 +15,7 @@ exports.getNumberOfLines = function getNumberOfLines(str) {
 };
 
 exports.getUnfinishedLine = function getUnfinishedLine(str) {
-	var idx = str.lastIndexOf("\n");
+	const idx = str.lastIndexOf("\n");
 	if(idx === -1)
 		return str.length;
 	else

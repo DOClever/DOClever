@@ -17,28 +17,7 @@ var model=new mongoose.Schema({
     url:String,
     remark:String,
     method:String,
-    header:{
-        type:[],
-        default:[]
-    },
-    queryParam:{
-        type:[],
-        default:[]
-    },
-    bodyParam:{
-        type:[],
-        default:[]
-    },
-    outParam:{
-        type:[],
-        default:[]
-    },
-    restParam:{
-        type:[],
-        default:[]
-    },
-    bodyInfo:Object,
-    outInfo:Object,
+    param:Array,
     owner:{
         type:mongoose.Schema.ObjectId,
         ref:"User"
@@ -56,7 +35,8 @@ var model=new mongoose.Schema({
     after:Object,
     id:String
 },{
-    timestamps:true
+    timestamps:true,
+    strict: false
 });
 model.configOutputField(null,[
     "createdAt",

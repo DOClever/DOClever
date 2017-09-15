@@ -13,12 +13,17 @@ var async=require("asyncawait/async")
 var await=require("asyncawait/await")
 var CryptoJS=require("crypto-js")
 var request=require("../third/requestAsync");
+var mongoose = require('mongoose');
 var mail=require("nodemailer");
+var readline=require("readline");
 var dom = require("jsdom").JSDOM;
 var document=(new dom(`...`)).window.document;
+var argv=require("yargs").argv;
 require("./Base64")
 var testModel=null;
 var testVersionModel=null;
+var statusModel=null;
+var statusVersionModel=null;
 var routerMap={};
 var bProduct;
 function err(res,code,msg) {
@@ -71,21 +76,6 @@ function ch(res,e) {
 
 function dateTrans(date) {
     return moment(date).format("YYYY-MM-DD HH:mm:ss");
-}
-
-function getImToken() {
-    return request({
-        method:"POST",
-        url:con.imUrl+ "token",
-        "body":JSON.stringify({
-            "grant_type":"client_credentials",
-            "client_id":con.imId,
-            "client_secret":con.imSecret
-        }),
-        "headers":{
-            "Content-Type":"application/json"
-        }
-    });
 }
 
 function dateDiff(startTime, endTime, diffType) {
@@ -320,15 +310,6 @@ function getIPAdress(){
         }
     }
 }
-
-function next() {
-    let n=next.caller.arguments[2];
-    if(n)
-    {
-        n.go=1;
-    }
-}
-
 
 
 (function () {
@@ -766,6 +747,7 @@ function createDir(dirpath) {
                 }
             }
         });
+        console.log("目录创建成功");
     }
     return true;
 }
@@ -1455,13 +1437,341 @@ function sendMail(smtp,port,user,pass,to,subject,content) {
     });
 }
 
+function versionDiff(obj1,obj2) {
+    var verArr=obj1.split(".");
+    var verLocalArr=obj2.split(".");
+    var bNew=false;
+    for(var i=0;i<3;i++)
+    {
+        if(parseInt(verArr[i])>parseInt(verLocalArr[i]))
+        {
+            bNew=true;
+            break;
+        }
+        else if(parseInt(verArr[i])<parseInt(verLocalArr[i]))
+        {
+            break;
+        }
+    }
+    if(bNew)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+var init=async (function () {
+    let setConfig=async (function () {
+        if(!con.db && process.argv.length<=2)
+        {
+            let read=readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            let question=function (title) {
+                return new Promise(function (resolve,reject) {
+                    read.question(title,function (answer) {
+                        resolve(answer);
+                    })
+                })
+            }
+            let arr=["请输入mongodb数据库地址（比如：mongodb://localhost:27017/DOClever)：","请输入DOClever上传文件路径（比如：/Users/Shared/DOClever）：","请输入DOClever上传图片文件路径（需要时上传文件路径的直接子目录，比如：/Users/Shared/DOClever/img）：","请输入DOClever上传临时文件路径（需要时上传文件路径的直接子目录，比如：/Users/Shared/DOClever/temp）：","请输入端口号（比如10000）："];
+            for(let i=0;i<arr.length;i++)
+            {
+                let val=await (question(arr[i]));
+                if(!val)
+                {
+                    i--;
+                    continue;
+                }
+                if(i==0)
+                {
+                    let connectDB=function () {
+                        return new Promise(function (resolve,reject) {
+                            mongoose.Promise = require('bluebird');
+                            let db=mongoose.createConnection(val);
+                            db.on("error",function () {
+                                console.log("连接失败");
+                                reject();
+                            })
+                            db.on("connected",function () {
+                                console.log("连接成功");
+                                db.close();
+                                resolve();
+                            })
+                        })
+                    }
+                    try
+                    {
+                        await (connectDB());
+                    }
+                    catch (err)
+                    {
+                        i--;
+                        continue;
+                    }
+                    con.db=val;
+                }
+                else if(i==1 || i==2 || i==3)
+                {
+                    try
+                    {
+                        createDir(val)
+                    }
+                    catch (err)
+                    {
+                        console.log(err);
+                        i--;
+                        continue;
+                    }
+                    if(i==1)
+                    {
+                        con.filePath=val;
+                    }
+                    else if(i==2)
+                    {
+                        con.imgPath=val;
+                    }
+                    else if(i==3)
+                    {
+                        con.tempPath=val;
+                    }
+                }
+                else if(i==4)
+                {
+                    con.port=parseInt(val);
+                }
+            }
+            fs.writeFileSync(path.join(__dirname,"../../config.json"),JSON.stringify(con));
+        }
+        if(argv.db)
+        {
+            con.db=argv.db;
+        }
+        if(argv.file)
+        {
+            try
+            {
+                createDir(argv.file)
+            }
+            catch (err)
+            {
+                console.log(err);
+                process.exit(0);
+            }
+            con.filePath=argv.file;
+        }
+        if(argv.img)
+        {
+            try
+            {
+                createDir(argv.img)
+            }
+            catch (err)
+            {
+                console.log(err);
+                process.exit(0);
+            }
+            con.imgPath=argv.img;
+        }
+        if(argv.temp)
+        {
+            try
+            {
+                createDir(argv.temp)
+            }
+            catch (err)
+            {
+                console.log(err);
+                process.exit(0);
+            }
+            con.tempPath=argv.temp;
+        }
+        if(argv.port)
+        {
+            con.port=parseInt(argv.port);
+        }
+    })
+    let patch=async (function () {
+        let curVersion="4.0.0";
+        var stat = fs.statSync(path.join(__dirname,"../patch"));
+        if(!stat.isDirectory())
+        {
+            return;
+        }
+        let files=fs.readdirSync(path.join(__dirname,"../patch"));
+        files=files.filter(function (obj) {
+            if(obj!="." && obj!="..")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }).sort(function (obj1,obj2) {
+            return versionDiff(obj1,obj2);
+        })
+        let info=require("../model/infoModel");
+        let version="0.0.0";
+        let obj=await (info.findOneAsync());
+        if(obj)
+        {
+            version=obj.version;
+        };
+        let index=-1;
+        for(let i=0;i<files.length;i++)
+        {
+            let bMax=versionDiff(files[i],version);
+            if(bMax)
+            {
+                index=i;
+                break;
+            }
+        }
+        let user=require("../model/userModel");
+        let objUser=await (user.findOneAsync());
+        if(index>-1 && objUser)
+        {
+            console.log("数据更新中,请勿操作");
+            for(let i=index;i<files.length;i++)
+            {
+                await (require("../patch/"+files[i])());
+            }
+            console.log("数据更新完成");
+        }
+        await (info.findOneAndUpdateAsync({},{
+            version:curVersion
+        },{
+            upsert:true,
+            setDefaultsOnInsert:true
+        }))
+    })
+    await (setConfig());
+    require("../event/event");
+    await (patch());
+    exports.event.emit("init");
+    console.log("DOClever启动成功");
+})
+
+var getMockParam=async (function(clientParam,obj,type,version) {
+    var arr=[];
+    if(!statusModel)
+    {
+        statusModel=require("../model/statusModel");
+        statusVersionModel=require("../model/statusVersionModel");
+    }
+    var status;
+    if(version)
+    {
+        status=statusVersionModel;
+    }
+    else
+    {
+        status=statusModel;
+    }
+    obj.param.forEach(function (item) {
+        var score=0;
+        for(let key in  clientParam)
+        {
+            let val=clientParam[key];
+            let objParam;
+            if(type=="query")
+            {
+                item.queryParam.forEach(function (obj) {
+                    if(obj.name.toLowerCase()==key.toLowerCase())
+                    {
+                        objParam=obj;
+                    }
+                })
+            }
+            else if(type=="body")
+            {
+                (item.bodyParam?item.bodyParam:[]).forEach(function (obj) {
+                    if(obj.name.toLowerCase()==key.toLowerCase())
+                    {
+                        objParam=obj;
+                    }
+                })
+            }
+            else
+            {
+                ((item.bodyInfo && item.bodyInfo.rawJSON)?item.bodyInfo.rawJSON:[]).forEach(function (obj) {
+                    if(obj.name.toLowerCase()==key.toLowerCase())
+                    {
+                        objParam=obj;
+                    }
+                })
+            }
+            if(objParam)
+            {
+                score+=2;
+                if(!objParam.value)
+                {
+                    continue;
+                }
+                if(objParam.value.type==0)
+                {
+                    let bFind=false;
+                    objParam.value.data.forEach(function (obj) {
+                        if(obj.value==val)
+                        {
+                            bFind=true;
+                        }
+                    })
+                    if(bFind)
+                    {
+                        score++;
+                    }
+                }
+                else
+                {
+                    let query={
+                        project:obj.project,
+                        id:objParam.status
+                    }
+                    if(version)
+                    {
+                        query.version=version;
+                    }
+                    let objStatus=await (status.findOneAsync(query))
+                    if(objStatus)
+                    {
+                        let bFind=false;
+                        for(let obj of objStatus.data)
+                        {
+                            if(obj.key==val)
+                            {
+                                score++;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        arr.push(score);
+    })
+    let index=0;
+    for(let i=0;i<arr.length;i++)
+    {
+        if(arr[i]>arr[index])
+        {
+            index=i;
+        }
+    }
+    return obj.param[index];
+})
+
 exports.err=err;
 exports.ok=ok;
 exports.dateDiff=dateDiff;
 exports.throw=tr;
 exports.stopThen=stopThen;
 exports.catch=ch;
-exports.token=getImToken;
 exports.distance=distance;
 exports.dateTrans=dateTrans;
 exports.event=new event.EventEmitter();
@@ -1471,7 +1781,6 @@ exports.date=date;
 exports.bProduct=bProduct;
 exports.validateParam=validateParam;
 exports.delImg=delImg;
-exports.next=next;
 exports.convertToJSON=convertToJSON;
 exports.mock=mock;
 exports.createDir=createDir;
@@ -1480,9 +1789,8 @@ exports.inArrKey=inArrKey;
 exports.runTestCode=runTestCode;
 exports.sendMail=sendMail;
 exports.clone=clone;
-
-
-
+exports.init=init;
+exports.getMockParam=getMockParam;
 
 
 

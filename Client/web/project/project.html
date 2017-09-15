@@ -12,18 +12,40 @@
     <link href="../lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../common/common.css">
     <title>项目列表</title>
+    <style>
+        .el-tabs--card>.el-tabs__header .el-tabs__item.is-active
+        {
+            border-bottom-color:transparent;
+        }
+        .el-tabs__nav
+        {
+            float: none;
+        }
+        .el-tabs__nav-scroll
+        {
+            text-align: center;
+        }
+        .el-tabs__nav
+        {
+            background-color: white;
+        }
+        .el-tabs__header
+        {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15);
+        }
+    </style>
 </head>
 <body>
 <div class="container" id="app" style="margin: 0px;height: 600px;width: 100%" v-cloak>
     <mainnav>
-        <el-row class="row" style="text-align: center;height: 60px;line-height: 60px;font-size: 25px;color: #20A0FF" slot="title">列表</el-row>
+        <el-row class="row" style="text-align: center;height: 50px;line-height: 50px;font-size: 25px;color: #50bfff" slot="title">列表</el-row>
         <el-popover ref="popover" placement="bottom" width="250" trigger="hover" slot="other">
             <span style="font-size: 15px;color: red">
                 支持postman v2格式的JSON,DOClever导出JSON,RAP的导出JSON，Swagger的导出url和JSON
             </span>
         </el-popover>
         <el-dropdown slot="slot2">
-            <el-button type="text" style="font-size: 15px;width:40px;height: 60px" class="el-dropdown-link">
+            <el-button type="text" style="font-size: 15px;width:40px;height: 50px" class="el-dropdown-link">
                 添加
             </el-button>
             <el-dropdown-menu slot="dropdown">
@@ -31,13 +53,19 @@
                 <el-dropdown-item @click.native="showTeam=true">添加团队</el-dropdown-item>
             </el-dropdown-menu>
         </el-dropdown>
-        <el-button type="text" v-popover:popover style="font-size: 15px;width:40px;height: 60px" slot="slot1" title="导入项目" @click="importProject">
+        <el-button type="text" v-popover:popover style="font-size: 15px;width:40px;height: 50px" slot="slot1" title="导入项目" @click="importProject">
             导入
         </el-button>
     </mainnav>
-    <div style="width: 100%;height:calc(100vh - 90px);top: 90px;overflow-y: auto;position: fixed;">
-        <teamlist :arr="teamList" v-if="teamList.length>0"></teamlist>
-        <projectlist :arr="projectList" v-if="projectList.length>0"></projectlist>
+    <div style="width: 100%;height:calc(100vh - 65px);top: 65px;overflow-y: auto;position: fixed;">
+        <el-tabs v-model="tab" type="card">
+            <el-tab-pane label="项目" name="project">
+                <projectlist></projectlist>
+            </el-tab-pane>
+            <el-tab-pane label="团队" name="team">
+                <teamlist></teamlist>
+            </el-tab-pane>
+        </el-tabs>
     </div>
     <el-dialog title="新建项目" v-model="showAdd" size="small">
         <el-form ref="form" label-width="100px">
@@ -70,7 +98,7 @@
     <el-dialog title="请求列表" v-model="showApply" size="small">
         <el-row class="row" style="height: 300px;overflow-y: auto">
             <table class="table-hover" style="width: 100%">
-                <template v-for="item in arrApply">
+                <template v-for="item in $store.state.arrApply">
                     <tr class="row"  style="height: 40px;text-align: center;vertical-align: middle">
                         <td style="width: 70%">
                             团队<span style="color: #00adef">{{item.from.name}}</span>拉你加入

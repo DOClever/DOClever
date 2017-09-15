@@ -20,42 +20,49 @@ router.use(async (function(req,res,next)
     }
     try
     {
+        let userId;
         if(req.session.userid)
         {
-            let obj=await (user.findOneAsync({
-                _id:req.session.userid
-            }));
-            if(!obj)
+            userId=req.session.userid;
+        }
+        else
+        {
+            if(req.cookies.id)
             {
-                util.throw(e.userNotFound,"用户没有找到");
-            }
-            else if(obj.state==0)
-            {
-                util.throw(e.userForbidden,"用户被禁用");
-            }
-            req.userInfo=obj;
-            if((req.handle instanceof Array) && req.handle.length>0)
-            {
-                for(let func of req.handle)
-                {
-                    let n={
-                        go:0
-                    }
-                    await (func(req,res,n))
-                    if(n.go==0)
-                    {
-                        break;
-                    }
-                }
+                userId=req.cookies.id;
+                req.session.userid=userId;
             }
             else
             {
-                req.handle(req,res);
+                util.throw(e.userNotLogin,"请登录");
+            }
+        }
+        let obj=await (user.findOneAsync({
+            _id:userId
+        }));
+        if(!obj)
+        {
+            util.throw(e.userNotFound,"用户没有找到");
+        }
+        else if(obj.state==0)
+        {
+            util.throw(e.userForbidden,"用户被禁用");
+        }
+        req.userInfo=obj;
+        if((req.handle instanceof Array) && req.handle.length>0)
+        {
+            for(let func of req.handle)
+            {
+                let ret=await (func(req,res))
+                if(ret!==true)
+                {
+                    break;
+                }
             }
         }
         else
         {
-            util.throw(e.userNotLogin,"请登录");
+            req.handle(req,res);
         }
     }
     catch (err)

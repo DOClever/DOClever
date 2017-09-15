@@ -2,6 +2,8 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra
 */
+"use strict";
+
 var SourceNode = require("source-map").SourceNode;
 var SourceMapConsumer = require("source-map").SourceMapConsumer;
 var SourceListMap = require("source-list-map").SourceListMap;
@@ -35,54 +37,53 @@ function _splitCode(code) {
 	return result;
 }
 
-function OriginalSource(value, name) {
-	Source.call(this);
-	this._value = value;
-	this._name = name;
+class OriginalSource extends Source {
+	constructor(value, name) {
+		super();
+		this._value = value;
+		this._name = name;
+	}
+
+	source() {
+		return this._value;
+	}
+
+	node(options) {
+		options = options || {};
+		var sourceMap = this._sourceMap;
+		var value = this._value;
+		var name = this._name;
+		var lines = value.split("\n");
+		var node = new SourceNode(null, null, null,
+			lines.map(function(line, idx) {
+				var pos = 0;
+				if(options.columns === false) {
+					var content = line + (idx != lines.length - 1 ? "\n" : "");
+					return new SourceNode(idx + 1, 0, name, content);
+				}
+				return new SourceNode(null, null, null,
+					_splitCode(line + (idx != lines.length - 1 ? "\n" : "")).map(function(item) {
+						if(/^\s*$/.test(item)) return item;
+						var res = new SourceNode(idx + 1, pos, name, item);
+						pos += item.length;
+						return res;
+					})
+				);
+			})
+		);
+		node.setSourceContent(name, value);
+		return node;
+	}
+
+	listMap(options) {
+		return new SourceListMap(this._value, this._name, this._value)
+	}
+
+	updateHash(hash) {
+		hash.update(this._value);
+	}
 }
-
-module.exports = OriginalSource;
-
-OriginalSource.prototype = Object.create(Source.prototype);
-OriginalSource.prototype.constructor = OriginalSource;
-
-OriginalSource.prototype.source = function() {
-	return this._value;
-};
 
 require("./SourceAndMapMixin")(OriginalSource.prototype);
 
-OriginalSource.prototype.node = function(options) {
-	options = options || {};
-	var sourceMap = this._sourceMap;
-	var value = this._value;
-	var name = this._name;
-	var lines = value.split("\n");
-	var node = new SourceNode(null, null, null,
-		lines.map(function(line, idx) {
-			var pos = 0;
-			if(options.columns === false) {
-				var content = line + (idx != lines.length - 1 ? "\n" : "");
-				return new SourceNode(idx + 1, 0, name, content);
-			}
-			return new SourceNode(null, null, null,
-				_splitCode(line + (idx != lines.length - 1 ? "\n" : "")).map(function(item) {
-					if(/^\s*$/.test(item)) return item;
-					var res = new SourceNode(idx + 1, pos, name, item);
-					pos += item.length;
-					return res;
-				})
-			);
-		})
-	);
-	node.setSourceContent(name, value);
-	return node;
-};
-
-OriginalSource.prototype.listMap = function(options) {
-	return new SourceListMap(this._value, this._name, this._value)
-};
-
-OriginalSource.prototype.updateHash = function(hash) {
-	hash.update(this._value);
-};
+module.exports = OriginalSource;

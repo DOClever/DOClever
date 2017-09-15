@@ -29,22 +29,26 @@ class WebWorkerMainTemplatePlugin {
 		mainTemplate.plugin("require-ensure", function(_, chunk, hash) {
 			const chunkFilename = this.outputOptions.chunkFilename;
 			return this.asString([
-				"// \"1\" is the signal for \"already loaded\"",
-				"if(!installedChunks[chunkId]) {",
+				"return new Promise(function(resolve) {",
 				this.indent([
-					"importScripts(" +
-					this.applyPluginsWaterfall("asset-path", JSON.stringify(chunkFilename), {
-						hash: "\" + " + this.renderCurrentHashCode(hash) + " + \"",
-						hashWithLength: function(length) {
-							return "\" + " + this.renderCurrentHashCode(hash, length) + " + \"";
-						}.bind(this),
-						chunk: {
-							id: "\" + chunkId + \""
-						}
-					}) + ");"
+					"// \"1\" is the signal for \"already loaded\"",
+					"if(!installedChunks[chunkId]) {",
+					this.indent([
+						"importScripts(" +
+						this.applyPluginsWaterfall("asset-path", JSON.stringify(chunkFilename), {
+							hash: "\" + " + this.renderCurrentHashCode(hash) + " + \"",
+							hashWithLength: function(length) {
+								return "\" + " + this.renderCurrentHashCode(hash, length) + " + \"";
+							}.bind(this),
+							chunk: {
+								id: "\" + chunkId + \""
+							}
+						}) + ");"
+					]),
+					"}",
+					"resolve();"
 				]),
-				"}",
-				"return Promise.resolve();"
+				"});"
 			]);
 		});
 		mainTemplate.plugin("bootstrap", function(source, chunk, hash) {

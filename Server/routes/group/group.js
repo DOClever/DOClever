@@ -17,342 +17,461 @@ var version=require("../../model/versionModel")
 var teamGroup=require("../../model/teamGroupModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
-let refreshInterface=async (function (req,id) {
-    let query={
-        project:id
-    }
-    if(req.headers["docleverversion"])
-    {
-        query.version=req.headers["docleverversion"]
-    }
-    let arr=await (req.groupModel.findAsync(query,"_id name type",{
-        sort:"name"
-    }));
-    for(let obj of arr)
-    {
-        let arrInterface=await (req.interfaceModel.findAsync({
-            group:obj._id
-        },"_id name method finish url",{
-            sort:"name"
-        }));
-        obj._doc.data=arrInterface;
-    }
-    return arr;
-})
 
-
-function validateUser(req,res) {
-    try
-    {
-        req.interfaceModel=interface;
-        req.groupModel=group;
+function Group() {
+    this.getChild=async (function(req,id,obj,bInter) {
+        let query={
+            project:id,
+            parent:obj?obj.id:{
+                $exists:false
+            }
+        }
         if(req.headers["docleverversion"])
         {
-            req.version=await (version.findOneAsync({
-                _id:req.headers["docleverversion"]
-            }))
-            if(!req.version)
-            {
-                util.throw(e.versionInvalidate,"版本不可用");
-            }
-            req.interfaceModel=interfaceVersion;
-            req.groupModel=groupVersion;
+            query.version=req.headers["docleverversion"]
         }
-        let grp;
-        if(req.clientParam.group)
-        {
-            grp=await (req.groupModel.findOneAsync({
-                _id:req.clientParam.group
-            }));
-            if(!grp)
-            {
-                util.throw(e.groupNotFound,"分组不存在");
-                return;
-            }
-        }
-        let obj=await (project.findOneAsync({
-            _id:req.clientParam.id?req.clientParam.id:grp.project,
-            $or:[
-                {
-                    owner:req.userInfo._id
-                },
-                {
-                    users:{
-                        $elemMatch:{
-                            user:req.userInfo._id,
-                        }
-                    }
-                }
-            ]
+        let arr=await (req.groupModel.findAsync(query,null,{
+            sort:"name"
         }))
-        if(!obj)
+        for(let obj of arr)
         {
-            obj=await (project.findOneAsync({
-                _id:req.clientParam.id?req.clientParam.id:grp.project,
+            obj._doc.data=await (this.getChild(req,id,obj,bInter));
+        }
+        if(bInter && obj)
+        {
+            let arrInterface=await (req.interfaceModel.findAsync({
+                group:obj._id
+            },"_id name method finish url",{
+                sort:"name"
             }));
-            if(!obj)
+            arr=arr.concat(arrInterface);
+        }
+        return arr;
+    })
+    this.validateUser=async ((req,res)=> {
+        try
+        {
+            req.interfaceModel=interface;
+            req.groupModel=group;
+            if(req.headers["docleverversion"])
             {
-                util.throw(e.projectNotFound,"项目不存在");
-                return;
+                req.version=await (version.findOneAsync({
+                    _id:req.headers["docleverversion"]
+                }))
+                if(!req.version)
+                {
+                    util.throw(e.versionInvalidate,"版本不可用");
+                }
+                req.interfaceModel=interfaceVersion;
+                req.groupModel=groupVersion;
             }
-            if(obj.team)
+            let grp;
+            if(req.clientParam.group)
             {
-                let arrUser=await (teamGroup.findAsync({
-                    team:obj.team,
-                    users:{
-                        $elemMatch:{
-                            user:req.userInfo._id,
-                            role:{
-                                $in:[0,2]
+                grp=await (req.groupModel.findOneAsync({
+                    _id:req.clientParam.group
+                }));
+                if(!grp)
+                {
+                    util.throw(e.groupNotFound,"分组不存在");
+                    return;
+                }
+            }
+            let obj=await (project.findOneAsync({
+                _id:req.clientParam.id?req.clientParam.id:grp.project,
+                $or:[
+                    {
+                        owner:req.userInfo._id
+                    },
+                    {
+                        users:{
+                            $elemMatch:{
+                                user:req.userInfo._id,
                             }
                         }
                     }
-                }))
-                if(arrUser.length==0)
+                ]
+            }))
+            if(!obj)
+            {
+                obj=await (project.findOneAsync({
+                    _id:req.clientParam.id?req.clientParam.id:grp.project,
+                }));
+                if(!obj)
+                {
+                    util.throw(e.projectNotFound,"项目不存在");
+                    return;
+                }
+                if(obj.team)
+                {
+                    let arrUser=await (teamGroup.findAsync({
+                        team:obj.team,
+                        users:{
+                            $elemMatch:{
+                                user:req.userInfo._id,
+                                role:{
+                                    $in:[0,2]
+                                }
+                            }
+                        }
+                    }))
+                    if(arrUser.length==0)
+                    {
+                        util.throw(e.userForbidden,"你没有权限");
+                        return;
+                    }
+                }
+                else
                 {
                     util.throw(e.userForbidden,"你没有权限");
                     return;
                 }
+                req.obj=obj;
+                req.group=grp;
+                return true
             }
             else
             {
-                util.throw(e.userForbidden,"你没有权限");
-                return;
+                req.obj=obj;
+                req.group=grp;
+                return true
             }
-            req.obj=obj;
-            req.group=grp;
-            util.next();
-        }
-        else
-        {
-            req.obj=obj;
-            req.group=grp;
-            util.next();
-        }
-    }
-    catch (err)
-    {
-        util.catch(res,err);
-    }
-}
-
-function create(req,res) {
-    try
-    {
-        let query={
-            name:req.clientParam.name,
-            project:req.clientParam.id
-        }
-        if(req.headers["docleverversion"])
-        {
-            query.version=req.headers["docleverversion"]
-        }
-        let obj=await (req.groupModel.findOneAsync(query));
-        if(obj)
-        {
-            util.throw(e.duplicateName,"名字重复了");
-        }
-        if(req.clientParam.group)
-        {
-            req.group.name=req.clientParam.name;
-            await (req.group.saveAsync());
-        }
-        else
-        {
-            let query={
-                name:req.clientParam.name,
-                project:req.clientParam.id,
-                id:uuid()
-            }
-            if(req.headers["docleverversion"])
-            {
-                query.version=req.headers["docleverversion"]
-            }
-            let result=await (req.groupModel.createAsync(query));
-            if(req.clientParam.import==1)
-            {
-                util.ok(res,result,"ok");
-                return;
-            }
-        }
-        let arr=await (refreshInterface(req,req.clientParam.id));
-        util.ok(res,arr,"更新成功");
-
-    }
-    catch (err)
-    {
-        util.catch(res,err);
-    }
-}
-
-function remove(req,res) {
-    try
-    {
-        if(req.group.type==0)
-        {
-            let query={
-                type:1,
-                project:req.group.project
-            }
-            if(req.headers["docleverversion"])
-            {
-                query.version=req.headers["docleverversion"]
-            }
-            let obj=await (req.groupModel.findOneAsync(query))
-            await (req.interfaceModel.updateAsync({
-                group:req.group._id
-            },{
-                group:obj._id
-            },{
-                multi:true
-            }))
-            await (req.group.removeAsync());
-            await (interfaceSnapshot.updateAsync({
-                group:req.group._id
-            },{
-                group:obj._id
-            },{
-                multi:true
-            }));
-            let arr=await (refreshInterface(req,req.group.project));
-            util.ok(res,arr,"删除成功");
-        }
-        else
-        {
-            util.throw(e.userForbidden,"系统分组不可删除");
-        }
-
-    }
-    catch (err)
-    {
-        util.catch(res,err);
-    }
-}
-
-function interfaceList(req,res) {
-    try
-    {
-        let query={
-            group:req.clientParam.group
-        }
-        let arr=await (req.interfaceModel.findAsync(query,"name group method",{
-            populate:{
-                path:"group",
-                select:"name"
-            },
-            sort:"name"
-        }))
-        util.ok(res,arr,"ok");
-    }
-    catch (err)
-    {
-        util.catch(res,err);
-    }
-}
-
-function exportJSON(req,res) {
-    try
-    {
-        let obj={
-            name:req.group.name,
-            flag:"SBDoc",
-            data:[]
-        };
-        let arr=await (req.interfaceModel.findAsync({
-            group:req.group._id
-        }));
-        for(let item of arr)
-        {
-            let newInter={};
-            for(let key in item._doc)
-            {
-                if(item._doc.hasOwnProperty(key) && key!="__v" && key!="_id" && key!="project" && key!="group" && key!="owner" && key!="editor")
-                {
-                    newInter[key]=item._doc[key];
-                }
-            }
-            obj.data.push(newInter);
-        }
-        let content=JSON.stringify(obj);
-        res.writeHead(200,{
-            'Content-Type': 'application/octet-stream',
-            'Content-Disposition': 'attachment; filename*=UTF-8\'\''+encodeURIComponent(req.group.name)+".json",
-            "Transfer-Encoding": "chunked",
-            "Expires":0,
-            "Cache-Control":"must-revalidate, post-check=0, pre-check=0",
-            "Content-Transfer-Encoding":"binary",
-            "Pragma":"public",
-        });
-        res.end(content);
-    }
-    catch (err)
-    {
-        util.catch(res,err);
-    }
-}
-
-function importJSON(req,res) {
-    try
-    {
-        let obj;
-        try
-        {
-            obj=JSON.parse(req.clientParam.json);
         }
         catch (err)
         {
-            util.throw(e.systemReason,"json解析错误");
-            return;
+            util.catch(res,err);
         }
-        if(obj.flag!="SBDoc")
+    })
+
+    this.create=async ((req,res)=> {
+        try
         {
-            util.throw(e.systemReason,"不是DOClever的导出格式");
-            return;
-        }
-        let objProject=await (project.findOneAsync({
-            _id:req.clientParam.id
-        }))
-        if(!objProject)
-        {
-            util.throw(e.projectNotFound,"项目不存在");
-            return;
-        }
-        let query={
-            name:obj.name,
-            project:objProject._id,
-        }
-        if(req.headers["docleverversion"])
-        {
-            query.version=req.headers["docleverversion"]
-        }
-        let objGroup=await (req.groupModel.createAsync(query));
-        for(let item of obj.data)
-        {
-            item.project=objProject._id;
-            item.group=objGroup._id;
-            item.owner=req.userInfo._id;
-            item.editor=req.userInfo._id;
+            let query={
+                name:req.clientParam.name,
+                project:req.clientParam.id
+            }
             if(req.headers["docleverversion"])
             {
-                item.version=req.headers["docleverversion"]
+                query.version=req.headers["docleverversion"]
             }
-            await (req.interfaceModel.createAsync(item));
+            let objParent;
+            if(req.clientParam.parent)
+            {
+                objParent=await (req.groupModel.findOneAsync({
+                    _id:req.clientParam.parent
+                }));
+                if(!objParent)
+                {
+                    util.throw(e.groupNotFound,"父级分组不存在");
+                }
+                else
+                {
+                    query.parent=objParent.id;
+                }
+            }
+            let obj=await (req.groupModel.findOneAsync(query));
+            if(obj)
+            {
+                util.throw(e.duplicateName,"名字重复了");
+            }
+            if(req.clientParam.group)
+            {
+                if(req.clientParam.name)
+                {
+                    req.group.name=req.clientParam.name;
+                }
+                if(req.clientParam.parent)
+                {
+                    req.group.parent=req.clientParam.parent;
+                }
+                await (req.group.saveAsync());
+            }
+            else
+            {
+                let query={
+                    name:req.clientParam.name,
+                    project:req.clientParam.id,
+                    id:uuid()
+                }
+                if(req.clientParam.parent)
+                {
+                    query.parent=objParent.id;
+                }
+                if(req.headers["docleverversion"])
+                {
+                    query.version=req.headers["docleverversion"]
+                }
+                let result=await (req.groupModel.createAsync(query));
+                if(req.clientParam.import==1)
+                {
+                    util.ok(res,result,"ok");
+                    return;
+                }
+            }
+            let arr=await (this.getChild(req,req.clientParam.id,null,1));
+            util.ok(res,arr,"更新成功");
+
         }
-        let arr=await (refreshInterface(req,objProject._id));
-        util.ok(res,arr,"导入成功");
-    }
-    catch (err)
-    {
-        util.catch(res,err);
-    }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+
+    this.remove=async ((req,res)=> {
+        try
+        {
+            if(req.group.type==0)
+            {
+                let query={
+                    type:1,
+                    project:req.group.project
+                }
+                if(req.headers["docleverversion"])
+                {
+                    query.version=req.headers["docleverversion"]
+                }
+                let objTrash=await (req.groupModel.findOneAsync(query));
+                let removeChild=async (function (objGroup) {
+                    let arrGroup=await (req.groupModel.findAsync({
+                        project:req.group.project,
+                        parent:objGroup.id
+                    }));
+                    for(let obj of arrGroup)
+                    {
+                        await (removeChild(obj));
+                    }
+                    await (req.interfaceModel.updateAsync({
+                        group:objGroup._id
+                    },{
+                        group:objTrash._id
+                    },{
+                        multi:true
+                    }))
+                    await (interfaceSnapshot.updateAsync({
+                        group:objGroup._id
+                    },{
+                        group:objTrash._id
+                    },{
+                        multi:true
+                    }));
+                    await (objGroup.removeAsync());
+                })
+                await (removeChild(req.group));
+                let arr=await (this.getChild(req,req.group.project,null,1));
+                util.ok(res,arr,"删除成功");
+            }
+            else
+            {
+                util.throw(e.userForbidden,"系统分组不可删除");
+            }
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.exportJSON=async ((req,res)=>{
+        try
+        {
+            let obj={
+                name:req.group.name,
+                flag:"SBDoc",
+                data:[]
+            };
+            let _map=async (function(req,id,obj) {
+                let query={
+                    project:id,
+                    parent:obj?obj.id:{
+                        $exists:false
+                    }
+                }
+                if(req.headers["docleverversion"])
+                {
+                    query.version=req.headers["docleverversion"]
+                }
+                let arr=await (req.groupModel.findAsync(query,"-_id -parent -version -project",{
+                    sort:"name"
+                }))
+                for(let obj of arr)
+                {
+                    obj._doc.data=await (_map(req,id,obj));
+                }
+                let arrInterface=await (req.interfaceModel.findAsync({
+                    group:obj._id
+                },"-_id -id -project -group -owner -editor -version",{
+                    sort:"name"
+                }));
+                arr=arr.concat(arrInterface);
+                return arr;
+            })
+            obj.data=await (_map(req,req.group.project,req.group));
+            let content=JSON.stringify(obj);
+            res.writeHead(200,{
+                'Content-Type': 'application/octet-stream',
+                'Content-Disposition': 'attachment; filename*=UTF-8\'\''+encodeURIComponent(req.group.name)+".json",
+                "Transfer-Encoding": "chunked",
+                "Expires":0,
+                "Cache-Control":"must-revalidate, post-check=0, pre-check=0",
+                "Content-Transfer-Encoding":"binary",
+                "Pragma":"public",
+            });
+            res.end(content);
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+
+    this.importJSON=async ((req,res)=>{
+        try
+        {
+            let obj;
+            try
+            {
+                obj=JSON.parse(req.clientParam.json);
+            }
+            catch (err)
+            {
+                util.throw(e.systemReason,"json解析错误");
+                return;
+            }
+            if(obj.flag!="SBDoc")
+            {
+                util.throw(e.systemReason,"不是DOClever的导出格式");
+                return;
+            }
+            let objProject=await (project.findOneAsync({
+                _id:req.clientParam.id
+            }))
+            if(!objProject)
+            {
+                util.throw(e.projectNotFound,"项目不存在");
+                return;
+            }
+            if(req.clientParam.group)
+            {
+                req.group=await (req.groupModel.findOneAsync({
+                    _id:req.clientParam.group
+                }))
+                if(!req.group)
+                {
+                    util.throw(e.groupNotFound,"分组不存在");
+                    return;
+                }
+            }
+            let importChild=async (function (data,objParent) {
+                for(let item of data)
+                {
+                    if(item.data)
+                    {
+                        let query={
+                            name:item.name,
+                            project:objProject._id,
+                            id:uuid(),
+                            type:0
+                        };
+                        if(objParent)
+                        {
+                            query.parent=objParent.id;
+                        }
+                        if(req.headers["docleverversion"])
+                        {
+                            query.version=req.headers["docleverversion"]
+                        }
+                        let objGroup=await (req.groupModel.createAsync(query));
+                        await (importChild(item.data,objGroup));
+                    }
+                    else
+                    {
+                        item.project=objProject._id;
+                        item.group=objParent._id;
+                        item.owner=req.userInfo._id;
+                        item.editor=req.userInfo._id;
+                        item.id=uuid();
+                        if(req.headers["docleverversion"])
+                        {
+                            item.version=req.headers["docleverversion"]
+                        }
+                        if(!item.param)
+                        {
+                            item.param=[];
+                            let o={
+                                name:"未命名",
+                                remark:"",
+                                id:uuid(),
+                                header:item.header,
+                                queryParam:item.queryParam,
+                                restParam:item.restParam,
+                                outParam:item.outParam,
+                                outInfo:item.outInfo,
+                                before:item.before,
+                                after:item.after
+                            }
+                            if(item.bodyParam)
+                            {
+                                o.bodyParam=item.bodyParam;
+                                o.bodyInfo=item.bodyInfo;
+                            }
+                            delete item.header;
+                            delete item.queryParam;
+                            delete item.restParam;
+                            delete item.outParam;
+                            delete item.outInfo;
+                            delete item.before;
+                            delete item.after;
+                            delete item.bodyParam;
+                            delete item.bodyInfo;
+                            item.param.push(o);
+                        }
+                        await (req.interfaceModel.createAsync(item));
+                    }
+                }
+            })
+            await (importChild([obj],req.group?req.group:null))
+            let arr=await (this.getChild(req,objProject._id,null,1));
+            util.ok(res,arr,"导入成功");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.move=async ((req,res)=>{
+        try
+        {
+            let toGroup;
+            if(req.clientParam.to)
+            {
+                toGroup=await (req.groupModel.findOneAsync({
+                    _id:req.clientParam.to
+                }));
+                if(!toGroup)
+                {
+                    util.throw(e.groupNotFound,"分组不存在");
+                }
+            }
+            await (req.groupModel.updateAsync({
+                _id:req.clientParam.group
+            },req.clientParam.to?{
+                parent:toGroup.id
+            }:{
+                $unset:{
+                    parent:1
+                }
+            }));
+            util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
 }
 
-exports.validateUser=async (validateUser);
-exports.create=async (create);
-exports.remove=async (remove);
-exports.interface=async (interfaceList);
-exports.exportJSON=async (exportJSON);
-exports.importJSON=async (importJSON);
+
+module.exports=Group;
 
 
 

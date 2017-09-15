@@ -23,6 +23,7 @@
 <script>
     var valueList=require("./valueList.vue")
     module.exports={
+        props:["index","item"],
         data:function () {
             return {
 
@@ -30,7 +31,7 @@
         },
         computed: {
             arr:function () {
-                return this.$store.state.query
+                return this.item.query
             }
         },
         components:{
@@ -38,24 +39,7 @@
         },
         methods:{
             remove:function (index) {
-                if(this.arr.length>1)
-                {
-                    this.arr.splice(index,1)
-                }
-                else
-                {
-                    this.arr[0].name="";
-                    this.arr[0].must=0;
-                    this.arr[0].remark="";
-                    if(this.arr[0].value)
-                    {
-                        this.arr[0].value={
-                            type:0,
-                            data:[],
-                            status:""
-                        };
-                    }
-                }
+                this.arr.splice(index,1)
             },
             configValue:function (item) {
                 if(!item.value)
@@ -68,7 +52,7 @@
                 }
                 var child=$.showBox(this.$parent,"valueList",{
                     "source":item.value
-                });
+                },"projectinfo/interface");
                 child.$on("save",function (value) {
                     item.value=value;
                 });

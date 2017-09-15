@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="消息中心"  size="small" ref="box" >
+    <el-dialog title="消息中心"  size="small" ref="box" v-model="showDialog">
         <el-row class="row" v-scroll="loadMore" style="height: 300px;overflow-y: auto">
             <template v-for="item in arr">
                 <el-row class="row" style="font-size: 17px;height: 30px;line-height: 30px">
@@ -36,7 +36,8 @@
                 page:0,
                 clearPending:false,
                 loading:false,
-                finish:false
+                finish:false,
+                showDialog:false
             }
         },
         directives:{

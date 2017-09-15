@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="DOClever"  size="small" ref="box" :modal="hud">
+    <el-dialog title="DOClever"  size="small" ref="box" :modal="hud" v-model="showDialog">
         <el-row style="background-color: white;height: 100%;padding: 20px;" class="row">
             <el-input v-drag="'text'" type="textarea" :rows="6" :placeholder="placeholder" v-model="text"></el-input>
         </el-row>
@@ -18,7 +18,8 @@
         data:function () {
             return {
                 text:this.source,
-                hud:this.hudremove===undefined?true:Boolean(this.hudremove)
+                hud:this.hudremove===undefined?true:Boolean(this.hudremove),
+                showDialog:false
             }
         },
         directives:{

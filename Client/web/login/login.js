@@ -6,7 +6,9 @@ var vue=new Vue({
     data: {
         username:"",
         pwd:"",
-        loginPending:false
+        loginPending:false,
+        remember:0,
+        openId:""
     },
     methods:{
         login:function () {
@@ -19,7 +21,7 @@ var vue=new Vue({
             this.loginPending=true;
             net.post("/user/login",{
                 name:_this.username,
-                password:_this.pwd
+                password:_this.pwd,
             },{
                 "content-type":"application/x-www-form-urlencoded"
             }).then(function (data) {
@@ -31,7 +33,7 @@ var vue=new Vue({
                         type: 'success'
                     });
                     session.clear()
-                    session.update(data.data);
+                    session.update(data.data,_this.remember);
                     setTimeout(function () {
                         location.href="../project/project.html"
                     },1500);
@@ -44,8 +46,104 @@ var vue=new Vue({
                     });
                 }
             })
+        },
+        qqLogin:function() {
+            var _this=this;
+            var win=QC.Login.showPopup({});
+            var loop=setInterval(function () {
+                if(win.closed)
+                {
+                    clearInterval(loop);
+                    if(QC.Login.check())
+                    {
+                        var obj;
+                        QC.api("get_user_info", {}).success(function(s){
+                            obj=s.data;
+                            QC.Login.getMe(function (openId,accessToken) {
+                                _this.openId=openId;
+                                net.post("/user/login",{
+                                    qqid:openId,
+                                    qqimg:obj.figureurl_qq_1
+                                }).then(function (data) {
+                                    if(data.code==200)
+                                    {
+                                        _this.$notify({
+                                            title: '登录成功',
+                                            type: 'success'
+                                        });
+                                        session.clear()
+                                        session.update(data.data,_this.remember);
+                                        setTimeout(function () {
+                                            location.href="../project/project.html"
+                                        },1500);
+                                    }
+                                    else if(data.code==2)
+                                    {
+                                        sessionStorage.setItem("qqid",openId);
+                                        sessionStorage.setItem("qqname",obj.nickname);
+                                        sessionStorage.setItem("qqimg",obj.figureurl_qq_1);
+                                        window.open(location.protocol+"//"+location.host+"/html/web/register/registerqq.html")
+                                    }
+                                    else
+                                    {
+                                        _this.$notify({
+                                            title: data.msg,
+                                            type: 'error'
+                                        });
+                                    }
+                                })
+                            })
+                        })
+                    }
+                }
+            },500);
         }
     },
+    created:function () {
+        var _this=this;
+        window.addEventListener('message',function(e){
+            if(e.origin==location.protocol+"//"+location.host)
+            {
+                var obj;
+                try
+                {
+                    obj=JSON.parse(e.data);
+                }
+                catch (err)
+                {
+                    return;
+                }
+                if(!obj.name || !obj.password)
+                {
+                    return;
+                }
+                net.post("/user/login",{
+                    name:obj.name,
+                    password:obj.password,
+                }).then(function (data) {
+                    if(data.code==200)
+                    {
+                        _this.$notify({
+                            title: '登录成功',
+                            type: 'success'
+                        });
+                        session.clear()
+                        session.update(data.data,_this.remember);
+                        setTimeout(function () {
+                            location.href="../project/project.html"
+                        },1000);
+                    }
+                    else
+                    {
+                        _this.$notify({
+                            title: data.msg,
+                            type: 'error'
+                        });
+                    }
+                })
+            }
+        },false);
+    }
 })
 $.ready(function () {
     document.body.onkeydown=function (e) {

@@ -21,6 +21,7 @@
 <script>
     var headerData=require("./inparamHeader")
     module.exports={
+        props:["index","item"],
         data:function () {
             return {
                 keys:Object.keys(headerData).map(function (obj) {
@@ -31,7 +32,7 @@
         },
         computed:{
             arr:function () {
-                return this.$store.state.header
+                return this.item.header
             }
         },
         methods:{
@@ -71,22 +72,13 @@
                 cb(results);
             },
             focus:function (item) {
-                  this.itemSel=item;
+                this.itemSel=item;
             },
             add:function () {
                 this.arr.push({name:'',value:'',remark:''});
             },
             remove:function (index) {
-                if(this.arr.length>1)
-                {
-                    this.arr.splice(index,1)
-                }
-                else
-                {
-                    this.arr[0].name="";
-                    this.arr[0].value="";
-                    this.arr[0].remark="";
-                }
+                this.arr.splice(index,1)
             }
         },
         created:function () {

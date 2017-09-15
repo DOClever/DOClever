@@ -1,1 +1,25 @@
-webpackJsonp([11],{251:function(n,a,t){(function(n,a){var e=t(8);new n({el:"#app",data:{isLogin:!!a.get("id"),type:"first"},components:{mainnav:e},methods:{}})}).call(a,t(3),t(2))}},[251]);
+webpackJsonp([12],{
+
+/***/ 284:
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(Vue, session) {var mainNav=__webpack_require__(7);
+var vue=new Vue({
+    el: "#app",
+    data: {
+        isLogin:session.get('id')?true:false,
+        type:"first"
+    },
+    components:{
+        "mainnav":mainNav
+    },
+    methods:{
+
+    },
+})
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(3)))
+
+/***/ })
+
+},[284]);
+//# sourceMappingURL=about.js.map

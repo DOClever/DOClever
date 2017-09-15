@@ -20,6 +20,7 @@
 <script>
     var valueList=require("./valueList.vue")
     module.exports={
+        props:["index","item"],
         data:function () {
             return {
 
@@ -27,7 +28,7 @@
         },
         computed: {
             arr:function () {
-                return this.$store.state.param
+                return this.item.param
             }
         },
         components:{
@@ -45,7 +46,7 @@
                 }
                 var child=$.showBox(this.$parent,"valueList",{
                     "source":item.value
-                });
+                },"projectinfo/interface");
                 child.$on("save",function (value) {
                     item.value=value;
                 });

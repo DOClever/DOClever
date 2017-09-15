@@ -1,7 +1,8 @@
 /**
  * Created by sunxin on 2017/6/26.
  */
-var version=require("./version");
+var versionClass=require("./version");
+var version=new versionClass();
 var interface=[
     {
         "method":"POST",

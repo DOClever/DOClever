@@ -93,6 +93,7 @@ var browserVersion = browser.major
 var browserMinorVersion = browser.minor || 0
 // The content-type header is broken when 'prefer-streaming' or 'allow-wrong-content-type'
 // is passed in browsers that rely on xhr.overrideMimeType(), namely older chrome, safari 6-10.0, and the stock Android browser
+// Note that Safari 10.0 on iOS 10.3 doesn't need to override the mime type, so the content-type is preserved.
 var wrongMimeType = ((browserName === 'Chrome' && browserVersion <= 42) ||
 	((browserName === 'Safari' || browserName === 'Mobile Safari') && browserVersion >= 6 && (browserVersion < 10 || (browserVersion == 10 && browserMinorVersion == 0)))
 	|| (browserName === 'Android Browser'))
@@ -102,9 +103,13 @@ test('content-type response header with forced streaming', function (t) {
 		path: '/testHeaders',
 		mode: 'prefer-streaming'
 	}, function (res) {
-		if (wrongMimeType)
-			t.equal(res.headers['content-type'], 'text/plain; charset=x-user-defined', 'content-type overridden')
-		else
+		if (wrongMimeType) {
+			// allow both the 'wrong' and correct mime type, since sometimes it's impossible to tell which to expect
+			// from the browser version alone (e.g. Safari 10.0 on iOS 10.2 vs iOS 10.3)
+			var contentType = res.headers['content-type']
+			var correct = (contentType === 'text/plain; charset=x-user-defined') || (contentType === 'application/json')
+			t.ok(correct, 'content-type either preserved or overridden')
+		} else
 			t.equal(res.headers['content-type'], 'application/json', 'content-type preserved')
 		t.end()
 	})

@@ -64,7 +64,7 @@
 <script>
     module.exports={
         name:"outparam",
-        props:["source","le","parent"],
+        props:["source","le","parent","index","data"],
         data:function () {
             return {
                 level:this.le?this.le:0,
@@ -72,13 +72,13 @@
         },
         computed:{
             arr:function () {
-                return this.source?this.source:this.$store.state.result
+                return this.source?this.source:this.data.result
             },
             statusExist:function () {
                 return (this.$store.state.status && this.$store.state.status.length>0)?true:false;
             },
             type:function () {
-                return this.$store.state.outInfo.jsonType;
+                return this.data.outInfo.jsonType;
             }
         },
         methods:{

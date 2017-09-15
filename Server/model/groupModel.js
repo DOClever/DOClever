@@ -14,7 +14,8 @@ var model=new mongoose.Schema({
         type:Number,
         default:0      //0 普通 1 回收站
     },
-    id:String
+    id:String,
+    parent:String,
 },{
     timestamps:true
 });

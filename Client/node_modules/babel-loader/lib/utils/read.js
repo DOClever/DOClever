@@ -1,24 +1,14 @@
 "use strict";
 
-var fs = require("fs");
-/**
- * Read the file and cache the result
- * return the result in cache
- *
- * @example
- * var read = require('./helpers/fsExists')({});
- * read('.babelrc'); // file contents...
- */
-module.exports = function (cache) {
-  cache = cache || {};
+var path = require("path");
 
-  return function (filename) {
-    if (!filename) {
-      throw new Error("filename must be a string");
-    }
+module.exports = function readBabelConfig(fileSystem, filename) {
+  if (path.basename(filename) === "package.json") {
+    var pkg = require(filename);
 
-    cache[filename] = cache[filename] || fs.readFileSync(filename, "utf8");
+    return JSON.stringify(pkg.babel);
+  }
 
-    return cache[filename];
-  };
+  // Webpack `fs` return Buffer
+  return fileSystem.readFileSync(filename).toString("utf8");
 };

@@ -1,7 +1,8 @@
 /**
  * Created by sunxin on 2017/7/7.
  */
-var message=require("./message");
+var messageClass=require("./message");
+var message=new messageClass();
 var interface=[
     {
         "method":"DELETE",

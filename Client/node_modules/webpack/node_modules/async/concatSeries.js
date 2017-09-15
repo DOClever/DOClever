@@ -4,13 +4,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _concat = require('./internal/concat');
+var _doLimit = require('./internal/doLimit');
 
-var _concat2 = _interopRequireDefault(_concat);
+var _doLimit2 = _interopRequireDefault(_doLimit);
 
-var _doSeries = require('./internal/doSeries');
+var _concatLimit = require('./concatLimit');
 
-var _doSeries2 = _interopRequireDefault(_doSeries);
+var _concatLimit2 = _interopRequireDefault(_concatLimit);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -32,5 +32,5 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * containing the concatenated results of the `iteratee` function. Invoked with
  * (err, results).
  */
-exports.default = (0, _doSeries2.default)(_concat2.default);
+exports.default = (0, _doLimit2.default)(_concatLimit2.default, 1);
 module.exports = exports['default'];

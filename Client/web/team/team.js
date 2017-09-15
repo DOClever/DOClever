@@ -2,30 +2,24 @@
  * Created by sunxin on 2016/12/19.
  */
 var mainNav=require("../component/mainNav.vue");
-var teamInfo=require("../component/teamInfo.vue");
-var teamProjectList=require("../component/teamProjectList.vue");
-var teamUser=require("../component/teamUser.vue");
-var bus=require("../bus/projectInfoBus");
-if(!session.get("id"))
-{
-    location.href="../login/login.html"
-}
-else if(!session.get("teamId"))
+var teamInfo=require("./component/teamInfo.vue");
+var teamProjectList=require("./component/teamProjectList.vue");
+var teamUser=require("./component/teamUser.vue");
+var store=require("./store");
+var bus=require("../bus/bus")
+var sessionChange=require("../mixins/session");
+if(!session.get("teamId"))
 {
     location.href="../project/project.html"
 }
 session.remove("projectId");
 session.remove("projectName");
-session.remove("role");
-session.remove("own");
-session.remove("lastBaseUrl");
 session.remove("versionId");
 session.remove("versionName");
 session.remove("versionDis");
 var vue=new Vue({
     el: "#app",
     data: {
-        session:$.clone(session.raw()),
         type:1,
         obj:{
             notice:[],
@@ -46,6 +40,8 @@ var vue=new Vue({
         newUserRole:1,
         selUserApplyObj:{}
     },
+    mixins:[sessionChange],
+    store:store,
     components:{
         "mainnav":mainNav,
         "teaminfo":teamInfo,
@@ -147,10 +143,17 @@ var vue=new Vue({
             {
                 this.newUserGroup=this.obj.user[0]._id;
                 this.newUserRole=1;
-                this.showUserApply=true;
                 this.selUserApplyObj={
                     item:item,
                     state:state
+                }
+                if(state==1)
+                {
+                    this.showUserApply=true;
+                }
+                else
+                {
+                    this.handleUserApply();
                 }
             }
             else if(item.type==3)
@@ -169,7 +172,7 @@ var vue=new Vue({
                             item.handle=1;
                             _this.obj.project.unshift(data.data);
                             bus.$emit("updateTeamProject",1,data.data.interfaceCount);
-                            bus.$emit("updateTeamUser",data.data.userAddCount);
+                            store.state.event.$emit("updateTeamUser",data.data.userAddCount);
                         }
                         else
                         {
@@ -209,7 +212,7 @@ var vue=new Vue({
                                 })
                             }
                         })
-                        bus.$emit("updateTeamUser",1);
+                        store.state.event.$emit("updateTeamUser",1);
                     }
                     else
                     {

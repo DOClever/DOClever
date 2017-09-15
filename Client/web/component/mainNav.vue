@@ -1,46 +1,46 @@
 <template>
-    <el-row id="navBar" class="row" :style="transparent?{height:'60px','backgroundColor':'rgba(0,0,0,0.3)',left:0,top:0,position:'absolute'}:{height:'60px','backgroundColor':'white'}">
+    <el-row id="navBar" class="row" :style="transparent?{height:'50px','backgroundColor':'rgba(0,0,0,0.3)',left:0,top:0,position:'absolute'}:{height:'50px','backgroundColor':'white'}" style="box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15)">
         <slot name="other"></slot>
-        <el-col class="col" :span="3" style="text-align: left;line-height: 60px;color:#20A0FF ;font-size: 25px;padding-left: 20px">
+        <el-col class="col" :span="3" style="text-align: left;line-height: 50px;color:#50bfff ;font-size: 25px;padding-left: 20px">
             <a style="text-decoration: none;cursor: pointer;color: inherit" href="/">DOClever</a>
         </el-col>
-        <el-col class="col" :span="2" style="text-align: center;line-height: 60px;">
+        <el-col class="col" :span="2" style="text-align: center;line-height: 50px;">
             <slot name="slot3">
             </slot>
         </el-col>
-        <el-col class="col" :span="2" style="text-align: center;line-height: 60px;">
+        <el-col class="col" :span="2" style="text-align: center;line-height: 50px;">
             <slot name="slot4">
             </slot>
         </el-col>
-        <el-col class="col" :span="1" style="text-align: center;line-height: 60px;">
+        <el-col class="col" :span="1" style="text-align: center;line-height: 50px;">
 
         </el-col>
-        <el-col class="col" :span="8" style="text-align: center;line-height: 60px;font-size: 25px;color: #20A0FF;white-space: nowrap;text-overflow:ellipsis">
+        <el-col class="col" :span="8" style="text-align: center;line-height: 50px;font-size: 25px;color: #50bfff;white-space: nowrap;text-overflow:ellipsis">
             <slot name="title">
             </slot>
         </el-col>
-        <el-col class="col" :span="2" style="text-align: center;line-height: 60px;">
+        <el-col class="col" :span="2" style="text-align: center;line-height: 50px;">
             <slot name="slot1">
             </slot>
         </el-col>
-        <el-col class="col" :span="2" style="text-align: center;line-height: 60px;">
+        <el-col class="col" :span="2" style="text-align: center;line-height: 50px;">
             <slot name="slot2">
             </slot>
         </el-col>
-        <el-col class="col" :span="4" v-if="isLogin" style="white-space: nowrap;text-align: center;line-height: 60px">
-            <img v-proxy="img" style="width: 40px;height: 40px; border-radius:50%;margin-top: 10px">&nbsp;
+        <el-col class="col" :span="4" v-if="session.id" style="white-space: nowrap;text-align: center;line-height: 50px">
+            <img v-proxy="session.photo" style="width: 40px;height: 40px; border-radius:50%;margin-top: 5px">&nbsp;
             <el-dropdown @command="handleCommand" style="top: -15px;">
-                <span class="el-dropdown-link" style="color: #20A0FF;cursor: pointer">
+                <span class="el-dropdown-link" style="color: #50bfff;cursor: pointer">
                     <el-badge is-dot class="msgBadge" v-if="newMsg">
-                        {{name}}
+                        {{session.name}}
                     </el-badge>
                     <span v-else>
-                        {{name}}
+                        {{session.name}}
                     </span>
                     <i class="el-icon-caret-bottom el-icon--right"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item command="team" v-if="team">团队首页</el-dropdown-item>
+                    <el-dropdown-item command="team" v-if="session.team">团队首页</el-dropdown-item>
                     <el-dropdown-item command="list">返回列表</el-dropdown-item>
                     <el-dropdown-item command="apply" v-if="bShowApply">团队申请</el-dropdown-item>
                     <el-dropdown-item command="setting">个人设置</el-dropdown-item>
@@ -62,10 +62,10 @@
                 </el-dropdown-menu>
             </el-dropdown>
         </el-col>
-        <el-col class="col" :span="2" style="text-align: center;line-height: 60px" v-if="!isLogin">
+        <el-col class="col" :span="2" style="text-align: center;line-height: 50px" v-if="!session.id">
             <el-button type="info" onclick="location='/html/web/login/login.html'">登录</el-button>
         </el-col>
-        <el-col class="col" :span="2" style="text-align: center;line-height: 60px" v-if="!isLogin">
+        <el-col class="col" :span="2" style="text-align: center;line-height: 50px" v-if="!session.id">
             <el-button type="success"  onclick="location='/html/web/register/register.html'">注册</el-button>
         </el-col>
         <el-dialog title="团队申请" v-model="showTeam" size="small" ref="team">
@@ -86,15 +86,13 @@
 </template>
 <script>
     var con=require("../../../config.json");
-    var proxyImg=require("../director/proxyImg")
+    var proxyImg=require("../director/proxyImg");
+    var sessionChange=require("../mixins/session");
     module.exports={
         props:["transparent"],
+        mixins:[sessionChange],
         data:function () {
             return {
-                isLogin:session.get('id')?true:false,
-                img:session.get('photo'),
-                name:session.get("name"),
-                team:session.get("teamId"),
                 showTeam:false,
                 applyPending:false,
                 applyName:"",
@@ -210,9 +208,7 @@
                 else if(command=="quit")
                 {
                     var _this=this;
-                    net.post("/user/logout",{},{
-                        "content-type":"application/x-www-form-urlencoded"
-                    }).then(function (data) {
+                    net.post("/user/logout",{}).then(function (data) {
                         if(data.code==200)
                         {
                             _this.$notify({
@@ -265,7 +261,7 @@
             if(this.transparent)
             {
                 $.addEventListener(window,"scroll",function () {
-                    if(document.body.scrollTop>60)
+                    if(document.body.scrollTop>50)
                     {
                         ele.style.position="fixed";
                         ele.style.top=0;
@@ -279,9 +275,6 @@
                     }
                 })
             }
-            this.$parent.$on("updatePhoto",function (val) {
-                _this.img=val;
-            })
             if(session.get("id"))
             {
                 net.get("/message/new").then(function (data) {

@@ -4,13 +4,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _concat = require('./internal/concat');
+var _doLimit = require('./internal/doLimit');
 
-var _concat2 = _interopRequireDefault(_concat);
+var _doLimit2 = _interopRequireDefault(_doLimit);
 
-var _doParallel = require('./internal/doParallel');
+var _concatLimit = require('./concatLimit');
 
-var _doParallel2 = _interopRequireDefault(_doParallel);
+var _concatLimit2 = _interopRequireDefault(_concatLimit);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -39,5 +39,5 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *     // files is now a list of filenames that exist in the 3 directories
  * });
  */
-exports.default = (0, _doParallel2.default)(_concat2.default);
+exports.default = (0, _doLimit2.default)(_concatLimit2.default, Infinity);
 module.exports = exports['default'];

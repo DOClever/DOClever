@@ -115,7 +115,7 @@ $.startLoading=function () {
     ele.style.width="100%";
     ele.style.height=document.documentElement.clientHeight+"px";
     ele.style.backgroundColor="white";
-    ele.innerHTML='<div style="text-align: center;margin-top: '+(document.documentElement.clientHeight/2-100)+'px"><div class="el-icon-loading" style="color: #20A0FF;font-size: 40px;"></div><div style="margin-top: 30px;color: gray;font-size: 20px">DOClever,做最好的接口管理平台</div></div>'
+    ele.innerHTML='<div style="text-align: center;margin-top: '+(document.documentElement.clientHeight/2-100)+'px"><div class="el-icon-loading" style="color: #50bfff;font-size: 40px;"></div><div style="margin-top: 30px;color: gray;font-size: 20px">DOClever,做最好的接口管理平台</div></div>'
 }
 
 $.stopLoading=function () {
@@ -247,7 +247,7 @@ $.inputMul=function (vue,placeholder,func,hudRemove) {
             hudremove:hudRemove
         }
     });
-    child.$refs.box.open();
+    child.$data.showDialog=true;
     child.$refs.box.$on("close",function () {
         child.$el.parentNode.removeChild(child.$el);
     })
@@ -255,6 +255,45 @@ $.inputMul=function (vue,placeholder,func,hudRemove) {
         if(func)
         {
             var ret=func(val);
+            if(ret)
+            {
+                child.$refs.box.close();
+            }
+        }
+        else
+        {
+            child.$refs.box.close();
+        }
+    })
+    return child;
+}
+
+$.inputTwo=function (vue,labelTitle,labelContent,placeholderTitle,placeholderContent,textTitle,textContent,func,hudRemove) {
+    var ele=document.createElement("div");
+    vue.$el.appendChild(ele);
+    var self = vue;
+    var Child = Vue.extend(require("../component/inputTwo.vue"));
+    var child = new Child({
+        el: ele,
+        parent: self,
+        propsData:{
+            name1:labelTitle,
+            name2:labelContent,
+            placeholder1:placeholderTitle,
+            placeholder2:placeholderContent,
+            text1:textTitle,
+            text2:textContent,
+            hudremove:hudRemove
+        }
+    });
+    child.$data.showDialog=true;
+    child.$refs.box.$on("close",function () {
+        child.$el.parentNode.removeChild(child.$el);
+    })
+    child.$on("save",function (val1,val2) {
+        if(func)
+        {
+            var ret=func(val1,val2);
             if(ret)
             {
                 child.$refs.box.close();
@@ -309,17 +348,18 @@ $.getNowFormatDate=function(fmt) {
     return fmt;
 }
 
-$.showBox=function (vue,type,attr) {
+$.showBox=function (vue,type,attr,path) {
     var ele=document.createElement("div");
     vue.$el.appendChild(ele);
     var self = vue;
-    var Child = Vue.extend(require("../component/"+type+".vue"));
+    var module;
+    var Child = Vue.extend(path?require("../"+path+"/"+type+".vue"):require("../component/"+type+".vue"));
     var child = new Child({
         el: ele,
         parent: self,
         propsData:attr?attr:null
     });
-    child.$refs.box.open();
+    child.$data.showDialog=true;
     child.$refs.box.$on("close",function () {
         child.$el.parentNode.removeChild(child.$el);
         child.$destroy();

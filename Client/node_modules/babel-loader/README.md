@@ -15,13 +15,15 @@
 
 This package allows transpiling JavaScript files using [Babel](https://github.com/babel/babel) and [webpack](https://github.com/webpack/webpack).
 
-__Notes:__ Issues with the output should be reported on the babel [issue tracker](https://github.com/babel/babel/issues);
+__Notes:__ Issues with the output should be reported on the babel [issue tracker](https://github.com/babel/babel/issues).
 
 <h2 align="center">Install</h2>
 
 > webpack 1.x | babel-loader <= 6.x
 >
 > webpack 2.x | babel-loader >= 7.x (recommended) (^6.2.10 will also work, but with deprecation warnings)
+>
+> webpack 3.x | babel-loader >= 7.1
 
 ```bash
 yarn add babel-loader babel-core babel-preset-env webpack --dev

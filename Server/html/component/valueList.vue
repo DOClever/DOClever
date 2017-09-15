@@ -28,7 +28,7 @@
             <el-col class="col" :span="20">
                 <el-select style="width: 90%" v-model="info.status">
                     <el-option value="" label="无"></el-option>
-                    <el-option v-for="item in arrStatus" :value="item.id" :label="item.name"></el-option>
+                    <el-option v-for="item in arrStatus" :value="item.id" :label="item.name" :key="item.id"></el-option>
                 </el-select>
             </el-col>
         </el-row>

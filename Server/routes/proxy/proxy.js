@@ -10,11 +10,11 @@ var run=require("../../model/runModel")
 var getHeader = function (req) {
     var ret = {};
     for (var i in req.headers) {
-        if (!/^(host|connection|Access-|origin|referer|user-agent|__user|__path|__url|__method|__headers)/i.test(i)) {
+        if (!/^(host|connection|Access-|origin|referer|user-agent|user-doclever|path-doclever|url-doclever|method-doclever|headers-doclever)/i.test(i)) {
                 ret[i] = req.headers[i];
         }
     }
-    var headers=req.headers["__headers"];
+    var headers=req.headers["headers-doclever"];
     if(headers)
     {
         headers=JSON.parse(headers);
@@ -66,7 +66,7 @@ function getClientIp(req) {
 };
 
 function getHost(req) {
-    var url=req.headers["__url"];
+    var url=req.headers["url-doclever"];
     url=url.replace(/^(http:\/\/|https:\/\/)/i,"");
     var arr=url.split(":");
     var ret=arr[0];
@@ -78,9 +78,9 @@ function getHost(req) {
 }
 
 function getPort(req) {
-    var url=req.headers["__url"];
+    var url=req.headers["url-doclever"];
     var defaultPort;
-    if(req.headers["__url"].toLowerCase().startsWith("https://"))
+    if(req.headers["url-doclever"].toLowerCase().startsWith("https://"))
     {
         defaultPort=443;
     }
@@ -150,7 +150,7 @@ var onProxy = function (req, res) {
     counter++;
     var num = counter;
     var bHttps=false;
-    if(req.headers["__url"].toLowerCase().startsWith("https://"))
+    if(req.headers["url-doclever"].toLowerCase().startsWith("https://"))
     {
         bHttps=true;
     }
@@ -159,8 +159,8 @@ var onProxy = function (req, res) {
     {
         opt= {
             host:     getHost(req),
-            path:     req.headers["__path"],
-            method:   req.headers["__method"],
+            path:     req.headers["path-doclever"],
+            method:   req.headers["method-doclever"],
             headers:  getHeader(req),
             port:getPort(req),
             rejectUnauthorized: false,
@@ -172,15 +172,15 @@ var onProxy = function (req, res) {
     {
         opt= {
             host:     getHost(req),
-            path:     req.headers["__path"],
-            method:   req.headers["__method"],
+            path:     req.headers["path-doclever"],
+            method:   req.headers["method-doclever"],
             headers:  getHeader(req),
             port:getPort(req)
         };
         request=http.request;
     }
     run.create({
-        user:req.headers["__user"],
+        user:req.headers["user-doclever"],
         host:opt.host,
         path:opt.path,
     },function (err) {

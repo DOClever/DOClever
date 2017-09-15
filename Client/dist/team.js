@@ -1,1 +1,298 @@
-webpackJsonp([2],{267:function(e,t,o){(function(e,t,n,a){var s=o(8),i=o(31),r=o(33),d=o(34),p=o(6);e.get("id")?e.get("teamId")||(location.href="../project/project.html"):location.href="../login/login.html",e.remove("projectId"),e.remove("projectName"),e.remove("role"),e.remove("own"),e.remove("lastBaseUrl"),e.remove("versionId"),e.remove("versionName"),e.remove("versionDis");new t({el:"#app",data:{session:n.clone(e.raw()),type:1,obj:{notice:[],project:[],user:[]},showAdd:!1,addPending:!1,newType:0,name:"",dis:"",id:"",arrApply:[],showApply:!1,applyPending:!1,showUserApply:!1,newUserGroup:"",newUserRole:1,selUserApplyObj:{}},components:{mainnav:s,teaminfo:i,teamprojectlist:r,teamuser:d},methods:{addProject:function(){var t=this;if(0==this.newType){if(!this.name)return void this.$message.error("请输入名称");this.addPending=!0,a.post("/project/create",{name:t.name,dis:t.dis,team:e.get("teamId")}).then(function(e){t.addPending=!1,t.name="",t.dis="",200==e.code?(t.obj.project.unshift(e.data),n.notify("创建成功",1),t.showAdd=!1,p.$emit("updateTeamProject",1,0)):n.notify(e.msg,0)})}else{if(!this.id)return void this.$message.error("请输入项目ID");this.addPending=!0,a.put("/team/pullproject",{id:e.get("teamId"),project:this.id}).then(function(e){t.addPending=!1,t.name="",t.dis="",t.id="",200==e.code?(n.notify("请求已发出，等待项目管理员响应",1),t.showAdd=!1):n.notify(e.msg,0)})}},importProject:function(){n.showBox(this,"importProject")},addGroup:function(){var t=this;n.input("请输入部门名称",function(o){if(!o.value)return void n.tip("请输入部门名称",0);n.startHud(),a.post("/team/group",{id:e.get("teamId"),name:o.value}).then(function(e){n.stopHud(),200==e.code?(n.notify("新建成功",1),t.obj.user.push(e.data)):n.notify(e.msg,0)})})},handleApply:function(t,o){var s=this;2==t.type?(this.newUserGroup=this.obj.user[0]._id,this.newUserRole=1,this.showUserApply=!0,this.selUserApplyObj={item:t,state:o}):3==t.type&&(n.startHud(),a.put("/team/apply",{id:e.get("teamId"),apply:t._id,state:o}).then(function(e){n.stopHud(),200==e.code?"object"==typeof e.data?(t.handle=1,s.obj.project.unshift(e.data),p.$emit("updateTeamProject",1,e.data.interfaceCount),p.$emit("updateTeamUser",e.data.userAddCount)):t.handle=2:(t.handle=3,n.notify(e.msg,0))}))},handleUserApply:function(){var t=this;this.applyPending=!0,a.put("/team/apply",{id:e.get("teamId"),apply:this.selUserApplyObj.item._id,group:this.newUserGroup,role:this.newUserRole,state:this.selUserApplyObj.state}).then(function(e){t.applyPending=!1,200==e.code?"object"==typeof e.data?(t.selUserApplyObj.item.handle=1,t.obj.user.forEach(function(o){o._id==t.newUserGroup&&(o.users.push(e.data),o.users.sort(function(e,t){return e.user.name>t.user.name}))}),p.$emit("updateTeamUser",1)):t.selUserApplyObj.item.handle=2:(t.selUserApplyObj.item.handle=3,n.notify(e.msg,0)),t.showUserApply=!1})}},created:function(){var e=this;Promise.all([a.get("/team/info",{id:e.session.teamId}),a.get("/team/apply",{id:e.session.teamId})]).then(function(t){n.stopLoading();var o=t[0],a=t[1];if(200!=o.code)throw o.msg;if(e.obj=o.data,e.newUserGroup=o.data.user[0]._id,200!=a.code)throw a.msg;a.data.forEach(function(e){e.handle=0}),e.arrApply=a.data,e.arrApply.length>0&&(e.showApply=!0)}).catch(function(e){n.notify(e,0)})}});n.ready(function(){n.startLoading()})}).call(t,o(2),o(3),o(0),o(4))}},[267]);
+webpackJsonp([0],{
+
+/***/ 304:
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(session, Vue, net, $) {/**
+ * Created by sunxin on 2016/12/19.
+ */
+var mainNav=__webpack_require__(7);
+var teamInfo=__webpack_require__(38);
+var teamProjectList=__webpack_require__(39);
+var teamUser=__webpack_require__(40);
+var store=__webpack_require__(83);
+var bus=__webpack_require__(21)
+var sessionChange=__webpack_require__(6);
+if(!session.get("teamId"))
+{
+    location.href="../project/project.html"
+}
+session.remove("projectId");
+session.remove("projectName");
+session.remove("versionId");
+session.remove("versionName");
+session.remove("versionDis");
+var vue=new Vue({
+    el: "#app",
+    data: {
+        type:1,
+        obj:{
+            notice:[],
+            project:[],
+            user:[]
+        },
+        showAdd:false,
+        addPending:false,
+        newType:0,
+        name:"",
+        dis:"",
+        id:"",
+        arrApply:[],
+        showApply:false,
+        applyPending:false,
+        showUserApply:false,
+        newUserGroup:"",
+        newUserRole:1,
+        selUserApplyObj:{}
+    },
+    mixins:[sessionChange],
+    store:store,
+    components:{
+        "mainnav":mainNav,
+        "teaminfo":teamInfo,
+        "teamprojectlist":teamProjectList,
+        "teamuser":teamUser
+    },
+    methods:{
+        addProject:function () {
+            var _this=this;
+            if(this.newType==0)
+            {
+                if(!this.name)
+                {
+                    this.$message.error("请输入名称");
+                    return;
+                }
+                this.addPending=true;
+                net.post("/project/create",{
+                    name:_this.name,
+                    dis:_this.dis,
+                    team:session.get("teamId")
+                }).then(function (data) {
+                    _this.addPending=false;
+                    _this.name="";
+                    _this.dis=""
+                    if(data.code==200)
+                    {
+                        _this.obj.project.unshift(data.data);
+                        $.notify("创建成功",1);
+                        _this.showAdd=false;
+                        bus.$emit("updateTeamProject",1,0);
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
+            }
+            else
+            {
+                if(!this.id)
+                {
+                    this.$message.error("请输入项目ID");
+                    return;
+                }
+                this.addPending=true;
+                net.put("/team/pullproject",{
+                    id:session.get("teamId"),
+                    project:this.id
+                }).then(function (data) {
+                    _this.addPending=false;
+                    _this.name="";
+                    _this.dis=""
+                    _this.id=""
+                    if(data.code==200)
+                    {
+                        $.notify("请求已发出，等待项目管理员响应",1);
+                        _this.showAdd=false;
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
+            }
+        },
+        importProject:function () {
+            $.showBox(this,"importProject");
+        },
+        addGroup:function () {
+            var _this=this;
+            $.input("请输入部门名称",function (val) {
+                if(!val.value)
+                {
+                    $.tip("请输入部门名称",0);
+                    return;
+                }
+                $.startHud();
+                net.post("/team/group",{
+                    id:session.get("teamId"),
+                    name:val.value
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        $.notify("新建成功",1);
+                        _this.obj.user.push(data.data);
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
+            })
+        },
+        handleApply:function (item,state) {
+            var _this=this;
+            if(item.type==2)
+            {
+                this.newUserGroup=this.obj.user[0]._id;
+                this.newUserRole=1;
+                this.selUserApplyObj={
+                    item:item,
+                    state:state
+                }
+                if(state==1)
+                {
+                    this.showUserApply=true;
+                }
+                else
+                {
+                    this.handleUserApply();
+                }
+            }
+            else if(item.type==3)
+            {
+                $.startHud();
+                net.put("/team/apply",{
+                    id:session.get("teamId"),
+                    apply:item._id,
+                    state:state
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        if(typeof(data.data)=="object")
+                        {
+                            item.handle=1;
+                            _this.obj.project.unshift(data.data);
+                            bus.$emit("updateTeamProject",1,data.data.interfaceCount);
+                            store.state.event.$emit("updateTeamUser",data.data.userAddCount);
+                        }
+                        else
+                        {
+                            item.handle=2;
+                        }
+                    }
+                    else
+                    {
+                        item.handle=3;
+                        $.notify(data.msg,0);
+                    }
+                })
+            }
+        },
+        handleUserApply:function () {
+            var _this=this;
+            this.applyPending=true;
+            net.put("/team/apply",{
+                id:session.get("teamId"),
+                apply:this.selUserApplyObj.item._id,
+                group:this.newUserGroup,
+                role:this.newUserRole,
+                state:this.selUserApplyObj.state
+            }).then(function (data) {
+                _this.applyPending=false;
+                if(data.code==200)
+                {
+                    if(typeof(data.data)=="object")
+                    {
+                        _this.selUserApplyObj.item.handle=1;
+                        _this.obj.user.forEach(function (obj) {
+                            if(obj._id==_this.newUserGroup)
+                            {
+                                obj.users.push(data.data);
+                                obj.users.sort(function (obj1,obj2) {
+                                    return obj1.user.name>obj2.user.name
+                                })
+                            }
+                        })
+                        store.state.event.$emit("updateTeamUser",1);
+                    }
+                    else
+                    {
+                        _this.selUserApplyObj.item.handle=2;
+                    }
+                }
+                else
+                {
+                    _this.selUserApplyObj.item.handle=3;
+                    $.notify(data.msg,0);
+                }
+                _this.showUserApply=false;
+            })
+        }
+    },
+    created:function () {
+        var _this=this;
+        Promise.all([
+            net.get("/team/info",{
+                id:_this.session.teamId
+            }),
+            net.get("/team/apply",{
+                id:_this.session.teamId
+            })
+        ]).then(function (arr) {
+            $.stopLoading();
+            var data1=arr[0];
+            var data2=arr[1];
+            if(data1.code==200)
+            {
+                _this.obj=data1.data;
+                _this.newUserGroup=data1.data.user[0]._id;
+            }
+            else
+            {
+                throw data1.msg;
+            }
+            if(data2.code==200)
+            {
+                data2.data.forEach(function (obj) {
+                    obj.handle=0;
+                })
+                _this.arrApply=data2.data;
+                if(_this.arrApply.length>0)
+                {
+                    _this.showApply=true;
+                }
+            }
+            else
+            {
+                throw data2.msg;
+            }
+        }).catch(function (err) {
+            $.notify(err,0);
+        })
+    },
+})
+$.ready(function () {
+    $.startLoading();
+})
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3), __webpack_require__(2), __webpack_require__(4), __webpack_require__(0)))
+
+/***/ }),
+
+/***/ 83:
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(Vuex, Vue) {module.exports=new Vuex.Store({
+    state:{
+        event:new Vue(),
+    },
+});
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(18), __webpack_require__(2)))
+
+/***/ })
+
+},[304]);
+//# sourceMappingURL=team.js.map

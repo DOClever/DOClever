@@ -45,7 +45,7 @@
             </template>
         </table>
         <el-row class="row" v-else-if="info.type==1 && info.rawType==2">
-            <inparambodyjson></inparambodyjson>
+            <inparambodyjson :index="index" :data="item"></inparambodyjson>
         </el-row>
         <el-row class="row" style="height: 50px;line-height: 50px" v-else>
             <el-col class="col" :span="20" style="text-align: center">
@@ -61,6 +61,7 @@
 <script>
     var inparamBodyJSON=require("./inparamBodyJSON.vue");
     module.exports={
+        props:["index","item"],
         data:function () {
             return {
 
@@ -74,7 +75,7 @@
                 if(val==0)
                 {
                     var bFind=false,objIndex,value="application/x-www-form-urlencoded";
-                    this.$store.state.header.forEach(function (obj,index) {
+                    this.item.header.forEach(function (obj,index) {
                         if(obj.name && obj.name.toLowerCase()=="content-type")
                         {
                             obj.value=value;
@@ -84,7 +85,7 @@
                     })
                     if(!bFind)
                     {
-                        this.$store.state.header.push({
+                        this.item.header.unshift({
                             name:'Content-Type',
                             value:value,
                             remark:''
@@ -95,10 +96,10 @@
         },
         computed:{
             arr:function () {
-                return this.$store.state.body
+                return this.item.body
             },
             info:function () {
-                return this.$store.state.bodyInfo
+                return this.item.bodyInfo
             },
             rawJSONType:{
                 get:function () {
@@ -108,18 +109,18 @@
                     this.info.rawJSONType=val;
                     if(val)
                     {
-                        this.info.rawJSON=this.$store.state.rawJSONArray;
+                        this.info.rawJSON=this.item.rawJSONArray;
                     }
                     else
                     {
-                        this.info.rawJSON=this.$store.state.rawJSONObject;
+                        this.info.rawJSON=this.item.rawJSONObject;
                     }
                 }
             },
             rawType:{
                 get:function () {
                     var type="";
-                    this.$store.getters.headerSave.forEach(function (obj) {
+                    this.item.header.forEach(function (obj) {
                         if(obj.name.toLowerCase()=="content-type")
                         {
                             var value=obj.value.toLowerCase();
@@ -146,15 +147,11 @@
                     return type;
                 },
                 set:function (value) {
-                    if(value=="file")
-                    {
-                        this.info.rawType=1;
-                    }
-                    else if(value=="application/json")
+                    if(value=="application/json")
                     {
                         this.info.rawType=2;
                         var bFind=false,objIndex;
-                        this.$store.state.header.forEach(function (obj,index) {
+                        this.item.header.forEach(function (obj,index) {
                             if(obj.name && obj.name.toLowerCase()=="content-type")
                             {
                                 obj.value=value;
@@ -164,7 +161,7 @@
                         })
                         if(!bFind)
                         {
-                            this.$store.state.header.push({
+                            this.item.header.unshift({
                                 name:'Content-Type',
                                 value:value,
                                 remark:''
@@ -173,9 +170,16 @@
                     }
                     else
                     {
-                        this.info.rawType=0;
+                        if(value=="file")
+                        {
+                            this.info.rawType=1;
+                        }
+                        else
+                        {
+                            this.info.rawType=0;
+                        }
                         var bFind=false,objIndex;
-                        this.$store.state.header.forEach(function (obj,index) {
+                        this.item.header.forEach(function (obj,index) {
                             if(obj.name && obj.name.toLowerCase()=="content-type")
                             {
                                 obj.value=value;
@@ -183,19 +187,19 @@
                                 bFind=true;
                             }
                         })
-                        if(value=="")
+                        if(value=="" || value=="file")
                         {
                             if(bFind)
                             {
-                                if(this.$store.state.header.length>1)
+                                if(this.item.header.length>1)
                                 {
-                                    this.$store.state.header.splice(objIndex,1);
+                                    this.item.header.splice(objIndex,1);
                                 }
                                 else
                                 {
-                                    this.$store.state.header[0].name="";
-                                    this.$store.state.header[0].value="";
-                                    this.$store.state.header[0].remark="";
+                                    this.item.header[0].name="";
+                                    this.item.header[0].value="";
+                                    this.item.header[0].remark="";
                                 }
                             }
                         }
@@ -203,7 +207,7 @@
                         {
                             if(!bFind)
                             {
-                                this.$store.state.header.push({
+                                this.item.header.unshift({
                                     name:'Content-Type',
                                     value:value,
                                     remark:''
@@ -216,25 +220,7 @@
         },
         methods:{
             remove:function (index) {
-                if(this.arr.length>1)
-                {
-                    this.arr.splice(index,1)
-                }
-                else
-                {
-                    this.arr[0].name="";
-                    this.arr[0].must=0;
-                    this.arr[0].type=0;
-                    this.arr[0].remark="";
-                    if(this.arr[0].value)
-                    {
-                        this.arr[0].value={
-                            type:0,
-                            data:[],
-                            status:""
-                        };
-                    }
-                }
+                this.arr.splice(index,1)
             },
             configValue:function (item) {
                 if(!item.value)
@@ -247,7 +233,7 @@
                 }
                 var child=$.showBox(this.$parent,"valueList",{
                     "source":item.value
-                });
+                },"projectinfo/interface");
                 child.$on("save",function (value) {
                     item.value=value;
                 });
@@ -259,12 +245,40 @@
                 }
                 var child=$.showBox(this.$parent,"rawText",{
                     "source":this.info.rawText
-                });
+                },"projectinfo/interface");
                 var _this=this;
                 child.$on("save",function (value) {
                     _this.info.rawText=value;
                 });
             },
+            importJSON:function () {
+                var _this=this;
+                $.inputMul(this,"请输入JSON",function (val) {
+                    if(!val)
+                    {
+                        $.tip("请输入JSON",0);
+                        return false
+                    }
+                    var obj;
+                    try
+                    {
+                        obj=JSON.parse(val)
+                    }
+                    catch (err)
+                    {
+                        $.tip("JSON不符合格式",0);
+                        return false
+                    }
+                    var result=[];
+                    for(var key in obj)
+                    {
+                        helper.handleResultData(key,obj[key],result,null,1,1,1)
+                    }
+                    _this.info.rawJSON=result;
+                    _this.info.rawJSONType=(obj instanceof Array)?1:0;
+                    return true;
+                });
+            }
         }
     }
 </script>

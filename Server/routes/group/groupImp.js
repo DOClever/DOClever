@@ -1,17 +1,20 @@
 /**
  * Created by sunxin on 2016/11/17.
  */
-var group=require("./group");
+var groupClass=require("./group");
+var group=new groupClass();
 var interface=[
     {
         "method":"POST",
         "path":"/group/create",
         "param": {
             name:{
-                type:String
+                type:String,
+                optional:1
             },
             id:{
-                type:String
+                type:String,
+                optional:1
             },
             group:{
                 type:String,
@@ -19,6 +22,10 @@ var interface=[
             },
             import:{
                 type:Number,
+                optional:1
+            },
+            parent:{
+                type:String,
                 optional:1
             }
         },
@@ -37,18 +44,6 @@ var interface=[
         "data":String,
         user:1,
         handle:[group.validateUser,group.remove]
-    },
-    {
-        "method":"GET",
-        "path":"/group/interface",
-        "param": {
-            group:{
-                type:String
-            }
-        },
-        "data":String,
-        user:1,
-        handle:[group.validateUser,group.interface]
     },
     {
         "method":"GET",
@@ -71,11 +66,31 @@ var interface=[
             },
             json:{
                 type:String
+            },
+            group:{
+                type:String,
+                optional:1
             }
         },
         "data":String,
         user:1,
         handle:[group.validateUser,group.importJSON]
+    },
+    {
+        "method":"PUT",
+        "path":"/group/move",
+        "param": {
+            group:{
+                type:String
+            },
+            to:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":String,
+        user:1,
+        handle:[group.validateUser,group.move]
     },
 ];
 

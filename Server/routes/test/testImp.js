@@ -1,7 +1,8 @@
 /**
  * Created by sunxin on 2017/4/13.
  */
-var test=require("./test");
+var testClass=require("./test");
+var test=new testClass();
 var interface=[
     {
         "method":"POST",

@@ -21,10 +21,8 @@ SymlinkPlugin.prototype.apply = function(resolver) {
 		var paths = pathsResult.paths;
 
 		var containsSymlink = false;
-		forEachBail(paths.map(function(_, i) {
-			return i;
-		}), function(idx, callback) {
-			fs.readlink(paths[idx], function(err, result) {
+		forEachBail.withIndex(paths, function(path, idx, callback) {
+			fs.readlink(path, function(err, result) {
 				if(!err && result) {
 					pathSeqments[idx] = result;
 					containsSymlink = true;

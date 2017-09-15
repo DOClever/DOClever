@@ -1,38 +1,45 @@
 /**
  * Created by sunxin on 2017/2/20.
  */
-try {
-    sessionStorage.setItem('isPrivateMode', '1');
-    sessionStorage.removeItem('isPrivateMode');
-    window.isPrivateMode = false;
-} catch(e) {
-    window.isPrivateMode = true;
-}
+var config=require("./config");
 function getCookie(c_name)
 {
     if (document.cookie.length>0)
     {
-        var c_start=document.cookie.indexOf(c_name + "=")
-        if (c_start!=-1)
-        {
-            c_start=c_start + c_name.length+1
-            var c_end=document.cookie.indexOf(";",c_start)
-            if (c_end==-1) c_end=document.cookie.length
-            return decodeURIComponent(document.cookie.substring(c_start,c_end))
-        }
+        var arr,reg=new RegExp("(^| )"+c_name+"=([^;]*)(;|$)");
+        if(arr=document.cookie.match(reg))
+            return decodeURIComponent(arr[2]);
+        else
+            return undefined;
     }
     return undefined;
 }
-function setCookie(c_name,value)
+function setCookie(c_name,value,time)
 {
-    document.cookie=c_name+ "=" +encodeURIComponent(value)
+    if(time)
+    {
+        var exp = new Date();
+        exp.setTime(exp.getTime() + time);
+        document.cookie=c_name+ "=" +encodeURIComponent(value)+ ";expires=" + exp.toGMTString()+";path=/;";
+    }
+    else
+    {
+        document.cookie=c_name+ "=" +encodeURIComponent(value)+";path=/;";
+    }
+    var event = document.createEvent('HTMLEvents');
+    event.initEvent("cookieChange", false, false);
+    event.key = c_name;
+    event.value = value;
+    document.dispatchEvent(event);
 }
 
 function clearAllCookie() {
     var keys = document.cookie.match(/[^ =;]+(?=\=)/g);
     if(keys) {
         for(var i = 0;i<keys.length;i++)
-            document.cookie = keys[i] + '=0;expires=' + new Date(0).toUTCString()
+        {
+            delCookie(keys[i]);
+        }
     }
 }
 function delCookie(name)
@@ -41,7 +48,9 @@ function delCookie(name)
     exp.setTime(exp.getTime() - 1);
     var cval=getCookie(name);
     if(cval!=undefined && cval!=null)
-        document.cookie= name + "="+cval+";expires="+exp.toGMTString();
+    {
+        document.cookie= name + "="+cval+";expires="+exp.toGMTString()+";path=/;";
+    }
 }
 
 function getCookieObj() {
@@ -57,10 +66,11 @@ function getCookieObj() {
 }
 
 var local={};
-local.update=function (data) {
+local.update=function (data,remember) {
+    sessionStorage.setItem("login","1");
     if(data._id!==undefined && data._id!==null)
     {
-        local.set("id",data._id);
+        local.set("id",data._id,remember);
     }
     else
     {
@@ -68,7 +78,7 @@ local.update=function (data) {
     }
     if(data.name!==undefined && data.name!==null)
     {
-        local.set("name",data.name);
+        local.set("name",data.name,remember);
     }
     else
     {
@@ -76,7 +86,7 @@ local.update=function (data) {
     }
     if(data.photo!==undefined && data.photo!==null)
     {
-        local.set("photo",data.photo);
+        local.set("photo",data.photo,remember);
     }
     else
     {
@@ -84,7 +94,7 @@ local.update=function (data) {
     }
     if(data.qq!==undefined && data.qq!==null)
     {
-        local.set("qq",data.qq);
+        local.set("qq",data.qq,remember);
     }
     else
     {
@@ -92,7 +102,7 @@ local.update=function (data) {
     }
     if(data.email!==undefined && data.email!==null)
     {
-        local.set("email",data.email);
+        local.set("email",data.email,remember);
     }
     else
     {
@@ -100,7 +110,7 @@ local.update=function (data) {
     }
     if(data.sex!==undefined && data.sex!==null)
     {
-        local.set("sex",data.sex);
+        local.set("sex",data.sex,remember);
     }
     else
     {
@@ -108,7 +118,7 @@ local.update=function (data) {
     }
     if(data.age!==undefined && data.age!==null)
     {
-        local.set("age",data.age);
+        local.set("age",data.age,remember);
     }
     else
     {
@@ -116,7 +126,7 @@ local.update=function (data) {
     }
     if(data.company!==undefined && data.company!==null)
     {
-        local.set("company",data.company);
+        local.set("company",data.company,remember);
     }
     else
     {
@@ -124,71 +134,76 @@ local.update=function (data) {
     }
     if(data.loginCount!==undefined && data.loginCount!==null)
     {
-        local.set("loginCount",data.loginCount);
+        local.set("loginCount",data.loginCount,remember);
     }
     else
     {
         local.remove("loginCount");
     }
+    if(remember)
+    {
+        local.set("remember",1,1);
+    }
 }
 
 local.get=function (key) {
-    if(window.isPrivateMode)
-    {
-        return getCookie(key)
-    }
-    else
-    {
-        return sessionStorage.getItem(key);
-    }
-
+    return getCookie(key)
 }
 
-local.set=function (key,value) {
-    if(window.isPrivateMode)
-    {
-        setCookie(key,value);
-    }
-    else
-    {
-        sessionStorage.setItem(key,value);
-    }
-
+local.set=function (key,value,remember) {
+    setCookie(key,value,remember?1000*3600*24*7:0);
 }
 
 local.clear=function () {
-    if(window.isPrivateMode)
-    {
-        clearAllCookie();
-    }
-    else
-    {
-        sessionStorage.clear();
-    }
-
+    clearAllCookie();
 }
 
 local.raw=function () {
-    if(window.isPrivateMode)
-    {
-        return getCookieObj();
-    }
-    else
-    {
-        return sessionStorage;
-    }
+    return getCookieObj();
 }
 
 local.remove=function (item) {
-    if(window.isPrivateMode)
+    delCookie(item)
+}
+
+;(function () {
+    var id=local.get("id");
+    if(!id)
     {
-        delCookie(item)
+        if(/project/.test(location.href) || /person/.test(location.href) || /team/.test(location.href))
+        {
+            location.href="../login/login.html"
+        }
     }
     else
     {
-        sessionStorage.removeItem(item);
+        if(/login/.test(location.href))
+        {
+            location.href="../project/project.html"
+            return
+        }
+        else if(sessionStorage.getItem("login"))
+        {
+            return;
+        }
+        var xhr=new XMLHttpRequest();
+        xhr.withCredentials=true;
+        xhr.open("POST",config.baseUrl+"/user/login",true);
+        xhr.setRequestHeader("content-type","application/x-www-form-urlencoded");
+        xhr.onreadystatechange=function () {
+            if(xhr.readyState == 4) {
+                var data=JSON.parse(xhr.responseText);
+                if(data.code==200)
+                {
+                    var remember=local.get("remember");
+                    local.update(data.data,remember==1?1:0);
+                }
+            }
+        }
+        xhr.send($.param({
+            id:id
+        }));
     }
-
-}
+})();
 
 module.exports=local;

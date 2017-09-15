@@ -17,7 +17,8 @@ module.exports = {
         help:"./web/help/help",
         donate:"./web/donate/donate",
         share:"./web/share/share",
-        team:"./web/team/team"
+        team:"./web/team/team",
+        registerqq:"./web/register/registerqq"
     },
     output: {
         path: path.join(__dirname, 'dist'),
@@ -52,12 +53,12 @@ module.exports = {
             {
                 test: /\.css$/,
                 loaders: ['style', 'css'],
-                include: path.resolve(__dirname, 'web/component')
+                include: path.resolve(__dirname, 'web')
             },
             {
                 test: /\.vue$/,
                 loader:"vue-loader",
-                include: path.resolve(__dirname, 'web/component')
+                include: path.resolve(__dirname, 'web')
             },
             {
                 test: /helper\.js/,

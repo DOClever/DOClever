@@ -1,7 +1,8 @@
 /**
  * Created by sunxin on 2017/6/7.
  */
-var team=require("./team");
+var teamClass=require("./team");
+var team=new teamClass();
 var interface=[
     {
         "method":"POST",

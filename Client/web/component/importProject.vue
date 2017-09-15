@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="导入"  size="small" ref="box">
+    <el-dialog title="导入"  size="small" ref="box" v-model="showDialog">
         <el-row class="row" style="height: 50px;line-height: 50px">
             导入类型：&nbsp;&nbsp;&nbsp;
             <el-select v-model="type">
@@ -67,8 +67,9 @@
 </template>
 
 <script>
+    var uuid=require("uuid");
     var dragFile=require("../director/dragFile");
-    var bus=require("../bus/projectInfoBus");
+    var bus=require("../bus/bus");
     module.exports={
         data:function () {
             return {
@@ -85,7 +86,8 @@
                 rapBodyType:0,
                 swaggerType:0,
                 textSwaggerJSON:"",
-                textSwaggerURL:""
+                textSwaggerURL:"",
+                showDialog:false
             }
         },
         directives:{
@@ -126,10 +128,12 @@
                     {
                         update.team=session.get("teamId")
                     }
+                    var insertDate;
                     var pro=net.post("/project/create",update).then(function (data) {
                         if(data.code==200)
                         {
-                            _this.$parent.projectList.unshift(data.data);
+                            _this.$store.commit("addProjectCreate",data.data);
+                            insertDate=data.data;
                             projectID=data.data._id;
                         }
                         else
@@ -196,7 +200,7 @@
                         group.item.forEach(function (item) {
                             pro=pro.then(function () {
                                 indexInterface++;
-                                _this.$parent.projectList[0].interfaceCount=indexInterface;
+                                insertDate.interfaceCount=indexInterface;
                                 _this.status="正在导入第"+indexInterface+"个接口"+item.name+"，一共"+count+"个接口";
                                 var obj;
                                 if(typeof(item.request.url)=="object")
@@ -241,8 +245,19 @@
                                         project:projectID,
                                         method:item.request.method,
                                         finish:1,
-                                        before:"",
-                                        after:"",
+                                        param:[{
+                                            before:{
+                                                mode:0,
+                                                code:""
+                                            },
+                                            after:{
+                                                mode:0,
+                                                code:""
+                                            },
+                                            name:"未命名",
+                                            remark:"",
+                                            id:uuid()
+                                        }]
                                     };
                                     var restParam=[];
                                     if(item.request.url.variable)
@@ -255,7 +270,7 @@
                                             })
                                         })
                                     }
-                                    obj.restparam=JSON.stringify(restParam);
+                                    obj.param[0].restParam=restParam;
                                     var param=[];
                                     for(var key in objUrl.params)
                                     {
@@ -270,7 +285,7 @@
                                         }
                                         param.push(v);
                                     }
-                                    obj.queryparam=JSON.stringify(param);
+                                    obj.param[0].queryParam=param;
                                 }
                                 else
                                 {
@@ -304,8 +319,19 @@
                                         project:projectID,
                                         method:item.request.method,
                                         finish:1,
-                                        before:"",
-                                        after:"",
+                                        param:[{
+                                            before:{
+                                                mode:0,
+                                                code:""
+                                            },
+                                            after:{
+                                                mode:0,
+                                                code:""
+                                            },
+                                            name:"未命名",
+                                            remark:"",
+                                            id:uuid()
+                                        }]
                                     };
                                     var param=[];
                                     for(var key in objUrl.params)
@@ -321,10 +347,11 @@
                                         }
                                         param.push(v);
                                     }
-                                    obj.queryparam=JSON.stringify(param);
+                                    obj.param[0].queryParam=param;
+                                    obj.param[0].restParam=[];
                                 }
                                 var bJSON=false;
-                                obj.header=JSON.stringify(item.request.header.map(function (obj) {
+                                obj.param[0].header=item.request.header.map(function (obj) {
                                     if(obj.key.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application/json")
                                     {
                                         bJSON=true;
@@ -334,7 +361,7 @@
                                         value:obj.value,
                                         remark:""
                                     }
-                                }));
+                                })
                                 if(obj.method.toLowerCase()=="post" || obj.method.toLowerCase()=="put" || obj.method.toLowerCase()=="patch")
                                 {
                                     var body,bodyInfo;
@@ -370,7 +397,7 @@
                                             var objJSON;
                                             try
                                             {
-                                                objJSON=JSON.parse(item.request.body.raw);
+                                                objJSON=eval("("+item.request.body.raw+")");
                                             }
                                             catch (err)
                                             {
@@ -416,7 +443,7 @@
                                     }
                                     else
                                     {
-                                        body="[]";
+                                        body=[];
                                         bodyInfo={
                                             type:0,
                                             rawType:0,
@@ -425,15 +452,16 @@
                                             rawText:"",
                                         };
                                     }
-                                    obj.bodyparam=JSON.stringify(body);
-                                    obj.bodyinfo=JSON.stringify(bodyInfo)
+                                    obj.param[0].bodyParam=body;
+                                    obj.param[0].bodyInfo=bodyInfo
                                 }
-                                obj.outparam="[]";
-                                obj.outinfo=JSON.stringify({
+                                obj.param[0].outParam=[];
+                                obj.param[0].outInfo={
                                     type:0,
                                     rawRemark:"",
                                     rawMock:"",
-                                });
+                                };
+                                obj.param=JSON.stringify(obj.param);
                                 return net.post("/interface/create",obj).then(function (data) {
                                     if(data.code!=200)
                                     {
@@ -554,7 +582,7 @@
                             }
                             else
                             {
-                                _this.$parent.projectList.unshift(data.data);
+                                _this.$store.commit("addProjectCreate",data.data);
                             }
                             _this.$refs.box.close();
                         }
@@ -604,7 +632,7 @@
                             }
                             else
                             {
-                                _this.$parent.projectList.unshift(data.data);
+                                _this.$store.commit("addProjectCreate",data.data);
                             }
                             _this.$refs.box.close();
                         }
@@ -672,7 +700,7 @@
                             }
                             else
                             {
-                                _this.$parent.projectList.unshift(data.data);
+                                _this.$store.commit("addProjectCreate",data.data);
                             }
                             _this.$refs.box.close();
                         }

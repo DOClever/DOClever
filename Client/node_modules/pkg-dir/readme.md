@@ -1,6 +1,6 @@
 # pkg-dir [![Build Status](https://travis-ci.org/sindresorhus/pkg-dir.svg?branch=master)](https://travis-ci.org/sindresorhus/pkg-dir)
 
-> Find the root directory of a npm package
+> Find the root directory of a Node.js project or npm package
 
 
 ## Install
@@ -25,10 +25,10 @@ $ npm install --save pkg-dir
 
 ```js
 // example.js
-var pkgDir = require('pkg-dir');
+const pkgDir = require('pkg-dir');
 
-pkgDir(__dirname).then(function (rootPath) {
-	console.log(rootPath);
+pkgDir(__dirname).then(rootDir => {
+	console.log(rootDir);
 	//=> '/Users/sindresorhus/foo'
 });
 ```
@@ -38,15 +38,15 @@ pkgDir(__dirname).then(function (rootPath) {
 
 ### pkgDir([cwd])
 
-Returns a promise that resolves to the package root path or `null`.
+Returns a `Promise` for either the project root path or `null` if it couldn't be found.
 
 ### pkgDir.sync([cwd])
 
-Returns the package root path or `null`.
+Returns the project root path or `null`.
 
 #### cwd
 
-Type: `string`  
+Type: `string`<br>
 Default: `process.cwd()`
 
 Directory to start from.
@@ -55,9 +55,10 @@ Directory to start from.
 ## Related
 
 - [pkg-dir-cli](https://github.com/sindresorhus/pkg-dir-cli) - CLI for this module
+- [pkg-up](https://github.com/sindresorhus/pkg-up) - Find the closest package.json file
 - [find-up](https://github.com/sindresorhus/find-up) - Find a file by walking up parent directories
 
 
 ## License
 
-MIT © [Sindre Sorhus](http://sindresorhus.com)
+MIT © [Sindre Sorhus](https://sindresorhus.com)

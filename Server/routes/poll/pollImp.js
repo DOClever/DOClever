@@ -1,7 +1,8 @@
 /**
  * Created by sunxin on 2017/7/5.
  */
-var poll=require("./poll");
+var pollClass=require("./poll");
+var poll=new pollClass();
 var interface=[
     {
         "method":"POST",

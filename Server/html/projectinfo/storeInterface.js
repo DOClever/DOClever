@@ -1,6 +1,7 @@
 /**
  * Created by sunxin on 2017/2/23.
  */
+var uuid=require("uuid");
 module.exports=new Vuex.Store({
     state:{
         interfaceList:[],
@@ -8,81 +9,97 @@ module.exports=new Vuex.Store({
         interface:null,
         interfaceEdit:null,
         baseUrls:[],
-        query:[{
-            name:"",
-            must:0,
-            remark:""
-        }],
-        header:[{
-            name:"",
-            value:"",
-            remark:""
-        }],
-        body:[{
-            name:"",
-            type:0,
-            must:0,
-            remark:"",
-        }],
         param:[
-
-        ],
-        bodyInfo:{
-            type:0,
-            rawType:0,
-            rawTextRemark:"",
-            rawFileRemark:"",
-            rawText:"",
-            rawJSON:[],
-            rawJSONType:0
-        },
-        rawJSONObject:[{
-            name:"",
-            must:1,
-            type:0,
-            remark:"",
-            show:1,
-            mock:"",
-            drag:1
-        }],
-        rawJSONArray:[{
-            name:null,
-            must:1,
-            type:0,
-            remark:"",
-            show:1,
-            mock:"",
-            drag:1
-        }],
-        outInfo:{
-            type:0,
-            rawRemark:"",
-            rawMock:"",
-            jsonType:0
-        },
-        result:[],
-        resultObject:[
             {
                 name:"",
-                must:0,
-                type:0,
                 remark:"",
-                show:0,
-                mock:"",
-                drag:1
+                id:"",
+                query:[{
+                    name:"",
+                    must:0,
+                    remark:""
+                }],
+                header:[{
+                    name:"",
+                    value:"",
+                    remark:""
+                }],
+                body:[{
+                    name:"",
+                    type:0,
+                    must:0,
+                    remark:"",
+                }],
+                param:[
+
+                ],
+                bodyInfo:{
+                    type:0,
+                    rawType:0,
+                    rawTextRemark:"",
+                    rawFileRemark:"",
+                    rawText:"",
+                    rawJSON:[],
+                    rawJSONType:0
+                },
+                rawJSONObject:[{
+                    name:"",
+                    must:1,
+                    type:0,
+                    remark:"",
+                    show:1,
+                    mock:"",
+                    drag:1
+                }],
+                rawJSONArray:[{
+                    name:null,
+                    must:1,
+                    type:0,
+                    remark:"",
+                    show:1,
+                    mock:"",
+                    drag:1
+                }],
+                outInfo:{
+                    type:0,
+                    rawRemark:"",
+                    rawMock:"",
+                    jsonType:0
+                },
+                result:[],
+                resultObject:[
+                    {
+                        name:"",
+                        must:0,
+                        type:0,
+                        remark:"",
+                        show:0,
+                        mock:"",
+                        drag:1
+                    }
+                ],
+                resultArray:[
+                    {
+                        name:null,
+                        must:0,
+                        type:0,
+                        remark:"",
+                        show:0,
+                        mock:"",
+                        drag:1
+                    }
+                ],
+                before:{
+                    mode:0,
+                    code:""
+                },
+                after:{
+                    mode:0,
+                    code:""
+                }
             }
         ],
-        resultArray:[
-            {
-                name:null,
-                must:0,
-                type:0,
-                remark:"",
-                show:0,
-                mock:"",
-                drag:1
-            }
-        ],
+        index:0,
         preview:"",
         drawMix:[],
         objCopy:null,
@@ -94,8 +111,14 @@ module.exports=new Vuex.Store({
         globalAfter:""
     },
     getters:{
+        bodyInfo:function (state,getters) {
+            return state.param[state.index].bodyInfo;
+        },
+        outInfo:function (state,getters) {
+            return state.param[state.index].outInfo;
+        },
         querySave:function (state,getters) {
-            return state.query.filter(function (obj) {
+            return state.param[state.index].query.filter(function (obj) {
                 if(obj.name)
                 {
                     return true
@@ -107,7 +130,7 @@ module.exports=new Vuex.Store({
             })
         },
         headerSave:function (state,getters) {
-            return state.header.filter(function (obj) {
+            return state.param[state.index].header.filter(function (obj) {
                 if(obj.name)
                 {
                     return true
@@ -119,7 +142,7 @@ module.exports=new Vuex.Store({
             });
         },
         bodySave:function (state,getters) {
-            return state.body.filter(function (obj) {
+            return state.param[state.index].body.filter(function (obj) {
                 if(obj.name)
                 {
                     return true
@@ -140,41 +163,61 @@ module.exports=new Vuex.Store({
             return getters.bodySave.length
         },
         paramCount:function (state,getters) {
-            return state.param.length;
+            return state.param[state.index].param.length;
         },
-        rawMock:function (state) {
+        curParam:function (state,getters) {
+            return state.param[state.index];
+        },
+        rawMock:function (state,getters) {
             var bJSON=false,obj={};
-            if(state.bodyInfo.type==1 && state.bodyInfo.rawType==2 && state.bodyInfo.rawJSON)
+            if(getters.curParam.bodyInfo.type==1 && getters.curParam.bodyInfo.rawType==2 && getters.curParam.bodyInfo.rawJSON)
             {
-                obj=state.bodyInfo.rawJSONType==0?{}:[];
+                obj=getters.curParam.bodyInfo.rawJSONType==0?{}:[];
                 bJSON=true;
-                var result=helper.resultSave(state.bodyInfo.rawJSON);
+                var result=helper.resultSave(getters.curParam.bodyInfo.rawJSON);
                 helper.convertToJSON(result,obj);
             }
-            var info=helper.handleMockInfo(0,state.param,state.query,state.header,bJSON?obj:state.body,state);
-            return helper.mock(state.outInfo.rawMock,info);
+            var info=helper.handleMockInfo(0,getters.curParam.param,getters.curParam.query,getters.curParam.header,bJSON?obj:getters.curParam.body,state);
+            return helper.mock(getters.curParam.outInfo.rawMock,info);
         },
-        rawJSON:function (state) {
-            var obj=state.bodyInfo.rawJSONType==0?{}:[];
-            var obj={};
-            var result=helper.resultSave(state.bodyInfo.rawJSON);
+        rawJSON:function (state,getters) {
+            var obj=getters.curParam.bodyInfo.rawJSONType==0?{}:[];
+            var result=helper.resultSave(getters.curParam.bodyInfo.rawJSON);
             helper.convertToJSON(result,obj);
-            return helper.format(JSON.stringify(obj),1,result,state.status).draw;
-        }
+            return helper.format(JSON.stringify(obj),1,result,getters.curParam.status).draw;
+        },
     },
     mutations:{
+        setIndex:function (state,data) {
+            state.index=data;
+        },
         initInterfaceList:function (state,data) {
-            var arr=[]
-            for(var i=0;i<data.length;i++)
-            {
-                data[i].show=0;
-                for(var j=0;j<data[i].data.length;j++)
+            function init(data,list) {
+                var arr=[]
+                for(var i=0;i<data.length;i++)
                 {
-                    data[i].data[j].select=0;
+                    data[i].menu=0;
+                    if(data[i].data)
+                    {
+                        if(list && list[i] && list[i]._id==data[i]._id)
+                        {
+                            data[i].show=list[i].show;
+                        }
+                        else
+                        {
+                            data[i].show=0;
+                        }
+                        data[i].data=init(data[i].data,(list && list[i])?list[i].data:null)
+                    }
+                    else
+                    {
+                        data[i].select=0;
+                    }
+                    arr.push(data[i]);
                 }
-                arr.push(data[i]);
+                return arr;
             }
-            state.interfaceList=arr;
+            state.interfaceList=init(data,state.interfaceList);
         },
         setBaseUrls:function (state,data) {
             state.baseUrls=data;
@@ -222,347 +265,401 @@ module.exports=new Vuex.Store({
             state.globalAfter=val;
         },
         initParam:function (state,data) {
-            state.query.splice(0,state.query.length);
-            state.header.splice(0,state.header.length);
-            state.body.splice(0,state.body.length);
-            state.resultObject.splice(0,state.resultObject.length);
-            state.resultArray.splice(0,state.resultArray.length);
-            state.param.splice(0,state.param.length);
-            state.query.push({
-                name:"",
-                must:0,
-                remark:""
-            });
-            state.header.push({
-                name:"",
-                value:"",
-                remark:""
-            });
-            state.body.push({
-                name:"",
-                type:0,
-                must:0,
-                remark:"",
-            });
-            state.resultObject.push({
-                name:"",
-                must:1,
-                type:0,
-                remark:"",
-                show:1,
-                drag:1,
-                mock:""
-            })
-            state.resultArray.push({
-                name:null,
-                must:1,
-                type:0,
-                remark:"",
-                show:1,
-                drag:1,
-                mock:""
-            })
-            state.rawJSONObject=[{
-                name:"",
-                must:1,
-                type:0,
-                remark:"",
-                show:1,
-                mock:"",
-                drag:1
-            }];
-            state.rawJSONArray=[{
-                name:null,
-                must:1,
-                type:0,
-                remark:"",
-                show:1,
-                mock:"",
-                drag:1
-            }];
-            state.bodyInfo={
-                type:0,
-                rawType:0,
-                rawTextRemark:"",
-                rawFileRemark:"",
-                rawText:"",
-                rawJSON:state.rawJSONObject,
-                rawJSONType:0
-            };
-            state.outInfo={
-                type:0,
-                rawRemark:"",
-                rawMock:"",
-                jsonType:0
-            }
-            state.result=state.resultObject
+            state.param=[
+                {
+                    name:"未命名",
+                    remark:"",
+                    id:uuid(),
+                    query:[{
+                        name:"",
+                        must:0,
+                        remark:""
+                    }],
+                    header:[{
+                        name:"",
+                        value:"",
+                        remark:""
+                    }],
+                    body:[{
+                        name:"",
+                        type:0,
+                        must:0,
+                        remark:"",
+                    }],
+                    param:[
+
+                    ],
+                    bodyInfo:{
+                        type:0,
+                        rawType:0,
+                        rawTextRemark:"",
+                        rawFileRemark:"",
+                        rawText:"",
+                        rawJSON:[],
+                        rawJSONType:0
+                    },
+                    rawJSONObject:[{
+                        name:"",
+                        must:1,
+                        type:0,
+                        remark:"",
+                        show:1,
+                        mock:"",
+                        drag:1
+                    }],
+                    rawJSONArray:[{
+                        name:null,
+                        must:1,
+                        type:0,
+                        remark:"",
+                        show:1,
+                        mock:"",
+                        drag:1
+                    }],
+                    outInfo:{
+                        type:0,
+                        rawRemark:"",
+                        rawMock:"",
+                        jsonType:0
+                    },
+                    result:[],
+                    resultObject:[
+                        {
+                            name:"",
+                            must:0,
+                            type:0,
+                            remark:"",
+                            show:0,
+                            mock:"",
+                            drag:1
+                        }
+                    ],
+                    resultArray:[
+                        {
+                            name:null,
+                            must:0,
+                            type:0,
+                            remark:"",
+                            show:0,
+                            mock:"",
+                            drag:1
+                        }
+                    ],
+                }
+            ];
+            state.param[0].result=state.param[0].resultObject;
+            state.param[0].bodyInfo.rawJSON=state.param[0].rawJSONObject;
+            state.index=0;
         },
         initInterface:function (state,data) {
-            if(state.interfaceEdit.queryParam.length>0)
+            for(var i=1;i<state.interfaceEdit.param.length;i++)
             {
-                state.query=state.interfaceEdit.queryParam;
-                state.query.forEach(function (item) {
-                    if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
-                    {
-                        item.value={
-                            type:0,
-                            status:"",
-                            data:item.value.map(function (obj) {
-                                return {
-                                    value:obj,
-                                    remark:""
-                                }
-                            })
+                state.param.push($.clone(state.param[0]));
+            }
+            state.interfaceEdit.param.forEach(function (objInter,index) {
+                state.param[index].name=objInter.name;
+                state.param[index].id=objInter.id;
+                state.param[index].remark=objInter.remark;
+                if(objInter.queryParam.length>0)
+                {
+                    state.param[index].query=objInter.queryParam;
+                    state.param[index].query.forEach(function (item) {
+                        if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
+                        {
+                            item.value={
+                                type:0,
+                                status:"",
+                                data:item.value.map(function (obj) {
+                                    return {
+                                        value:obj,
+                                        remark:""
+                                    }
+                                })
+                            }
                         }
-                    }
-                })
-            }
-            else
-            {
-                state.interfaceEdit.queryParam=state.query;
-            }
-            if(state.interfaceEdit.bodyParam.length>0)
-            {
-                state.body=state.interfaceEdit.bodyParam;
-                state.body.forEach(function (item) {
-                    if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
-                    {
-                        item.value={
-                            type:0,
-                            status:"",
-                            data:item.value.map(function (obj) {
-                                return {
-                                    value:obj,
-                                    remark:""
-                                }
-                            })
-                        }
-                    }
-                })
-            }
-            else
-            {
-                state.interfaceEdit.bodyParam=state.body;
-            }
-            if(state.interfaceEdit.header.length>0)
-            {
-                state.header=state.interfaceEdit.header;
-            }
-            else
-            {
-                state.interfaceEdit.header=state.header;
-            }
-            if(state.interfaceEdit.outParam.length>0)
-            {
-                helper.initResultShow(state.interfaceEdit.outParam);
-                state.result=state.interfaceEdit.outParam;
-            }
-            else
-            {
-                state.interfaceEdit.outParam=state.result;
-            }
-            if(state.interfaceEdit.restParam.length>0)
-            {
-                state.param=state.interfaceEdit.restParam;
-                state.param.forEach(function (item) {
-                    if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
-                    {
-                        item.value={
-                            type:0,
-                            status:"",
-                            data:item.value.map(function (obj) {
-                                return {
-                                    value:obj,
-                                    remark:""
-                                }
-                            })
-                        }
-                    }
-                })
-            }
-            else
-            {
-                state.interfaceEdit.restParam=state.param;
-            }
-            if(state.interfaceEdit.bodyInfo)
-            {
-                state.bodyInfo=state.interfaceEdit.bodyInfo;
-                if(state.bodyInfo.rawText===undefined)
-                {
-                    Vue.set(state.bodyInfo,"rawText","");
-                }
-                if(state.bodyInfo.rawTextRemark===undefined)
-                {
-                    Vue.set(state.bodyInfo,"rawTextRemark","");
-                }
-                if(state.bodyInfo.rawFileRemark===undefined)
-                {
-                    Vue.set(state.bodyInfo,"rawFileRemark","");
-                }
-                if(state.bodyInfo.rawJSONType===undefined)
-                {
-                    Vue.set(state.bodyInfo,"rawJSONType",0);
-                }
-                if(state.bodyInfo.rawJSON==undefined)
-                {
-                    Vue.set(state.bodyInfo,"rawJSON",state.rawJSONObject);
+                    })
+                    state.param[index].query.push({
+                        name:"",
+                        must:0,
+                        remark:""
+                    });
                 }
                 else
                 {
-                    helper.initResultShow(state.bodyInfo.rawJSON);
-                    if(state.bodyInfo.rawJSONType==0)
+                    objInter.queryParam=state.param[index].query;
+                }
+                if(objInter.bodyParam && objInter.bodyParam.length>0)
+                {
+                    state.param[index].body=objInter.bodyParam;
+                    state.param[index].body.forEach(function (item) {
+                        if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
+                        {
+                            item.value={
+                                type:0,
+                                status:"",
+                                data:item.value.map(function (obj) {
+                                    return {
+                                        value:obj,
+                                        remark:""
+                                    }
+                                })
+                            }
+                        }
+                    })
+                    state.param[index].body.push({
+                        name:"",
+                        type:0,
+                        must:0,
+                        remark:"",
+                    });
+                }
+                else
+                {
+                    objInter.bodyParam=state.param[index].body;
+                }
+                if(objInter.header.length>0)
+                {
+                    state.param[index].header=objInter.header;
+                    state.param[index].header.push({
+                        name:"",
+                        value:"",
+                        remark:""
+                    });
+                }
+                else
+                {
+                    objInter.header=state.param[index].header;
+                }
+                if(objInter.outParam.length>0)
+                {
+                    helper.initResultShow(objInter.outParam);
+                    state.param[index].result=objInter.outParam;
+                }
+                else
+                {
+                    objInter.outParam=state.param[index].result;
+                }
+                if(objInter.restParam.length>0)
+                {
+                    state.param[index].param=objInter.restParam;
+                    state.param[index].param.forEach(function (item) {
+                        if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
+                        {
+                            item.value={
+                                type:0,
+                                status:"",
+                                data:item.value.map(function (obj) {
+                                    return {
+                                        value:obj,
+                                        remark:""
+                                    }
+                                })
+                            }
+                        }
+                    })
+                }
+                else
+                {
+                    objInter.restParam=state.param[index].param;
+                }
+                if(objInter.bodyInfo)
+                {
+                    state.param[index].bodyInfo=objInter.bodyInfo;
+                    if(state.param[index].bodyInfo.rawText===undefined)
                     {
-                        state.rawJSONObject=state.bodyInfo.rawJSON;
+                        Vue.set(state.param[index].bodyInfo,"rawText","");
+                    }
+                    if(state.param[index].bodyInfo.rawTextRemark===undefined)
+                    {
+                        Vue.set(state.param[index].bodyInfo,"rawTextRemark","");
+                    }
+                    if(state.param[index].bodyInfo.rawFileRemark===undefined)
+                    {
+                        Vue.set(state.param[index].bodyInfo,"rawFileRemark","");
+                    }
+                    if(state.param[index].bodyInfo.rawJSONType===undefined)
+                    {
+                        Vue.set(state.param[index].bodyInfo,"rawJSONType",0);
+                    }
+                    if(state.param[index].bodyInfo.rawJSON==undefined)
+                    {
+                        Vue.set(state.param[index].bodyInfo,"rawJSON",state.param[index].rawJSONObject);
                     }
                     else
                     {
-                        state.rawJSONArray=state.bodyInfo.rawJSON;
-                    }
-                }
-                var bFind=false;
-                for(var i=0;i<state.header.length;i++)
-                {
-                    var obj=state.header[i];
-                    if(obj.name.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application/json")
-                    {
-                        bFind=true;
-                        break;
-                    }
-                }
-                if(bFind && state.bodyInfo.rawText)
-                {
-                    var obj;
-                    try
-                    {
-                        obj=JSON.parse(state.bodyInfo.rawText);
-                    }
-                    catch (e)
-                    {
-
-                    }
-                    if(obj)
-                    {
-                        var result=[];
-                        for(var key in obj)
+                        helper.initResultShow(state.param[index].bodyInfo.rawJSON);
+                        if(state.param[index].bodyInfo.rawJSONType==0)
                         {
-                            helper.handleResultData(key,obj[key],result,null,1,null,1)
+                            state.param[index].rawJSONObject=state.param[index].bodyInfo.rawJSON;
                         }
-                        state.bodyInfo.rawJSON=result;
-                        state.bodyInfo.rawJSONType=(obj instanceof Array)?1:0;
-                        state.bodyInfo.rawText="";
-                        state.bodyInfo.rawType=2;
+                        else
+                        {
+                            state.param[index].rawJSONArray=state.param[index].bodyInfo.rawJSON;
+                        }
                     }
-                }
-            }
-            else
-            {
-                state.interfaceEdit.bodyInfo=state.bodyInfo;
-            }
-            if(state.interfaceEdit.outInfo)
-            {
-                state.outInfo=state.interfaceEdit.outInfo;
-                if(state.outInfo.jsonType===undefined)
-                {
-                    Vue.set(state.outInfo,"jsonType",0);
-                }
-                else if(state.outInfo.jsonType==0)
-                {
-                    state.resultObject=state.result;
-                }
-                else
-                {
-                    state.resultArray=state.result;
-                }
-            }
-            else
-            {
-                state.interfaceEdit.outInfo=state.outInfo;
-            }
-            if(!state.interfaceEdit.before)
-            {
-                Vue.set(state.interfaceEdit,"before",{
-                    mode:0,
-                    code:""
-                })
-            }
-            else
-            {
-                if(typeof(state.interfaceEdit.before)=="string")
-                {
-                    state.interfaceEdit.before={
-                        mode:0,
-                        code:state.interfaceEdit.before
-                    }
-                }
-            }
-            if(!state.interfaceEdit.after)
-            {
-                Vue.set(state.interfaceEdit,"after",{
-                    mode:0,
-                    code:""
-                })
-            }
-            else
-            {
-                if(typeof(state.interfaceEdit.after)=="string")
-                {
-                    state.interfaceEdit.after={
-                        mode:0,
-                        code:state.interfaceEdit.after
-                    }
-                }
-            }
-        },
-        changeMethod:function (state) {
-            if(state.interfaceEdit.method=="POST" || state.interfaceEdit.method=="PUT" || state.interfaceEdit.method=="PATCH")
-            {
-                if(state.header.length==1 && !state.header[0].name)
-                {
-                    state.header[0].name="Content-Type";
-                    state.header[0].value="application/x-www-form-urlencoded"
-                }
-                else
-                {
                     var bFind=false;
-                    for(var i=0;i<state.header.length;i++)
+                    for(var i=0;i<state.param[index].header.length;i++)
                     {
-                        var obj=state.header[i];
-                        if(obj.name=="Content-Type")
+                        var obj=state.param[index].header[i];
+                        if(obj.name.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application/json")
                         {
                             bFind=true;
                             break;
                         }
                     }
-                    if(!bFind)
+                    if(bFind && state.param[index].bodyInfo.rawText)
                     {
-                        state.header.push({
-                            name:"Content-Type",
-                            value:"application/x-www-form-urlencoded",
-                            remark:""
-                        })
+                        var obj;
+                        try
+                        {
+                            obj=JSON.parse(state.param[index].bodyInfo.rawText);
+                        }
+                        catch (e)
+                        {
+
+                        }
+                        if(obj)
+                        {
+                            var result=[];
+                            for(var key in obj)
+                            {
+                                helper.handleResultData(key,obj[key],result,null,1,null,1)
+                            }
+                            state.param[index].bodyInfo.rawJSON=result;
+                            state.param[index].bodyInfo.rawJSONType=(obj instanceof Array)?1:0;
+                            state.param[index].bodyInfo.rawText="";
+                            state.param[index].bodyInfo.rawType=2;
+                        }
                     }
                 }
+                else
+                {
+                    objInter.bodyInfo=state.param[index].bodyInfo;
+                }
+                if(objInter.outInfo)
+                {
+                    state.param[index].outInfo=objInter.outInfo;
+                    if(state.param[index].outInfo.jsonType===undefined)
+                    {
+                        Vue.set(state.param[index].outInfo,"jsonType",0);
+                    }
+                    else if(state.param[index].outInfo.jsonType==0)
+                    {
+                        state.param[index].resultObject=state.param[index].result;
+                    }
+                    else
+                    {
+                        state.param[index].resultArray=state.param[index].result;
+                    }
+                }
+                else
+                {
+                    objInter.outInfo=state.param[index].outInfo;
+                }
+                if(!objInter.before)
+                {
+                    Vue.set(objInter,"before",{
+                        mode:0,
+                        code:""
+                    })
+                }
+                else
+                {
+                    if(typeof(objInter.before)=="string")
+                    {
+                        objInter.before={
+                            mode:0,
+                            code:objInter.before
+                        }
+                    }
+                }
+                state.param[index].before=objInter.before;
+                if(!objInter.after)
+                {
+                    Vue.set(objInter,"after",{
+                        mode:0,
+                        code:""
+                    })
+                }
+                else
+                {
+                    if(typeof(objInter.after)=="string")
+                    {
+                        objInter.after={
+                            mode:0,
+                            code:objInter.after
+                        }
+                    }
+                }
+                state.param[index].after=objInter.after;
+            })
+        },
+        changeMethod:function (state) {
+            if(state.interfaceEdit.method=="POST" || state.interfaceEdit.method=="PUT" || state.interfaceEdit.method=="PATCH")
+            {
+                state.param.forEach(function (obj,index) {
+                    if(obj.header.length==1 && !obj.header[0].name)
+                    {
+                        obj.header[0].name="Content-Type";
+                        obj.value="application/x-www-form-urlencoded"
+                    }
+                    else
+                    {
+                        var bFind=false;
+                        for(var i=0;i<obj.header.length;i++)
+                        {
+                            var obj=obj.header[i];
+                            if(obj.name=="Content-Type")
+                            {
+                                bFind=true;
+                                break;
+                            }
+                        }
+                        if(!bFind)
+                        {
+                            obj.header.push({
+                                name:"Content-Type",
+                                value:"application/x-www-form-urlencoded",
+                                remark:""
+                            })
+                        }
+                    }
+                    if(!obj.bodyInfo)
+                    {
+                        obj.bodyInfo={
+                            type:0,
+                            rawType:0,
+                            rawTextRemark:"",
+                            rawFileRemark:"",
+                            rawText:"",
+                            rawJSON:[],
+                            rawJSONType:0
+                        }
+                    }
+                })
             }
             else
             {
-                for(var i=0;i<state.header.length;i++)
-                {
-                    var obj=state.header[i];
-                    if(obj.name=="Content-Type")
+                state.param.forEach(function (obj,index) {
+                    for(var i=0;i<obj.header.length;i++)
                     {
-                        if(state.header.length>1)
+                        var obj1=obj.header[i];
+                        if(obj1.name=="Content-Type")
                         {
-                            state.header.splice(i,1);
+                            if(obj.header.length>1)
+                            {
+                                obj.header.splice(i,1);
+                            }
+                            else
+                            {
+                                obj.header[0].name="";
+                                obj.header[0].value="";
+                                obj.header[0].remark="";
+                            }
+                            break;
                         }
-                        else
-                        {
-                            state.header[0].name="";
-                            state.header[0].value="";
-                            state.header[0].remark="";
-                        }
-                        break;
                     }
-                }
+                })
             }
         },
         changeUrl:function (state,val) {
@@ -576,12 +673,12 @@ module.exports=new Vuex.Store({
                     {
                         var str=arr[i].substr(1,arr[i].length-2);
                         var bFind=false;
-                        for(var j=0;j<state.param.length;j++)
+                        for(var j=0;j<state.param[state.index].param.length;j++)
                         {
-                            if(str==state.param[j].name)
+                            if(str==state.param[state.index].param[j].name)
                             {
                                 bFind=true;
-                                arrParam.push(state.param[j]);
+                                arrParam.push(state.param[state.index].param[j]);
                                 break;
                             }
                         }
@@ -599,23 +696,26 @@ module.exports=new Vuex.Store({
                         }
                     }
                 }
-                state.param=arrParam;
-                state.interfaceEdit.restParam=state.param;
+                state.param.forEach(function (obj,index) {
+                    obj.param=arrParam;
+                    state.interfaceEdit.param[index].restParam=obj.param;
+                })
             }
         },
         changePreview:function (state,val) {
             if(val==1)
             {
-                var obj=state.outInfo.jsonType==1?[]:{};
-                var result=helper.resultSave(state.result);
+                var obj=state.param[state.index].outInfo.jsonType==1?[]:{};
+                var result=helper.resultSave(state.param[state.index].result);
                 var bJSON=false,objJSON={};
-                if(state.bodyInfo.type==1 && state.bodyInfo.rawType==2 && state.bodyInfo.rawJSON)
+                if(state.param[state.index].bodyInfo.type==1 && state.param[state.index].bodyInfo.rawType==2 && state.param[state.index].bodyInfo.rawJSON)
                 {
+                    objJSON=state.param[state.index].bodyInfo.rawJSONType==0?{}:[];
                     bJSON=true;
-                    var result1=helper.resultSave(state.bodyInfo.rawJSON);
+                    var result1=helper.resultSave(state.param[state.index].bodyInfo.rawJSON);
                     helper.convertToJSON(result1,objJSON);
                 }
-                var info=helper.handleMockInfo(0,state.param,state.query,state.header,bJSON?objJSON:state.body,state);
+                var info=helper.handleMockInfo(0,state.param[state.index].param,state.param[state.index].query,state.param[state.index].header,bJSON?objJSON:state.param[state.index].body,state);
                 helper.convertToJSON(result,obj,info);
                 state.drawMix=helper.format(JSON.stringify(obj),1,result,state.status).draw;
             }
@@ -625,116 +725,56 @@ module.exports=new Vuex.Store({
             {
                 return;
             }
-            state.interfaceSearchList=[];
-            state.interfaceList.forEach(function (obj) {
-                var objCopy=$.clone(obj);
-                objCopy.data=obj.data.filter(function (o) {
-                    var str;
-                    if(state.searchType==0)
-                    {
-                        str=o.name;
-                    }
-                    else
-                    {
-                        str=o.url;
-                    }
-                    if(str.toLowerCase().indexOf(state.searchText.toLowerCase())>-1)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                })
-                if(objCopy.data.length>0)
+            state.interfaceSearchList=(function (list) {
+                var searchList=[];
+                for(var i=0;i<list.length;i++)
                 {
-                    state.interfaceSearchList.push(objCopy);
+                    var obj=list[i];
+                    if(obj.data)
+                    {
+                        var objCopy={};
+                        for(var key in obj)
+                        {
+                            objCopy[key]=obj[key];
+                        }
+                        objCopy.data=arguments.callee(objCopy.data)
+                        if(objCopy.data.length>0)
+                        {
+                            searchList.push(objCopy);
+                        }
+                    }
+                    else
+                    {
+                        var str;
+                        if(state.searchType==0)
+                        {
+                            str=obj.name;
+                        }
+                        else
+                        {
+                            str=obj.url;
+                        }
+                        if(str.toLowerCase().indexOf(state.searchText.toLowerCase())>-1)
+                        {
+                            searchList.push(obj);
+                        }
+                    }
                 }
-            })
+                return searchList;
+            })(state.interfaceList)
         },
         toggleResultType:function (state) {
-            if(state.outInfo.jsonType==1)
+            if(state.param[state.index].outInfo.jsonType==1)
             {
-                state.result=state.resultArray
+                state.param[state.index].result=state.param[state.index].resultArray
             }
             else
             {
-                state.result=state.resultObject
+                state.param[state.index].result=state.param[state.index].resultObject
             }
         }
     },
     actions:{
-        add:function (context,data) {
-            if(context.state.interface && (data.id || (data.item && !data.item._id)))
-            {
-                context.state.interface.select=0;
-                context.commit("setInterface",null);
-            }
-            context.commit("initParam");
-            if(data.item)
-            {
-                context.commit("setInterfaceEdit",data.item);
-            }
-            else
-            {
-                context.commit("setInterfaceEdit",{
-                    "name": "",
-                    "group": {
-                        "_id": data.id,
-                    },
-                    "url": "",
-                    "remark": "",
-                    "method": "GET",
-                    "finish":0,
-                    "outParam": [{
-                        name:"",
-                        must:0,
-                        type:0,
-                        remark:"",
-                        show:0,
-                        mock:"",
-                        drag:1
-                    }],
-                    "bodyParam": [{
-                        name:"",
-                        type:0,
-                        must:0,
-                        remark:"",
-                    }],
-                    "queryParam": [{
-                        name:"",
-                        must:0,
-                        remark:""
-                    }],
-                    "header": [{
-                        name:"",
-                        value:"",
-                        remark:""
-                    }],
-                    "bodyInfo":{
-                        type:0,
-                        rawType:0,
-                        rawTextRemark:"",
-                        rawFileRemark:"",
-                        rawText:"",
-                        rawJSON:context.state.rawJSONObject,
-                        rawJSONType:0
-
-                    },
-                    outInfo:{
-                        type:0,
-                        rawRemark:"",
-                        rawMock:"",
-                        jsonType:0
-                    },
-                    restParam:[],
-                    before:"",
-                    after:""
-                });
-            }
-            context.commit("initInterface");
-        },
         getAllInterface:function (context,data) {
             context.commit("initInterfaceList",data);
         },

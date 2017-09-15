@@ -3,26 +3,17 @@
  */
 var helper={};
 helper.methodColor=function (m) {
-    var m=m.toLowerCase();
-    if(m=="get")
+    if(m==1)
     {
-        return "green"
+        return "rgb(19,206,106)"
     }
-    else if(m=="post")
+    else if(m==2)
     {
-        return "orange"
+        return "gray"
     }
-    else  if(m=="delete")
+    else
     {
-        return "red"
-    }
-    else if(m=="put")
-    {
-        return "skyblue"
-    }
-    else if(m=="patch")
-    {
-        return "purple"
+        return "#50bfff";
     }
 }
 

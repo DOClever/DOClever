@@ -4,7 +4,6 @@
 var mongoose = require('mongoose');
 var data=require("./../../config.json");
 require("../third/schemaExtend");
-var util=require("./util");
 mongoose.Promise = require('bluebird');
 var db=mongoose.createConnection(data.db,{
     server: {
@@ -20,6 +19,7 @@ var db=mongoose.createConnection(data.db,{
         }
     }
 });
+
 module.exports=db;
 
 

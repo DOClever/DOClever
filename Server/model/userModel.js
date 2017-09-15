@@ -23,7 +23,8 @@ var model=new mongoose.Schema({
     },
     lastLoginDate:Date,
     question:String,
-    answer:String
+    answer:String,
+    qqId:String
 },{
     timestamps:true
 });

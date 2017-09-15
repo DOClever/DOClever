@@ -2,55 +2,12 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra
 */
+"use strict";
+
 var Source = require("./Source");
 var SourceNode = require("source-map").SourceNode;
 
-var REPLACE_REGEX = /\n(?=.|\s)/g
-
-function PrefixSource(prefix, source) {
-	Source.call(this);
-	this._source = source;
-	this._prefix = prefix;
-}
-module.exports = PrefixSource;
-
-PrefixSource.prototype = Object.create(Source.prototype);
-PrefixSource.prototype.constructor = PrefixSource;
-
-PrefixSource.prototype.source = function() {
-	var node = typeof this._source === "string" ? this._source : this._source.source();
-	var prefix = this._prefix;
-	return prefix + node.replace(REPLACE_REGEX, "\n" + prefix);
-};
-
-require("./SourceAndMapMixin")(PrefixSource.prototype);
-
-PrefixSource.prototype.node = function(options) {
-	var node = this._source.node(options);
-	var append = [this._prefix];
-	return new SourceNode(null, null, null, [
-		cloneAndPrefix(node, this._prefix, append)
-	]);
-};
-
-PrefixSource.prototype.listMap = function(options) {
-	var prefix = this._prefix;
-	var map = this._source.listMap(options);
-	return map.mapGeneratedCode(function(code) {
-		return prefix + code.replace(REPLACE_REGEX, "\n" + prefix);
-	});
-};
-
-PrefixSource.prototype.updateHash = function(hash) {
-	if(typeof this._source === "string")
-		hash.update(this._source);
-	else
-		this._source.updateHash(hash);
-	if(typeof this._prefix === "string")
-		hash.update(this._prefix);
-	else
-		this._prefix.updateHash(hash);
-};
+var REPLACE_REGEX = /\n(?=.|\s)/g;
 
 function cloneAndPrefix(node, prefix, append) {
 	if(typeof node === "string") {
@@ -72,3 +29,48 @@ function cloneAndPrefix(node, prefix, append) {
 		return newNode;
 	}
 };
+
+class PrefixSource extends Source {
+	constructor(prefix, source) {
+		super();
+		this._source = source;
+		this._prefix = prefix;
+	}
+
+	source() {
+		var node = typeof this._source === "string" ? this._source : this._source.source();
+		var prefix = this._prefix;
+		return prefix + node.replace(REPLACE_REGEX, "\n" + prefix);
+	}
+
+	node(options) {
+		var node = this._source.node(options);
+		var append = [this._prefix];
+		return new SourceNode(null, null, null, [
+			cloneAndPrefix(node, this._prefix, append)
+		]);
+	}
+
+	listMap(options) {
+		var prefix = this._prefix;
+		var map = this._source.listMap(options);
+		return map.mapGeneratedCode(function(code) {
+			return prefix + code.replace(REPLACE_REGEX, "\n" + prefix);
+		});
+	}
+
+	updateHash(hash) {
+		if(typeof this._source === "string")
+			hash.update(this._source);
+		else
+			this._source.updateHash(hash);
+		if(typeof this._prefix === "string")
+			hash.update(this._prefix);
+		else
+			this._prefix.updateHash(hash);
+	}
+}
+
+require("./SourceAndMapMixin")(PrefixSource.prototype);
+
+module.exports = PrefixSource;

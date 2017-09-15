@@ -18,7 +18,8 @@ var model=new mongoose.Schema({
     version:{
         type:mongoose.Schema.ObjectId,
         ref:"Version"
-    }
+    },
+    parent:String,
 },{
     timestamps:true
 });

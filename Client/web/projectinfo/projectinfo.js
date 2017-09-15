@@ -2,19 +2,16 @@
  * Created by sunxin on 2016/12/22.
  */
 var mainNav=require("../component/mainNav.vue")
-var interface=require("../component/interface.vue")
-var setting=require("../component/setting.vue")
-var global=require("../component/global.vue")
-var test=require("../component/test.vue")
-var version=require("../component/version.vue")
+var interface=require("./interface/interface.vue")
+var setting=require("./setting/setting.vue")
+var global=require("./global/global.vue")
+var test=require("./test/test.vue")
+var version=require("./version/version.vue")
 var config=require("../util/config");
-var bus=require("../bus/projectInfoBus")
 var itemAuto=require("../component/autocompleteItem.vue");
-if(!session.get("id"))
-{
-    location.href="../login/login.html"
-}
-else if(!session.get("projectId"))
+var store=require("./store");
+var sessionChange=require("../mixins/session");
+if(!session.get("projectId"))
 {
     location.href="../project/project.html"
 }
@@ -26,11 +23,13 @@ Vue.component("itemauto",itemAuto);
 var vue=new Vue({
     el: "#app",
     data: {
-        session:$.clone(session.raw()),
         type:0,
         arrApply:[],
-        showApply:false
+        showApply:false,
+        selProject:session.get("projectName")
     },
+    store:store,
+    mixins:[sessionChange],
     components:{
         "mainnav":mainNav,
         "interface":interface,
@@ -69,7 +68,48 @@ var vue=new Vue({
                     $.notify(data.msg,0);
                 }
             })
-        }
+        },
+        querySearch:function (queryString,cb) {
+            var _this=this;
+            var query={
+                name:""
+            }
+            if(_this.session.teamId)
+            {
+                query.team=_this.session.teamId
+            }
+            net.get("/project/filterlist",query).then(function (data) {
+                if(data.code==200)
+                {
+                    var results=data.data.map(function (obj) {
+                        return {
+                            value:obj.name,
+                            remark:obj.dis!="undefined"?obj.dis:"",
+                            id:obj._id,
+                            own:obj.own,
+                            role:obj.role
+                        }
+                    })
+                    cb(results);
+                }
+                else
+                {
+                    $.notify(data.msg,0);
+                    cb([]);
+                }
+            })
+        },
+        showAutoComplete:function (event) {
+            setTimeout(function(){
+                event.target.nextSibling.focus();
+            },100)
+        },
+        changeProject:function (obj) {
+            session.set("projectId",obj.id);
+            session.set("projectName",obj.value);
+            store.state.lastBaseUrl=""
+            location.reload();
+        },
     },
     created:function () {
         var _this=this;
@@ -103,7 +143,7 @@ var vue=new Vue({
             var obj6=values[5];
             if(obj1.code==200)
             {
-                bus.$emit("initInterface",obj1.data);
+                store.dispatch("interface/getAllInterface",obj1.data)
             }
             else
             {
@@ -111,7 +151,7 @@ var vue=new Vue({
             }
             if(obj2.code==200)
             {
-                bus.$emit("initInfo",obj2.data);
+                store.commit("setProject",obj2.data);
             }
             else
             {
@@ -119,7 +159,7 @@ var vue=new Vue({
             }
             if(obj3.code==200)
             {
-                bus.$emit("initStatus",obj3.data);
+                store.commit("setStatus",obj3.data);
             }
             else
             {
@@ -127,13 +167,13 @@ var vue=new Vue({
             }
             if(obj4.code==200)
             {
-                bus.$emit("initTest",obj4.data);
+                store.state.event.$emit("initTest",obj4.data);
             }
             else
             {
                 throw obj4.msg;
             }
-            if(session.get("role")==0)
+            if(store.state.role==0)
             {
                 if(obj5.code==200)
                 {
@@ -153,12 +193,13 @@ var vue=new Vue({
             }
             if(obj6.code==200)
             {
-                bus.$emit("initVersion",obj6.data);
+                store.state.event.$emit("initVersion",obj6.data);
             }
             else
             {
                 throw obj6.msg;
             }
+            store.state.event.$emit("init");
         }).catch(function (err) {
             $.stopLoading();
             if(typeof(err)=="string")
@@ -170,6 +211,9 @@ var vue=new Vue({
                 $.notify("获取失败",0);
             }
         })
+    },
+    mounted:function () {
+        document.getElementById("projectChange").getElementsByTagName("input")[0].readOnly=true;
     }
 })
 window.vueObj=vue;

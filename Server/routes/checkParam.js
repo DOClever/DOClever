@@ -114,11 +114,8 @@ function route(category) {
             {
                 for(let func of inter[index].handle)
                 {
-                    let n={
-                        go:0
-                    }
-                    await (func(req,res,n))
-                    if(n.go==0)
+                    let ret=await (func(req,res))
+                    if(ret!==true)
                     {
                         break;
                     }

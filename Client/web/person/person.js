@@ -5,21 +5,18 @@ var mainNav=require("../component/mainNav.vue")
 var imgFile=require("../director/imgFile")
 var proxyImg=require("../director/proxyImg")
 var config=require("../util/config");
-if(!session.get("id"))
-{
-    location.href="../login/login.html"
-}
+var sessionChange=require("../mixins/session");
 var vue=new Vue({
     el: "#app",
     data: {
         infoShow:1,
-        session:$.clone(session.raw()),
         oldPass:"",
         newPass:"",
         newPass1:"",
         savePending:false,
         passPending:false,
     },
+    mixins:[sessionChange],
     components:{
         "mainnav":mainNav,
     },

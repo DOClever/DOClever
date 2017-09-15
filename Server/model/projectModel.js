@@ -25,6 +25,7 @@ var model=new mongoose.Schema({
                 ref:"User"
             },
             role:Number,   // 0 管理员  1 观察者
+            option:Object,
             _id:false
         }],
         default:[]

@@ -1,7 +1,8 @@
 /**
  * Created by sunxin on 2017/7/7.
  */
-var article=require("./article");
+var articleClass=require("./article");
+var article=new articleClass();
 var interface=[
     {
         "method":"POST",

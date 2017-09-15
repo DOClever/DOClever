@@ -4,17 +4,18 @@
 */
 var createInnerCallback = require("./createInnerCallback");
 
-function UnsafeCachePlugin(source, filterPredicate, cache, target) {
+function UnsafeCachePlugin(source, filterPredicate, cache, withContext, target) {
 	this.source = source;
 	this.filterPredicate = filterPredicate;
+	this.withContext = withContext;
 	this.cache = cache || {};
 	this.target = target;
 }
 module.exports = UnsafeCachePlugin;
 
-function getCacheId(request) {
+function getCacheId(request, withContext) {
 	return JSON.stringify({
-		context: request.context,
+		context: withContext ? request.context : "",
 		path: request.path,
 		query: request.query,
 		request: request.request
@@ -25,9 +26,10 @@ UnsafeCachePlugin.prototype.apply = function(resolver) {
 	var filterPredicate = this.filterPredicate;
 	var cache = this.cache;
 	var target = this.target;
+	var withContext = this.withContext;
 	resolver.plugin(this.source, function(request, callback) {
 		if(!filterPredicate(request)) return callback();
-		var cacheId = getCacheId(request);
+		var cacheId = getCacheId(request, withContext);
 		var cacheEntry = cache[cacheId];
 		if(cacheEntry) {
 			return callback(null, cacheEntry);

@@ -1,12 +1,13 @@
 'use strict';
-var path = require('path');
-var commonDir = require('commondir');
-var pkgDir = require('pkg-dir');
-var mkdirp = require('mkdirp');
+const path = require('path');
+const commonDir = require('commondir');
+const pkgDir = require('pkg-dir');
+const makeDir = require('make-dir');
 
-module.exports = function (options) {
-	var name = options.name;
-	var dir = options.cwd;
+module.exports = options => {
+	const name = options.name;
+	let dir = options.cwd;
+
 	if (options.files) {
 		dir = commonDir(dir, options.files);
 	} else {
@@ -19,7 +20,7 @@ module.exports = function (options) {
 		dir = path.join(dir, 'node_modules', '.cache', name);
 
 		if (dir && options.create) {
-			mkdirp.sync(dir);
+			makeDir.sync(dir);
 		}
 
 		if (options.thunk) {

@@ -1,7 +1,8 @@
 /**
  * Created by sunxin on 2017/4/13.
  */
-var status=require("./status");
+var statusClass=require("./status");
+var status=new statusClass();
 var interface=[
     {
         "method":"POST",

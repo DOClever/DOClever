@@ -7,11 +7,11 @@ var pass = require('stream').PassThrough;
 var getHeader = function (req) {
     var ret = {};
     for (var i in req.headers) {
-        if (!/^(host|connection|Access-|origin|referer|user-agent|__user|__path|__url|__method|__headers)/i.test(i)) {
+        if (!/^(host|connection|Access-|origin|referer|user-agent|user-doclever|path-doclever|url-doclever|method-doclever|headers-doclever)/i.test(i)) {
             ret[i] = req.headers[i];
         }
     }
-    var headers=req.headers["__headers"];
+    var headers=req.headers["headers-doclever"];
     if(headers)
     {
         headers=JSON.parse(headers);
@@ -68,16 +68,16 @@ var getPath = function (req) {
 };
 
 function getHost(req) {
-    var url=req.headers["__url"];
+    var url=req.headers["url-doclever"];
     url=url.replace(/^(http:\/\/|https:\/\/)/i,"");
     var arr=url.split(":");
     return arr[0];
 }
 
 function getPort(req) {
-    var url=req.headers["__url"];
+    var url=req.headers["url-doclever"];
     var defaultPort;
-    if(req.headers["__url"].toLowerCase().startsWith("https://"))
+    if(req.headers["url-doclever"].toLowerCase().startsWith("https://"))
     {
         defaultPort=443;
     }
@@ -96,7 +96,7 @@ var onProxy = function (req, res) {
     {
         return;
     }
-    if(!req.headers["__url"])
+    if(!req.headers["url-doclever"])
     {
         mock(req,res);
     }
@@ -122,7 +122,7 @@ function mock(req,res) {
         delete opt.headers["content-length"]
     }
     var req2 = http.request(opt, function (res2) {
-        if(!realUrl || res2.headers["__finish"]=="0")
+        if(!realUrl || res2.headers["finish-doclever"]=="0")
         {
             console.log("接口开发中，返回mock数据");
             res.writeHead(res2.statusCode, filterResHeader(res2.headers,res));
@@ -272,7 +272,7 @@ function redirect(res,bHttps,opt,location) {
 
 function proxy(req,res) {
     var bHttps=false;
-    if(req.headers["__url"].toLowerCase().startsWith("https://"))
+    if(req.headers["url-doclever"].toLowerCase().startsWith("https://"))
     {
         bHttps=true;
     }
@@ -281,8 +281,8 @@ function proxy(req,res) {
     {
         opt= {
             host:     getHost(req),
-            path:     req.headers["__path"],
-            method:   req.headers["__method"],
+            path:     req.headers["path-doclever"],
+            method:   req.headers["method-doclever"],
             headers:  getHeader(req),
             port:getPort(req),
             rejectUnauthorized: false,
@@ -294,8 +294,8 @@ function proxy(req,res) {
     {
         opt= {
             host:     getHost(req),
-            path:     req.headers["__path"],
-            method:   req.headers["__method"],
+            path:     req.headers["path-doclever"],
+            method:   req.headers["method-doclever"],
             headers:  getHeader(req),
             port:getPort(req)
         };

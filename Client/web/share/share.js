@@ -11,74 +11,83 @@ var vue=new Vue({
     el: "#app",
     data: {
         interface:{},
-        query:[{
-            name:"",
-            must:0,
-            remark:""
-        }],
-        header:[{
-            name:"",
-            value:"",
-            remark:""
-        }],
-        body:[{
-            name:"",
-            type:0,
-            must:0,
-            remark:"",
-        }],
-        param:[
-        ],
-        bodyInfo:{
-            type:0,
-            rawType:0,
-            rawTextRemark:"",
-            rawFileRemark:"",
-            rawText:"",
-            rawJSON:[{
-                name:"",
-                must:1,
-                type:0,
-                remark:"",
-                show:1,
-                mock:"",
-                drag:1
-            }]
-        },
-        outInfo:{
-            type:0,
-            rawRemark:"",
-            rawMock:"",
-            jsonType:0
-        },
-        result:[],
-        resultObject:[
-            {
+        param:[{
+            query:[{
                 name:"",
                 must:0,
+                remark:""
+            }],
+            header:[{
+                name:"",
+                value:"",
+                remark:""
+            }],
+            body:[{
+                name:"",
                 type:0,
-                remark:"",
-                show:0,
-                mock:"",
-                drag:1
-            }
-        ],
-        resultArray:[
-            {
-                name:null,
                 must:0,
-                type:0,
                 remark:"",
-                show:0,
-                mock:"",
-                drag:1
-            }
-        ],
-        drawMix:[],
+            }],
+            param:[
+            ],
+            bodyInfo:{
+                type:0,
+                rawType:0,
+                rawTextRemark:"",
+                rawFileRemark:"",
+                rawText:"",
+                rawJSON:[{
+                    name:"",
+                    must:1,
+                    type:0,
+                    remark:"",
+                    show:1,
+                    mock:"",
+                    drag:1
+                }]
+            },
+            outInfo:{
+                type:0,
+                rawRemark:"",
+                rawMock:"",
+                jsonType:0
+            },
+            result:[],
+            resultObject:[
+                {
+                    name:"",
+                    must:0,
+                    type:0,
+                    remark:"",
+                    show:0,
+                    mock:"",
+                    drag:1
+                }
+            ],
+            resultArray:[
+                {
+                    name:null,
+                    must:0,
+                    type:0,
+                    remark:"",
+                    show:0,
+                    mock:"",
+                    drag:1
+                }
+            ],
+        }],
+        arrDraw:[],
+        index:0
     },
     computed:{
+        curParam:function () {
+            return  this.param[this.index];
+        },
+        paramSave:function () {
+            return this.curParam.param;
+        },
         querySave:function () {
-            return this.query.filter(function (obj) {
+            return this.curParam.query.filter(function (obj) {
                 if(obj.name)
                 {
                     return true
@@ -90,7 +99,7 @@ var vue=new Vue({
             })
         },
         headerSave:function () {
-            return this.header.filter(function (obj) {
+            return this.curParam.header.filter(function (obj) {
                 if(obj.name)
                 {
                     return true
@@ -102,7 +111,7 @@ var vue=new Vue({
             });
         },
         bodySave:function () {
-            return this.body.filter(function (obj) {
+            return this.curParam.body.filter(function (obj) {
                 if(obj.name)
                 {
                     return true
@@ -123,23 +132,23 @@ var vue=new Vue({
             return this.bodySave.length
         },
         paramCount:function () {
-            return this.param.length;
+            return this.paramSave.length;
         },
         rawMock:function () {
             var bJSON=false,obj={};
-            if(this.bodyInfo.type==1 && this.bodyInfo.rawType==2 && this.bodyInfo.rawJSON)
+            if(this.curParam.bodyInfo.type==1 && this.curParam.bodyInfo.rawType==2 && this.curParam.bodyInfo.rawJSON)
             {
-                obj=this.bodyInfo.rawJSONType==0?{}:[];
+                obj=this.curParam.bodyInfo.rawJSONType==0?{}:[];
                 bJSON=true;
-                var result=helper.resultSave(this.bodyInfo.rawJSON);
+                var result=helper.resultSave(this.curParam.bodyInfo.rawJSON);
                 helper.convertToJSON(result,obj);
             }
-            var info=helper.handleMockInfo(0,this.param,this.query,this.header,bJSON?obj:this.body,this);
-            return helper.mock(this.outInfo.rawMock,info);
+            var info=helper.handleMockInfo(0,this.curParam.param,this.curParam.query,this.curParam.header,bJSON?obj:this.curParam.body,this);
+            return helper.mock(this.curParam.outInfo.rawMock,info);
         },
         rawJSON:function () {
-            var obj=this.bodyInfo.rawJSONType==0?{}:[];
-            var result=helper.resultSave(this.bodyInfo.rawJSON);
+            var obj=this.curParam.bodyInfo.rawJSONType==0?{}:[];
+            var result=helper.resultSave(this.curParam.bodyInfo.rawJSON);
             helper.convertToJSON(result,obj);
             return helper.format(JSON.stringify(obj),1,result,this.status).draw;
         },
@@ -155,6 +164,15 @@ var vue=new Vue({
         bodyTab:function () {
             return "Body ("+(this.bodyInfo.type==0?this.bodyCount:"Raw")+")";
         },
+        bodyInfo:function () {
+            return this.curParam.bodyInfo;
+        },
+        outInfo:function () {
+            return this.curParam.outInfo;
+        },
+        drawMix:function () {
+            return this.arrDraw.length>0?this.arrDraw[this.index]:[];
+        },
         editInfo:function () {
             return this.interface?(this.interface.createdAt?((this.interface.owner?this.interface.owner.name:"")+"在"+this.interface.createdAt+"创建，最近修改被"+(this.interface.editor?this.interface.editor.name:"")+"在"+this.interface.updatedAt+"改动"):"接口尚未保存"):"";
         },
@@ -162,234 +180,261 @@ var vue=new Vue({
     methods:{
         showInfo:function (data) {
             this.interface=data;
-            if(this.interface.queryParam.length>0)
+            var _this=this;
+            for(var i=1;i<_this.interface.param.length;i++)
             {
-                var obj=this.query[0];
-                this.query=this.interface.queryParam;
-                this.query.forEach(function (item) {
-                    if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
-                    {
-                        item.value={
-                            type:0,
-                            status:"",
-                            data:item.value.map(function (obj) {
-                                return {
-                                    value:obj,
-                                    remark:""
-                                }
-                            })
-                        }
-                    }
-                })
-                this.query.push(obj);
+                _this.param.push($.clone(_this.param[0]));
             }
-            else
-            {
-                this.interface.queryParam=this.query;
-            }
-            if(this.interface.bodyParam.length>0)
-            {
-                var obj=this.body[0];
-                this.body=this.interface.bodyParam;
-                this.body.forEach(function (item) {
-                    if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
-                    {
-                        item.value={
-                            type:0,
-                            status:"",
-                            data:item.value.map(function (obj) {
-                                return {
-                                    value:obj,
-                                    remark:""
-                                }
-                            })
-                        }
-                    }
-                })
-                this.body.push(obj);
-            }
-            else
-            {
-                this.interface.bodyParam=this.body;
-            }
-            if(this.interface.header.length>0)
-            {
-                var obj=this.header[0];
-                this.header=this.interface.header;
-                this.header.push(obj);
-            }
-            else
-            {
-                this.interface.header=this.header;
-            }
-            if(this.interface.outParam.length>0)
-            {
-                helper.initResultShow(this.interface.outParam);
-                this.result=this.interface.outParam;
-            }
-            else
-            {
-                this.interface.outParam=this.result;
-            }
-            if(this.interface.restParam.length>0)
-            {
-                this.param=this.interface.restParam;
-                this.param.forEach(function (item) {
-                    if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
-                    {
-                        item.value={
-                            type:0,
-                            status:"",
-                            data:item.value.map(function (obj) {
-                                return {
-                                    value:obj,
-                                    remark:""
-                                }
-                            })
-                        }
-                    }
-                })
-            }
-            else
-            {
-                this.interface.restParam=this.param;
-            }
-            if(this.interface.bodyInfo)
-            {
-                this.bodyInfo=this.interface.bodyInfo;
-                if(this.bodyInfo.rawText===undefined)
+            _this.interface.param.forEach(function (objInter,index) {
+                _this.param[index].name=objInter.name;
+                _this.param[index].id=objInter.id;
+                _this.param[index].remark=objInter.remark;
+                if(objInter.queryParam.length>0)
                 {
-                    Vue.set(this.bodyInfo,"rawText","");
-                }
-                if(this.bodyInfo.rawTextRemark===undefined)
-                {
-                    Vue.set(this.bodyInfo,"rawTextRemark","");
-                }
-                if(this.bodyInfo.rawFileRemark===undefined)
-                {
-                    Vue.set(this.bodyInfo,"rawFileRemark","");
-                }
-                if(this.bodyInfo.rawJSON==undefined)
-                {
-                    Vue.set(this.bodyInfo,"rawJSON",[{
-                        name:"",
-                        must:1,
-                        type:0,
-                        remark:"",
-                        show:1,
-                        mock:"",
-                        drag:1
-                    }]);
-                }
-                else
-                {
-                    helper.initResultShow(this.bodyInfo.rawJSON);
-                }
-                var bFind=false;
-                for(var i=0;i<this.header.length;i++)
-                {
-                    var obj=this.header[i];
-                    if(obj.name.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application/json")
-                    {
-                        bFind=true;
-                        break;
-                    }
-                }
-                if(bFind && this.bodyInfo.rawText)
-                {
-                    var obj;
-                    try
-                    {
-                        obj=JSON.parse(this.bodyInfo.rawText);
-                    }
-                    catch (e)
-                    {
-
-                    }
-                    if(obj)
-                    {
-                        var result=[];
-                        for(var key in obj)
+                    _this.param[index].query=objInter.queryParam;
+                    _this.param[index].query.forEach(function (item) {
+                        if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
                         {
-                            helper.handleResultData(key,obj[key],result,null,1)
+                            item.value={
+                                type:0,
+                                status:"",
+                                data:item.value.map(function (obj) {
+                                    return {
+                                        value:obj,
+                                        remark:""
+                                    }
+                                })
+                            }
                         }
-                        this.bodyInfo.rawJSON=result;
-                        this.bodyInfo.rawText="";
-                        this.bodyInfo.rawType=2;
-                    }
-                }
-            }
-            else
-            {
-                this.interface.bodyInfo=this.bodyInfo;
-            }
-            if(this.interface.outInfo)
-            {
-                this.outInfo=this.interface.outInfo;
-                if(this.outInfo.jsonType===undefined)
-                {
-                    Vue.set(this.outInfo,"jsonType",0);
-                }
-                else if(this.outInfo.jsonType==0)
-                {
-                    this.resultObject=this.result;
+                    })
+                    _this.param[index].query.push({
+                        name:"",
+                        must:0,
+                        remark:""
+                    });
                 }
                 else
                 {
-                    this.resultArray=this.result;
+                    objInter.queryParam=_this.param[index].query;
                 }
-            }
-            else
-            {
-                this.interface.outInfo=this.outInfo;
-            }
-            if(!this.interface.before)
-            {
-                Vue.set(this.interface,"before",{
-                    mode:0,
-                    code:""
-                })
-            }
-            else
-            {
-                if(typeof(this.interface.before)=="string")
+                if(objInter.bodyParam && objInter.bodyParam.length>0)
                 {
-                    this.interface.before={
-                        mode:0,
-                        code:this.interface.before
+                    _this.param[index].body=objInter.bodyParam;
+                    _this.param[index].body.forEach(function (item) {
+                        if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
+                        {
+                            item.value={
+                                type:0,
+                                status:"",
+                                data:item.value.map(function (obj) {
+                                    return {
+                                        value:obj,
+                                        remark:""
+                                    }
+                                })
+                            }
+                        }
+                    })
+                    _this.param[index].body.push({
+                        name:"",
+                        type:0,
+                        must:0,
+                        remark:"",
+                    });
+                }
+                else
+                {
+                    objInter.bodyParam=_this.param[index].body;
+                }
+                if(objInter.header.length>0)
+                {
+                    _this.param[index].header=objInter.header;
+                    _this.param[index].header.push({
+                        name:"",
+                        value:"",
+                        remark:""
+                    });
+                }
+                else
+                {
+                    objInter.header=_this.param[index].header;
+                }
+                if(objInter.outParam.length>0)
+                {
+                    helper.initResultShow(objInter.outParam);
+                    _this.param[index].result=objInter.outParam;
+                }
+                else
+                {
+                    objInter.outParam=_this.param[index].result;
+                }
+                if(objInter.restParam.length>0)
+                {
+                    _this.param[index].param=objInter.restParam;
+                    _this.param[index].param.forEach(function (item) {
+                        if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
+                        {
+                            item.value={
+                                type:0,
+                                status:"",
+                                data:item.value.map(function (obj) {
+                                    return {
+                                        value:obj,
+                                        remark:""
+                                    }
+                                })
+                            }
+                        }
+                    })
+                }
+                else
+                {
+                    objInter.restParam=_this.param[index].param;
+                }
+                if(objInter.bodyInfo)
+                {
+                    _this.param[index].bodyInfo=objInter.bodyInfo;
+                    if(_this.param[index].bodyInfo.rawText===undefined)
+                    {
+                        Vue.set(_this.param[index].bodyInfo,"rawText","");
+                    }
+                    if(_this.param[index].bodyInfo.rawTextRemark===undefined)
+                    {
+                        Vue.set(_this.param[index].bodyInfo,"rawTextRemark","");
+                    }
+                    if(_this.param[index].bodyInfo.rawFileRemark===undefined)
+                    {
+                        Vue.set(_this.param[index].bodyInfo,"rawFileRemark","");
+                    }
+                    if(_this.param[index].bodyInfo.rawJSONType===undefined)
+                    {
+                        Vue.set(_this.param[index].bodyInfo,"rawJSONType",0);
+                    }
+                    if(_this.param[index].bodyInfo.rawJSON==undefined)
+                    {
+                        Vue.set(_this.param[index].bodyInfo,"rawJSON",_this.param[index].rawJSONObject);
+                    }
+                    else
+                    {
+                        helper.initResultShow(_this.param[index].bodyInfo.rawJSON);
+                        if(_this.param[index].bodyInfo.rawJSONType==0)
+                        {
+                            _this.param[index].rawJSONObject=_this.param[index].bodyInfo.rawJSON;
+                        }
+                        else
+                        {
+                            _this.param[index].rawJSONArray=_this.param[index].bodyInfo.rawJSON;
+                        }
+                    }
+                    var bFind=false;
+                    for(var i=0;i<_this.param[index].header.length;i++)
+                    {
+                        var obj=_this.param[index].header[i];
+                        if(obj.name.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application/json")
+                        {
+                            bFind=true;
+                            break;
+                        }
+                    }
+                    if(bFind && _this.param[index].bodyInfo.rawText)
+                    {
+                        var obj;
+                        try
+                        {
+                            obj=JSON.parse(_this.param[index].bodyInfo.rawText);
+                        }
+                        catch (e)
+                        {
+
+                        }
+                        if(obj)
+                        {
+                            var result=[];
+                            for(var key in obj)
+                            {
+                                helper.handleResultData(key,obj[key],result,null,1,null,1)
+                            }
+                            _this.param[index].bodyInfo.rawJSON=result;
+                            _this.param[index].bodyInfo.rawJSONType=(obj instanceof Array)?1:0;
+                            _this.param[index].bodyInfo.rawText="";
+                            _this.param[index].bodyInfo.rawType=2;
+                        }
                     }
                 }
-            }
-            if(!this.interface.after)
-            {
-                Vue.set(this.interface,"after",{
-                    mode:0,
-                    code:""
-                })
-            }
-            else
-            {
-                if(typeof(this.interface.after)=="string")
+                else
                 {
-                    this.interface.after={
-                        mode:0,
-                        code:this.interface.after
+                    objInter.bodyInfo=_this.param[index].bodyInfo;
+                }
+                if(objInter.outInfo)
+                {
+                    _this.param[index].outInfo=objInter.outInfo;
+                    if(_this.param[index].outInfo.jsonType===undefined)
+                    {
+                        Vue.set(_this.param[index].outInfo,"jsonType",0);
+                    }
+                    else if(_this.param[index].outInfo.jsonType==0)
+                    {
+                        _this.param[index].resultObject=_this.param[index].result;
+                    }
+                    else
+                    {
+                        _this.param[index].resultArray=_this.param[index].result;
                     }
                 }
-            }
-            var obj=this.outInfo.jsonType==1?[]:{};
-            var result=helper.resultSave(this.result);
-            var bJSON=false,objJSON={};
-            if(this.bodyInfo.type==1 && this.bodyInfo.rawType==2 && this.bodyInfo.rawJSON)
-            {
-                objJSON=this.bodyInfo.rawJSONType==0?{}:[];
-                bJSON=true;
-                var result1=helper.resultSave(this.bodyInfo.rawJSON);
-                helper.convertToJSON(result1,objJSON);
-            }
-            var info=helper.handleMockInfo(0,this.param,this.query,this.header,bJSON?objJSON:this.body);
-            helper.convertToJSON(result,obj,info);
-            this.drawMix=helper.format(JSON.stringify(obj),1,result,this.status).draw;
+                else
+                {
+                    objInter.outInfo=_this.param[index].outInfo;
+                }
+                if(!objInter.before)
+                {
+                    Vue.set(objInter,"before",{
+                        mode:0,
+                        code:""
+                    })
+                }
+                else
+                {
+                    if(typeof(objInter.before)=="string")
+                    {
+                        objInter.before={
+                            mode:0,
+                            code:objInter.before
+                        }
+                    }
+                }
+                _this.param[index].before=objInter.before;
+                if(!objInter.after)
+                {
+                    Vue.set(objInter,"after",{
+                        mode:0,
+                        code:""
+                    })
+                }
+                else
+                {
+                    if(typeof(objInter.after)=="string")
+                    {
+                        objInter.after={
+                            mode:0,
+                            code:objInter.after
+                        }
+                    }
+                }
+                _this.param[index].after=objInter.after;
+                var obj=_this.param[index].outInfo.jsonType==1?[]:{};
+                var result=helper.resultSave(_this.param[index].result);
+                var bJSON=false,objJSON={};
+                if(_this.param[index].bodyInfo.type==1 && _this.param[index].bodyInfo.rawType==2 && _this.param[index].bodyInfo.rawJSON)
+                {
+                    objJSON=_this.param[index].bodyInfo.rawJSONType==0?{}:[];
+                    bJSON=true;
+                    var result1=helper.resultSave(_this.param[index].bodyInfo.rawJSON);
+                    helper.convertToJSON(result1,objJSON);
+                }
+                var info=helper.handleMockInfo(0,_this.param[index].param,_this.param[index].query,_this.param[index].header,bJSON?objJSON:_this.param[index].body);
+                helper.convertToJSON(result,obj,info);
+                _this.arrDraw.push(helper.format(JSON.stringify(obj),1,result,this.status).draw);
+            })
         },
         methodColor:function (val) {
             return helper.methodColor(val);

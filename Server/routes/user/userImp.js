@@ -1,23 +1,66 @@
 /**
  * Created by sunxin on 2016/11/9.
  */
-var user=require("./user");
+var userClass=require("./user");
+var user=new userClass();
 var interface=[
     {
         "method":"POST",
         "path":"/user/login",
         "param": {
             name:{
-                type:String
+                type:String,
+                optional:1
             },
             password:{
-                type:String
+                type:String,
+                optional:1
+            },
+            id:{
+                type:String,
+                optional:1
+            },
+            qqid:{
+                type:String,
+                optional:1
+            },
+            qqimg:{
+                type:String,
+                optional:1
             }
         },
         "data":{
 
         },
         handle:user.login
+    },
+    {
+        "method":"POST",
+        "path":"/user/createqq",
+        "param": {
+            name:{
+                type:String,
+            },
+            password:{
+                type:String,
+            },
+            qqid:{
+                type:String,
+            },
+            qqimg:{
+                type:String,
+            },
+            question:{
+                type:String
+            },
+            answer:{
+                type:String
+            }
+        },
+        "data":{
+
+        },
+        handle:user.createQQ
     },
     {
         "method":"POST",

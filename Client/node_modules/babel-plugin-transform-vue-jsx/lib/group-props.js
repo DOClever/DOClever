@@ -1,7 +1,7 @@
 var makeMap = require('./make-map')
 var isTopLevel = makeMap('class,staticClass,style,key,ref,refInFor,slot,scopedSlots')
 var isNestable = makeMap('domProps,on,nativeOn,hook')
-var nestableRE = /^(domProps|on|nativeOn|hook)([\-A-Z])/
+var nestableRE = /^(domProps|on|nativeOn|hook)([\-_A-Z])/
 var dirRE = /^v-/
 var xlinkRE = /^xlink([A-Z])/
 

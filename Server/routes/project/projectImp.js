@@ -1,7 +1,8 @@
 /**
  * Created by sunxin on 2016/11/16.
  */
-var project=require("./project");
+var projectClass=require("./project");
+var project=new projectClass();
 var interface=[
     {
         "method":"POST",
@@ -46,6 +47,10 @@ var interface=[
                 validate:{
                     in:[0,1]
                 }
+            },
+            option:{
+                type:String,
+                optional:1
             }
         },
         "data":String,
@@ -67,6 +72,10 @@ var interface=[
                 validate:{
                     in:[0,1]
                 }
+            },
+            option:{
+                type:String,
+                optional:1
             }
         },
         "data":String,
@@ -101,6 +110,25 @@ var interface=[
         handle:[project.list]
     },
     {
+        "method":"GET",
+        "path":"/project/filterlist",
+        "param": {
+            team:{
+                type:String,
+                optional:1
+            },
+            name:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.filterList]
+    },
+    {
         "method":"PUT",
         "path":"/project/url",
         "param": {
@@ -116,7 +144,7 @@ var interface=[
 
         },
         user:1,
-        handle:[project.validateUser,project.url]
+        handle:[project.inProject,project.url]
     },
     {
         "method":"GET",
@@ -144,7 +172,7 @@ var interface=[
 
         },
         user:1,
-        handle:[project.inProject,project.group]
+        handle:[project.inProject,project.groupList]
     },
     {
         "method":"GET",
@@ -162,7 +190,7 @@ var interface=[
 
         },
         user:1,
-        handle:[project.inProject,project.interface]
+        handle:[project.inProject,project.interfaceList]
     },
     {
         "method":"DELETE",
@@ -221,7 +249,7 @@ var interface=[
 
         },
         user:1,
-        handle:[project.validateUser,project.addUrl]
+        handle:[project.inProject,project.addUrl]
     },
     {
         "method":"GET",
@@ -289,7 +317,7 @@ var interface=[
 
         },
         user:1,
-        handle:[project.validateUser,project.setInject]
+        handle:[project.inProject,project.setInject]
     },
     {
         "method":"GET",
