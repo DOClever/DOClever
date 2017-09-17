@@ -289,6 +289,21 @@ function Team() {
             obj._doc.userCount=count;
             obj._doc.user=ret;
             obj._doc.notice=obj._doc.notice.slice(0,10);
+            if(obj.owner._id.toString()==req.userInfo._id.toString())
+            {
+                obj._doc.role=2;
+            }
+            else
+            {
+                if(req.access)
+                {
+                    obj._doc.role=0;
+                }
+                else
+                {
+                    obj._doc.role=1;
+                }
+            }
             util.ok(res,obj,"ok");
         }
         catch (err)
@@ -1118,6 +1133,60 @@ function Team() {
             }))
             await (req.team.removeAsync());
             util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.transfer=async ((req,res)=>{
+        try
+        {
+            if(req.userInfo._id.toString()!=req.team.owner.toString())
+            {
+                util.throw(e.userForbidden,"你没有权限");
+            }
+            let u=await (user.findOneAsync({
+                _id:req.clientParam.user
+            }));
+            if(!u)
+            {
+                util.throw(e.userNotFound,"用户不存在");
+            }
+            await (teamGroup.findOneAndUpdateAsync({
+                team:req.clientParam.id,
+                "users.user":req.userInfo._id
+            },{
+                "users.$.role":0
+            }))
+            await (teamGroup.findOneAndUpdateAsync({
+                team:req.clientParam.id,
+                "users.user":req.clientParam.user
+            },{
+                "users.$.role":2
+            }))
+            req.team.owner=req.clientParam.user;
+            await (req.team.saveAsync());
+            util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.userList=async ((req,res)=>{
+        try
+        {
+            let ret=await (teamGroup.findAsync({
+                team:req.team._id
+            },null,{
+                sort:"name",
+                populate:{
+                    path:"users.user",
+                    select:"name photo"
+                }
+            }))
+            util.ok(res,ret,"ok");
         }
         catch (err)
         {

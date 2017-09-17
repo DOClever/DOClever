@@ -20,7 +20,7 @@
                                         <span v-if="item1.role==0">
                                             项目管理员
                                         </span>
-                                        <span v-if="item1.role==1">
+                                        <span v-else-if="item1.role==1">
                                             项目观察者
                                         </span>
                                         <span v-else>

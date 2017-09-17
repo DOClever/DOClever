@@ -7,6 +7,7 @@ Vue.use(VueFullpage);
 var vue=new Vue({
     "el":"#app",
     data:{
+        dialogVisible:false,
         dis:[
           {
               title:"DOClever是我目前用到过最好的一个接口管理平台",

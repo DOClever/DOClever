@@ -2,13 +2,13 @@
     <el-row class="row">
         <el-row class="row" style="text-align: center;height: 50px;line-height: 50px;font-size: 20px;border-radius: 5px;box-shadow: 0px 2px 2px #888888;background-color: white;">
             <el-col class="col" :span="8" style="border-right: 1px gray solid">
-                项目:{{obj.projectCount}}
+                项目:{{projectCount}}
             </el-col>
             <el-col class="col" :span="8" style="border-right: 1px gray solid">
-                接口:{{obj.interfaceCount}}
+                接口:{{interfaceCount}}
             </el-col>
             <el-col class="col" :span="8">
-                用户:{{obj.userCount}}
+                用户:{{userCount}}
             </el-col>
         </el-row>
         <el-form ref="form" label-width="100px" style="margin-top: 20px;border-radius: 5px;box-shadow: 0px 2px 2px #888888;background-color: white;padding: 20px">
@@ -25,7 +25,7 @@
             </el-form-item>
             <el-form-item label="团队角色" style="text-align: center">
                 <div style="width: 80%;display: inline-block;text-align: left">
-                    {{session.teamOwn==1?'所有者':(session.teamRole==0?'管理员':'普通成员')}}
+                    {{ownRole?'所有者':(manageRole?'管理员':'普通成员')}}
                 </div>
             </el-form-item>
             <el-form-item label="创建时间" style="text-align: center">
@@ -33,10 +33,13 @@
                     {{obj.createdAt}}
                 </div>
                 <el-button type="danger" style="width: 90px;position: absolute;right: 50px" @click.prevent="removeTeam" :loading="deletePending">
-                    {{session.teamOwn==1?'删除团队':'退出团队'}}
+                    {{ownRole?'删除团队':'退出团队'}}
                 </el-button>
-                <el-button type="primary" style="width: 80px;position: absolute;right: 160px" @click.prevent="saveInfo" :loading="infoPending" v-if="session.teamRole==0 || session.teamRole==2">
+                <el-button type="primary" style="width: 80px;position: absolute;right: 160px" @click.prevent="saveInfo" :loading="infoPending" v-if="manageRole">
                     保存
+                </el-button>
+                <el-button type="primary" style="width: 80px;position: absolute;right: 270px" @click.prevent="transfer" v-if="ownRole">
+                    转让
                 </el-button>
             </el-form-item>
         </el-form>
@@ -47,9 +50,9 @@
                         <span style="font-size: 15px">
                             团队公告
                         </span>&nbsp;&nbsp;&nbsp;
-                        <el-button type="text" icon="plus" @click.stop="addNotice" v-if="session.teamRole==0 || session.teamRole==2"></el-button>
+                        <el-button type="text" icon="plus" @click.stop="addNotice" v-if="manageRole"></el-button>
                     </template>
-                    <template v-for="(item,index) in obj.notice">
+                    <template v-for="(item,index) in notice">
                         <el-row class="row">
                             <el-row class="row" style="font-size: 17px">
                                 {{item.content}}
@@ -62,7 +65,7 @@
                             </el-row>
                         </el-row>
                     </template>
-                    <el-row class="row" style="height: 30px;line-height: 30px;text-align: center;color: gray;border-top: 1px lightgray solid;cursor:pointer" v-if="more && obj.notice.length>0" @click.native="moreNotice">
+                    <el-row class="row" style="height: 30px;line-height: 30px;text-align: center;color: gray;border-top: 1px lightgray solid;cursor:pointer" v-if="more && notice.length>0" @click.native="moreNotice">
                         获取更多
                     </el-row>
                 </el-collapse-item>
@@ -73,10 +76,8 @@
 
 
 <script>
-    var bus=require("../../bus/bus");
     var sessionChange=require("../../mixins/session");
     module.exports={
-        props:["obj"],
         data:function () {
             return {
                 infoPending:false,
@@ -87,14 +88,37 @@
             }
         },
         mixins:[sessionChange],
+        computed:{
+            obj:function () {
+                return this.$store.state.team;
+            },
+            projectCount:function () {
+                return this.$store.getters.projectCount;
+            },
+            interfaceCount:function () {
+                return this.$store.getters.interfaceCount;
+            },
+            userCount:function () {
+                return this.$store.getters.userCount;
+            },
+            notice:function () {
+                return this.$store.state.notice
+            },
+            ownRole:function () {
+                return this.$store.getters.ownRole;
+            },
+            manageRole:function () {
+                return this.$store.getters.manageRole;
+            }
+        },
         methods:{
             saveInfo:function () {
                 var _this=this;
                 this.infoPending=true;
                 net.post("/team/save",{
                     id:session.get("teamId"),
-                    dis:_this.obj.dis,
-                    name:_this.obj.name
+                    dis:_this.$store.state.team.dis,
+                    name:_this.$store.state.team.name
                 }).then(function (data) {
                     _this.infoPending=false;
                     if(data.code)
@@ -111,7 +135,7 @@
             },
             removeTeam:function () {
                 var _this=this;
-                if(this.session.teamOwn==1)
+                if(this.ownRole)
                 {
                     $.confirm("确定删除该团队？",function () {
                         _this.deletePending=true;
@@ -195,7 +219,7 @@
                         if(data.code==200)
                         {
                             $.notify("删除成功",1);
-                            _this.obj.notice.splice(index,1);
+                            _this.$store.state.notice.splice(index,1);
                         }
                         else
                         {
@@ -216,7 +240,7 @@
                     {
                         if(data.data.length>0)
                         {
-                            _this.obj.notice.concat(data.data);
+                            _this.$store.state.notice.concat(data.data);
                         }
                         else
                         {
@@ -245,7 +269,7 @@
                         if(data.code==200)
                         {
                             $.notify("添加成功",1);
-                            _this.obj.notice.unshift(data.data);
+                            _this.$store.state.notice.unshift(data.data);
                         }
                         else
                         {
@@ -254,17 +278,29 @@
                     })
                     return true;
                 })
+            },
+            transfer:function () {
+                $.startHud();
+                var _this=this;
+                net.get("/team/user",{
+                    id:session.get("teamId"),
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        var child=$.showBox(_this,"teamTransfer",{
+                            arr:data.data
+                        },"team/component");
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
             }
         },
         created:function () {
-            var _this=this;
-            bus.$on("updateTeamProject",function (projectCount,interfaceCount) {
-                _this.obj.projectCount+=projectCount;
-                _this.obj.interfaceCount+=interfaceCount;
-            })
-            this.$store.state.event.$on("updateTeamUser",function (userCount) {
-                _this.obj.userCount+=userCount;
-            })
+
         }
     }
 </script>

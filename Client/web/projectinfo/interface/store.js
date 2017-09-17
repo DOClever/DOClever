@@ -877,7 +877,7 @@ module.exports={
                     if(obj.header.length==1 && !obj.header[0].name)
                     {
                         obj.header[0].name="Content-Type";
-                        obj.value="application/x-www-form-urlencoded"
+                        obj.header[0].value="application/x-www-form-urlencoded"
                     }
                     else
                     {

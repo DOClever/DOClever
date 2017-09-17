@@ -6,7 +6,6 @@ var teamInfo=require("./component/teamInfo.vue");
 var teamProjectList=require("./component/teamProjectList.vue");
 var teamUser=require("./component/teamUser.vue");
 var store=require("./store");
-var bus=require("../bus/bus")
 var sessionChange=require("../mixins/session");
 if(!session.get("teamId"))
 {
@@ -21,11 +20,6 @@ var vue=new Vue({
     el: "#app",
     data: {
         type:1,
-        obj:{
-            notice:[],
-            project:[],
-            user:[]
-        },
         showAdd:false,
         addPending:false,
         newType:0,
@@ -48,6 +42,17 @@ var vue=new Vue({
         "teamprojectlist":teamProjectList,
         "teamuser":teamUser
     },
+    computed:{
+        user:function () {
+            return store.state.user;
+        },
+        ownRole:function () {
+            return store.getters.ownRole;
+        },
+        manageRole:function () {
+            return store.getters.manageRole;
+        }
+    },
     methods:{
         addProject:function () {
             var _this=this;
@@ -69,10 +74,9 @@ var vue=new Vue({
                     _this.dis=""
                     if(data.code==200)
                     {
-                        _this.obj.project.unshift(data.data);
+                        store.state.project.unshift(data.data);
                         $.notify("创建成功",1);
                         _this.showAdd=false;
-                        bus.$emit("updateTeamProject",1,0);
                     }
                     else
                     {
@@ -128,7 +132,7 @@ var vue=new Vue({
                     if(data.code==200)
                     {
                         $.notify("新建成功",1);
-                        _this.obj.user.push(data.data);
+                        store.state.user.push(data.data);
                     }
                     else
                     {
@@ -141,7 +145,7 @@ var vue=new Vue({
             var _this=this;
             if(item.type==2)
             {
-                this.newUserGroup=this.obj.user[0]._id;
+                this.newUserGroup=store.state.user[0]._id;
                 this.newUserRole=1;
                 this.selUserApplyObj={
                     item:item,
@@ -170,9 +174,7 @@ var vue=new Vue({
                         if(typeof(data.data)=="object")
                         {
                             item.handle=1;
-                            _this.obj.project.unshift(data.data);
-                            bus.$emit("updateTeamProject",1,data.data.interfaceCount);
-                            store.state.event.$emit("updateTeamUser",data.data.userAddCount);
+                            store.state.project.unshift(data.data);
                         }
                         else
                         {
@@ -203,7 +205,7 @@ var vue=new Vue({
                     if(typeof(data.data)=="object")
                     {
                         _this.selUserApplyObj.item.handle=1;
-                        _this.obj.user.forEach(function (obj) {
+                        store.state.user.forEach(function (obj) {
                             if(obj._id==_this.newUserGroup)
                             {
                                 obj.users.push(data.data);
@@ -212,7 +214,6 @@ var vue=new Vue({
                                 })
                             }
                         })
-                        store.state.event.$emit("updateTeamUser",1);
                     }
                     else
                     {
@@ -243,7 +244,7 @@ var vue=new Vue({
             var data2=arr[1];
             if(data1.code==200)
             {
-                _this.obj=data1.data;
+                store.commit("setTeam",data1.data);
                 _this.newUserGroup=data1.data.user[0]._id;
             }
             else

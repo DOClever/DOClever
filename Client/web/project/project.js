@@ -7,8 +7,6 @@ var teamList=require("./component/teamList.vue")
 var store=require("./store");
 session.remove("teamId");
 session.remove("teamName");
-session.remove("teamRole");
-session.remove("teamOwn");
 session.remove("versionId");
 session.remove("versionName");
 session.remove("versionDis");

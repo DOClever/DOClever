@@ -442,6 +442,10 @@ module.exports={
                         {
                             Vue.set(objParam.bodyInfo,"rawFileRemark","");
                         }
+                        if(objParam.bodyInfo.rawJSONType===undefined)
+                        {
+                            Vue.set(objParam.bodyInfo,"rawJSONType",0);
+                        }
                         if(objParam.bodyInfo.rawJSON==undefined)
                         {
                             Vue.set(objParam.bodyInfo,"rawJSON",[]);

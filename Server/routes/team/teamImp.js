@@ -366,6 +366,31 @@ var interface=[
         user:1,
         handle:[team.validate,team.removeTeam]
     },
+    {
+        "method":"PUT",
+        "path":"/team/transfer",
+        "param": {
+            id:{
+                type:String,
+            },
+            user:String
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.transfer]
+    },
+    {
+        "method":"GET",
+        "path":"/team/user",
+        "param": {
+            id:{
+                type:String,
+            },
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.userList]
+    },
 ];
 
 module.exports=interface;

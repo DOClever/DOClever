@@ -42,20 +42,21 @@
                     </el-col>
                 </el-row>
             </el-row>
-            <el-tabs type="card" style="background-color: white;padding: 20px;margin-top: 15px;border-radius: 5px;box-shadow: 0px 2px 2px #888888;" v-model="tabIndex" id="mainRun">
-                <template v-for="(item, index) in param">
-                    <el-tab-pane :key="item.id" :name="index">
+            <el-row class="row" style="height: 500px;overflow-y: auto;margin-top: 15px;">
+                <el-tabs type="card" style="background-color: white;border-radius: 5px;box-shadow: 0px 2px 2px #888888;" v-model="tabIndex" id="mainRun">
+                    <template v-for="(item, index) in param">
+                        <el-tab-pane :key="item.id" :name="index">
                             <span slot="label">
                                 <el-popover placement="bottom" width="200" trigger="hover" :content="item.remark" v-if="item.remark">
                                     <span slot="reference">{{item.name}}</span>
                                 </el-popover>
                                 <span v-else>{{item.name}}</span>&nbsp
                             </span>
-                        <runparam :index="index" :item="item"></runparam>
-                    </el-tab-pane>
-                </template>
-            </el-tabs>
-            <el-row class="row" style="height: 100px"></el-row>
+                            <runparam :index="index" :item="item"></runparam>
+                        </el-tab-pane>
+                    </template>
+                </el-tabs>
+            </el-row>
         </el-row>
     </el-dialog>
 </template>

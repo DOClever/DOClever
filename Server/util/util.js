@@ -1268,7 +1268,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
     function log(text) {
         if(typeof(text)=="object")
         {
-            text=JSON.stringify(text);
+            text=JSON.stringify(text).replace(/\s/g,"&nbsp;");
         }
         root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]"+text+"<br>";
     }
@@ -1596,7 +1596,7 @@ var init=async (function () {
         }
     })
     let patch=async (function () {
-        let curVersion="4.0.0";
+        let curVersion="4.0.1";
         var stat = fs.statSync(path.join(__dirname,"../patch"));
         if(!stat.isDirectory())
         {

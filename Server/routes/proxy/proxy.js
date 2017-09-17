@@ -108,6 +108,7 @@ function redirect(res,bHttps,opt,location) {
             path:     objUrl.path,
             method:   "GET",
             port:objUrl.port?objUrl.port:80,
+			headers:{cookie:opt.headers.cookie}
         }
         request1=http.request;
         bHttps=false;
@@ -121,6 +122,7 @@ function redirect(res,bHttps,opt,location) {
             port:objUrl.port?objUrl.port:443,
             rejectUnauthorized: false,
             requestCert: true,
+			headers:{cookie:opt.headers.cookie}
         }
         request1=https.request;
         bHttps=true;
@@ -128,6 +130,8 @@ function redirect(res,bHttps,opt,location) {
     var req3=request1(opt1,function (res3) {
         if(res3.statusCode==302)
         {
+            handleCookieIfNecessary(opt1,res3.headers);
+            opt.headers.cookie=opt1.headers.cookie;
             redirect(res,bHttps,opt,res3.headers.location)
         }
         else
@@ -144,6 +148,21 @@ function redirect(res,bHttps,opt,location) {
         res.end(err.stack);
     });
 }
+
+function handleCookieIfNecessary(opt, headers) {
+    let cookies = headers["set-cookie"];
+    if (cookies) {
+        for (let index in cookies) {
+            let cookie = cookies[index];
+            let realOfCookie = cookie.split(";")[0];
+            if (!opt.headers.cookie) {
+                opt.headers.cookie = "";
+            }
+            opt.headers.cookie += realOfCookie + ";";
+        }
+    }
+}
+
 
 var counter = 0;
 var onProxy = function (req, res) {
@@ -189,6 +208,7 @@ var onProxy = function (req, res) {
     var req2 = request(opt, function (res2) {
         if(res2.statusCode==302)
         {
+            handleCookieIfNecessary(opt,res2.headers);
             redirect(res,bHttps,opt,res2.headers.location)
         }
         else

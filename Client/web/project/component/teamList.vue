@@ -118,8 +118,6 @@
             info:function (item) {
                 session.set("teamId",item._id);
                 session.set("teamName",item.name);
-                session.set("teamRole",item.role);
-                session.set("teamOwn",item.own);
                 location.href="/html/web/team/team.html";
             },
             up:function (event) {

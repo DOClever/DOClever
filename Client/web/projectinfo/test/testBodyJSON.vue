@@ -40,7 +40,7 @@
                 </tr>
                 <tr v-if="(item.type==4 || item.type==3) && (item.data && item.data.length>0) && item.show">
                     <td colspan="7" style="width: 100%;margin:0;padding: 0 ">
-                        <inparambodyjson :source="item.data" :le="level+1"></inparambodyjson>
+                        <testparambodyjson :source="item.data" :le="level+1" :status="status"></testparambodyjson>
                     </td>
                 </tr>
             </template>

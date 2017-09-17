@@ -10,7 +10,7 @@
                             <span style="font-size: 15px">
                                 {{item.name+"("+item.users.length+")"}}
                             </span>&nbsp;&nbsp;&nbsp;
-                        <el-dropdown v-if="session.teamRole==0 || session.teamRole==2">
+                        <el-dropdown v-if="manageRole">
                             <el-button type="text" icon="setting" class="el-dropdown-link" @click.stop="">
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
@@ -30,7 +30,7 @@
                             </el-col>
                             <el-col class="col" :span="6">
                                 <template v-if="item1.role!=2">
-                                    <el-select v-if="session.teamRole==0 || session.teamRole==2" v-model="item1.role" @input="changeRole(item1)">
+                                    <el-select v-if="manageRole && session.id!=item1.user._id" v-model="item1.role" @input="changeRole(item1)">
                                         <el-option :value="0" label="团队管理员"></el-option>
                                         <el-option :value="1" label="团队成员"></el-option>
                                     </el-select>
@@ -43,7 +43,7 @@
                                 </span>
                             </el-col>
                             <el-col class="col" :span="4">
-                                <el-dropdown v-if="session.teamRole==0 || session.teamRole==2">
+                                <el-dropdown v-if="(manageRole && item1.role!=2 && !ownRole) || ownRole">
                                     <el-button type="text"  class="el-dropdown-link" @click.stop="">
                                         操作
                                     </el-button>
@@ -75,7 +75,6 @@
     var proxyImg=require("../../director/proxyImg");
     var sessionChange=require("../../mixins/session");
     module.exports={
-        props:["arr"],
         data:function () {
             return {
                 searchName:"",
@@ -95,11 +94,11 @@
             arrFilter:function () {
                 if(!this.searchName)
                 {
-                    return this.arr;
+                    return this.$store.state.user;
                 }
                 var arr=[];
                 var _this=this;
-                this.arr.forEach(function (obj) {
+                this.$store.state.user.forEach(function (obj) {
                     var objCopy=$.clone(obj);
                     objCopy.users=objCopy.users.filter(function (obj) {
                         if(obj.user.name.toLowerCase().indexOf(_this.searchName.toLowerCase())>-1)
@@ -119,12 +118,18 @@
                 return arr;
             },
             arrGroup:function () {
-                return this.arr.map(function (obj) {
+                return this.$store.state.user.map(function (obj) {
                     return {
                         name:obj.name,
                         id:obj._id
                     }
                 })
+            },
+            ownRole:function () {
+                return this.$store.getters.ownRole;
+            },
+            manageRole:function () {
+                return this.$store.getters.manageRole;
             }
         },
         methods:{
@@ -200,7 +205,7 @@
                             if(data.code==200)
                             {
                                 $.notify("删除成功",1);
-                                _this.arr.splice(index,1);
+                                _this.$store.state.user.splice(index,1);
                             }
                             else
                             {
@@ -254,7 +259,6 @@
                                 },"team/component")
                                 child.$on("remove",function () {
                                     parent.users.splice(index,1);
-                                    _this.$store.state.event.$emit("updateTeamUser",-1);
                                 })
                             }
                             else
@@ -268,7 +272,6 @@
                                     {
                                         $.notify("删除成功",1);
                                         parent.users.splice(index,1);
-                                        _this.$store.state.event.$emit("updateTeamUser",-1);
                                     }
                                     else
                                     {
@@ -310,7 +313,7 @@
                         _this.showGroup=false;
                         _this.moveUserParent.users.splice(_this.moveUserIndex,1);
                         var group;
-                        _this.arr.forEach(function (obj) {
+                        _this.$store.state.user.forEach(function (obj) {
                             if(obj._id==_this.selectGroup)
                             {
                                 group=obj;

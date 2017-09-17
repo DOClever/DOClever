@@ -2086,7 +2086,7 @@ helper.runTestCode=async function (code,test,global,opt,root) {
     function log(text) {
         if(typeof(text)=="object")
         {
-            text=JSON.stringify(text);
+            text=JSON.stringify(text).replace(/\s/g,"&nbsp;");
         }
         root.output+=text+"<br>";
     }

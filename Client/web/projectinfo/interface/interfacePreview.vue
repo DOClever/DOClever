@@ -262,6 +262,9 @@
         },
         mixins:[sessionChange],
         computed:{
+            rawJSON:function () {
+                return this.$store.getters.rawJSON;
+            },
             interfaceEditRole:function () {
                 return this.$store.getters.interfaceEditRole;
             },
