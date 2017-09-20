@@ -85,7 +85,6 @@
     </el-row>
 </template>
 <script>
-    var con=require("../../../config.json");
     var proxyImg=require("../director/proxyImg");
     var sessionChange=require("../mixins/session");
     var ver=require("../../../ver.json")
