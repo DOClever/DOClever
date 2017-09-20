@@ -7,12 +7,12 @@
 var app = require('../app');
 var debug = require('debug')('DOClever:server');
 var http = require('http');
-var config=require("../../config.json")
 var util=require("../util/util");
 /**
  * Get port from environment and store in Express.
  */
 util.event.on("init",function () {
+    var config=require("../../config.json")
     var port = normalizePort(process.env.PORT || config.port);
     app.set('port', port);
     var server = http.createServer(app);

@@ -349,6 +349,45 @@
                         });
                         return;
                     }
+                    else
+                    {
+                        if(obj.folder)
+                        {
+                            var ret=[];
+                            (function _map(arr) {
+                                for(var i=0;i<arr.length;i++)
+                                {
+                                    var obj=arr[i];
+                                    if(obj.data)
+                                    {
+                                        ret.push(obj._id);
+                                        if(obj._id==group._id)
+                                        {
+                                            return true;
+                                        }
+                                        else
+                                        {
+                                            var v=arguments.callee(obj.data);
+                                            if(v)
+                                            {
+                                                return true;
+                                            }
+                                            else
+                                            {
+                                                ret.pop();
+                                            }
+                                        }
+                                    }
+                                }
+                                return false;
+                            })(this.$store.state.interfaceList)
+                            if(ret.indexOf(obj.id)>-1)
+                            {
+                                $.tip("不能移动到子分组内！",0);
+                                return;
+                            }
+                        }
+                    }
                     $.startHud("#body");
                     this.$store.dispatch("move",{
                         obj:obj,

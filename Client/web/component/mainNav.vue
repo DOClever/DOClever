@@ -88,6 +88,7 @@
     var con=require("../../../config.json");
     var proxyImg=require("../director/proxyImg");
     var sessionChange=require("../mixins/session");
+    var ver=require("../../../ver.json")
     module.exports={
         props:["transparent"],
         mixins:[sessionChange],
@@ -176,7 +177,7 @@
                             $.stopHud();
                             var obj=JSON.parse(xml.responseText);
                             var verArr=obj[0].name.split(".");
-                            var verLocalArr=con.version.split(".");
+                            var verLocalArr=ver.version.split(".");
                             var bNew=false;
                             for(var i=0;i<3;i++)
                             {

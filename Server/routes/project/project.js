@@ -692,7 +692,7 @@ function Project() {
                 if(!obj)
                 {
                     let arr=await (teamGroup.findAsync({
-                        team:req.clientParam.id,
+                        team:req.clientParam.team,
                         "users.user":req.userInfo._id
                     }))
                     if(arr.length==0)

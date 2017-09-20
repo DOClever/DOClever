@@ -3,7 +3,6 @@
  */
 var request=require("../third/requestAsync");
 var error=require("./error.json");
-var con=require("./../../config.json")
 var moment=require("moment");
 var event=require("events");
 var express=require("express");
@@ -26,6 +25,7 @@ var statusModel=null;
 var statusVersionModel=null;
 var routerMap={};
 var bProduct;
+var con;
 function err(res,code,msg) {
     res.json({
         code:code,
@@ -1465,8 +1465,9 @@ function versionDiff(obj1,obj2) {
 
 var init=async (function () {
     let setConfig=async (function () {
-        if(!con.db && process.argv.length<=2)
+        if(!fs.existsSync(path.join(__dirname, "../../config.json")) && process.argv.length<=2)
         {
+            con={};
             let read=readline.createInterface({
                 input: process.stdin,
                 output: process.stdout
@@ -1478,7 +1479,7 @@ var init=async (function () {
                     })
                 })
             }
-            let arr=["请输入mongodb数据库地址（比如：mongodb://localhost:27017/DOClever)：","请输入DOClever上传文件路径（比如：/Users/Shared/DOClever）：","请输入DOClever上传图片文件路径（需要时上传文件路径的直接子目录，比如：/Users/Shared/DOClever/img）：","请输入DOClever上传临时文件路径（需要时上传文件路径的直接子目录，比如：/Users/Shared/DOClever/temp）：","请输入端口号（比如10000）："];
+            let arr=["请输入mongodb数据库地址（比如：mongodb://localhost:27017/DOClever)：","请输入DOClever上传文件路径（比如：/Users/Shared/DOClever）：","请输入DOClever上传图片文件路径（需要是上传文件路径的直接子目录，比如：/Users/Shared/DOClever/img）：","请输入DOClever上传临时文件路径（需要是上传文件路径的直接子目录，比如：/Users/Shared/DOClever/temp）：","请输入端口号（比如10000）："];
             for(let i=0;i<arr.length;i++)
             {
                 let val=await (question(arr[i]));
@@ -1546,6 +1547,11 @@ var init=async (function () {
                 }
             }
             fs.writeFileSync(path.join(__dirname,"../../config.json"),JSON.stringify(con));
+            con=require("../../config.json");
+        }
+        else
+        {
+            con=require("../../config.json");
         }
         if(argv.db)
         {
@@ -1596,7 +1602,7 @@ var init=async (function () {
         }
     })
     let patch=async (function () {
-        let curVersion="4.0.1";
+        let curVersion=require("../../ver.json").version;
         var stat = fs.statSync(path.join(__dirname,"../patch"));
         if(!stat.isDirectory())
         {
@@ -1651,8 +1657,8 @@ var init=async (function () {
         }))
     })
     await (setConfig());
-    require("../event/event");
     await (patch());
+    require("../event/event");
     exports.event.emit("init");
     console.log("DOClever启动成功");
 })
