@@ -18,16 +18,7 @@
 ## 如何部署
 #### 1.首先本地要安装node环境，推荐6.10.0版本([下载页面](https://nodejs.org/en/))
 #### 2.安装mongodb([下载页面](https://www.mongodb.com/))，可使用robomongo来作为mongodb的客户端工具([下载页面](https://robomongo.org/))，启动mongodb后（[如何启动](http://www.open-open.com/lib/view/open1435117403544.html)），用robomongo来连接，新建一个database作为DOClever的数据库（名称随意）
-#### 3.将DOClever的源码down到本地，进入根目录，修改config.json 
-{  
-  "db":"mongodb://localhost:27017/DOClever",  //这里为你的mongodb服务器的地址和库的名称  
-  "filePath":"/Users/Shared/DOClever",  //这里作为DOClever文件上传的路径  
-  "imgPath":"/Users/Shared/DOClever/img",  //这里是DOClever图片上传的路径(是DOClever文件上传的路径的直接子目录）  
-  "tempPath":"/Users/Shared/DOClever/temp",  //这里DOClever临时文件上传的路径（是DOClever文件上传的路径的直接子目录)  
-  "port":10000,  //DOClever启动的端口号  
-  "version":"1.0.0"  //DOClever的版本号（无需修改）  
-}  
-#### 4.在命令行下运行node DOClever的根目录/Server/bin/www即可启动DOClever（如果是windows环境下，请修改目录分隔符)，在浏览器里输入localhost:DOClever启动的端口号,出现首页表示部署成功。
+#### 3.将DOClever的源码down到本地，在命令行下运行node DOClever的根目录/Server/bin/www（如果是windows环境下，请修改目录分隔符)，第一次启动，会出现命令行提示符，按照提示符输入即可完成相关的配置，等到DOClever启动成功后， 在浏览器里输入localhost:DOClever启动的端口号,出现首页表示部署成功。
 ## 问题反馈
 #### 如果你有任何问题和建议，请在issues里面指出，每个月的1号和15号会发布功能迭代版本，根据bug情况不定期的会发布bug迭代版本。如果你想加入开源的大家庭，欢迎加入qq群：611940610
 ## 注意
