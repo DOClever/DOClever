@@ -2405,14 +2405,46 @@ function Project() {
                 id:uuid()
             }));
             let objGroup={};
-            obj.tags.forEach(function (obj) {
-                objGroup[obj.name]=await (group.createAsync({
-                    name:obj.name,
-                    project:objProject._id,
-                    type:0,
-                    id:uuid()
-                }));
-            })
+            if(obj.tags)
+            {
+                obj.tags.forEach(function (obj) {
+                    objGroup[obj.name]=await (group.createAsync({
+                        name:obj.name,
+                        project:objProject._id,
+                        type:0,
+                        id:uuid()
+                    }));
+                })
+            }
+            else
+            {
+                let arr=[];
+                for(let key in obj.paths)
+                {
+                    let objInter=obj.paths[key];
+                    for(let key1 in objInter)
+                    {
+                        let objIns=objInter[key1];
+                        if(objIns.tags)
+                        {
+                            objIns.tags.forEach(function (obj) {
+                                if(arr.indexOf(obj)==-1)
+                                {
+                                    arr.push(obj);
+                                }
+                            })
+                        }
+                    }
+                }
+                arr.forEach(function (obj) {
+                    objGroup[obj]=await (group.createAsync({
+                        name:obj,
+                        project:objProject._id,
+                        type:0,
+                        id:uuid()
+                    }));
+                })
+            }
             let objDef={};
             function handleDef(def,root) {
                 let ref=false,obj,key;
