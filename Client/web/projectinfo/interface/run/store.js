@@ -103,18 +103,22 @@ module.exports={
             state.index=data;
         },
         toggleQuery:function (state) {
-            if(state.getters.curParam.queryRawShow)
+            if(state.interface.param[state.index].queryRawShow)
             {
-                state.getters.curParam.queryRawShow=0;
-                var str=$.trim(state.getters.curParam.queryRawStr);
+                state.interface.param[state.index].queryRawShow=0;
+                var str=$.trim(state.interface.param[state.index].queryRawStr);
                 var arr=[];
                 var param1=str.split("&");
                 for(var i=0;i<param1.length;i++)
                 {
+                    if(!param1[i])
+                    {
+                        continue;
+                    }
                     var param2=param1[i].split("=");
                     if(param2.length>0)
                     {
-                        var valueObj=helper.findValue(state.getters.curParam.query,param2[0]);
+                        var valueObj=helper.findValue(state.interface.param[state.index].query,param2[0]);
                         arr.push({
                             name:param2[0],
                             must:valueObj?valueObj.must:1,
@@ -138,30 +142,38 @@ module.exports={
                     selValue:"",
                     enable:1
                 })
-                state.getters.curParam.query=arr;
+                state.interface.param[state.index].query=arr;
             }
             else
             {
-                state.getters.curParam.queryRawShow=1;
-                var str="",arr=state.getters.curParam.query;
+                state.interface.param[state.index].queryRawShow=1;
+                var str="",arr=state.interface.param[state.index].query;
                 for(var i=0;i<arr.length;i++)
                 {
                     if(arr[i].name)
                     {
-                        str+=(arr[i].name+"="+(encodeURIComponent(arr[i].selValue))+((i!=arr.length-1)?"&":""))
+                        str+=(arr[i].name+"="+(encodeURIComponent(arr[i].selValue))+"&")
+                    }
+                    if(i==arr.length-1)
+                    {
+                        str=str.replace(/(\&+)$/,"");
                     }
                 }
-                state.getters.curParam.queryRawStr=str;
+                state.interface.param[state.index].queryRawStr=str;
             }
         },
         toggleHeader:function (state) {
-            if(state.getters.curParam.headerRawShow)
+            if(state.interface.param[state.index].headerRawShow)
             {
-                state.getters.curParam.headerRawShow=0;
-                var arr=$.trim(state.getters.curParam.headerRawStr).split("\n");
+                state.interface.param[state.index].headerRawShow=0;
+                var arr=$.trim(state.interface.param[state.index].headerRawStr).split("\n");
                 var arrHeader=[];
                 for(var i=0;i<arr.length;i++)
                 {
+                    if(!$.trim(arr[i]))
+                    {
+                        continue;
+                    }
                     var line=$.trim(arr[i]);
                     var index=line.indexOf(":");
                     var key="",value="";
@@ -176,7 +188,7 @@ module.exports={
                     }
                     if(key)
                     {
-                        var obj=helper.findValue(state.getters.curParam.header,key);
+                        var obj=helper.findValue(state.interface.param[state.index].header,key);
                         arrHeader.push({
                             name:key,
                             value:value,
@@ -194,35 +206,43 @@ module.exports={
                     value:"",
                     remark:""
                 })
-                state.getters.curParam.header=arrHeader;
+                state.interface.param[state.index].header=arrHeader;
             }
             else
             {
-                state.getters.curParam.headerRawShow=1;
-                var str="",arr=state.getters.curParam.header;
+                state.interface.param[state.index].headerRawShow=1;
+                var str="",arr=state.interface.param[state.index].header;
                 for(var i=0;i<arr.length;i++)
                 {
                     if(arr[i].name)
                     {
-                        str+=(arr[i].name+":"+(arr[i].value?arr[i].value:"")+((i!=arr.length-1)?"\n":""))
+                        str+=(arr[i].name+":"+(arr[i].value?arr[i].value:"")+"\n");
+                    }
+                    if(i==arr.length-1)
+                    {
+                        str=str.replace(/(\n+)$/,"");
                     }
                 }
-                state.getters.curParam.headerRawStr=str;
+                state.interface.param[state.index].headerRawStr=str;
             }
         },
         toggleBody:function (state) {
-            if(state.getters.curParam.bodyRawShow)
+            if(state.interface.param[state.index].bodyRawShow)
             {
-                state.getters.curParam.bodyRawShow=0;
-                var str=$.trim(state.getters.curParam.bodyRawStr);
+                state.interface.param[state.index].bodyRawShow=0;
+                var str=$.trim(state.interface.param[state.index].bodyRawStr);
                 var arr=[];
                 var param1=str.split("&");
                 for(var i=0;i<param1.length;i++)
                 {
+                    if(!param1[i])
+                    {
+                        continue;
+                    }
                     var param2=param1[i].split("=");
                     if(param2.length>0)
                     {
-                        var valueObj=helper.findValue(state.getters.curParam.body,param2[0]);
+                        var valueObj=helper.findValue(state.interface.param[state.index].body,param2[0]);
                         var selValue=param2[1]?decodeURIComponent(param2[1]):""
                         if(valueObj && valueObj.type!=1)
                         {
@@ -255,20 +275,24 @@ module.exports={
                         enable:1
                     }
                 )
-                state.getters.curParam.body=arr;
+                state.interface.param[state.index].body=arr;
             }
             else
             {
-                state.getters.curParam.bodyRawShow=1;
-                var str="",arr=state.getters.curParam.body;
+                state.interface.param[state.index].bodyRawShow=1;
+                var str="",arr=state.interface.param[state.index].body;
                 for(var i=0;i<arr.length;i++)
                 {
                     if(arr[i].name)
                     {
-                        str+=(arr[i].name+"="+(arr[i].type==1?"[FILE]":encodeURIComponent(arr[i].selValue))+((i!=arr.length-1)?"&":""))
+                        str+=(arr[i].name+"="+(arr[i].type==1?"[FILE]":encodeURIComponent(arr[i].selValue))+"&")
+                    }
+                    if(i==arr.length-1)
+                    {
+                        str=str.replace(/(\&+)$/,"");
                     }
                 }
-                state.getters.curParam.bodyRawStr=str;
+                state.interface.param[state.index].bodyRawStr=str;
             }
         },
         changeMethod:function (state) {
@@ -285,8 +309,8 @@ module.exports={
                         var bFind=false;
                         for(var i=0;i<obj.header.length;i++)
                         {
-                            var obj=obj.header[i];
-                            if(obj.name=="Content-Type")
+                            var obj1=obj.header[i];
+                            if(obj1.name=="Content-Type")
                             {
                                 bFind=true;
                                 break;
@@ -320,8 +344,8 @@ module.exports={
                 state.interface.param.forEach(function (obj,index) {
                     for(var i=0;i<obj.header.length;i++)
                     {
-                        var obj=obj.header[i];
-                        if(obj.name=="Content-Type")
+                        var obj1=obj.header[i];
+                        if(obj1.name=="Content-Type")
                         {
                             if(obj.header.length>1)
                             {
