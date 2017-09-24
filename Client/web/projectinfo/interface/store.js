@@ -1546,7 +1546,7 @@ module.exports={
             };
             if(session.get("snapshotId"))
             {
-                header.docleversnapshotdis=session.get("snapshotDis");
+                header.docleversnapshotdis=encodeURIComponent(session.get("snapshotDis"));
             }
             return net.post("/interface/create",obj,header).then(function (data) {
                 if(data.code==200)

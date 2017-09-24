@@ -174,7 +174,7 @@ function Interface() {
             if (req.clientParam.id) {
                 update.editor = req.userInfo._id;
                 if (req.headers["docleversnapshot"]) {
-                    update.snapshot = req.headers["docleversnapshotdis"];
+                    update.snapshot = decodeURIComponent(req.headers["docleversnapshotdis"]);
                 }
                 let obj = await(req.interfaceModel.findOneAndUpdateAsync({
                     _id: req.clientParam.id
