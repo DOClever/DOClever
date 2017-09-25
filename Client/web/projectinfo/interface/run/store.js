@@ -671,6 +671,7 @@ module.exports={
                 func=net.post(proxyUrl,body,header,null,1,bNet)
             }
             return func.then(function (result) {
+                context.getters.curParam.run=1;
                 context.getters.curParam.resHeader=result.header;
                 context.getters.curParam.status=String(result.status);
                 context.getters.curParam.second=(((new Date())-startDate)/1000).toFixed(3);
@@ -834,41 +835,48 @@ module.exports={
                         }
                     }
                 }
-                var result=[];
-                if(context.getters.curParam.resultData)
+                var result=[],outInfo;
+                if(obj.run)
                 {
-                    if((context.getters.curParam.resultData instanceof Array) && context.getters.curParam.resultData.length>0)
+                    if(context.getters.curParam.resultData)
                     {
-                        var resultObj=helper.findObj(context.getters.curParam.result,key);
-                        helper.handleResultData(key,context.getters.curParam.resultData[0],result,resultObj)
+                        if((context.getters.curParam.resultData instanceof Array) && context.getters.curParam.resultData.length>0)
+                        {
+                            var resultObj=helper.findObj(context.getters.curParam.result,key);
+                            helper.handleResultData(key,context.getters.curParam.resultData[0],result,resultObj)
+                        }
+                        else
+                        {
+                            for(var key in context.getters.curParam.resultData)
+                            {
+                                var resultObj=helper.findObj(context.getters.curParam.result,key);
+                                helper.handleResultData(key,context.getters.curParam.resultData[key],result,resultObj)
+                            }
+                        }
+                    }
+                    if(context.getters.curParam.type=="object")
+                    {
+                        outInfo={
+                            type:0,
+                            rawRemark:"",
+                            rawMock:"",
+                            jsonType:(context.getters.curParam.resultData && (context.getters.curParam.resultData instanceof Array))?1:0
+                        }
                     }
                     else
                     {
-                        for(var key in context.getters.curParam.resultData)
-                        {
-                            var resultObj=helper.findObj(context.getters.curParam.result,key);
-                            helper.handleResultData(key,context.getters.curParam.resultData[key],result,resultObj)
+                        outInfo={
+                            type:1,
+                            rawRemark:context.getters.curParam.outInfo?context.getters.curParam.outInfo.rawRemark:"",
+                            rawMock:context.getters.curParam.outInfo?context.getters.curParam.outInfo.rawMock:"",
+                            jsonType:0
                         }
-                    }
-                }
-                var outInfo;
-                if(context.getters.curParam.type=="object")
-                {
-                    outInfo={
-                        type:0,
-                        rawRemark:"",
-                        rawMock:"",
-                        jsonType:(context.getters.curParam.resultData && (context.getters.curParam.resultData instanceof Array))?1:0
                     }
                 }
                 else
                 {
-                    outInfo={
-                        type:1,
-                        rawRemark:context.getters.curParam.outInfo?context.getters.curParam.outInfo.rawRemark:"",
-                        rawMock:context.getters.curParam.outInfo?context.getters.curParam.outInfo.rawMock:"",
-                        jsonType:0
-                    }
+                    result=context.getters.curParam.result;
+                    outInfo=context.getters.curParam.outInfo;
                 }
                 var obj1={
                     queryParam:query,
@@ -1000,6 +1008,7 @@ module.exports={
                     rawData:"",
                     encryptType:"",
                     errorCount:0,
+                    run:0
                 }
                 for(var key in objKey)
                 {

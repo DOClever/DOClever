@@ -401,6 +401,9 @@
             },
             param:function () {
                 return this.$store.state.param
+            },
+            index:function () {
+                return this.$store.state.index
             }
         },
         methods:{
@@ -469,7 +472,8 @@
                 var obj=$.clone(this.interfaceEdit);
                 obj.param=$.clone(this.param);
                 var child=$.showBox(this,"run",{
-                    "interfaceEdit":obj
+                    "interfaceEdit":obj,
+                    "index":this.index
                 },"projectinfo/interface/run");
                 child.$on("save",function () {
                     store.dispatch("newInterface");

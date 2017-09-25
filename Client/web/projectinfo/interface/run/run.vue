@@ -74,7 +74,7 @@
     var store=require("./../../store")._modulesNamespaceMap["interface/run/"].context;
     var sessionChange=require("../../../mixins/session");
     module.exports={
-        props:["interfaceEdit"],
+        props:["interfaceEdit","index"],
         data:function () {
             return {
                 runPending:false,
@@ -261,6 +261,7 @@
         },
         created:function () {
             store.dispatch("initData",this.interfaceEdit);
+            store.commit("setIndex",this.index);
         },
     }
 </script>
