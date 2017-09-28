@@ -13,7 +13,7 @@ var util=require("../util/util");
  */
 util.event.on("init",function () {
     var config=require("../../config.json")
-    var port = normalizePort(process.env.PORT || config.port);
+    var port = normalizePort(process.env.PORT || config.port?config.port:10000);
     app.set('port', port);
     var server = http.createServer(app);
     server.listen(port,"0.0.0.0");

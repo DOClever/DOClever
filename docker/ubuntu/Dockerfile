@@ -23,13 +23,14 @@ RUN apt-get install -y nodejs \
 
 RUN mkdir -p /var/log/supervisor
 
-RUN git clone -b dev git@github.com:kanlidy/DOClever.git /root/DOClever
+# only for local test, copy source code of DOClever to this file, create a fold named "source", and paste codes into it.
+#COPY /source /root/DOClever
+RUN git clone -b dev https://github.com/kanlidy/DOClever.git /root/DOClever
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 EXPOSE 10000
 
-COPY ./entrypoint.sh /
+COPY ./entrypoint.sh /entrypoint.sh
 
-RUN chmod +x entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

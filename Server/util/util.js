@@ -1219,44 +1219,8 @@ function versionDiff(obj1, obj2) {
 
 var init = async(function () {
   let setConfig = async(function () {
-    con = {};
-    if (argv.db) {
-      con.db = argv.db;
-    }
-    if (argv.file) {
-      try {
-        createDir(argv.file)
-      }
-      catch (err) {
-        console.log(err);
-        process.exit(0);
-      }
-      con.filePath = argv.file;
-    }
-    if (argv.img) {
-      try {
-        createDir(argv.img)
-      }
-      catch (err) {
-        console.log(err);
-        process.exit(0);
-      }
-      con.imgPath = argv.img;
-    }
-    if (argv.temp) {
-      try {
-        createDir(argv.temp)
-      }
-      catch (err) {
-        console.log(err);
-        process.exit(0);
-      }
-      con.tempPath = argv.temp;
-    }
-    if (argv.port) {
-      con.port = parseInt(argv.port);
-    }
-    if (!fs.existsSync(path.join(__dirname, "../../config.json")) && process.argv.length <= 2) {
+    if ((!fs.existsSync(path.join(__dirname, "../../config.json")) || !require("../../config.json").db) && process.argv.length <= 2) {
+      con = {};
       let read = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -1324,14 +1288,51 @@ var init = async(function () {
         }
       }
       fs.writeFileSync(path.join(__dirname, "../../config.json"), JSON.stringify(con));
+      delete require.cache[path.join(__dirname, "../../config.json")];
       con = require("../../config.json");
     }
-    else if (!fs.existsSync(path.join(__dirname, "../../config.json")) && process.argv.length > 2) {
-      fs.writeFileSync(path.join(__dirname, "../../config.json"), JSON.stringify(con));
+    else if ((!fs.existsSync(path.join(__dirname, "../../config.json")) || !require("../../config.json").db) && process.argv.length > 2) {
+      fs.writeFileSync(path.join(__dirname, "../../config.json"), JSON.stringify({}));
       con = require("../../config.json");
     }
     else {
       con = require("../../config.json");
+    }
+    if (argv.db) {
+      con.db = argv.db;
+    }
+    if (argv.file) {
+      try {
+        createDir(argv.file)
+      }
+      catch (err) {
+        console.log(err);
+        process.exit(0);
+      }
+      con.filePath = argv.file;
+    }
+    if (argv.img) {
+      try {
+        createDir(argv.img)
+      }
+      catch (err) {
+        console.log(err);
+        process.exit(0);
+      }
+      con.imgPath = argv.img;
+    }
+    if (argv.temp) {
+      try {
+        createDir(argv.temp)
+      }
+      catch (err) {
+        console.log(err);
+        process.exit(0);
+      }
+      con.tempPath = argv.temp;
+    }
+    if (argv.port) {
+      con.port = parseInt(argv.port);
     }
   })
   let patch = async(function () {

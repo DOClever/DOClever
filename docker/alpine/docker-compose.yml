@@ -1,7 +1,7 @@
 version: "2"
 services:
   DOClever:
-    image: lw96/doclever:1.1
+    image: lw96/doclever:latest-alpine
     restart: always
     container_name: "DOClever"
     ports:
@@ -20,8 +20,9 @@ services:
     image: mongo:latest
     restart: always
     container_name: "mongodb"
-    volumes:
-    - /my/own/datadir:/data/db
+#    If you need to store your database to local please add these two lines, and define your local data direction.
+#    volumes:
+#    - /my/own/datadir:/data/db
     
 
     
