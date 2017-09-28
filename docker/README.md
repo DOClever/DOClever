@@ -25,17 +25,44 @@ docker build -t lw96/doclever .
 
 ### 3.启动容器
 
-```
-docker run -d --name doclever -p 10000:10000 lw96/doclever
-```
-
-稍等片刻，系统需要加载配置。
-
-使用浏览器打开：
+建议使用docker-compose进行容器的管理
 
 ```
-http://127.0.0.1:10000/
+version: "2"
+services:
+  DOClever:
+    image: lw96/doclever
+    restart: always
+    container_name: "DOClever"
+    ports:
+    - 10000:10000
+    volumes:
+    - /本地路径/file:/doclever/file
+    - /本地路径/img:/doclever/img
+    - /本地路径/tmp:/doclever/tmp
+    environment:
+    # - DB_HOST=mongodb://localhost:27017/DOClever
+    - PORT=10000
+    links:
+    - mongo:mongo
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    container_name: "mongodb"
+    volumes:
+    - /my/own/datadir:/data/db
+
 ```
+
+对上面代码的说明：
+
+volumes：代表着把容器中的数据挂载到你本地路径，本地路径
+environment: 环境变量。
+- DB_HOST：可以使用自定义数据库地址，或者使用容器中的mongodb
+- PORT：中设置的端口号10000为容器中的端口（尽量不变，只修改容器暴露的端口号，即ports下面的端口），而外部的端口可以自定义。
+ports:容器暴露的实际端口
+- 自己想设置的端口:10000
 
 
 ## 使用自动化docker-compose
@@ -63,3 +90,13 @@ docker-compose build
 ```
 docker-compose up -d
 ```
+
+稍等片刻，系统需要加载配置。
+
+可以通过：
+
+```
+docker logs -f DOClever
+```
+
+来查看容器打印的日志信息。
