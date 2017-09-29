@@ -25,6 +25,26 @@ docker build -t lw96/doclever .
 
 ### 3.启动容器
 
+如果你有一个mongodb在跑：
+
+那么直接只需要运行DOClever容器就行了:
+
+```$xslt
+docker run -it -d --name doclever -p 10000:10000 \
+-e DB_HOST=mongodb://localhost:27017/DOClever \
+-e PORT=10000 \
+-e DB_FILE=/root/DOClever/data/file \
+-e DB_IMG=/root/DOClever/data/img \
+-e DB_TEMP=/root/DOClever/data/tmp \
+-v /本地路径/file:/root/DOClever/data/file \
+-v /本地路径/img:/root/DOClever/data/img \
+-v /本地路径/tmp:/root/DOClever/data/tmp \
+lw96/doclever:latest-ubuntu
+```
+这里的DB_FILE，DB_IMG，DB_TEMP为容器内的路径，可以不设置，默认为上面路径。
+下面`-v`是设置本地路径挂载的。
+
+
 建议使用docker-compose进行容器的管理
 
 ```
@@ -37,11 +57,11 @@ services:
     ports:
     - 10000:10000
     volumes:
-    - /本地路径/file:/doclever/file
-    - /本地路径/img:/doclever/img
-    - /本地路径/tmp:/doclever/tmp
+    - /本地路径/file:/root/DOClever/data/file
+    - /本地路径/img:/root/DOClever/data/img
+    - /本地路径/tmp:/root/DOClever/data/tmp
     environment:
-    # - DB_HOST=mongodb://localhost:27017/DOClever
+    - DB_HOST=mongodb://mongo:27017/DOClever
     - PORT=10000
     links:
     - mongo:mongo

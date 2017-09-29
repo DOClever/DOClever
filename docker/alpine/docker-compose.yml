@@ -7,9 +7,9 @@ services:
     ports:
     - 10000:10000
     volumes:
-    - /Users/liwei/Downloads/doclever/file:/doclever/file
-    - /Users/liwei/Downloads/doclever/img:/doclever/img
-    - /Users/liwei/Downloads/doclever/tmp:/doclever/tmp
+    - /hostdir/file:/root/DOClever/data/file
+    - /hostdir/img:/root/DOClever/data/img
+    - /hostdir/tmp:/root/DOClever/data/tmp
     environment:
     # - DB_HOST=mongodb://localhost:27017/DOClever
     - PORT=10000
