@@ -103,7 +103,7 @@ function route(category) {
             }
         }
         req.clientParam=temp;
-        if(inter[index].user)
+        if(inter[index].user || inter[index].admin)
         {
             req.handle=inter[index].handle
             next();

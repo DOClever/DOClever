@@ -108,10 +108,12 @@
                 return this.$store.state.teamJoinList;
             },
             arrCreateLength:function () {
-                return Math.floor(this.arrCreate.length/4)+1
+                var val=this.arrCreate.length/4;
+                return Math.floor(val)===val?val:(Math.floor(val)+1)
             },
             arrJoinLength:function () {
-                return Math.floor(this.arrJoin.length/4)+1
+                var val=this.arrJoin.length/4;
+                return Math.floor(val)===val?val:(Math.floor(val)+1);
             }
         },
         methods:{

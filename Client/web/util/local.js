@@ -177,7 +177,7 @@ local.remove=function (item) {
     }
     else
     {
-        if(/login/.test(location.href))
+        if(/\/login\.html/.test(location.href))
         {
             location.href="../project/project.html"
             return

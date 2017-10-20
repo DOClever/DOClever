@@ -264,6 +264,10 @@ module.exports={
         },
         handleInterface:function (context,obj) {
             obj.interface.param.forEach(function (objParam,index) {
+                Vue.set(objParam,"encrypt",{
+                    type:"",
+                    salt:""
+                })
                 objParam.queryParam.forEach(function (item,i) {
                     if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
                     {

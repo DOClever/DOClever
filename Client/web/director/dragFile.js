@@ -23,7 +23,7 @@ var obj={
             e.stopPropagation();
             e.preventDefault();
             var file=e.dataTransfer.files[0];
-            if(file.type.indexOf("text")==-1 && file.type.indexOf("json")==-1)
+            if(file.type.indexOf("text")==-1 && file.type.indexOf("json")==-1 && file.type!="")
             {
                 $.tip("文件类型不正确",0);
                 return;

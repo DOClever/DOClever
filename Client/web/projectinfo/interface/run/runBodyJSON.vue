@@ -1,8 +1,8 @@
 <template>
     <el-row class="row" style="cursor: pointer;height: 100%">
-        <table width="100%" style="border-spacing: 0">
+        <table width="100%" style="border-spacing: 0;border-collapse: collapse">
             <template v-for="(item,index) in arr">
-                <tr style="text-align: center;vertical-align: middle;cursor: move;height: 50px;line-height: 50px" :draggable="item.drag?item.drag:'false'" @dragover="dragOver($event,item)" @dragleave="dragLeave($event,item)" @drop="drop($event,item,arr)" @dragstart="dragStart($event,item,index,arr)" @dragend="dragEnd($event)">
+                <tr style="text-align: center;vertical-align: middle;cursor: move;height: 50px;line-height: 50px" :draggable="item.drag?item.drag:'false'" @dragover="dragOver($event,item)" @dragleave="dragLeave($event,item)" @dragenter="dragEnter($event,item)" @drop="drop($event,item,index,arr)" @dragstart="dragStart($event,item,index,arr)" @dragend="dragEnd($event)">
                     <td :style="{width: '30%',verticalAlign: 'middle',paddingLeft:level*20+'px'}">
                         <el-col class="col" :span="2" v-if="(item.type==4 || item.type==3)" @click.native="toggle(item)">
                             <span :class="item.show?'el-icon-caret-bottom':'el-icon-caret-right'" style="color:#c7c7c7 "></span>
@@ -54,7 +54,7 @@
                 </tr>
                 <tr v-if="(item.type==4 || item.type==3) && (item.data && item.data.length>0) && item.show">
                     <td colspan="7" style="width: 100%;margin:0;padding: 0 ">
-                        <inparambodyjson :source="item.data" :le="level+1" :parent="item"></inparambodyjson>
+                        <runparambodyjson :source="item.data" :le="level+1" :parent="item"></runparambodyjson>
                     </td>
                 </tr>
             </template>
@@ -63,7 +63,7 @@
 </template>
 
 <script>
-    var dragArr=null,dragItem=null;
+    var dragArr=null,dragItem=null,lastEle=null;
     module.exports={
         name:"runparambodyjson",
         props:["source","le","parent","index","data"],
@@ -177,90 +177,103 @@
                 dragItem=item;
             },
             dragOver:function (event,item) {
+                if(dragItem==item || !lastEle)
+                {
+                    return;
+                }
+                var bound=lastEle.getBoundingClientRect();
+                var top=event.clientY;
+                var height=bound.bottom-bound.top;
                 if(item.type==3 || item.type==4)
                 {
-                    var ele=event.target;
-                    while(ele.tagName.toLowerCase()!="tr")
+                    if(top<bound.top+height/3)
                     {
-                        ele=ele.parentNode;
+                        lastEle.style.borderTop="2px #50bfff solid";
+                        lastEle.style.borderBottom="";
+                        lastEle.style.backgroundColor="white";
                     }
-                    if(this.level==0)
+                    else if(top>bound.bottom-height/3)
                     {
-                        if(!ele.timer)
-                        {
-                            ele.timer=setTimeout(function () {
-                                ele.style.backgroundColor="orange";
-                            },2000)
-                            ele.style.backgroundColor="rgb(223,236,191)";
-                        }
+                        lastEle.style.borderTop="";
+                        lastEle.style.borderBottom="2px #50bfff solid";
+                        lastEle.style.backgroundColor="white";
                     }
                     else
                     {
-                        ele.style.backgroundColor="rgb(223,236,191)";
+                        lastEle.style.borderTop="";
+                        lastEle.style.borderBottom="";
+                        lastEle.style.backgroundColor="rgb(223,236,191)";
+                    }
+                }
+                else
+                {
+                    if(top<bound.top+(bound.bottom-bound.top)/2)
+                    {
+                        lastEle.style.borderTop="2px #50bfff solid";
+                        lastEle.style.borderBottom="";
+                    }
+                    else
+                    {
+                        lastEle.style.borderTop="";
+                        lastEle.style.borderBottom="2px #50bfff solid";
                     }
                 }
                 event.preventDefault();
                 return true;
             },
-            dragLeave:function (event,item) {
-                if(item.type==3 || item.type==4)
+            dragEnter:function (event,item) {
+                if(dragItem==item)
                 {
-                    var ele=event.target;
-                    while(ele.tagName.toLowerCase()!="tr")
-                    {
-                        ele=ele.parentNode;
-                    }
-                    ele.style.backgroundColor="white";
-                    if(ele.timer)
-                    {
-                        clearTimeout(ele.timer);
-                        ele.timer=null;
-                    }
+                    return;
                 }
-            },
-            drop:function (event,item,arr) {
-                event.preventDefault();
-                if(item.type==3 || item.type==4)
+                var ele=event.target;
+                while(ele.tagName.toLowerCase()!="tr")
                 {
-                    var ele=event.target;
-                    while(ele.tagName.toLowerCase()!="tr")
+                    ele=ele.parentNode;
+                }
+                if(lastEle && lastEle==ele)
+                {
+                    return true;
+                }
+                else if(lastEle && lastEle!=ele)
+                {
+                    lastEle.style.borderBottom="";
+                    lastEle.style.borderTop="";
+                    lastEle.style.backgroundColor="white";
+                }
+                lastEle=ele;
+                console.log("enter"+item.name);
+                return true;
+            },
+            dragLeave:function (event,item) {
+                return true;
+            },
+            drop:function (event,item,index,arr) {
+                if(lastEle)
+                {
+                    lastEle.style.borderBottom="";
+                    lastEle.style.borderTop="";
+                    lastEle.style.backgroundColor="white";
+                    event.preventDefault();
+                    if(dragItem==item)
                     {
-                        ele=ele.parentNode;
+                        return false;
                     }
-                    if(ele.timer)
-                    {
-                        clearTimeout(ele.timer);
-                        ele.timer=null;
-                    }
+                    var bound=lastEle.getBoundingClientRect();
+                    var top=event.clientY;
+                    var height=bound.bottom-bound.top;
                     if(event.dataTransfer.getData("text"))
                     {
                         var obj=JSON.parse(event.dataTransfer.getData("text"));
-                        if(!obj.item || !obj.item.name)
+                        if(obj.item.name===null)
                         {
-                            if(obj.item && !obj.item.name)
-                            {
-                                $.tip("名字为空的元素不允许拖动!",0);
-                            }
-                            ele.style.backgroundColor="white";
-                            return false;
+                            obj.item.name="";
                         }
-                        if(ele.style.backgroundColor=="orange")
-                        {
-                            if(this.arr.indexOf(dragItem)>-1)
-                            {
-                                $.tip("已经是顶部元素了!",0);
-                                ele.style.backgroundColor="white";
-                                return false;
-                            }
-                            dragArr.splice(obj.index,1);
-                            this.arr.push(obj.item);
-                        }
-                        else
+                        if((item.type==3 || item.type==4) && top>bound.top+height/3 && top<bound.bottom-height/3)
                         {
                             if(item.data.indexOf(dragItem)>-1)
                             {
                                 $.tip("已经是直接父子元素关系了!",0);
-                                ele.style.backgroundColor="white";
                                 return false;
                             }
                             var objFind={
@@ -279,17 +292,65 @@
                             }
                             else
                             {
-                                $.tip("不允许拖动子元素内!",0);
+                                $.tip("不允许拖动到子元素内!",0);
+                            }
+                        }
+                        else if(top<bound.top+height/2)
+                        {
+                            if(dragArr==arr)
+                            {
+                                if(index>obj.index)
+                                {
+                                    arr.splice(obj.index,1);
+                                    arr.splice(index-1,0,obj.item);
+                                }
+                                else
+                                {
+                                    arr.splice(obj.index,1);
+                                    arr.splice(index,0,obj.item);
+                                }
+                            }
+                            else
+                            {
+                                dragArr.splice(obj.index,1);
+                                arr.splice(index,0,obj.item);
+                            }
+                        }
+                        else
+                        {
+                            if(dragArr==arr)
+                            {
+                                if(index>obj.index)
+                                {
+                                    arr.splice(obj.index,1);
+                                    arr.splice(index,0,obj.item);
+                                }
+                                else
+                                {
+                                    arr.splice(obj.index,1);
+                                    arr.splice(index+1,0,obj.item);
+                                }
+                            }
+                            else
+                            {
+                                dragArr.splice(obj.index,1);
+                                arr.splice(index+1,0,obj.item);
                             }
                         }
                     }
-                    ele.style.backgroundColor="white";
+                    lastEle=null;
                 }
                 return false;
             },
             dragEnd:function () {
                 dragArr=null;
                 dragItem=null;
+                if(lastEle)
+                {
+                    lastEle.style.borderBottom="";
+                    lastEle.style.borderTop="";
+                    lastEle.style.backgroundColor="white";
+                }
             },
             handleDragItem:function (item,item1,obj) {
                 if(item==item1)

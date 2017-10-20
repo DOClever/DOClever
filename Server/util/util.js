@@ -18,6 +18,8 @@ var readline=require("readline");
 var dom = require("jsdom").JSDOM;
 var document=(new dom(`...`)).window.document;
 var argv=require("yargs").argv;
+var URL=require("url");
+var mockjs=require("mockjs")
 require("./Base64")
 var testModel=null;
 var testVersionModel=null;
@@ -529,6 +531,36 @@ function convertToJSON(data,obj,info) {
                     return null;
                 }
             }
+            else if(str.startsWith("mj"))
+            {
+                var val=str.substring(3,str.length-1).trim();
+                if(val[0]=="@")
+                {
+                    return mockjs.mock(val);
+                }
+                else
+                {
+                    var obj=eval("("+val+")");
+                    if(typeof(obj)=="object")
+                    {
+                        var objNew={};
+                        for(var key in obj)
+                        {
+                            objNew["mock|"+key]=obj[key];
+                        }
+                        var ret=mockjs.mock(objNew);
+                        for(var key in ret)
+                        {
+                            return ret[key];
+                        }
+
+                    }
+                    else
+                    {
+                        return val;
+                    }
+                }
+            }
         }
         return data.mock?data.mock.trim():null;
     }
@@ -720,6 +752,36 @@ function mock(data,info) {
             else
             {
                 return null;
+            }
+        }
+        else if(/^mj/i.test(str))
+        {
+            var val=str.substring(3,str.length-1).trim();
+            if(val[0]=="@")
+            {
+                return mockjs.mock(val);
+            }
+            else
+            {
+                var obj=eval("("+val+")");
+                if(typeof(obj)=="object")
+                {
+                    var objNew={};
+                    for(var key in obj)
+                    {
+                        objNew["mock|"+key]=obj[key];
+                    }
+                    var ret=mockjs.mock(objNew);
+                    for(var key in ret)
+                    {
+                        return ret[key];
+                    }
+
+                }
+                else
+                {
+                    return val;
+                }
             }
         }
     }
@@ -1465,7 +1527,7 @@ function versionDiff(obj1,obj2) {
 
 var init=async (function () {
     let setConfig=async (function () {
-        if(!fs.existsSync(path.join(__dirname, "../../config.json")) && process.argv.length<=2)
+        if((!fs.existsSync(path.join(__dirname, "../../config.json")) || !require("../../config.json").db) && process.argv.length<=2)
         {
             con={};
             let read=readline.createInterface({
@@ -1547,6 +1609,12 @@ var init=async (function () {
                 }
             }
             fs.writeFileSync(path.join(__dirname,"../../config.json"),JSON.stringify(con));
+            delete require.cache[path.join(__dirname,"../../config.json")];
+            con=require("../../config.json");
+        }
+        else if((!fs.existsSync(path.join(__dirname, "../../config.json"))  || !require("../../config.json").db) && process.argv.length>2)
+        {
+            fs.writeFileSync(path.join(__dirname,"../../config.json"),JSON.stringify({}));
             con=require("../../config.json");
         }
         else
@@ -1772,6 +1840,315 @@ var getMockParam=async (function(clientParam,obj,type,version) {
     return obj.param[index];
 })
 
+function handleResultData(name,data,result,originObj,show,input,bArr) {
+    name=typeof(name)=="string"?name:null;
+    if(typeof(data)=="string")
+    {
+        var obj={
+            name:name,
+            must:originObj?originObj.must:1,
+            type:0,
+            remark:originObj?originObj.remark:"",
+            mock:originObj?(originObj.mock?originObj.mock:data):data,
+            drag:1
+        }
+        if(show)
+        {
+            obj.show=0
+        }
+        if(input)
+        {
+            obj.value={
+                type:0,
+                status:"",
+                data:[
+                    {
+                        value:obj.mock,
+                        remark:""
+                    }
+                ]
+            }
+        }
+        result.push(obj)
+    }
+    else if(typeof(data)=="number")
+    {
+        var obj={
+            name:name,
+            must:originObj?originObj.must:1,
+            type:1,
+            remark:originObj?originObj.remark:"",
+            mock:originObj?(originObj.mock?originObj.mock:String(data)):String(data),
+            drag:1
+        }
+        if(show)
+        {
+            obj.show=0
+        }
+        if(input)
+        {
+            obj.value={
+                type:0,
+                status:"",
+                data:[
+                    {
+                        value:obj.mock,
+                        remark:""
+                    }
+                ]
+            }
+        }
+        result.push(obj)
+    }
+    else if(typeof(data)=="boolean")
+    {
+        var obj={
+            name:name,
+            must:originObj?originObj.must:1,
+            type:2,
+            remark:originObj?originObj.remark:"",
+            mock:originObj?(originObj.mock?originObj.mock:String(data)):String(data),
+            drag:1
+        }
+        if(show)
+        {
+            obj.show=0
+        }
+        if(input)
+        {
+            obj.value={
+                type:0,
+                status:"",
+                data:[
+                    {
+                        value:obj.mock,
+                        remark:""
+                    }
+                ]
+            }
+        }
+        result.push(obj)
+    }
+    else  if(typeof(data)=="object" && (data instanceof Array))
+    {
+        var obj={
+            name:name,
+            must:originObj?originObj.must:1,
+            type:3,
+            remark:originObj?originObj.remark:"",
+            data:[],
+            mock:"",
+            drag:1
+        };
+        if(show)
+        {
+            obj.show=0
+        }
+        result.push(obj);
+        if(data.length>0)
+        {
+            if(bArr)
+            {
+                for(var i=0;i<data.length;i++)
+                {
+                    var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[i]:null):null;
+                    arguments.callee(null,data[i],obj.data,resultObj,show,input,bArr)
+                }
+            }
+            else
+            {
+                var resultObj=originObj?((originObj.data && originObj.data.length>0)?originObj.data[0]:null):null;
+                arguments.callee(null,data[0],obj.data,resultObj,show,input,bArr)
+            }
+        }
+    }
+    else  if(typeof(data)=="object" && data===null)
+    {
+        var obj={
+            name:name,
+            must:originObj?originObj.must:1,
+            type:5,
+            remark:originObj?originObj.remark:"",
+            data:[],
+            mock:"",
+            drag:1
+        };
+        if(show)
+        {
+            obj.show=0
+        }
+        result.push(obj);
+        if(input)
+        {
+            obj.value={
+                type:0,
+                status:"",
+                data:[
+
+                ]
+            }
+        }
+    }
+    else if(typeof(data)=="object" && !(data instanceof Array))
+    {
+        var obj={
+            name:name,
+            must:originObj?originObj.must:1,
+            type:4,
+            remark:originObj?originObj.remark:"",
+            data:[],
+            mock:"",
+            drag:1
+        };
+        if(show)
+        {
+            obj.show=0
+        }
+        result.push(obj);
+        for(var key in data)
+        {
+            var resultObj=findObj(originObj?originObj.data:null,key);
+            arguments.callee(key,data[key],obj.data,resultObj,show,input,bArr)
+        }
+    }
+    else
+    {
+        return;
+    }
+}
+function findObj(data,key) {
+    if(!data || !key)
+    {
+        return null;
+    }
+    for(var i=0;i<data.length;i++)
+    {
+        if(data[i].name==key)
+        {
+            return data[i];
+        }
+    }
+    return null;
+}
+
+function parseURL(url) {
+    var a = URL.parse(url);
+    return {
+        source: url,
+        protocol: a.protocol?a.protocol.replace(':',''):"http",
+        host: a.hostname,
+        port: a.port,
+        query: a.search?a.search:"",
+        params: (function(){
+            var ret = {},
+                seg = (a.search?a.search:"").replace(/^\?/,'').split('&'),
+                len = seg.length, i = 0, s;
+            for (;i<len;i++) {
+                if (!seg[i]) { continue; }
+                s = seg[i].split('=');
+                ret[s[0]] = s[1];
+            }
+            return ret;
+        })(),
+        file: (a.pathname?a.pathname.match(/\/([^\/?#]+)$/i):"" || [,''])[1],
+        hash: a.hash?a.hash.replace('#',''):"",
+        path: a.pathname?a.pathname.replace(/^([^\/])/,'/$1'):"",
+        relative: (a.href.match(/tps?:\/\/[^\/]+(.+)/) || [,''])[1],
+        segments: a.pathname?a.pathname.replace(/^\//,'').split('/'):""
+    };
+}
+
+let runPoll=async (function (arr) {
+    let poll=require("../model/pollModel");
+    let test=require("../model/testModel");
+    let user=require("../model/userModel");
+    arr=await (poll.populateAsync(arr,{
+        path:"project"
+    }));
+    arr=await (poll.populateAsync(arr,{
+        path:"version"
+    }));
+    arr=await (poll.populateAsync(arr,{
+        path:"test",
+    }));
+    for(let obj of arr)
+    {
+        let root={
+            output:"",
+            count:obj.test.length,
+            success:0,
+            fail:0,
+            unknown:0
+        };
+        for(let obj1 of obj.test)
+        {
+            obj1=await (test.populateAsync(obj1,{
+                path:"module"
+            }))
+            obj1=await (test.populateAsync(obj1,{
+                path:"group"
+            }))
+            let global={
+                baseUrl:obj.baseUrl,
+                before:obj.project.before,
+                after:obj.project.after
+            }
+            if(typeof (obj.version)=="object")
+            {
+                global.before=obj.version.before;
+                global.after=obj.version.after;
+            }
+            try
+            {
+                let ret=await (exports.runTestCode(obj1.code,obj1,{},global,root))
+                if(ret===undefined)
+                {
+                    root.unknown++;
+                }
+                else if(Boolean(ret)==true)
+                {
+                    root.success++;
+                }
+                else
+                {
+                    root.fail++;
+                }
+            }
+            catch (err)
+            {
+                root.output+=err+"<br>"
+            }
+        }
+        var arrPollUser=obj.users.map(function (obj) {
+            return obj.toString();
+        });
+        var arrProjectUser=obj.project.users.map(function (obj) {
+            return obj.user.toString();
+        })
+        arrProjectUser.unshift(obj.project.owner.toString());
+        let arr=[];
+        for(let u of arrPollUser)
+        {
+            if(arrProjectUser.indexOf(u)>-1)
+            {
+                let obj=await (user.findOneAsync({
+                    _id:u
+                }));
+                if(obj && obj.email)
+                {
+                    arr.push(obj.email);
+                }
+            }
+        }
+        if(arr.length>0)
+        {
+            let subject="[DOClever]"+moment().format("YYYY-MM-DD HH:mm:ss")+" 项目"+obj.project.name+"轮询结果";
+            let content=`<h3>测试：${root.count}&nbsp;&nbsp;成功：${root.success}&nbsp;&nbsp;失败：${root.fail}&nbsp;&nbsp;未判定：${root.unknown}</h3>`+root.output;
+            exports.sendMail(obj.sendInfo.smtp,obj.sendInfo.port,obj.sendInfo.user,obj.sendInfo.password,arr,subject,content);
+        }
+    }
+})
+
 exports.err=err;
 exports.ok=ok;
 exports.dateDiff=dateDiff;
@@ -1797,7 +2174,7 @@ exports.sendMail=sendMail;
 exports.clone=clone;
 exports.init=init;
 exports.getMockParam=getMockParam;
-
-
-
+exports.handleResultData=handleResultData;
+exports.parseURL=parseURL
+exports.runPoll=runPoll;
 

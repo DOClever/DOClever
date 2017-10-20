@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>管理总后台</title>
+    <meta charset="UTF-8">
+    <link href="../pic/logo.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="../lib/element/index.css">
+    <link rel="stylesheet" href="../node_modules/animate.css/animate.min.css">
+    <link href="../lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../common/common.css">
+</head>
+<body>
+<div class="container" style="background-image: url(../pic/login/back.jpg);background-position:center center;background-size: cover;height: calc(100vh);" id="app" v-cloak>
+    <div style="width: 100%;padding-top: 150px">
+        <div style="width:500px;margin: 0 auto;background-color:rgb(55,174,215);border-radius: 10px;padding-bottom: 10px ">
+            <div class="row" style="text-align: center;color: white;padding-top: 10px;">
+                <h1><a style="text-decoration: none;cursor: pointer;color: inherit" href="/">管理总后台</a></h1>
+            </div>
+            <div class="row">
+                <el-form ref="form" style="width: 80%;margin: 0 auto;padding: 20px 20px 20px 20px;background-color: white;border-radius: 2px" >
+                    <el-form-item style="text-align: center">
+                        <el-input  placeholder="用户名" style="width: 400px;" v-model="username">
+                            <template slot="prepend"><i class="fa fa-user" style="width: 15px"></i> </template>
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item style="text-align: center">
+                        <el-input  placeholder="密码" style="width: 400px;" v-model="pwd" type="password">
+                            <template slot="prepend"><i class="fa fa-key"></i> </template>
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item style="text-align: center">
+                        <el-button type="info"  style="width: 400px;" @click.prevent="login" :loading="loginPending" id="login">
+                            登录
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../dist/vendor.bundle.js"></script>
+<script src="../lib/element/index.js"></script>
+<script src="../../dist/adminlogin.js"></script>
+</body>
+</html>

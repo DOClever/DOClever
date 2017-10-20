@@ -108,401 +108,6 @@
                 }
             },
             save:function () {
-                var _this=this;
-                function postman(obj,arr)
-                {
-                    if(!obj.info.name)
-                    {
-                        $.tip("项目名称为空",0);
-                        return;
-                    }
-                    _this.savePending=true;
-                    _this.status="正在创建项目"+obj.info.name;
-                    var projectID,groupID;
-                    var update={
-                        name:obj.info.name,
-                        dis:obj.info.description,
-                        import:1
-                    };
-                    if(session.get("teamId"))
-                    {
-                        update.team=session.get("teamId")
-                    }
-                    var insertDate;
-                    var pro=net.post("/project/create",update).then(function (data) {
-                        if(data.code==200)
-                        {
-                            _this.$store.commit("addProjectCreate",data.data);
-                            insertDate=data.data;
-                            projectID=data.data._id;
-                        }
-                        else
-                        {
-                            throw data.msg;
-                        }
-                    });
-                    var count=0,indexInterface=0,bDefaultGroup=false,bDefaultGroupId;
-                    obj.item.forEach(function (o) {
-                        if(o.item)
-                        {
-                            count+=o.item.length;
-                        }
-                        else
-                        {
-                            count++;
-                        }
-                    })
-                    obj.item.forEach(function (group) {
-                        pro=pro.then(function () {
-                            var groupName,bDefault=false;
-                            if(group.item)
-                            {
-                                groupName=group.name;
-                            }
-                            else
-                            {
-                                bDefault=true;
-                                if(!bDefaultGroup)
-                                {
-                                    groupName="未命名";
-                                    bDefaultGroup=true;
-                                }
-                                else
-                                {
-                                    groupID=bDefaultGroupId;
-                                    return;
-                                }
-                            }
-                            _this.status="正在创建分组"+groupName;
-                            var query={};
-                            query.id=projectID;
-                            query.name=groupName;
-                            query.import=1;
-                            return net.post("/group/create",query).then(function (data) {
-                                if(data.code!=200)
-                                {
-                                    throw data.msg;
-                                }
-                                else
-                                {
-                                    groupID=data.data._id;
-                                    if(bDefault)
-                                    {
-                                        bDefaultGroupId=groupID;
-                                    }
-                                }
-                            })
-                        })
-                        if(!group.item)
-                        {
-                            group.item=[group];
-                        }
-                        group.item.forEach(function (item) {
-                            pro=pro.then(function () {
-                                indexInterface++;
-                                insertDate.interfaceCount=indexInterface;
-                                _this.status="正在导入第"+indexInterface+"个接口"+item.name+"，一共"+count+"个接口";
-                                var obj;
-                                if(typeof(item.request.url)=="object")
-                                {
-                                    var objUrl=$.parseURL(item.request.url.raw);
-                                    var url=objUrl.source;
-                                    var index=url.indexOf("?");
-                                    if(index>-1)
-                                    {
-                                        url=url.substr(0,index);
-                                    }
-                                    for(var i=0;i<arr.length;i++)
-                                    {
-                                        if(_this.ignore)
-                                        {
-                                            index=url.toLowerCase().indexOf(arr[i].toLowerCase());
-                                        }
-                                        else
-                                        {
-                                            index=url.indexOf(arr[i]);
-                                        }
-                                        if(index>-1)
-                                        {
-                                            url=url.substr(index+arr[i].length);
-                                            break;
-                                        }
-                                    }
-                                    if(item.request.url.path)
-                                    {
-                                        item.request.url.path.forEach(function (obj) {
-                                            if(obj[0]==":")
-                                            {
-                                                url=url.replace(obj,"{"+obj.substr(1)+"}");
-                                            }
-                                        })
-                                    }
-                                    obj={
-                                        name:item.name,
-                                        url:url,
-                                        group:groupID,
-                                        remark:item.request.description,
-                                        project:projectID,
-                                        method:item.request.method,
-                                        finish:1,
-                                        param:[{
-                                            before:{
-                                                mode:0,
-                                                code:""
-                                            },
-                                            after:{
-                                                mode:0,
-                                                code:""
-                                            },
-                                            name:"未命名",
-                                            remark:"",
-                                            id:uuid()
-                                        }]
-                                    };
-                                    var restParam=[];
-                                    if(item.request.url.variable)
-                                    {
-                                        item.request.url.variable.forEach(function (obj) {
-                                            restParam.push({
-                                                name:obj.key,
-                                                remark:obj.description,
-                                                value:[obj.value]
-                                            })
-                                        })
-                                    }
-                                    obj.param[0].restParam=restParam;
-                                    var param=[];
-                                    for(var key in objUrl.params)
-                                    {
-                                        var v={
-                                            name:key,
-                                            must:1,
-                                            remark:""
-                                        };
-                                        if(objUrl.params[key]!=="" && objUrl.params[key]!==undefined)
-                                        {
-                                            v.value=[objUrl.params[key]];
-                                        }
-                                        param.push(v);
-                                    }
-                                    obj.param[0].queryParam=param;
-                                }
-                                else
-                                {
-                                    var objUrl=$.parseURL(item.request.url);
-                                    var url=objUrl.source,index=url.indexOf("?");
-                                    if(index>-1)
-                                    {
-                                        url=url.substr(0,index);
-                                    }
-                                    for(var i=0;i<arr.length;i++)
-                                    {
-                                        if(_this.ignore)
-                                        {
-                                            index=url.toLowerCase().indexOf(arr[i].toLowerCase());
-                                        }
-                                        else
-                                        {
-                                            index=url.indexOf(arr[i]);
-                                        }
-                                        if(index>-1)
-                                        {
-                                            url=url.substr(index+arr[i].length);
-                                            break;
-                                        }
-                                    }
-                                    obj={
-                                        name:item.name,
-                                        url:url,
-                                        group:groupID,
-                                        remark:item.request.description,
-                                        project:projectID,
-                                        method:item.request.method,
-                                        finish:1,
-                                        param:[{
-                                            before:{
-                                                mode:0,
-                                                code:""
-                                            },
-                                            after:{
-                                                mode:0,
-                                                code:""
-                                            },
-                                            name:"未命名",
-                                            remark:"",
-                                            id:uuid()
-                                        }]
-                                    };
-                                    var param=[];
-                                    for(var key in objUrl.params)
-                                    {
-                                        var v={
-                                            name:key,
-                                            must:1,
-                                            remark:""
-                                        };
-                                        if(objUrl.params[key]!=="" && objUrl.params[key]!==undefined)
-                                        {
-                                            v.value=[objUrl.params[key]];
-                                        }
-                                        param.push(v);
-                                    }
-                                    obj.param[0].queryParam=param;
-                                    obj.param[0].restParam=[];
-                                }
-                                var bJSON=false;
-                                obj.param[0].header=item.request.header.map(function (obj) {
-                                    if(obj.key.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application/json")
-                                    {
-                                        bJSON=true;
-                                    }
-                                    return {
-                                        name:obj.key,
-                                        value:obj.value,
-                                        remark:""
-                                    }
-                                })
-                                if(obj.method.toLowerCase()=="post" || obj.method.toLowerCase()=="put" || obj.method.toLowerCase()=="patch")
-                                {
-                                    var body,bodyInfo;
-                                    if(item.request.body.mode=="urlencoded" || item.request.body.mode=="formdata")
-                                    {
-                                        bodyInfo={
-                                            type:0,
-                                            rawType:0,
-                                            rawTextRemark:"",
-                                            rawFileRemark:"",
-                                            rawText:"",
-                                        };
-                                        body=item.request.body[item.request.body.mode].map(function (obj)
-                                        {
-                                            var o={
-                                                name:obj.key,
-                                                type:obj.type=="text"?0:1,
-                                                must:1,
-                                                remark:"",
-                                            }
-                                            if(o.type==0 && obj.value!=="" && obj.value!==undefined)
-                                            {
-                                                o.value=[obj.value];
-                                            }
-                                            return o;
-                                        })
-                                    }
-                                    else if(item.request.body.mode=="raw")
-                                    {
-                                        body=[];
-                                        if(bJSON)
-                                        {
-                                            var objJSON;
-                                            try
-                                            {
-                                                objJSON=eval("("+item.request.body.raw+")");
-                                            }
-                                            catch (err)
-                                            {
-
-                                            }
-                                            if(objJSON)
-                                            {
-                                                var result=[];
-                                                for(var key in objJSON)
-                                                {
-                                                    helper.handleResultData(key,objJSON[key],result,null,1)
-                                                }
-                                                bodyInfo={
-                                                    type:1,
-                                                    rawType:2,
-                                                    rawTextRemark:"",
-                                                    rawFileRemark:"",
-                                                    rawText:"",
-                                                    rawJSON:result
-                                                };
-                                            }
-                                            else
-                                            {
-                                                bodyInfo={
-                                                    type:1,
-                                                    rawType:0,
-                                                    rawTextRemark:"",
-                                                    rawFileRemark:"",
-                                                    rawText:item.request.body.raw,
-                                                };
-                                            }
-                                        }
-                                        else
-                                        {
-                                            bodyInfo={
-                                                type:1,
-                                                rawType:0,
-                                                rawTextRemark:"",
-                                                rawFileRemark:"",
-                                                rawText:item.request.body.raw,
-                                            };
-                                        }
-                                    }
-                                    else
-                                    {
-                                        body=[];
-                                        bodyInfo={
-                                            type:0,
-                                            rawType:0,
-                                            rawTextRemark:"",
-                                            rawFileRemark:"",
-                                            rawText:"",
-                                        };
-                                    }
-                                    obj.param[0].bodyParam=body;
-                                    obj.param[0].bodyInfo=bodyInfo
-                                }
-                                obj.param[0].outParam=[];
-                                obj.param[0].outInfo={
-                                    type:0,
-                                    rawRemark:"",
-                                    rawMock:"",
-                                };
-                                obj.param=JSON.stringify(obj.param);
-                                return net.post("/interface/create",obj).then(function (data) {
-                                    if(data.code!=200)
-                                    {
-                                        throw data.msg
-                                    }
-                                });
-                            })
-                        })
-                        if(group.item && group.item[0]==group)
-                        {
-                            group.item=null;
-                        }
-                    })
-                    pro=pro.then(function () {
-                        return net.put("/project/url",{
-                            id:projectID,
-                            urls:JSON.stringify(arr.map(function (obj) {
-                                return {
-                                    url:obj,
-                                    remark:""
-                                }
-                            }))
-                        }).then(function (data) {
-                            if(data.code!=200)
-                            {
-                                throw data.msg
-                            }
-                        })
-                    }).then(function () {
-                        _this.savePending=false;
-                        _this.$refs.box.close();
-                        $.notify("导入成功",1);
-                        if(session.get("teamId"))
-                        {
-                            bus.$emit("updateTeamProject",1,count);
-                        }
-                    }).catch(function (err) {
-                        _this.savePending=false;
-                        $.tip(err,0);
-                    })
-                }
                 if(this.type==0)
                 {
                     if(!this.text)
@@ -525,6 +130,11 @@
                         $.tip("不是可识别的JSON格式",0);
                         return;
                     }
+                    else if(!obj.info.name)
+                    {
+                        $.tip("项目名称为空",0);
+                        return;
+                    }
                     var arr=[];
                     this.arr.forEach(function (obj) {
                         if(obj.title)
@@ -537,7 +147,35 @@
                         $.tip("请输入BaseUrl",0);
                         return;
                     }
-                    postman(obj,arr)
+                    var _this=this;
+                    this.savePending=true;
+                    var update={
+                        json:this.text,
+                        baseurl:arr.join(","),
+                        ignore:this.ignore
+                    };
+                    if(session.get("teamId"))
+                    {
+                        update.team=session.get("teamId")
+                    }
+                    net.post("/project/importpostman",update).then(function (data) {
+                        _this.savePending=false;
+                        if(data.code==200)
+                        {
+                            _this.savePending=false;
+                            _this.$refs.box.close();
+                            $.notify("导入成功",1);
+                            _this.$store.commit("addProjectCreate",data.data);
+                            if(session.get("teamId"))
+                            {
+                                bus.$emit("updateTeamProject",1,data.data.interfaceCount);
+                            }
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
                 }
                 else if(this.type==1)
                 {

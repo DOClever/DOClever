@@ -52,9 +52,14 @@
                         <el-col class="col" :span="1" style="text-align: left">
                         </el-col>
                         <el-col class="col" :span="3" style="height: 50px;line-height: 50px;text-align: left" id="editSave">
-                            <el-button :loading="savePending" type="primary" style="width: 65%" @click="save" v-if="interfaceEditRole">
+                            <el-button :loading="savePending" type="primary" style="width: 65%" @click="save" v-if="interfaceEditRole" id="btnSave">
                                 保存
                             </el-button>
+                            <transition name="el-fade-in-linear">
+                                <el-button id="mail" v-show="mailShow" type="text" style="position: absolute" @click="sendMail">
+                                    <i class="fa fa-envelope-o"></i>
+                                </el-button>
+                            </transition>
                         </el-col>
                         <el-col class="col" :span="3" style="height: 50px;line-height: 50px;text-align: left" id="editRun">
                             <el-button type="primary" style="width: 65%" @click="run">
@@ -226,6 +231,7 @@
               savePending:false,
               snapshot:{},
               bMax:false,
+              mailShow:false
           }
         },
         mixins:[sessionChange],
@@ -237,6 +243,21 @@
             "interfacepreview":interfacePreview
         },
         watch:{
+            mailShow:function (val) {
+                if(val)
+                {
+                    var save=document.getElementById("btnSave");
+                    var mail=document.getElementById("mail");
+                    mail.style.left=save.offsetLeft+save.offsetWidth/4+"px";
+                    mail.style.top="-20px";
+                    mail.style.width=save.offsetWidth/2+"px";
+                    mail.style.marginLeft=0;
+                    var _this=this;
+                    setTimeout(function () {
+                        _this.mailShow=false;
+                    },2000);
+                }
+            },
             preview:function (val) {
                 store.dispatch("changePreview",val);
             },
@@ -454,6 +475,7 @@
                     if(data.code==200)
                     {
                         $.notify("保存成功",1)
+                        _this.mailShow=true;
                     }
                     else
                     {
@@ -790,11 +812,63 @@
             },
             cloneParam:function (item) {
                 this.$store.commit("addParam",1);
+            },
+            sendMail:function () {
+                var _this=this;
+                Promise.all([
+                    net.get("/project/users",{
+                        id:session.get("projectId")
+                    }),
+                    net.get("/user/sendinfo")
+                ]).then(function (data) {
+                    var obj1=data[0];
+                    var obj2=data[1];
+                    var user;
+                    if(obj1.code==200)
+                    {
+                        user=obj1.data.filter(function (obj) {
+                            if(obj._id==session.get("id"))
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+                        });
+                    }
+                    else
+                    {
+                        $.notify(obj1.msg,0);
+                        return;
+                    }
+                    if(obj2.code==200)
+                    {
+                        if(!obj2.data.user)
+                        {
+                            $.notify("发件账户不存在，请前去个人设置里面设置",0);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        $.notify(obj2.msg,0);
+                        return;
+                    }
+                    $.showBox(_this,"sendMail",{
+                        source:user,
+                        id:_this.interfaceEdit._id
+                    },"projectinfo/interface")
+                })
             }
         },
         created:function () {
+            var _this=this;
             store.getters.event.$on("initStatus",function (data) {
                 store.commit("setStatus",data);
+            })
+            store.getters.event.$on("initInterface",function (data) {
+                _this.mailShow=false;
             })
         },
     }

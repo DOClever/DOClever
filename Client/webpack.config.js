@@ -18,7 +18,9 @@ module.exports = {
         donate:"./web/donate/donate",
         share:"./web/share/share",
         team:"./web/team/team",
-        registerqq:"./web/register/registerqq"
+        registerqq:"./web/register/registerqq",
+        admin:"./web/admin/admin",
+        adminlogin:"./web/admin/adminlogin"
     },
     output: {
         path: path.join(__dirname, 'dist'),

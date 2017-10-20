@@ -8,7 +8,7 @@
     <meta HTTP-EQUIV="Expires" CONTENT="0">
     <link href="../pic/logo.ico" rel="shortcut icon">
     <link rel="stylesheet" href="../lib/element/index.css">
-    <link rel="stylesheet" href="../node_modules/animate.css/animate.min.css">
+    <link rel="stylesheet" href="../../node_modules/animate.css/animate.min.css">
     <link href="../lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../common/common.css">
     <title>个人中心</title>
@@ -36,10 +36,13 @@
                 <el-button type="primary"  style="display: block;width: 90%;margin: 20px auto 0 auto" @click="infoShow=0">
                     修改密码
                 </el-button>
+                <el-button type="primary"  style="display: block;width: 90%;margin: 20px auto 0 auto" @click="infoShow=2">
+                    发件设置
+                </el-button>
             </div>
         </el-col>
         <el-col :span="16"  class="col">
-            <div style="background-color: white;margin:20px auto 0 auto;width: 90%;height: 600px;" v-if="infoShow">
+            <div style="background-color: white;margin:20px auto 0 auto;width: 90%;height: 600px;" v-if="infoShow==1">
                 <el-row class="row" style="height: 60px;margin: 0">
                     <h4 style="margin-left: 10px">
                         个人资料
@@ -74,7 +77,7 @@
                     </el-form-item>
                 </el-form>
             </div>
-            <div style="background-color: white;margin:20px auto 0 auto;width: 90%;height: 600px;" v-else>
+            <div style="background-color: white;margin:20px auto 0 auto;width: 90%;height: 600px;" v-else-if="infoShow==0">
                 <el-row class="row" style="height: 60px;margin: 0">
                     <h4 style="margin-left: 10px">
                         修改密码
@@ -92,6 +95,32 @@
                     </el-form-item>
                     <el-form-item style="text-align: center" style="text-align: center">
                         <el-button type="primary" style="width: 60%;margin: 20px auto 0 auto" @click.prevent="editPass":loading="passPending">
+                            保存
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <div style="background-color: white;margin:20px auto 0 auto;width: 90%;height: 500px;" v-else>
+                <el-row class="row" style="height: 60px;margin: 0">
+                    <h4 style="margin-left: 10px">
+                        发件设置
+                    </h4>
+                </el-row>
+                <el-form ref="form" label-width="150px">
+                    <el-form-item label="发件人邮箱账户" style="text-align: center">
+                        <el-input placeholder="请输入发件人的邮箱账户(如：aaa@qq.com)" style="width: 80%" v-model="sendInfo.user"></el-input>
+                    </el-form-item>
+                    <el-form-item label="发件人邮箱密码" style="text-align: center">
+                        <el-input placeholder="请输入发件人的邮箱密码" style="width: 80%" v-model="sendInfo.password"></el-input>
+                    </el-form-item>
+                    <el-form-item label="发件人smtp地址" style="text-align: center">
+                        <el-input placeholder="请输入发件人的smtp地址(如：smtp.qq.com)" style="width: 80%" v-model="sendInfo.smtp"></el-input>
+                    </el-form-item>
+                    <el-form-item label="发件人smtp端口" style="text-align: center">
+                        <el-input placeholder="请输入发件人smtp端口号" style="width: 80%" v-model="sendInfo.port"></el-input>
+                    </el-form-item>
+                    <el-form-item style="text-align: center" style="text-align: center">
+                        <el-button type="primary" style="width: 60%;margin: 20px auto 0 auto" @click.prevent="saveSendInfo":loading="sendPending">
                             保存
                         </el-button>
                     </el-form-item>

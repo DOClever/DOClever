@@ -41,7 +41,7 @@ function Interface() {
         {
             let arrInterface=await (req.interfaceModel.findAsync({
                 group:obj._id
-            },"_id name method finish url",{
+            },"_id name method finish url delete",{
                 sort:"name"
             }));
             arr=arr.concat(arrInterface);
@@ -113,12 +113,13 @@ function Interface() {
                             }
                         }
                     }))
-                    if (arrUser.length == 0) {
+                    if (arrUser.length == 0 && !obj.public) {
                         util.throw(e.userForbidden, "你没有权限");
                         return;
                     }
                 }
-                else {
+                else if(!obj.public)
+                {
                     util.throw(e.userForbidden, "你没有权限");
                     return;
                 }
@@ -157,6 +158,18 @@ function Interface() {
     this.create=async ((req, res)=> {
         try {
             await(this.validateUser(req));
+            let query={
+                url:req.clientParam.url,
+                method:req.clientParam.method
+            }
+            if (req.headers["docleverversion"]) {
+                query.version = req.headers["docleverversion"]
+            }
+            let obj=await (req.interfaceModel.findOneAsync(query));
+            if(obj)
+            {
+                util.throw(e.interfaceDuplicate,"项目内接口的路径和方法重复");
+            }
             let update = {};
             for (let key in req.clientParam) {
                 if (key != "id" && req.clientParam[key] !== undefined) {
@@ -593,6 +606,77 @@ function Interface() {
         }
         catch (err) {
             util.catch(res, err);
+        }
+    })
+    this.notify=async ((req,res)=>{
+        try
+        {
+            await (this.validateUser(req));
+            if(!req.userInfo.sendInfo.user)
+            {
+                util.throw(e.systemReason,"发件账户不存在，请前去个人设置里面设置");
+            }
+            let arrTo=req.clientParam.users.split(",");
+            let arrToMail=[];
+            for(let obj of arrTo)
+            {
+                let u=await (user.findOneAsync({
+                    _id:obj
+                }))
+                if(u && u.email)
+                {
+                    arrToMail.push(u.email);
+                }
+            }
+            let title=`[DOClever]接口${req.interface.name}发生变更`;
+            req.group=await (req.groupModel.findOneAsync({
+                _id:req.interface.group
+            }));
+            let g=req.group.id;
+            let arrGroup=[];
+            while(g)
+            {
+                let obj=await (req.groupModel.findOneAsync({
+                    id:g,
+                    project:req.interface.project
+                }));
+                if(obj)
+                {
+                    arrGroup.unshift(obj.name);
+                }
+                g=obj.parent;
+            }
+            let strGroup=arrGroup.join("/");
+            let content=`<div>名称：${req.interface.name}</div><div>路径：${req.interface.url}</div><div>方法：${req.interface.method}</div><div>分组：${strGroup}</div><div>通知人：${req.userInfo.name}</div><div>通知内容：${req.clientParam.content?req.clientParam.content:""}</div>`;
+            if(arrToMail.length>0)
+            {
+                util.sendMail(req.userInfo.sendInfo.smtp,req.userInfo.sendInfo.port,req.userInfo.sendInfo.user,req.userInfo.sendInfo.password,arrToMail,title,content);
+            }
+            util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.merge=async ((req,res)=>{
+        try
+        {
+            await (this.validateUser(req));
+            await (req.interfaceModel.updateAsync({
+                _id:req.clientParam.id
+            },{
+                $unset:{
+                    delete:1
+                }
+            }))
+            let arr = await(this.getChild(req,req.project._id, null,1));
+            util.ok(res, arr, "ok");
+
+        }
+        catch (err)
+        {
+            util.catch(res,err);
         }
     })
 }

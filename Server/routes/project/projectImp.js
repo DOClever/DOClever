@@ -26,6 +26,10 @@ var interface=[
             team:{
                 optional:1,
                 type:String
+            },
+            public:{
+                type:Number,
+                optional:1
             }
         },
         "data":String,
@@ -467,6 +471,46 @@ var interface=[
         user:1,
         handle:[project.importSwagger]
     },
+    {
+        "method":"PUT",
+        "path":"/project/updateswagger",
+        "param": {
+            id:String,
+            json:{
+                type:String,
+                optional:1
+            },
+            url:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.validateUser,project.updateSwagger]
+    },
+    {
+        "method":"POST",
+        "path":"/project/importpostman",
+        "param": {
+            json:{
+                type:String
+            },
+            team:{
+                type:String,
+                optional:1
+            },
+            baseurl:String,
+            ignore:Number
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[project.importPostman]
+    }
 ];
 
 module.exports=interface;

@@ -522,14 +522,16 @@
                     }),
                     net.get("/project/urllist",{
                         id:session.get("projectId")
-                    })
+                    }),
+                    net.get("/user/sendinfo")
                 ]).then(function (data) {
                     $.stopHud();
                     var obj1=data[0];
                     var obj2=data[1];
                     var obj3=data[2];
                     var obj4=data[3];
-                    var poll,test,user,baseUrl;
+                    var obj5=data[4];
+                    var poll,test,user,baseUrl,sendInfo;
                     if(obj1.code==200)
                     {
                         poll=obj1.data;
@@ -566,11 +568,20 @@
                     {
                         throw obj4.msg;
                     }
+                    if(obj5.code==200)
+                    {
+                        sendInfo=obj5.data;
+                    }
+                    else
+                    {
+                        throw obj5.msg;
+                    }
                     $.showBox(_this,"poll",{
                         "propPoll":poll,
                         "propTest":test,
                         "propUser":user,
-                        "propBaseUrl":baseUrl
+                        "propBaseUrl":baseUrl,
+                        "propSendInfo":sendInfo
                     },"projectinfo/test")
                 }).catch(function (err) {
                     $.stopHud();

@@ -58,6 +58,10 @@ function  Poll() {
                 setDefaultsOnInsert:true,
                 new:true
             }));
+            if(req.clientParam.immediate)
+            {
+                util.runPoll([obj]);
+            }
             util.ok(res,obj,"ok");
         }
         catch (err)

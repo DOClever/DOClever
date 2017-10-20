@@ -27,10 +27,16 @@
             <slot name="slot2">
             </slot>
         </el-col>
-        <el-col class="col" :span="4" v-if="session.id" style="white-space: nowrap;text-align: center;line-height: 50px">
-            <img v-proxy="session.photo" style="width: 40px;height: 40px; border-radius:50%;margin-top: 5px">&nbsp;
+        <el-col class="col" :span="4" v-if="session.id || adminPage" style="white-space: nowrap;text-align: center;line-height: 50px">
+            <img v-proxy="adminPage?adminPhoto:session.photo" style="width: 40px;height: 40px; border-radius:50%;margin-top: 5px">&nbsp;
             <el-dropdown @command="handleCommand" style="top: -15px;">
-                <span class="el-dropdown-link" style="color: #50bfff;cursor: pointer">
+                <span class="el-dropdown-link" style="color: #50bfff;cursor: pointer" v-if="adminPage">
+                    <span>
+                        {{admin}}
+                    </span>
+                    <i class="el-icon-caret-bottom el-icon--right"></i>
+                </span>
+                <span class="el-dropdown-link" style="color: #50bfff;cursor: pointer" v-else>
                     <el-badge is-dot class="msgBadge" v-if="newMsg">
                         {{session.name}}
                     </el-badge>
@@ -39,7 +45,10 @@
                     </span>
                     <i class="el-icon-caret-bottom el-icon--right"></i>
                 </span>
-                <el-dropdown-menu slot="dropdown">
+                <el-dropdown-menu slot="dropdown" v-if="adminPage">
+                    <el-dropdown-item command="quit">退出</el-dropdown-item>
+                </el-dropdown-menu>
+                <el-dropdown-menu slot="dropdown" v-else>
                     <el-dropdown-item command="team" v-if="session.team">团队首页</el-dropdown-item>
                     <el-dropdown-item command="list">返回列表</el-dropdown-item>
                     <el-dropdown-item command="apply" v-if="bShowApply">团队申请</el-dropdown-item>
@@ -62,10 +71,10 @@
                 </el-dropdown-menu>
             </el-dropdown>
         </el-col>
-        <el-col class="col" :span="2" style="text-align: center;line-height: 50px" v-if="!session.id">
+        <el-col class="col" :span="2" style="text-align: center;line-height: 50px" v-if="!session.id && !adminPage">
             <el-button type="info" onclick="location='/html/web/login/login.html'">登录</el-button>
         </el-col>
-        <el-col class="col" :span="2" style="text-align: center;line-height: 50px" v-if="!session.id">
+        <el-col class="col" :span="2" style="text-align: center;line-height: 50px" v-if="!session.id && !adminPage">
             <el-button type="success"  onclick="location='/html/web/register/register.html'">注册</el-button>
         </el-col>
         <el-dialog title="团队申请" v-model="showTeam" size="small" ref="team">
@@ -99,7 +108,10 @@
                 applyDis:"",
                 newMsg:false,
                 proxy:session.get("proxy")?true:false,
-                bShowApply:document.title.indexOf("DOClever")>-1?false:true
+                bShowApply:document.title.indexOf("DOClever")>-1?false:true,
+                admin:sessionStorage.getItem("admin"),
+                adminPhoto:"/html/web/pic/admin/admin.jpeg",
+                adminPage:location.href.indexOf("admin.html")>-1?1:0
             }
         },
         directives:{
@@ -208,20 +220,40 @@
                 else if(command=="quit")
                 {
                     var _this=this;
-                    net.post("/user/logout",{}).then(function (data) {
-                        if(data.code==200)
-                        {
-                            _this.$notify({
-                                title: '退出成功',
-                                type: 'success'
-                            });
-                            session.clear();
-                            setTimeout(function () {
-                                location.href="/";
-                            },1000)
+                    if(this.adminPage)
+                    {
+                        net.post("/admin/logout",{}).then(function (data) {
+                            if(data.code==200)
+                            {
+                                _this.$notify({
+                                    title: '退出成功',
+                                    type: 'success'
+                                });
+                                sessionStorage.removeItem("admin");
+                                setTimeout(function () {
+                                    location.href="/";
+                                },1000)
 
-                        }
-                    })
+                            }
+                        })
+                    }
+                    else
+                    {
+                        net.post("/user/logout",{}).then(function (data) {
+                            if(data.code==200)
+                            {
+                                _this.$notify({
+                                    title: '退出成功',
+                                    type: 'success'
+                                });
+                                session.clear();
+                                setTimeout(function () {
+                                    location.href="/";
+                                },1000)
+
+                            }
+                        })
+                    }
                 }
             },
             applyTeam:function () {

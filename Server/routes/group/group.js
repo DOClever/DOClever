@@ -41,7 +41,7 @@ function Group() {
         {
             let arrInterface=await (req.interfaceModel.findAsync({
                 group:obj._id
-            },"_id name method finish url",{
+            },"_id name method finish url delete",{
                 sort:"name"
             }));
             arr=arr.concat(arrInterface);
@@ -115,13 +115,13 @@ function Group() {
                             }
                         }
                     }))
-                    if(arrUser.length==0)
+                    if(arrUser.length==0 && !obj.public)
                     {
                         util.throw(e.userForbidden,"你没有权限");
                         return;
                     }
                 }
-                else
+                else if(!obj.public)
                 {
                     util.throw(e.userForbidden,"你没有权限");
                     return;
@@ -462,6 +462,56 @@ function Group() {
                 }
             }));
             util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.merge=async ((req,res)=>{
+        try
+        {
+            await (req.groupModel.updateAsync({
+                _id:req.clientParam.group
+            },{
+                $unset:{
+                    delete:1
+                }
+            }))
+            let mergeChild=async (function(obj) {
+                let query={
+                    project:req.obj._id,
+                    parent:obj.id
+                }
+                if(req.headers["docleverversion"])
+                {
+                    query.version=req.headers["docleverversion"]
+                }
+                let arr=await (req.groupModel.findAsync(query))
+                for(let obj of arr)
+                {
+                    await (req.groupModel.findOneAndUpdateAsync({
+                        _id:obj._id
+                    },{
+                        $unset:{
+                            delete:1
+                        }
+                    }))
+                    await (mergeChild(obj));
+                }
+                await (req.interfaceModel.updateAsync({
+                    group:obj._id
+                },{
+                    $unset:{
+                        delete:1
+                    }
+                },{
+                    multi:true
+                }));
+            })
+            await (mergeChild(req.group));
+            let arr = await (this.getChild(req,req.group.project,null,1));
+            util.ok(res, arr, "ok");
         }
         catch (err)
         {

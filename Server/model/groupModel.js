@@ -16,6 +16,7 @@ var model=new mongoose.Schema({
     },
     id:String,
     parent:String,
+    delete:Number
 },{
     timestamps:true
 });

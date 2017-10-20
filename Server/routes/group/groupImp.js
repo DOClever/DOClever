@@ -92,6 +92,18 @@ var interface=[
         user:1,
         handle:[group.validateUser,group.move]
     },
+    {
+        "method":"PUT",
+        "path":"/group/merge",
+        "param": {
+            group:{
+                type:String
+            },
+        },
+        "data":String,
+        user:1,
+        handle:[group.validateUser,group.merge]
+    },
 ];
 
 module.exports=interface;

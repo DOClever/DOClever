@@ -24,11 +24,33 @@ var model=new mongoose.Schema({
     lastLoginDate:Date,
     question:String,
     answer:String,
-    qqId:String
+    qqId:String,
+    sendInfo:{
+        user:{
+            type:String,
+            default:""
+        },
+        password:{
+            type:String,
+            default:""
+        },
+        smtp:{
+            type:String,
+            default:""
+        },
+        port:{
+            type:Number,
+            default:465
+        }
+    }
 },{
     timestamps:true
 });
-
+model.configOutputField(null,[
+    "createdAt",
+    "updatedAt",
+    "lastLoginDate"
+]);
 var dbManage=db.model("User",model);
 mongoomise.promisifyAll(dbManage,require("bluebird"));
 module.exports=dbManage;

@@ -1,6 +1,9 @@
 module.exports={
     namespaced:true,
     getters:{
+        event: function (state, getters, rootState) {
+            return rootState.event;
+        },
         project:function (state,getters,rootState) {
             return rootState.project;
         },

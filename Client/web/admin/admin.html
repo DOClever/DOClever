@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link href="../pic/logo.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="../lib/element/index.css">
+    <link rel="stylesheet" href="../../node_modules/animate.css/animate.min.css">
+    <link href="../lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../common/common.css">
+    <title>管理总后台</title>
+    <style>
+        .el-tabs--card>.el-tabs__header .el-tabs__item.is-active
+        {
+            border-bottom-color:transparent;
+        }
+        .el-tabs__nav
+        {
+            float: none;
+        }
+        .el-tabs__nav-scroll
+        {
+            text-align: center;
+        }
+        .el-tabs__nav
+        {
+            background-color: white;
+        }
+        .el-tabs__header
+        {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app" style="margin: 0px;height: 600px;width: 100%" v-cloak>
+    <mainnav>
+        <el-row class="row" style="text-align: center;height: 50px;line-height: 50px;font-size: 25px;color: #50bfff" slot="title">总后台</el-row>
+    </mainnav>
+    <div style="width: 100%;height:calc(100vh - 65px);top: 65px;overflow-y: auto;position: fixed;">
+        <el-tabs v-model="tab" type="card">
+            <el-tab-pane label="成员" name="user">
+                <user></user>
+            </el-tab-pane>
+            <el-tab-pane label="项目" name="project">
+                <project></project>
+            </el-tab-pane>
+            <el-tab-pane label="团队" name="team">
+                <team></team>
+            </el-tab-pane>
+            <el-tab-pane label="接口" name="interface">
+                <interface></interface>
+            </el-tab-pane>
+            <el-tab-pane label="设置" name="setting">
+                <setting></setting>
+            </el-tab-pane>
+        </el-tabs>
+    </div>
+</div>
+<script src="../../dist/vendor.bundle.js"></script>
+<script src="../lib/element/index.js"></script>
+<script src="../../dist/admin.js"></script>
+</body>
+</html>

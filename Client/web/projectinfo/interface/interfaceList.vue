@@ -10,7 +10,7 @@
                 <el-col class="col" :span="4" style="font-size: large;text-align: center;white-space: nowrap" @click.native="item.show=!item.show">
                     <span :class="item.show?'fa fa-folder-open':'fa fa-folder'" style="color:#c7c7c7 "></span>
                 </el-col>
-                <el-col class="col" :span="20-2*level" :style="{margin: 0,fontSize: 'larger',color: item.type==0?'#50bfff':'red',whiteSpace: 'nowrap',padding: 0,textOverflow:'ellipsis',overflow:'hidden'}" @click.native="item.show=!item.show" :title="item.name">
+                <el-col class="col" :span="20-2*level" :style="{margin: 0,fontSize: 'larger',color: item.type==0?'#50bfff':'red',whiteSpace: 'nowrap',padding: 0,textOverflow:'ellipsis',overflow:'hidden',textDecoration:item.delete?'line-through':'none'}" @click.native="item.show=!item.show" :title="item.name">
                     {{item.name}}({{item.data.length}})
                 </el-col>
                 <div class="col" style="height: 40px;white-space: nowrap;text-align: center;position: absolute;top: 0px;right: 0px;width: 40px" v-show="item.menu">
@@ -26,9 +26,10 @@
                             <el-dropdown-item  v-if="item.type==0"><div @click="removeGroup(item)">删除</div></el-dropdown-item>
                             <el-dropdown-item  v-if="item.type==1"><div @click="clear">清空</div></el-dropdown-item>
                             <el-dropdown-item  v-if="item.type==0 && objCopy"><div @click="paste(item)">粘贴</div></el-dropdown-item>
-                            <el-dropdown-item ><div @click="importInterface(item)" v-if="item.type==0">导入接口</div></el-dropdown-item>
-                            <el-dropdown-item ><div @click="exportGroup(item)" v-if="item.type==0">导出分组</div></el-dropdown-item>
-                            <el-dropdown-item ><div @click="importGroup(item)" v-if="item.type==0">导入分组</div></el-dropdown-item>
+                            <el-dropdown-item v-if="item.type==0"><div @click="importInterface(item)">导入接口</div></el-dropdown-item>
+                            <el-dropdown-item v-if="item.type==0"><div @click="exportGroup(item)" >导出分组</div></el-dropdown-item>
+                            <el-dropdown-item v-if="item.type==0"><div @click="importGroup(item)">导入分组</div></el-dropdown-item>
+                            <el-dropdown-item v-if="item.type==0 && item.delete"><div @click="mergeGroup(item)" >合并</div></el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
                 </div>
@@ -40,10 +41,10 @@
                         &nbsp;
                     </el-col>
                 </template>
-                <el-col class="col" :span="4" :style="{fontSize: 'small',margin: 0,color:item.select?'white':methodColor(item.finish),padding:0,lineHeight:'40px','textAlign':'center'}" name="treeMethod">
+                <el-col class="col" :span="4" :style="{fontSize: 'small',margin: 0,color:item.select?'white':methodColor(item.finish),padding:0,lineHeight:'40px','textAlign':'center',textDecoration:(parent.type==0 && item.delete)?'line-through':'none'}" name="treeMethod">
                     {{item.method=="DELETE"?"DEL":item.method}}
                 </el-col>
-                <el-col class="col" :span="20-2*level" :style="{margin: 0,color: item.finish==1?'green':(item.finish==2?'gray':'#50bfff'),color:item.select?'white':'#50bfff',lineHeight:'40px',textOverflow:'ellipsis',overflow:'hidden'}" name="treeName" :title="item.name">
+                <el-col class="col" :span="20-2*level" :style="{margin: 0,color: item.finish==1?'green':(item.finish==2?'gray':'#50bfff'),color:item.select?'white':'#50bfff',lineHeight:'40px',textOverflow:'ellipsis',overflow:'hidden',textDecoration:item.delete?'line-through':'none'}" name="treeName" :title="item.name">
                     {{item.name}}
                 </el-col>
                 <div class="col" style="margin: 0;height: 40px;white-space: nowrap;text-align: center;position: absolute;top: 0px;right: 0px;width: 40px" v-show="item.menu">
@@ -56,6 +57,7 @@
                             <el-dropdown-item><div @click="copy(item)">复制</div></el-dropdown-item>
                             <el-dropdown-item v-if="parent.type==1"><div @click="destroyInterface(item)">彻底删除</div></el-dropdown-item>
                             <el-dropdown-item><div @click="exportInterface(item)">导出接口</div></el-dropdown-item>
+                            <el-dropdown-item v-if="parent.type==0 && item.delete"><div @click="mergeInterface(item)">合并</div></el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
                 </div>
@@ -551,6 +553,40 @@
                         }
                     })
                     return true;
+                })
+            },
+            mergeGroup:function (item) {
+                var _this=this;
+                $.confirm("是否确认该分组的合并",function () {
+                    $.startHud();
+                    _this.$store.dispatch("mergeGroup",item._id).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("合并成功",1);
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
+                })
+            },
+            mergeInterface:function (item) {
+                var _this=this;
+                $.confirm("是否确认该接口的合并",function () {
+                    $.startHud();
+                    _this.$store.dispatch("mergeInterface",item._id).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("合并成功",1);
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
                 })
             }
         }

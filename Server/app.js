@@ -12,6 +12,7 @@ var app = express();
 (async (function () {
     await (util.init());
     var checkUser=require("./routes/checkUser");
+    var checkAdmin=require("./routes/checkAdmin");
     var checkParam=require("./routes/checkParam");
     var checkFormDataUser=require("./routes/checkFormDataUser");
     var con=require("./../config.json");
@@ -45,6 +46,7 @@ var app = express();
     app.use("/poll",checkFormDataUser(con.imgPath),checkParam("poll"),checkUser);
     app.use("/article",checkFormDataUser(con.imgPath),checkParam("article"),checkUser);
     app.use("/message",checkFormDataUser(con.imgPath),checkParam("message"),checkUser);
+    app.use("/admin",checkFormDataUser(con.imgPath),checkParam("admin"),checkAdmin);
     app.use("/mock",checkFormDataUser(con.tempPath),mock);
     app.use("/html",express.static(path.join(__dirname, '../Client')));
     app.use("/img",express.static(con.imgPath));

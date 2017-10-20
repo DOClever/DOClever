@@ -1006,11 +1006,11 @@ module.exports={
                         var str;
                         if(state.searchType==0)
                         {
-                            str=obj.name;
+                            str=obj.name?obj.name:"";
                         }
                         else
                         {
-                            str=obj.url;
+                            str=obj.url?obj.url:"";
                         }
                         if(str.toLowerCase().indexOf(state.searchText.toLowerCase())>-1)
                         {
@@ -1686,6 +1686,28 @@ module.exports={
                 });
                 context.state.newInterfaceStr="";
             }
+        },
+        mergeGroup:function (context,id) {
+            return net.put("/group/merge",{
+                group:id
+            }).then(function (data) {
+                if(data.code==200)
+                {
+                    context.dispatch("refreshData",data.data);
+                }
+                return data;
+            })
+        },
+        mergeInterface:function (context,id) {
+            return net.put("/interface/merge",{
+                id:id
+            }).then(function (data) {
+                if(data.code==200)
+                {
+                    context.dispatch("refreshData",data.data);
+                }
+                return data;
+            })
         }
     }
 }

@@ -1,6 +1,7 @@
 /**
  * Created by sunxin on 2017/2/22.
  */
+var mockjs=require("mockjs");
 var helper={};
 helper.methodColor=function (m) {
     if(m==1)
@@ -339,6 +340,36 @@ helper.convertToJSON=function (data,obj,info,run) {
                 else
                 {
                     return null;
+                }
+            }
+            else if(/^mj/i.test(str))
+            {
+                var val=$.trim(str.substring(3,str.length-1));
+                if(val[0]=="@")
+                {
+                    return mockjs.mock(val);
+                }
+                else
+                {
+                    var obj=eval("("+val+")");
+                    if(typeof(obj)=="object")
+                    {
+                        var objNew={};
+                        for(var key in obj)
+                        {
+                            objNew["mock|"+key]=obj[key];
+                        }
+                        var ret=mockjs.mock(objNew);
+                        for(var key in ret)
+                        {
+                            return ret[key];
+                        }
+
+                    }
+                    else
+                    {
+                        return val;
+                    }
                 }
             }
         }
@@ -1034,6 +1065,36 @@ helper.mock=function (data,info) {
             else
             {
                 return null;
+            }
+        }
+        else if(/^mj/i.test(str))
+        {
+            var val=$.trim(str.substring(3,str.length-1));
+            if(val[0]=="@")
+            {
+                return mockjs.mock(val);
+            }
+            else
+            {
+                var obj=eval("("+val+")");
+                if(typeof(obj)=="object")
+                {
+                    var objNew={};
+                    for(var key in obj)
+                    {
+                        objNew["mock|"+key]=obj[key];
+                    }
+                    var ret=mockjs.mock(objNew);
+                    for(var key in ret)
+                    {
+                        return ret[key];
+                    }
+
+                }
+                else
+                {
+                    return val;
+                }
             }
         }
     }

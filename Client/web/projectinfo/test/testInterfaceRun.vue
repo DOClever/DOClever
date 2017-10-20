@@ -54,6 +54,16 @@
                 <el-input type="textarea" :rows="2" style="width: 95%" v-model="objInterface.remark" :disabled="true"></el-input>
             </el-col>
         </el-row>
+        <el-row class="row" style="height: 60px;line-height: 60px;text-align: center">
+            <el-col class="col" :span="2">
+                注入
+            </el-col>
+            <el-col class="col" :span="22">
+                <el-checkbox v-model="pullInject" :true-label="1" :false-label="0">
+                    降低动态注入优先级
+                </el-checkbox>
+            </el-col>
+        </el-row>
         <el-tabs type="card" style="background-color: white;padding: 20px;margin-top: 15px;border-radius: 5px;box-shadow: 0px 2px 2px #888888;" v-model="tabIndex" id="mainTest">
             <template v-for="(item, index) in originInterface.param">
                 <el-tab-pane :key="item.id" :name="index">
@@ -217,6 +227,10 @@
                             after:{
                                 mode:0,
                                 code:""
+                            },
+                            encrypt:{
+                                type:"",
+                                salt:""
                             }
                         };
                     }
@@ -259,7 +273,8 @@
                     }
                 }.call(this),
                 showDialog:false,
-                tabIndex:this.index
+                tabIndex:this.index,
+                pullInject:this.interface.pullInject?1:0
             }
         },
         components:{
@@ -378,6 +393,7 @@
                 }
                 this.objInterface.baseUrl=this.baseUrl;
                 var obj=$.clone(this.objInterface);
+                obj.pullInject=this.pullInject;
                 obj.paramId=this.originInterface.param[parseInt(this.tabIndex)].id;
                 delete obj.param;
                 this.$emit("save",obj);
