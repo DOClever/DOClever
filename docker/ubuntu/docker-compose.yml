@@ -1,0 +1,28 @@
+version: "2"
+services:
+  DOClever:
+    image: lw96/doclever:latest-ubuntu
+    restart: always
+    container_name: "DOClever"
+    ports:
+    - 10000:10000
+    volumes:
+    - /hostdir/file:/root/DOClever/data/file
+    - /hostdir/img:/root/DOClever/data/img
+    - /hostdir/tmp:/root/DOClever/data/tmp
+    environment:
+    # - DB_HOST=mongodb://localhost:27017/DOClever
+    - PORT=10000
+    links:
+    - mongo:mongo
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    container_name: "mongodb"
+#    If you need to store your database to local please add these two lines, and define your local data direction.
+#    volumes:
+#    - /my/own/datadir:/data/db
+    
+
+    
