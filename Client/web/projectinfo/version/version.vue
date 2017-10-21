@@ -16,14 +16,12 @@
                         <h4 style="margin-left: 10px;color: gray;display: inline-block">
                             版本信息
                         </h4>
-                        <template v-if="versionEditRole">
-                            <el-button type="primary" style="float: right;margin-right: 20px;margin-top: 15px" @click="showVersion=true" :loading="createPending" v-if="!session.versionId">
-                                创建版本
-                            </el-button>
-                            <el-button type="primary" style="float: right;margin-right: 20px;margin-top: 15px" @click="returnMaster" v-else>
-                                返回主版本
-                            </el-button>
-                        </template>
+                        <el-button type="primary" style="float: right;margin-right: 20px;margin-top: 15px" @click="showVersion=true" :loading="createPending" v-if="!session.versionId && versionEditRole">
+                            创建版本
+                        </el-button>
+                        <el-button type="primary" style="float: right;margin-right: 20px;margin-top: 15px" @click="returnMaster" v-if="session.versionId">
+                            返回主版本
+                        </el-button>
                     </el-row>
                     <el-form ref="form" label-width="100px" v-if="session.versionId">
                         <el-form-item label="版本号" style="text-align: center">

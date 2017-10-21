@@ -36,6 +36,9 @@ module.exports={
         },
         ownRole:function (state,getters,rootState,rootGetters) {
             return rootState.own==1;
-        }
+        },
+        guestRole:function (state,getters,rootState,rootGetters) {
+            return rootState.guest==1;
+        },
     },
 }

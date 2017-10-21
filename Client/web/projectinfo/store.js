@@ -14,7 +14,8 @@ module.exports=new Vuex.Store({
         lastBaseUrl:"",
         roleOption:{},
         role:0,
-        own:0
+        own:0,
+        guest:0
     },
     getters:{
         interfaceEditRole:function (state) {
@@ -173,6 +174,7 @@ module.exports=new Vuex.Store({
                 if(!bIn && state.project.public)
                 {
                     state.role=1;
+                    state.guest=1;
                     state.roleOption={
                         "ie":0,
                         "te":0,

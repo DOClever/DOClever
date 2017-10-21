@@ -59,7 +59,7 @@
                                 </el-button>
                             </el-col>
                             <el-col class="col" :span="12" style="text-align: center">
-                                <el-button type="danger" style="width: 60%;margin-top: 20px;margin-bottom: 20px" @click.prevent="removeProject" :loading="deletePending" v-if="!project.public">
+                                <el-button type="danger" style="width: 60%;margin-top: 20px;margin-bottom: 20px" @click.prevent="removeProject" :loading="deletePending" v-if="!guestRole">
                                     {{ownRole?'删除项目':'退出项目'}}
                                 </el-button>
                             </el-col>
@@ -247,6 +247,9 @@
             }
         },
         computed:{
+            guestRole:function () {
+                return this.$store.getters.guestRole;
+            },
             manageRole:function () {
                 return this.$store.getters.manageRole;
             },

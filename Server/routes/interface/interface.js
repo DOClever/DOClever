@@ -160,7 +160,14 @@ function Interface() {
             await(this.validateUser(req));
             let query={
                 url:req.clientParam.url,
-                method:req.clientParam.method
+                method:req.clientParam.method,
+                project:req.project._id
+            }
+            if(req.clientParam.id)
+            {
+                query._id={
+                    $ne:req.clientParam.id
+                }
             }
             if (req.headers["docleverversion"]) {
                 query.version = req.headers["docleverversion"]
