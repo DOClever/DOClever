@@ -274,7 +274,7 @@
                 }.call(this),
                 showDialog:false,
                 tabIndex:this.index,
-                pullInject:this.interface.pullInject?1:0
+                pullInject:(this.interface && this.interface.pullInject)?1:0
             }
         },
         components:{
