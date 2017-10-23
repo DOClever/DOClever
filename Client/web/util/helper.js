@@ -1659,7 +1659,7 @@ helper.handleTestInterface=function (inter,data,status) {
             for(var i=0;i<obj.header.length;i++)
             {
                 var obj1=obj.header[i];
-                if(obj1.name.toLowerCase()=="content-type" && obj1.value.toLowerCase()=="application/json")
+                if(obj1.name.toLowerCase()=="content-type" && obj1.value.toLowerCase().indexOf("application/json")>-1)
                 {
                     bFind=true;
                     break;

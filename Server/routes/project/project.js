@@ -4203,7 +4203,7 @@ function Project() {
                         }
                         let bJSON=false;
                         obj.param[0].header=grp.request.header.map(function (obj) {
-                            if(obj.key.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application/json")
+                            if(obj.key.toLowerCase()=="content-type" && obj.value.toLowerCase().indexOf("application/json")>-1)
                             {
                                 bJSON=true;
                             }
@@ -4245,14 +4245,28 @@ function Project() {
                                 body=[];
                                 if(bJSON)
                                 {
-                                    let objJSON;
+                                    let objJSON,bSuccess;
                                     try
                                     {
                                         objJSON=eval("("+grp.request.body.raw+")");
+                                        bSuccess=true;
                                     }
                                     catch (err)
                                     {
+                                        bSuccess=false;
+                                    }
+                                    if(!bSuccess)
+                                    {
+                                        let str=grp.request.body.raw;
+                                        str=str.replace(/\{\{.+?\}\}/g,"\"\"");
+                                        try
+                                        {
+                                            objJSON=eval("("+str+")");
+                                        }
+                                        catch (err)
+                                        {
 
+                                        }
                                     }
                                     if(objJSON)
                                     {

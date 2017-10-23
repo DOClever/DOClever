@@ -2050,10 +2050,10 @@ function parseURL(url) {
             }
             return ret;
         })(),
-        file: (a.pathname?a.pathname.match(/\/([^\/?#]+)$/i):"" || [,''])[1],
+        file:((a.pathname?a.pathname.match(/\/([^\/?#]+)$/i):"") || [,''])[1],
         hash: a.hash?a.hash.replace('#',''):"",
         path: a.pathname?a.pathname.replace(/^([^\/])/,'/$1'):"",
-        relative: (a.href.match(/tps?:\/\/[^\/]+(.+)/) || [,''])[1],
+        relative: ((a.href.match(/tps?:\/\/[^\/]+(.+)/)) || [,''])[1],
         segments: a.pathname?a.pathname.replace(/^\//,'').split('/'):""
     };
 }

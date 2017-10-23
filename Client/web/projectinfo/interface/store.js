@@ -633,7 +633,7 @@ module.exports={
                     for(var i=0;i<state.param[index].header.length;i++)
                     {
                         var obj=state.param[index].header[i];
-                        if(obj.name.toLowerCase()=="content-type" && obj.value.toLowerCase()=="application/json")
+                        if(obj.name.toLowerCase()=="content-type" && obj.value.toLowerCase().indexOf("application/json")>-1)
                         {
                             bFind=true;
                             break;
