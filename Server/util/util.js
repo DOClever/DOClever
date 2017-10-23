@@ -1706,9 +1706,7 @@ var init=async (function () {
                 break;
             }
         }
-        let user=require("../model/userModel");
-        let objUser=await (user.findOneAsync());
-        if(index>-1 && objUser)
+        if(index>-1)
         {
             console.log("数据更新中,请勿操作");
             for(let i=index;i<files.length;i++)

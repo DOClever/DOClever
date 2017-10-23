@@ -2704,7 +2704,16 @@ function Project() {
                                 },
                                 name:"未命名",
                                 remark:"",
-                                id:uuid()
+                                id:uuid(),
+                                queryParam:[],
+                                header:[],
+                                restParam:[],
+                                outInfo:{
+                                    "rawMock" : "",
+                                    "rawRemark" : "",
+                                    "type" : 0
+                                },
+                                outParam:[],
                             }
                         ],
                         id:uuid()
@@ -3527,7 +3536,16 @@ function Project() {
                                     },
                                     name:"未命名",
                                     remark:"",
-                                    id:uuid()
+                                    id:uuid(),
+                                    queryParam:[],
+                                    header:[],
+                                    restParam:[],
+                                    outInfo:{
+                                        "rawMock" : "",
+                                        "rawRemark" : "",
+                                        "type" : 0
+                                    },
+                                    outParam:[],
                                 }
                             ],
                             id:uuid()

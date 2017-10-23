@@ -60,7 +60,7 @@
                 </thead>
                 <tbody>
                     <template v-for="(item,index) in list">
-                        <tr style="text-align: center;vertical-align: middle">
+                        <tr style="text-align: center;vertical-align: middle" :key="item._id">
                             <td style="width: 15%">
                                 {{item.name}}
                             </td>

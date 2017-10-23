@@ -189,7 +189,7 @@ var vue=new Vue({
                 _this.param[index].name=objInter.name;
                 _this.param[index].id=objInter.id;
                 _this.param[index].remark=objInter.remark;
-                if(objInter.queryParam.length>0)
+                if(objInter.queryParam && objInter.queryParam.length>0)
                 {
                     _this.param[index].query=objInter.queryParam;
                     _this.param[index].query.forEach(function (item) {
@@ -246,7 +246,7 @@ var vue=new Vue({
                 {
                     objInter.bodyParam=_this.param[index].body;
                 }
-                if(objInter.header.length>0)
+                if(objInter.header && objInter.header.length>0)
                 {
                     _this.param[index].header=objInter.header;
                     _this.param[index].header.push({
@@ -259,7 +259,7 @@ var vue=new Vue({
                 {
                     objInter.header=_this.param[index].header;
                 }
-                if(objInter.outParam.length>0)
+                if(objInter.outParam && objInter.outParam.length>0)
                 {
                     helper.initResultShow(objInter.outParam);
                     _this.param[index].result=objInter.outParam;
@@ -268,7 +268,7 @@ var vue=new Vue({
                 {
                     objInter.outParam=_this.param[index].result;
                 }
-                if(objInter.restParam.length>0)
+                if(objInter.restParam && objInter.restParam.length>0)
                 {
                     _this.param[index].param=objInter.restParam;
                     _this.param[index].param.forEach(function (item) {

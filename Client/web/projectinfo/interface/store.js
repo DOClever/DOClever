@@ -492,7 +492,7 @@ module.exports={
                 state.param[index].name=objInter.name;
                 state.param[index].id=objInter.id;
                 state.param[index].remark=objInter.remark;
-                if(objInter.queryParam.length>0)
+                if(objInter.queryParam && objInter.queryParam.length>0)
                 {
                     state.param[index].query=objInter.queryParam;
                     state.param[index].query.forEach(function (item) {
@@ -549,7 +549,7 @@ module.exports={
                 {
                     objInter.bodyParam=state.param[index].body;
                 }
-                if(objInter.header.length>0)
+                if(objInter.header && objInter.header.length>0)
                 {
                     state.param[index].header=objInter.header;
                     state.param[index].header.push({
@@ -562,7 +562,7 @@ module.exports={
                 {
                     objInter.header=state.param[index].header;
                 }
-                if(objInter.outParam.length>0)
+                if(objInter.outParam && objInter.outParam.length>0)
                 {
                     helper.initResultShow(objInter.outParam);
                     state.param[index].result=objInter.outParam;
@@ -571,7 +571,7 @@ module.exports={
                 {
                     objInter.outParam=state.param[index].result;
                 }
-                if(objInter.restParam.length>0)
+                if(objInter.restParam && objInter.restParam.length>0)
                 {
                     state.param[index].param=objInter.restParam;
                     state.param[index].param.forEach(function (item) {
