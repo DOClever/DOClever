@@ -165,7 +165,7 @@
                         {
                             _this.newMsg=false;
                             document.getElementById("navBar").style.zIndex="";
-                            var child=$.showBox(_this,"message",{
+                            var child=$.showBox(_this,require("./message.vue"),{
                                 propArr:data.data
                             });
                             child.$on("close",function () {

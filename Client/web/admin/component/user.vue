@@ -139,7 +139,7 @@
         },
         methods:{
             create:function () {
-                $.showBox(this.$root,"userEdit",{},"admin/component");
+                $.showBox(this.$root,require("./userEdit.vue"));
             },
             edit:function (item,index) {
                 var _this=this;
@@ -150,9 +150,9 @@
                     $.stopHud();
                     if(data.code==200)
                     {
-                        $.showBox(_this.$root,"userEdit",{
+                        $.showBox(_this.$root,require("./userEdit.vue"),{
                             propObj:data.data
-                        },"admin/component");
+                        });
                     }
                     else
                     {

@@ -493,10 +493,10 @@
                 var _this=this;
                 var obj=$.clone(this.interfaceEdit);
                 obj.param=$.clone(this.param);
-                var child=$.showBox(this,"run",{
+                var child=$.showBox(this,require("./run/run.vue"),{
                     "interfaceEdit":obj,
                     "index":this.index
-                },"projectinfo/interface/run");
+                });
                 child.$on("save",function () {
                     store.dispatch("newInterface");
                 });
@@ -658,10 +658,10 @@
                     $.stopHud();
                     if(data.code==200)
                     {
-                        var child=$.showBox(_this,"snapshotList",{
+                        var child=$.showBox(_this,require("./snapshotList.vue"),{
                             arr:data.data,
                             id:_this.interfaceEdit._id
-                        },"projectinfo/interface");
+                        });
 
                     }
                     else
@@ -855,10 +855,10 @@
                         $.notify(obj2.msg,0);
                         return;
                     }
-                    $.showBox(_this,"sendMail",{
+                    $.showBox(_this,require("./sendMail.vue"),{
                         source:user,
                         id:_this.interfaceEdit._id
-                    },"projectinfo/interface")
+                    })
                 })
             }
         },

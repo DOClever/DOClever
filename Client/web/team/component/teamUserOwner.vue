@@ -87,10 +87,10 @@
                     id:session.get("teamId"),
                     project:item._id
                 }).then(function (data) {
-                    var child=$.showBox(_this,"teamUserOwnerSelect",{
+                    var child=$.showBox(_this,require("./teamUserOwnerSelect.vue"),{
                         arr:data.data,
                         id:item._id
-                    },"team/component")
+                    })
                     child.$on("save",function () {
                         item.handle=1;
                     })

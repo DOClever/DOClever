@@ -351,9 +351,9 @@
                 var _this=this;
                 var obj=$.clone(this.interfaceEdit);
                 obj.param=$.clone(this.$store.state.param);
-                var child=$.showBox(this,"run",{
+                var child=$.showBox(this,require("./run/run.vue"),{
                     "interfaceEdit":obj
-                },"projectinfo/interface/run");
+                });
             },
         }
     }

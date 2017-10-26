@@ -167,11 +167,11 @@
                                 if(data.data.length>0)
                                 {
                                     _this.deletePending=false;
-                                    var child=$.showBox(_this,"teamUserOwner",{
+                                    var child=$.showBox(_this,require("./teamUserOwner.vue"),{
                                         arr:data.data,
                                         user:session.get("id"),
                                         self:1
-                                    },"team/component")
+                                    })
                                     child.$on("remove",function () {
                                         setTimeout(function () {
                                             location.href="../../project/project.html"
@@ -288,9 +288,9 @@
                     $.stopHud();
                     if(data.code==200)
                     {
-                        var child=$.showBox(_this,"teamTransfer",{
+                        var child=$.showBox(_this,require("./teamTransfer.vue"),{
                             arr:data.data
-                        },"team/component");
+                        });
                     }
                     else
                     {

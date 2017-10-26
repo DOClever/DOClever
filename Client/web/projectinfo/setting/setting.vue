@@ -396,9 +396,9 @@
                                 user:obj
                             }
                         })
-                        var child=$.showBox(_this,"importMember",{
+                        var child=$.showBox(_this,require("./importMember.vue"),{
                             source:arr
-                        },"projectinfo/setting");
+                        });
                         child.$on("save",function (arr) {
                             _this.project.users=_this.project.users.concat(arr);
                         })
@@ -460,7 +460,7 @@
             },
             editRoleOption:function () {
                 var _this=this;
-                var child=$.showBox(this,"roleOption");
+                var child=$.showBox(this,require("../../component/roleOption.vue"));
                 child.$on("save",function (val) {
                     _this.roleOption=val;
                 })
@@ -474,9 +474,9 @@
                     $.stopHud();
                     if(data.code==200)
                     {
-                        $.showBox(_this,"transfer",{
+                        $.showBox(_this,require("./transfer.vue"),{
                             source:data.data
-                        },"projectinfo/setting");
+                        });
                     }
                     else
                     {

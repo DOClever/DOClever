@@ -1916,12 +1916,12 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
                 {
                     var startDate=new Date();
                     var file=await (new Promise(function (resolve,reject) {
-                        var child=$.showBox(window.vueObj,"testUploadFile",{
+                        var child=$.showBox(window.vueObj,require("../projectinfo/test/testUploadFile.vue"),{
                             name:name,
                             url:path,
                             keyName:obj1.name,
                             remark:obj1.remark
-                        },"projectinfo/test");
+                        });
                         child.$on("save",function (obj) {
                             resolve(obj);
                         })
@@ -1968,12 +1968,12 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
             {
                 var startDate=new Date();
                 var file=await (new Promise(function (resolve,reject) {
-                    var child=$.showBox(window.vueObj,"testUploadFile",{
+                    var child=$.showBox(window.vueObj,require("../projectinfo/test/testUploadFile.vue"),{
                         name:name,
                         url:path,
                         keyName:obj.name,
                         remark:obj.remark
-                    },"projectinfo/test");
+                    });
                     child.$on("save",function (obj) {
                         if(obj.files.length==0)
                         {
@@ -2264,11 +2264,11 @@ helper.runTestCode=async function (code,test,global,opt,root) {
     }
     function input(title,data) {
         return new Promise(function (resolve,reject) {
-            var child=$.showBox(window.vueObj,"testRunInput",{
+            var child=$.showBox(window.vueObj,require("../projectinfo/test/testRunInput.vue"),{
                 title:title,
                 data:data,
                 name:test.name
-            },"projectinfo/test");
+            });
             child.$on("save",function (obj) {
                 resolve(obj);
             })

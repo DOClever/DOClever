@@ -118,10 +118,10 @@
                     $.stopHud();
                     if(data.code==200)
                     {
-                        var child=$.showBox(_this,"teamProjectUser",{
+                        var child=$.showBox(_this,require("./teamProjectUser.vue"),{
                             arr:data.data,
                             id:item._id
-                        },"team/component");
+                        });
                         child.$on("update",function (arr) {
                             item.userCount=arr.length+1;
                             arr.forEach(function (obj) {
@@ -148,10 +148,10 @@
                     $.stopHud();
                     if(data.code==200)
                     {
-                        var child=$.showBox(_this,"projectTransfer",{
+                        var child=$.showBox(_this,require("./projectTransfer.vue"),{
                             arr:data.data,
                             id:item._id
-                        },"team/component");
+                        });
                         child.$on("userMinus",function () {
                             item.userCount--;
                         })

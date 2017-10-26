@@ -123,7 +123,7 @@
             },
             editRoleOption:function (item) {
                 var _this=this;
-                var child=$.showBox(this,"roleOption",{
+                var child=$.showBox(this,require("../../component/roleOption.vue"),{
                     data:item.option
                 });
                 child.$on("save",function (val) {

@@ -309,11 +309,11 @@ $.getNowFormatDate=function(fmt) {
     return fmt;
 }
 
-$.showBox=function (vue,type,attr) {
+$.showBox=function (vue,obj,attr) {
     var ele=document.createElement("div");
     vue.$el.appendChild(ele);
     var self = vue;
-    var Child = Vue.extend(require("../component/"+type+".vue"));
+    var Child = Vue.extend(obj);
     var child = new Child({
         el: ele,
         parent: self,

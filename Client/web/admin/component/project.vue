@@ -132,9 +132,9 @@
                     $.stopHud();
                     if(data.code==200)
                     {
-                        $.showBox(_this.$root,"projectEdit",{
+                        $.showBox(_this.$root,require("./projectEdit.vue"),{
                             propObj:data.data
-                        },"admin/component");
+                        });
                     }
                     else
                     {

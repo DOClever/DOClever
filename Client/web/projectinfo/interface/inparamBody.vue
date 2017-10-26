@@ -235,9 +235,9 @@
                         status: ""
                     });
                 }
-                var child=$.showBox(this.$parent,"valueList",{
+                var child=$.showBox(this.$parent,require("./valueList.vue"),{
                     "source":item.value
-                },"projectinfo/interface");
+                });
                 child.$on("save",function (value) {
                     item.value=value;
                 });
@@ -247,9 +247,9 @@
                 {
                     Vue.set(this.info,"rawText","");
                 }
-                var child=$.showBox(this.$parent,"rawText",{
+                var child=$.showBox(this.$parent,require("./rawText.vue"),{
                     "source":this.info.rawText
-                },"projectinfo/interface");
+                });
                 var _this=this;
                 child.$on("save",function (value) {
                     _this.info.rawText=value;

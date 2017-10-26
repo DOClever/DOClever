@@ -113,7 +113,7 @@ var vue=new Vue({
             }
         },
         importProject:function () {
-            $.showBox(this,"importProject");
+            $.showBox(this,require("../component/importProject.vue"));
         },
         addGroup:function () {
             var _this=this;
