@@ -32,6 +32,10 @@
 
     </el-row>
     <el-tabs style="width: 90%;margin: 0 auto;">
+        <el-tab-pane label="图文指南">
+            <h5 style="float: right"><a href="../resource/help.pdf">如果文档加载不出来，可以点击这里下载pdf</a></h5>
+            <iframe frameborder="0" src="https://www.kancloud.cn/lovefeiyang/doclever/432894" style="width: 100%;height: 1000px"></iframe>
+        </el-tab-pane>
         <el-tab-pane label="视频文档">
             <el-row class="row" style="text-align: center;height: 700px;background-color: white;padding-top: 20px">
                 <el-col class="col" :span="4" style="font-size: larger;color: #50a3ff;font-weight: bold;overflow-y: auto">
@@ -124,39 +128,6 @@
                     <iframe frameborder="0" width="640" height="498" src="https://v.qq.com/iframe/player.html?vid=b0385i031zz&tiny=0&auto=0" allowfullscreen id="video"></iframe>
                 </el-col>
             </el-row>
-        </el-tab-pane>
-        <el-tab-pane label="疑难解答">
-            <h3>
-                如果我用nginx接管了前端，那么需要注意什么呢？
-            </h3>
-            <p>如果你用nginx接管了前端页面，那么需要对nginx做一些简单的设置，因为DOClever在调试接口的时候会发送一些下划线开头的自定义http头部，而nginx默认会过滤掉这些头部，所以我们需要在nginx的配置文件中http或者server的配置项中添加underscores_in_headers on;允许在header的字段中带下划线，然后重启nginx即可
-            </p>
-            <hr>
-            <h3>
-                出现如下错误:<br>
-                <img src="../pic/help/1.png" style="width: 600px">
-            </h3>
-            <p>
-                说明你的node版本高了，导致编译不过，建议你使用6.10.0版本，这个版本为lts版本，长期维护，<a href="https://nodejs.org/en/blog/release/v6.10.0/" target="_blank">下载地址</a>
-            </p>
-            <hr>
-            <h3>
-                出现如下错误:<br>
-                <img src="../pic/help/2.png" style="width: 600px">
-            </h3>
-            <p>
-                因为你的url是内网环境，如果你是用的线上版本，请确保net.js 已经开启，如果你用的是内网部署版本，说明你内网部署的DOClever服务器和你测试的接口服务器不在同一个内网里，请确保Proxy开关打开：<br>
-                <img src="../pic/help/3.png" style="width: 300px"><br>
-                然后启动net.js
-            </p>
-            <hr>
-            <h3>
-                出现如下错误:<br>
-                <img src="../pic/help/4.jpg" style="width: 600px">
-            </h3>
-            <p>
-                说明你的mongodb没有连接上，检查mongodb是否已经开启，可以用romongodb这样的客户端根据检测，然后确保你config.json里面的数据库配置信息是否填写正确，数据库是否存在。
-            </p>
         </el-tab-pane>
     </el-tabs>
     <el-row class="row" style="background-color: rgb(39,52,68);color: white">

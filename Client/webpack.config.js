@@ -20,7 +20,8 @@ module.exports = {
         team:"./web/team/team",
         registerqq:"./web/register/registerqq",
         admin:"./web/admin/admin",
-        adminlogin:"./web/admin/adminlogin"
+        adminlogin:"./web/admin/adminlogin",
+        custom:"./web/custom/custom",
     },
     output: {
         path: path.join(__dirname, 'dist'),
