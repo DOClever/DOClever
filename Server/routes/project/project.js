@@ -2259,7 +2259,15 @@ function Project() {
                                     rawTextRemark:"",
                                     rawFileRemark:"",
                                     rawText:"",
-                                    rawJSON:[],
+                                    rawJSON:[{
+                                        name:"",
+                                        must:1,
+                                        type:0,
+                                        remark:"",
+                                        show:1,
+                                        mock:"",
+                                        drag:1
+                                    }],
                                     rawJSONType:0
                                 };
                                 objAction.requestParameterList.forEach(function (obj) {
@@ -2289,7 +2297,15 @@ function Project() {
                                     rawTextRemark:"",
                                     rawFileRemark:"",
                                     rawText:"",
-                                    rawJSON:[],
+                                    rawJSON:[{
+                                        name:"",
+                                        must:1,
+                                        type:0,
+                                        remark:"",
+                                        show:1,
+                                        mock:"",
+                                        drag:1
+                                    }],
                                     rawJSONType:0
                                 };
                                 for(let o of objAction.requestParameterList)
@@ -2725,7 +2741,15 @@ function Project() {
                         rawTextRemark:"",
                         rawFileRemark:"",
                         rawText:"",
-                        rawJSON:[],
+                        rawJSON:[{
+                            name:"",
+                            must:1,
+                            type:0,
+                            remark:"",
+                            show:1,
+                            mock:"",
+                            drag:1
+                        }],
                         rawJSONType:0
                     };
                     let outInfo={
@@ -2750,7 +2774,15 @@ function Project() {
                                 rawTextRemark:"",
                                 rawFileRemark:"",
                                 rawText:"",
-                                rawJSON:[],
+                                rawJSON:[{
+                                    name:"",
+                                    must:1,
+                                    type:0,
+                                    remark:"",
+                                    show:1,
+                                    mock:"",
+                                    drag:1
+                                }],
                                 rawJSONType:0
                             };
                         }
@@ -3558,7 +3590,15 @@ function Project() {
                         rawTextRemark:"",
                         rawFileRemark:"",
                         rawText:"",
-                        rawJSON:[],
+                        rawJSON:[{
+                            name:"",
+                            must:1,
+                            type:0,
+                            remark:"",
+                            show:1,
+                            mock:"",
+                            drag:1
+                        }],
                         rawJSONType:0
                     };
                     let outInfo={
@@ -3583,7 +3623,15 @@ function Project() {
                                 rawTextRemark:"",
                                 rawFileRemark:"",
                                 rawText:"",
-                                rawJSON:[],
+                                rawJSON:[{
+                                    name:"",
+                                    must:1,
+                                    type:0,
+                                    remark:"",
+                                    show:1,
+                                    mock:"",
+                                    drag:1
+                                }],
                                 rawJSONType:0
                             };
                         }
