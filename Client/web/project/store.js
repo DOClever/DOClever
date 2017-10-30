@@ -2,10 +2,12 @@ module.exports=new Vuex.Store({
     state:{
         projectCreateList:[],
         projectJoinList:[],
+        projectPublicList:[],
         teamCreateList:[],
         teamJoinList:[],
         projectCreateSort:0,
         projectJoinSort:0,
+        projectPublicSort:0,
         teamCreateSort:0,
         teamJoinSort:0,
         arrApply:[],
@@ -137,6 +139,42 @@ module.exports=new Vuex.Store({
                 })
             }
         },
+        changeProjectSortJoin:function (state,data) {
+            if(state.projectPublicSort==0)
+            {
+                state.projectPublicList.sort(function (obj1,obj2) {
+                    if(obj1.createdAt>obj2.createdAt)
+                    {
+                        return -1;
+                    }
+                    else if(obj1.createdAt<obj2.createdAt)
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                })
+            }
+            else
+            {
+                state.projectPublicList.sort(function (obj1,obj2) {
+                    if(obj1.name.toLowerCase()<obj2.name.toLowerCase())
+                    {
+                        return -1;
+                    }
+                    else if(obj1.name.toLowerCase()>obj2.name.toLowerCase())
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                })
+            }
+        },
         changeTeamSortCreate:function (state,data) {
             if(state.teamCreateSort==0)
             {
@@ -199,26 +237,26 @@ module.exports=new Vuex.Store({
                 return data;
             })
         },
-        handleApply:function (context,data) {
+        handleApply:function (context,dt) {
             return net.put("/user/handleapply",{
-                apply:data.item._id,
-                state:data.state
+                apply:dt.item._id,
+                state:dt.state
             }).then(function (data) {
                 if(data.code==200)
                 {
                     if(typeof(data.data)=="object")
                     {
-                        data.item.handle=1;
+                        dt.item.handle=1;
                         context.commit("addTeamJoin",data.data);
                     }
                     else
                     {
-                        data.item.handle=2;
+                        dt.item.handle=2;
                     }
                 }
                 else
                 {
-                    data.item.handle=3;
+                    dt.item.handle=3;
                 }
             })
         },
@@ -238,6 +276,10 @@ module.exports=new Vuex.Store({
                     for(var i=0;i<data1.data.project.join.length;i++)
                     {
                         context.state.projectJoinList.push(data1.data.project.join[i]);
+                    }
+                    for(var i=0;i<data1.data.project.public.length;i++)
+                    {
+                        context.state.projectPublicList.push(data1.data.project.public[i]);
                     }
                     for(var i=0;i<data1.data.team.create.length;i++)
                     {

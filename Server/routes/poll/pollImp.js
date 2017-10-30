@@ -35,7 +35,8 @@ var interface=[
             url:{
                 type:String,
             },
-            test:String
+            test:String,
+            immediate:Number
         },
         "data":String,
         user:1,

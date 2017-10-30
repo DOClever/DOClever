@@ -81,7 +81,7 @@ var vue=new Vue({
             })
         },
         importProject:function () {
-            $.showBox(this,"importProject");
+            $.showBox(this,require("../component/importProject.vue"));
         },
         handleApply:function (item,state) {
             var _this=this;

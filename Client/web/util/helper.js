@@ -3,6 +3,7 @@
  */
 var CryptoJS=require("crypto-js")
 require("./Base64")
+var mockjs=require("mockjs");
 var helper={};
 helper.methodColor=function (m) {
     if(m==1)
@@ -342,6 +343,36 @@ helper.convertToJSON=function (data,obj,info,run) {
                 else
                 {
                     return null;
+                }
+            }
+            else if(/^mj/i.test(str))
+            {
+                var val=$.trim(str.substring(3,str.length-1));
+                if(val[0]=="@")
+                {
+                    return mockjs.mock(val);
+                }
+                else
+                {
+                    var obj=eval("("+val+")");
+                    if(typeof(obj)=="object")
+                    {
+                        var objNew={};
+                        for(var key in obj)
+                        {
+                            objNew["mock|"+key]=obj[key];
+                        }
+                        var ret=mockjs.mock(objNew);
+                        for(var key in ret)
+                        {
+                            return ret[key];
+                        }
+
+                    }
+                    else
+                    {
+                        return val;
+                    }
                 }
             }
         }
@@ -1105,6 +1136,36 @@ helper.mock=function (data,info) {
                 return null;
             }
         }
+        else if(/^mj/i.test(str))
+        {
+            var val=$.trim(str.substring(3,str.length-1));
+            if(val[0]=="@")
+            {
+                return mockjs.mock(val);
+            }
+            else
+            {
+                var obj=eval("("+val+")");
+                if(typeof(obj)=="object")
+                {
+                    var objNew={};
+                    for(var key in obj)
+                    {
+                        objNew["mock|"+key]=obj[key];
+                    }
+                    var ret=mockjs.mock(objNew);
+                    for(var key in ret)
+                    {
+                        return ret[key];
+                    }
+
+                }
+                else
+                {
+                    return val;
+                }
+            }
+        }
     }
     return data?$.trim(data):null;
 }
@@ -1381,6 +1442,10 @@ helper.handleTestInterface=function (inter,data,status) {
             }
         }
         inter.updatedAt=data.updatedAt;
+        Vue.set(obj,"encrypt",(bFindInter && inter.encrypt)?inter.encrypt:{
+            salt:"",
+            type:""
+        })
         obj.restParam.forEach(function (item) {
             var obj;
             inter.restParam.forEach(function (item1) {
@@ -1594,7 +1659,7 @@ helper.handleTestInterface=function (inter,data,status) {
             for(var i=0;i<obj.header.length;i++)
             {
                 var obj1=obj.header[i];
-                if(obj1.name.toLowerCase()=="content-type" && obj1.value.toLowerCase()=="application/json")
+                if(obj1.name.toLowerCase()=="content-type" && obj1.value.toLowerCase().indexOf("application/json")>-1)
                 {
                     bFind=true;
                     break;
@@ -1729,6 +1794,17 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
     objParam.forEach(function (obj) {
         param[obj.name]=obj.selValue;
     })
+    if(obj.pullInject)
+    {
+        if(opt && opt.param)
+        {
+            for(var key in opt.param)
+            {
+                var val=opt.param[key];
+                param[key]=val;
+            }
+        }
+    }
     var query={};
     obj.queryParam.forEach(function (obj) {
         if(!obj.name || !obj.enable)
@@ -1750,6 +1826,13 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
             query[obj.name]=obj.selValue;
         }
     })
+    if(obj.pullInject)
+    {
+        if(opt && opt.query)
+        {
+            Object.assign(query,opt.query);
+        }
+    }
     var header={},arrHeaders=["host","connection","origin","referer","user-agent","cookie"],objHeaders={};
     obj.header.forEach(function (obj) {
         if(!obj.name || !obj.enable)
@@ -1783,6 +1866,23 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
 
         }
     })
+    if(obj.pullInject)
+    {
+        if(opt && opt.header)
+        {
+            for(var key in opt.header)
+            {
+                if($.inArr(key,arrHeaders))
+                {
+                    objHeaders[key]=opt.header[key];
+                }
+                else
+                {
+                    header[key]=opt.header[key];
+                }
+            }
+        }
+    }
     var body={},bUpload=false;
     if(method=="POST" || method=="PUT" || method=="PATCH")
     {
@@ -1816,12 +1916,12 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
                 {
                     var startDate=new Date();
                     var file=await (new Promise(function (resolve,reject) {
-                        var child=$.showBox(window.vueObj,"testUploadFile",{
+                        var child=$.showBox(window.vueObj,require("../projectinfo/test/testUploadFile.vue"),{
                             name:name,
                             url:path,
                             keyName:obj1.name,
                             remark:obj1.remark
-                        },"projectinfo/test");
+                        });
                         child.$on("save",function (obj) {
                             resolve(obj);
                         })
@@ -1868,12 +1968,12 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
             {
                 var startDate=new Date();
                 var file=await (new Promise(function (resolve,reject) {
-                    var child=$.showBox(window.vueObj,"testUploadFile",{
+                    var child=$.showBox(window.vueObj,require("../projectinfo/test/testUploadFile.vue"),{
                         name:name,
                         url:path,
                         keyName:obj.name,
                         remark:obj.remark
-                    },"projectinfo/test");
+                    });
                     child.$on("save",function (obj) {
                         if(obj.files.length==0)
                         {
@@ -1907,6 +2007,68 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
             }
         }
     }
+    if(obj.pullInject)
+    {
+        if((method=="POST" || method=="PUT" || method=="PATCH") && obj.bodyInfo)
+        {
+            if(obj.bodyInfo.type==0)
+            {
+                if(opt && opt.body)
+                {
+                    Object.assign(body,opt.body);
+                }
+            }
+            else
+            {
+                if(obj.bodyInfo.rawType==0)
+                {
+                    if(opt && opt.body!==undefined)
+                    {
+                        body=opt.body;
+                    }
+                }
+                else if(obj.bodyInfo.rawType==2)
+                {
+                    if(opt && opt.body)
+                    {
+                        for(var key in opt.body)
+                        {
+                            var val=opt.body[key];
+                            var arr=key.split(".");
+                            if(arr.length>1)
+                            {
+                                var obj1=body;
+                                for(var i=0;i<arr.length;i++)
+                                {
+                                    var key1=arr[i];
+                                    if(i!=arr.length-1)
+                                    {
+                                        if(obj1[key1]!==undefined)
+                                        {
+                                            obj1=obj1[key1];
+                                        }
+                                        else
+                                        {
+                                            obj1=obj1[key1]={};
+                                        }
+                                    }
+                                    else
+                                    {
+                                        obj1[key1]=val;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                body[key]=val;
+                            }
+                        }
+                    }
+                    body=JSON.stringify(body);
+                }
+            }
+        }
+    }
     if(obj.before.mode==0)
     {
         if(global.before)
@@ -1919,93 +2081,103 @@ helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
     {
         helper.runBefore(obj.before.code,baseUrl,path,method,query,header,body,param)
     }
-    if(opt && opt.param)
+    if(!obj.pullInject)
     {
-        for(var key in opt.param)
+        if(opt && opt.param)
         {
-            var val=opt.param[key];
-            param[key]=val;
-        }
-    }
-    for(var paramKey in param)
-    {
-        path=path.replace("{"+paramKey+"}",param[paramKey])
-    }
-    if(opt && opt.query)
-    {
-        Object.assign(query,opt.query);
-    }
-    if(opt && opt.header)
-    {
-        for(var key in opt.header)
-        {
-            if($.inArr(key,arrHeaders))
+            for(var key in opt.param)
             {
-                objHeaders[key]=opt.header[key];
-            }
-            else
-            {
-                header[key]=opt.header[key];
+                var val=opt.param[key];
+                param[key]=val;
             }
         }
-    }
-    if((method=="POST" || method=="PUT" || method=="PATCH") && obj.bodyInfo)
-    {
-        if(obj.bodyInfo.type==0)
+        for(var paramKey in param)
         {
-            if(opt && opt.body)
-            {
-                Object.assign(body,opt.body);
-            }
+            path=path.replace("{"+paramKey+"}",param[paramKey])
         }
-        else
+        if(opt && opt.query)
         {
-            if(obj.bodyInfo.rawType==0)
+            Object.assign(query,opt.query);
+        }
+        if(opt && opt.header)
+        {
+            for(var key in opt.header)
             {
-                if(opt && opt.body!==undefined)
+                if($.inArr(key,arrHeaders))
                 {
-                    body=opt.body;
+                    objHeaders[key]=opt.header[key];
+                }
+                else
+                {
+                    header[key]=opt.header[key];
                 }
             }
-            else if(obj.bodyInfo.rawType==2)
+        }
+        if((method=="POST" || method=="PUT" || method=="PATCH") && obj.bodyInfo)
+        {
+            if(obj.bodyInfo.type==0)
             {
                 if(opt && opt.body)
                 {
-                    for(var key in opt.body)
+                    Object.assign(body,opt.body);
+                }
+            }
+            else
+            {
+                if(obj.bodyInfo.rawType==0)
+                {
+                    if(opt && opt.body!==undefined)
                     {
-                        var val=opt.body[key];
-                        var arr=key.split(".");
-                        if(arr.length>1)
+                        body=opt.body;
+                    }
+                }
+                else if(obj.bodyInfo.rawType==2)
+                {
+                    if(opt && opt.body)
+                    {
+                        for(var key in opt.body)
                         {
-                            var obj1=body;
-                            for(var i=0;i<arr.length;i++)
+                            var val=opt.body[key];
+                            var arr=key.split(".");
+                            if(arr.length>1)
                             {
-                                var key1=arr[i];
-                                if(i!=arr.length-1)
+                                var obj1=body;
+                                for(var i=0;i<arr.length;i++)
                                 {
-                                    if(obj1[key1]!==undefined)
+                                    var key1=arr[i];
+                                    if(i!=arr.length-1)
                                     {
-                                        obj1=obj1[key1];
+                                        if(obj1[key1]!==undefined)
+                                        {
+                                            obj1=obj1[key1];
+                                        }
+                                        else
+                                        {
+                                            obj1=obj1[key1]={};
+                                        }
                                     }
                                     else
                                     {
-                                        obj1=obj1[key1]={};
+                                        obj1[key1]=val;
                                     }
                                 }
-                                else
-                                {
-                                    obj1[key1]=val;
-                                }
+                            }
+                            else
+                            {
+                                body[key]=val;
                             }
                         }
-                        else
-                        {
-                            body[key]=val;
-                        }
                     }
+                    body=JSON.stringify(body);
                 }
-                body=JSON.stringify(body);
             }
+        }
+    }
+    else
+    {
+        for(var paramKey in param)
+        {
+            path=path.replace("{"+paramKey+"}",param[paramKey])
         }
     }
     query=$.param(query);
@@ -2092,11 +2264,11 @@ helper.runTestCode=async function (code,test,global,opt,root) {
     }
     function input(title,data) {
         return new Promise(function (resolve,reject) {
-            var child=$.showBox(window.vueObj,"testRunInput",{
+            var child=$.showBox(window.vueObj,require("../projectinfo/test/testRunInput.vue"),{
                 title:title,
                 data:data,
                 name:test.name
-            },"projectinfo/test");
+            });
             child.$on("save",function (obj) {
                 resolve(obj);
             })

@@ -14,7 +14,8 @@ module.exports=new Vuex.Store({
         lastBaseUrl:"",
         roleOption:{},
         role:0,
-        own:0
+        own:0,
+        guest:0
     },
     getters:{
         interfaceEditRole:function (state) {
@@ -141,6 +142,7 @@ module.exports=new Vuex.Store({
             else
             {
                 state.own=0;
+                var bIn=false;
                 state.project.users.forEach(function (obj) {
                     if(!obj.option && obj.role==1)
                     {
@@ -157,6 +159,7 @@ module.exports=new Vuex.Store({
                     }
                     if(obj.user._id==session.get("id"))
                     {
+                        bIn=true;
                         if(obj.role==0)
                         {
                             state.role=0;
@@ -168,6 +171,21 @@ module.exports=new Vuex.Store({
                         }
                     }
                 })
+                if(!bIn && state.project.public)
+                {
+                    state.role=1;
+                    state.guest=1;
+                    state.roleOption={
+                        "ie":0,
+                        "te":0,
+                        "gb":0,
+                        "gs":0,
+                        "gi":0,
+                        "gd":0,
+                        "ve":0,
+                        "vr":0
+                    };
+                }
             }
         },
         setBaseUrls:function (state,data) {

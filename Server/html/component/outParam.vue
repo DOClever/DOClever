@@ -166,7 +166,7 @@
                 {
                     Vue.set(item,"status","");
                 }
-                var child=$.showBox(this,"chooseStatus",{
+                var child=$.showBox(this,require("./chooseStatus.vue"),{
                     status:item.status
                 });
                 child.$on("save",function (data) {

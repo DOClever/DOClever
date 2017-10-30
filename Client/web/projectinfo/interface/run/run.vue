@@ -20,7 +20,7 @@
                     <el-col class="col" :span="2" style="line-height: 50px;text-align: left">
                         <el-popover ref="popover1" placement="bottom" width="400" trigger="hover">
                     <span style="display: inline-block;font-size: 13px">
-                对于内网测试的用户，如果DOClever的服务器和你接口服务器在同一个内网下，请确保右上角个人头像下拉菜单里的Proxy处于关闭状态，即可直接运行接口，否则请先在测试机上安装node环境（安装包点击下载：<a href="../../../resource/node.msi" target="_blank">window</a>&nbsp;&nbsp;<a href="../../../resource/node.pkg" target="_blank">mac</a>），然后将<a href="../../../resource/net.js" target="_blank">net.js</a>(和mock数据是同一个文件)保存到本地，用node运行,然后确保右上角个人头像下拉菜单里的Proxy处于开启状态，即可用本页面进行内网数据调试!
+                对于内网测试的用户，如果DOClever的服务器和你接口服务器在同一个内网下，请确保右上角个人头像下拉菜单里的Proxy处于关闭状态，即可直接运行接口，否则请先在测试机上安装node环境（安装包点击下载：<a href="/html/web/resource/node.msi" target="_blank">window</a>&nbsp;&nbsp;<a href="/html/web/resource/node.pkg" target="_blank">mac</a>），然后将<a href="/html/web/resource/net.js" target="_blank">net.js</a>(和mock数据是同一个文件)保存到本地，用node运行,然后确保右上角个人头像下拉菜单里的Proxy处于开启状态，即可用本页面进行内网数据调试!
             </span>
                         </el-popover>
                         <el-button type="text" style="font-size: 14px" v-popover:popover1>

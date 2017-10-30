@@ -253,10 +253,10 @@
                             if(data.data.length>0)
                             {
                                 $.stopHud();
-                                var child=$.showBox(_this,"teamUserOwner",{
+                                var child=$.showBox(_this,require("./teamUserOwner.vue"),{
                                     arr:data.data,
                                     user:item.user._id
-                                },"team/component")
+                                })
                                 child.$on("remove",function () {
                                     parent.users.splice(index,1);
                                 })

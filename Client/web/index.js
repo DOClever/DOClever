@@ -37,6 +37,12 @@ var vue=new Vue({
                 {
                     vue.bShowNext=true;
                 }
+                var imgElements = document.body.getElementsByTagName("img");
+                for(var i=0; i<imgElements.length; i++) {
+                    if(imgElements[i].hasAttribute("lazy") && imgElements[i].getAttribute("lazy")==next && !imgElements[i].src){
+                        imgElements[i].src=imgElements[i].getAttribute("real_src");
+                    }
+                }
             },
             afterChange: function (prev, next) {
 

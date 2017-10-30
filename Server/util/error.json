@@ -37,5 +37,8 @@
   "versionInvalidate":35,
   "pollNotFound":36,
   "articleNotFound":37,
-  "userNotInProject":38
+  "userNotInProject":38,
+  "interfaceDuplicate":39,
+  "adminNotFound":40,
+  "passwordWrong":41
 }

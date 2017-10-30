@@ -24,6 +24,10 @@
             next:function () {
                 this.page++;
                 this.$emit("change",this.page);
+            },
+            init:function () {
+                this.page=0;
+                this.$emit("change",this.page);
             }
         }
     }

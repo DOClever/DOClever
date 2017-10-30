@@ -20,6 +20,7 @@ var model=new mongoose.Schema({
         ref:"Version"
     },
     parent:String,
+    delete:Number
 },{
     timestamps:true
 });

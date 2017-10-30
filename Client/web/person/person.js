@@ -15,6 +15,8 @@ var vue=new Vue({
         newPass1:"",
         savePending:false,
         passPending:false,
+        sendPending:false,
+        sendInfo:{}
     },
     mixins:[sessionChange],
     components:{
@@ -110,10 +112,68 @@ var vue=new Vue({
                     });
                 }
             })
+        },
+        saveSendInfo:function () {
+            if(!this.sendInfo.user)
+            {
+                $.tip("请输入邮箱账户",0);
+                return;
+            }
+            else if(!this.sendInfo.password)
+            {
+                $.tip("请输入邮箱密码",0);
+                return;
+            }
+            else if(!this.sendInfo.smtp)
+            {
+                $.tip("请输入smtp地址",0);
+                return;
+            }
+            else if(!this.sendInfo.port)
+            {
+                $.tip("请输入smtp端口",0);
+                return;
+            }
+            var _this=this;
+            this.sendPending=true;
+            net.put("/user/sendinfo",this.sendInfo).then(function (data) {
+                _this.sendPending=false;
+                if(data.code==200)
+                {
+                    $.notify("保存成功",1);
+                }
+                else
+                {
+                    $.notify(data.msg,0)
+                }
+            })
         }
     },
     directives:{
         "imgfile":imgFile,
         "proxy":proxyImg
+    },
+    created:function () {
+        var _this=this;
+        net.get("/user/sendinfo").then(function (data) {
+            $.stopLoading();
+            if(data.code==200)
+            {
+                _this.sendInfo=data.data;
+            }
+            else
+            {
+                $.notify(data.msg,0)
+            }
+        })
     }
 })
+
+$.ready(function () {
+   $.startLoading();
+})
+
+
+
+
+

@@ -1,6 +1,9 @@
 module.exports={
     namespaced:true,
     getters:{
+        event: function (state, getters, rootState) {
+            return rootState.event;
+        },
         project:function (state,getters,rootState) {
             return rootState.project;
         },
@@ -33,6 +36,9 @@ module.exports={
         },
         ownRole:function (state,getters,rootState,rootGetters) {
             return rootState.own==1;
-        }
+        },
+        guestRole:function (state,getters,rootState,rootGetters) {
+            return rootState.guest==1;
+        },
     },
 }

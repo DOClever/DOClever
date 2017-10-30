@@ -96,7 +96,7 @@
                     }
                     Vue.set(item,"encrypt",obj);
                 }
-                $.showBox(this.$parent,"encrypt",{
+                $.showBox(this.$parent,require("../../../component/encrypt.vue"),{
                     "source":item.encrypt,
                     "notKey":1
                 });

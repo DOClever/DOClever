@@ -348,12 +348,12 @@ $.getNowFormatDate=function(fmt) {
     return fmt;
 }
 
-$.showBox=function (vue,type,attr,path) {
+$.showBox=function (vue,obj,attr) {
     var ele=document.createElement("div");
     vue.$el.appendChild(ele);
     var self = vue;
     var module;
-    var Child = Vue.extend(path?require("../"+path+"/"+type+".vue"):require("../component/"+type+".vue"));
+    var Child = Vue.extend(obj);
     var child = new Child({
         el: ele,
         parent: self,

@@ -37,12 +37,15 @@
                         <el-button type="info"  style="width: 400px;" @click.prevent="login" :loading="loginPending" id="login">
                             登录
                         </el-button>
-                        <el-row class="row" style="width: 400px;margin: 0 auto">
+                        <el-row class="row" style="width: 400px;margin: 0 auto;text-align: center">
                             <h5 style="text-align: center;float: left">
                                 <a style="color: #50bfff;cursor: pointer" href="../reset/reset.html">忘记密码?</a>
                             </h5>
-                            <h5 style="text-align: center">
+                            <h5 style="text-align: center;float: left;margin-left: 10px">
                                 <a style="color: #13CE66;cursor: pointer;float: right" href="../register/register.html">没有账号？立即注册</a>
+                            </h5>
+                            <h5 style="text-align: center;float: right">
+                                <a style="color: red;cursor: pointer;" href="../admin/adminlogin.html">管理总后台</a>
                             </h5>
                         </el-row>
                     </el-form-item>

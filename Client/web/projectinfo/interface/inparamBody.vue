@@ -129,7 +129,7 @@
                         {
                             var value=obj.value.toLowerCase();
                             var arr=["text/plain","application/json","text/html","application/xml","text/xml","application/javascript"];
-                            var index=arr.indexOf(value);
+                            var index=arr.indexOf(value.split(";")[0]);
                             if(index>-1)
                             {
                                 type=arr[index];
@@ -140,7 +140,7 @@
                     {
                         type="file"
                     }
-                    else if(type=="application/json")
+                    else if(type.indexOf("application/json")>-1)
                     {
                         this.info.rawType=2
                     }
@@ -151,7 +151,7 @@
                     return type;
                 },
                 set:function (value) {
-                    if(value=="application/json")
+                    if(value.indexOf("application/json")>-1)
                     {
                         this.info.rawType=2;
                         var bFind=false,objIndex;
@@ -235,9 +235,9 @@
                         status: ""
                     });
                 }
-                var child=$.showBox(this.$parent,"valueList",{
+                var child=$.showBox(this.$parent,require("./valueList.vue"),{
                     "source":item.value
-                },"projectinfo/interface");
+                });
                 child.$on("save",function (value) {
                     item.value=value;
                 });
@@ -247,9 +247,9 @@
                 {
                     Vue.set(this.info,"rawText","");
                 }
-                var child=$.showBox(this.$parent,"rawText",{
+                var child=$.showBox(this.$parent,require("./rawText.vue"),{
                     "source":this.info.rawText
-                },"projectinfo/interface");
+                });
                 var _this=this;
                 child.$on("save",function (value) {
                     _this.info.rawText=value;

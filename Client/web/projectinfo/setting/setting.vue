@@ -1,20 +1,22 @@
 <template>
     <el-row class="row">
         <el-col class="col" :span="6" style="padding: 0 10px 0 10px">
-            <el-row class="row" style="background-color: white;text-align: center;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
+            <el-row class="row" style="background-color: white;text-align: center;border-radius: 5px;box-shadow: 0px 2px 2px #888888;padding-bottom: 20px">
                 <el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=0">
                     修改项目信息
                 </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=1" v-if="manageRole">
-                修改项目组员
-            </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=2">
-                导出
-            </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=3">
-                Mock
-            </el-button><el-button type="primary" style="margin: 20px 0 20px 0;width: 80%;" @click="type=4" v-if="!session.teamId && manageRole">
-                团队申请
-            </el-button><el-button type="primary" style="margin: 20px 0 20px 0;width: 80%;" @click="type=4" v-if="session.teamId && manageRole">
-                退出团队
-            </el-button>
+                    修改项目组员
+                </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=2">
+                    导出
+                </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=3">
+                    Mock
+                </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=5" v-if="manageRole && project.source && project.source.type==0">
+                    更新工程
+                </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=4" v-if="!session.teamId && manageRole">
+                    团队申请
+                </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=4" v-if="session.teamId && manageRole">
+                    退出团队
+                </el-button>
             </el-row>
         </el-col>
         <el-col class="col" :span="18" style="padding: 0 10px 0 10px">
@@ -45,6 +47,11 @@
                                 {{project._id}}
                             </div>
                         </el-form-item>
+                        <el-form-item label="公开" style="text-align: center">
+                            <div style="width: 80%;display: inline-block;text-align: left">
+                                <el-switch v-model="project.public" on-color="#13ce66" off-color="#ff4949" :on-value="1" :off-value="0"></el-switch>
+                            </div>
+                        </el-form-item>
                         <el-row class="row" style="text-align: center">
                             <el-col class="col" :span="12" style="text-align: center">
                                 <el-button type="primary" style="width: 60%;margin-top: 20px;margin-bottom: 20px" @click.prevent="saveInfo" :loading="infoPending" v-if="manageRole">
@@ -52,7 +59,7 @@
                                 </el-button>
                             </el-col>
                             <el-col class="col" :span="12" style="text-align: center">
-                                <el-button type="danger" style="width: 60%;margin-top: 20px;margin-bottom: 20px" @click.prevent="removeProject" :loading="deletePending">
+                                <el-button type="danger" style="width: 60%;margin-top: 20px;margin-bottom: 20px" @click.prevent="removeProject" :loading="deletePending" v-if="!guestRole">
                                     {{ownRole?'删除项目':'退出项目'}}
                                 </el-button>
                             </el-col>
@@ -164,6 +171,23 @@
                         </el-form>
                     </template>
                 </el-row>
+                <el-row v-show="type==5" class="row">
+                    <el-row class="row" style="height: 60px">
+                        <h4 style="margin-left: 10px;color: gray">
+                            更新工程
+                        </h4>
+                    </el-row>
+                    <el-row class="row" style="word-break: break-all;padding: 10px;font-size: 15px;" v-if="project.source">
+                        该工程是通过Swagger导入的：<br><br>
+                        <el-radio class="radio" :label="0" v-model="importType">URL</el-radio>&nbsp;&nbsp;
+                        <el-radio class="radio" :label="1" v-model="importType">JSON</el-radio><br><br>
+                        <el-input v-model="project.source.url" style="width: 90%" placeholder="请输入更新的url地址" v-if="importType==0"></el-input>
+                        <el-input v-model="importText" type="textarea" :rows="5" placeholder="请输入更新的JSON" v-else></el-input>
+                    </el-row>
+                    <el-row class="row" style="text-align: center;margin-top: 20px">
+                        <el-button type="primary" style="width: 200px;margin-bottom: 20px" @click="updateProject" :loading="updateLoading">更新</el-button>
+                    </el-row>
+                </el-row>
             </el-row>
         </el-col>
     </el-row>
@@ -197,7 +221,10 @@
                     "gd":0,
                     "ve":0,
                     "vr":0
-                }
+                },
+                importType:0,
+                importText:"",
+                updateLoading:false,
             }
         },
         mixins:[sessionChange],
@@ -220,6 +247,9 @@
             }
         },
         computed:{
+            guestRole:function () {
+                return this.$store.getters.guestRole;
+            },
             manageRole:function () {
                 return this.$store.getters.manageRole;
             },
@@ -250,7 +280,8 @@
                 net.post("/project/create",{
                     id:session.get("projectId"),
                     dis:_this.project.dis,
-                    name:_this.project.name
+                    name:_this.project.name,
+                    public:_this.project.public
                 }).then(function (data) {
                     _this.infoPending=false;
                     if(data.code)
@@ -365,9 +396,9 @@
                                 user:obj
                             }
                         })
-                        var child=$.showBox(_this,"importMember",{
+                        var child=$.showBox(_this,require("./importMember.vue"),{
                             source:arr
-                        },"projectinfo/setting");
+                        });
                         child.$on("save",function (arr) {
                             _this.project.users=_this.project.users.concat(arr);
                         })
@@ -429,7 +460,7 @@
             },
             editRoleOption:function () {
                 var _this=this;
-                var child=$.showBox(this,"roleOption");
+                var child=$.showBox(this,require("../../component/roleOption.vue"));
                 child.$on("save",function (val) {
                     _this.roleOption=val;
                 })
@@ -443,19 +474,86 @@
                     $.stopHud();
                     if(data.code==200)
                     {
-                        $.showBox(_this,"transfer",{
+                        $.showBox(_this,require("./transfer.vue"),{
                             source:data.data
-                        },"projectinfo/setting");
+                        });
                     }
                     else
                     {
                         $.notify(data.msg,0)
                     }
                 })
+            },
+            updateProject:function () {
+                if(this.importType==0)
+                {
+                    if(!this.project.source.url)
+                    {
+                        $.tip("请输入url地址",0);
+                        return;
+                    }
+                }
+                else
+                {
+                    if(!this.importText)
+                    {
+                        $.tip("请输入JSON",0);
+                        return;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            JSON.parse(this.importText)
+                        }
+                        catch (err)
+                        {
+                            $.tip("JSON格式不正确",0);
+                            return;
+                        }
+                    }
+                }
+                var _this=this;
+                $.confirm("确定更新该工程？",function () {
+                    _this.updateLoading=true;
+                    net.put("/project/updateswagger",_this.importType==0?{
+                        id:session.get("projectId"),
+                        url:_this.project.source.url
+                    }:{
+                        id:session.get("projectId"),
+                        json:_this.importText
+                    }).then(function (data) {
+                        _this.updateLoading=false;
+                        if(data.code==200)
+                        {
+                            $.notify("更新成功",1)
+                            setTimeout(function () {
+                                location.reload();
+                            },1500)
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0)
+                        }
+                    })
+                })
             }
         },
         created:function () {
             var _this=this;
+            this.$store.getters.event.$on("init",function () {
+                if(_this.project.source && _this.project.source.type==0)
+                {
+                    if(_this.project.source.url)
+                    {
+                        _this.importType=0;
+                    }
+                    else
+                    {
+                        _this.importType=1;
+                    }
+                }
+            })
         }
     }
 </script>

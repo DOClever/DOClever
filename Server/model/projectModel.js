@@ -41,6 +41,11 @@ var model=new mongoose.Schema({
     team:{
         type:mongoose.Schema.ObjectId,
         ref:"Team"
+    },
+    source:Object,     //{type:Number,url:String}   0,swagger,1,rap,2,postman
+    public:{
+        type:Number,
+        default:0
     }
 },{
     timestamps:true

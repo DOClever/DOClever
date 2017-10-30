@@ -133,14 +133,14 @@
         methods:{
             createStatus:function () {
                 var _this=this;
-                var child=$.showBox(this,"statusEdit",{},"projectinfo/global");
+                var child=$.showBox(this,require("./statusEdit.vue"),{});
                 child.$on("save",function (data) {
                     _this.status.unshift(data);
                 })
             },
             editStatus:function (item) {
                 var _this=this;
-                var child=$.showBox(this,"statusEdit",{
+                var child=$.showBox(this,require("./statusEdit.vue"),{
                     source:item
                 },"projectinfo/global");
                 child.$on("save",function (data) {
@@ -250,7 +250,7 @@
             },
             createArticle:function () {
                 var _this=this;
-                var child=$.showBox(this,"article",{
+                var child=$.showBox(this,require("./article.vue"),{
                     propNew:1
                 },"projectinfo/global");
                 child.$on("save",function (obj) {
@@ -267,7 +267,7 @@
                     $.stopHud();
                     if(data.code==200)
                     {
-                        var child=$.showBox(_this,"article",{
+                        var child=$.showBox(_this,require("./article.vue"),{
                             propObj:data.data
                         },"projectinfo/global");
                         child.$on("save",function (obj) {

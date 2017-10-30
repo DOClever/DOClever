@@ -264,12 +264,12 @@
                     var obj2=values[1];
                     if(obj1.code==200 && obj2.code==200)
                     {
-                        var child=$.showBox(_this,"testInterfaceRun",{
+                        var child=$.showBox(_this,require("./testInterfaceRun.vue"),{
                             source:obj1.data.data,
                             url:obj1.data.baseUrl,
                             status:obj2.data,
                             index:0
-                        },"projectinfo/test");
+                        });
                         child.$on("save",function (obj) {
                             var a=document.createElement("a");
                             a.setAttribute("type","1");
@@ -316,14 +316,14 @@
                         if(obj3.code==200)
                         {
                             var index=helper.handleTestInterface(objInterface,obj3.data,obj2.data);
-                            var child=$.showBox(_this,"testInterfaceRun",{
+                            var child=$.showBox(_this,require("./testInterfaceRun.vue"),{
                                 source:obj1.data.data,
                                 url:obj1.data.baseUrl,
                                 status:obj2.data,
                                 interface:objInterface,
                                 index:index,
                                 netInterface:obj3.data
-                            },"projectinfo/test");
+                            });
                             child.$on("save",function (obj) {
                                 ele.setAttribute("data",JSON.stringify(obj));
                                 ele.innerText=obj.name;
@@ -357,10 +357,10 @@
                     $.stopHud();
                     if(data.code==200)
                     {
-                        var child=$.showBox(_this,"testTestRun",{
+                        var child=$.showBox(_this,require("./testTestRun.vue"),{
                             source:data.data,
                             self:_this.test.id
-                        },"projectinfo/test");
+                        });
                         child.$on("save",function (obj) {
                             var a=document.createElement("a");
                             a.setAttribute("type","2");
@@ -403,11 +403,11 @@
                     {
                         if(obj2.code==200)
                         {
-                            var child=$.showBox(_this,"testTestRun",{
+                            var child=$.showBox(_this,require("./testTestRun.vue"),{
                                 source:obj1.data,
                                 test:obj2.data,
                                 self:_this.test.id
-                            },"projectinfo/test");
+                            });
                             child.$on("save",function (obj) {
                                 ele.setAttribute("data",obj.id);
                                 ele.innerText=obj.name;
@@ -437,10 +437,10 @@
                         {
                             _this.baseUrl=data.data[0].url
                         }
-                        var child=$.showBox(_this,"testBaseUrl",{
+                        var child=$.showBox(_this,require("./testBaseUrl.vue"),{
                             url:_this.baseUrl,
                             arrUrl:data.data
-                        },"projectinfo/test")
+                        })
                         child.$on("save",function (url) {
                             _this.baseUrl=url;
                         })
@@ -498,14 +498,14 @@
                     }
                 }
                 $.stopHud();
-                $.showBox(this,"testRunGroup",{
+                $.showBox(this,require("./testRunGroup.vue"),{
                     source:arrTest,
                     opt:{
                         baseUrl:this.baseUrl,
                         before:this.before,
                         after:this.after
                     }
-                },"projectinfo/test")
+                })
             },
             poll:function () {
                 var _this=this;
@@ -522,14 +522,16 @@
                     }),
                     net.get("/project/urllist",{
                         id:session.get("projectId")
-                    })
+                    }),
+                    net.get("/user/sendinfo")
                 ]).then(function (data) {
                     $.stopHud();
                     var obj1=data[0];
                     var obj2=data[1];
                     var obj3=data[2];
                     var obj4=data[3];
-                    var poll,test,user,baseUrl;
+                    var obj5=data[4];
+                    var poll,test,user,baseUrl,sendInfo;
                     if(obj1.code==200)
                     {
                         poll=obj1.data;
@@ -566,12 +568,21 @@
                     {
                         throw obj4.msg;
                     }
-                    $.showBox(_this,"poll",{
+                    if(obj5.code==200)
+                    {
+                        sendInfo=obj5.data;
+                    }
+                    else
+                    {
+                        throw obj5.msg;
+                    }
+                    $.showBox(_this,require("./poll.vue"),{
                         "propPoll":poll,
                         "propTest":test,
                         "propUser":user,
-                        "propBaseUrl":baseUrl
-                    },"projectinfo/test")
+                        "propBaseUrl":baseUrl,
+                        "propSendInfo":sendInfo
+                    })
                 }).catch(function (err) {
                     $.stopHud();
                     $.notify(err,0);

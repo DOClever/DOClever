@@ -64,6 +64,9 @@
             <el-form-item label="发件人smtp端口" style="text-align: center">
                 <el-input placeholder="请输入发件人smtp端口号" style="width: 80%" v-model="poll.sendInfo.port"></el-input>
             </el-form-item>
+            <el-form-item label="立即执行一次" style="text-align: center">
+                <el-switch v-model="immediate" on-color="#13ce66" off-color="#ff4949"></el-switch>
+            </el-form-item>
         </el-form>
         <el-row class="dialog-footer" slot="footer">
             <el-button type="danger" @click="remove" :loading="removePending" v-if="propPoll">
@@ -79,7 +82,7 @@
 <script>
     var proxyImg=require("../../director/proxyImg")
     module.exports={
-        props:["propPoll","propTest","propUser","propBaseUrl"],
+        props:["propPoll","propTest","propUser","propBaseUrl","propSendInfo"],
         data:function () {
             return {
                 poll:function () {
@@ -92,7 +95,7 @@
                         return {
                             date:[],
                             time:[],
-                            sendInfo:{
+                            sendInfo:this.propSendInfo.user?this.propSendInfo:{
                                 user:"",
                                 password:"",
                                 smtp:"",
@@ -122,7 +125,8 @@
                 multipleSelection: [],
                 savePending:false,
                 removePending:false,
-                showDialog:false
+                showDialog:false,
+                immediate:false
             }
         },
         directives:{
@@ -207,7 +211,8 @@
                     smtp:this.poll.sendInfo.smtp,
                     port:this.poll.sendInfo.port,
                     url:this.poll.baseUrl,
-                    test:JSON.stringify(arrTest)
+                    test:JSON.stringify(arrTest),
+                    immediate:this.immediate?1:0
                 }).then(function (data) {
                     _this.savePending=false;
                     if(data.code==200)

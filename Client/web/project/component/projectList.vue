@@ -78,6 +78,45 @@
             </template>
             </tbody>
         </table>
+        <table style="background-color: transparent;width: 100%;height: 100%" v-if="arrPublic.length>0">
+            <thead>
+            <th style="text-align: left;font-size: 20px">
+                公开:
+            </th>
+            <th>
+                &nbsp;
+            </th>
+            <th>
+                &nbsp;
+            </th>
+            <th style="text-align: right;font-size: 15px">
+                排序：
+                <el-select v-model="$store.state.projectPublicSort" @input="changeSortPublic" style="width: 120px">
+                    <el-option label="创建时间" :value="0"></el-option>
+                    <el-option label="名称" :value="1"></el-option>
+                </el-select>
+            </th>
+            </thead>
+            <tbody>
+            <template v-for="n in arrPublicLength">
+                <tr>
+                    <template v-for="index in 4">
+                        <td  style="padding: 10px;height: 150px;width: 25%">
+                            <div v-if="arrPublic[(n-1)*4+(index-1)]" class="item" :style="{backgroundImage: 'url(\'../pic/back'+index+'.jpg\')',borderRadius:'5px',color:'gray',fontSize:'25px',wordBreak: 'break-all',display:'table'}" @click="info(arrPublic[(n-1)*4+(index-1)])" @mouseenter="up($event)" @mouseleave="down($event)">
+                                <div style="display: table-cell;vertical-align: middle">
+                                    {{arrPublic[(n-1)*4+(index-1)].name}}
+                                </div>
+                                <el-row class="row" style="height: 30px;line-height:30px;font-size: 15px;color: gray;position: absolute;left: 0;bottom: 0;text-align: left;background-color: rgba(215,215,215,0.51)">
+                                    &nbsp;{{"成员:"+arrPublic[(n-1)*4+(index-1)].userCount}}&nbsp;
+                                    {{"接口:"+arrPublic[(n-1)*4+(index-1)].interfaceCount}}
+                                </el-row>
+                            </div>
+                        </td>
+                    </template>
+                </tr>
+            </template>
+            </tbody>
+        </table>
     </div>
 </template>
 <style>
@@ -107,11 +146,20 @@
             arrJoin:function () {
                 return this.$store.state.projectJoinList;
             },
+            arrPublic:function () {
+                return this.$store.state.projectPublicList;
+            },
             arrCreateLength:function () {
-                return Math.floor(this.arrCreate.length/4)+1
+                var val=this.arrCreate.length/4;
+                return Math.floor(val)===val?val:(Math.floor(val)+1)
             },
             arrJoinLength:function () {
-                return Math.floor(this.arrJoin.length/4)+1
+                var val=this.arrJoin.length/4;
+                return Math.floor(val)===val?val:(Math.floor(val)+1)
+            },
+            arrPublicLength:function () {
+                var val=this.arrPublic.length/4;
+                return Math.floor(val)===val?val:(Math.floor(val)+1)
             }
         },
         methods:{

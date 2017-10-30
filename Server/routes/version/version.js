@@ -88,13 +88,13 @@ function Version() {
                                 }
                             }
                         }))
-                        if(arrUser.length==0)
+                        if(arrUser.length==0 && !obj.public)
                         {
                             util.throw(e.userForbidden,"你没有权限");
                             return;
                         }
                     }
-                    else
+                    else if(!obj.public)
                     {
                         util.throw(e.userForbidden,"你没有权限");
                         return;
@@ -136,6 +136,10 @@ function Version() {
             }
             else
             {
+                if(req.project.source)
+                {
+                    update.source=req.project.source
+                }
                 update.creator=req.userInfo._id;
                 update.baseUrls=req.project.baseUrls;
                 update.before=req.project.before;

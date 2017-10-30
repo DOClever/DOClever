@@ -264,6 +264,10 @@ module.exports={
         },
         handleInterface:function (context,obj) {
             obj.interface.param.forEach(function (objParam,index) {
+                Vue.set(objParam,"encrypt",{
+                    type:"",
+                    salt:""
+                })
                 objParam.queryParam.forEach(function (item,i) {
                     if(item.value && typeof(item.value)=="object" && (item.value instanceof Array))
                     {
@@ -454,7 +458,7 @@ module.exports={
                         for(var i=0;i<objParam.header.length;i++)
                         {
                             var obj1=objParam.header[i];
-                            if(obj1.name.toLowerCase()=="content-type" && obj1.value.toLowerCase()=="application/json")
+                            if(obj1.name.toLowerCase()=="content-type" && obj1.value.toLowerCase().indexOf("application/json")>-1)
                             {
                                 bFind=true;
                                 break;

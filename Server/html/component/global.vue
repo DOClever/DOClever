@@ -103,13 +103,13 @@
         methods:{
             editStatus:function (item) {
                 var _this=this;
-                var child=$.showBox(this,"statusEdit",{
+                var child=$.showBox(this,require("./statusEdit.vue"),{
                     source:item
                 });
             },
             editArticle:function(item,index)
             {
-                var child=$.showBox(this,"article",{
+                var child=$.showBox(this,require("./article.vue"),{
                     propObj:item
                 });
             }

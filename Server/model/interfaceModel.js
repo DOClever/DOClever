@@ -33,7 +33,8 @@ var model=new mongoose.Schema({
     },
     before:Object,
     after:Object,
-    id:String
+    id:String,
+    delete:Number
 },{
     timestamps:true,
     strict: false

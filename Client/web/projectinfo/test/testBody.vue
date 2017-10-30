@@ -123,7 +123,7 @@
                         {
                             var value=obj.value.toLowerCase();
                             var arr=["text/plain","application/json","text/html","application/xml","text/xml","application/javascript"];
-                            var index=arr.indexOf(value);
+                            var index=arr.indexOf(value.split(";")[0]);
                             if(index>-1)
                             {
                                 type=arr[index];
@@ -134,7 +134,7 @@
                     {
                         type="file"
                     }
-                    else if(type=="application/json")
+                    else if(type.indexOf("application/json")>-1)
                     {
                         this.info.rawType=2
                     }
@@ -157,7 +157,7 @@
                     }
                     Vue.set(item,"encrypt",obj);
                 }
-                $.showBox(this.$parent,"encrypt",{
+                $.showBox(this.$parent,require("../../component/encrypt.vue"),{
                     "source":item.encrypt
                 });
             },

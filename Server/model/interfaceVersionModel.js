@@ -37,7 +37,8 @@ var model=new mongoose.Schema({
     version:{
         type:mongoose.Schema.ObjectId,
         ref:"Version"
-    }
+    },
+    delete:Number
 },{
     timestamps:true,
     strict: false

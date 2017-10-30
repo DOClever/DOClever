@@ -303,9 +303,9 @@
                         status: ""
                     });
                 }
-                var child=$.showBox(this.$parent,"valueList",{
+                var child=$.showBox(this.$parent,require("./valueList.vue"),{
                     "source":item.value
-                },"projectinfo/interface");
+                });
                 child.$on("save",function (value) {
                     item.value=value;
                     item.mock="";

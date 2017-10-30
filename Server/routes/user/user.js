@@ -39,8 +39,15 @@ function User() {
             }
             if(obj)
             {
-                req.session.userid=obj._id;
-                util.ok(res,obj,"ok");
+                if(obj.state==1)
+                {
+                    req.session.userid=obj._id;
+                    util.ok(res,obj,"ok");
+                }
+                else
+                {
+                    util.throw(e.userForbidden,"用户被禁用");
+                }
             }
             else
             {
@@ -155,7 +162,8 @@ function User() {
     this.logout=async ((req,res)=> {
         try
         {
-            req.session.destroy();
+            req.session.userid=null;
+            delete req.session.userid;
             util.ok(res,"退出成功");
         }
         catch (err)
@@ -342,7 +350,31 @@ function User() {
             util.catch(res,err);
         }
     })
-
+    this.setSendInfo=async ((req,res)=>{
+        try
+        {
+            req.userInfo.sendInfo.user=req.clientParam.user;
+            req.userInfo.sendInfo.password=req.clientParam.password;
+            req.userInfo.sendInfo.smtp=req.clientParam.smtp;
+            req.userInfo.sendInfo.user=req.clientParam.user;
+            await (req.userInfo.saveAsync());
+            util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.getSendInfo=async ((req,res)=>{
+        try
+        {
+            util.ok(res,req.userInfo.sendInfo,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
 }
 
 module.exports=User;
