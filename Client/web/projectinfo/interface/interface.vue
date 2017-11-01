@@ -5,12 +5,24 @@
                 <el-col class="col" :span="6" style="line-height: 50px;text-align: center;font-weight: bold;font-size: 15px;padding: 0">
                     分组
                 </el-col>
-                <el-col class="col" :span="interfaceEditRole?9:15"></el-col>
+                <el-col class="col" :span="interfaceEditRole?6:12"></el-col>
                 <el-col class="col" :span="3" style="cursor: pointer;text-align: center;line-height: 50px;" title="导入分组" v-if="interfaceEditRole" @click.native="importGroup">
                     <i class="fa fa-download"></i>
                 </el-col>
                 <el-col class="col" :span="3" style="cursor: pointer;text-align: center;line-height: 50px;" title="添加分组" v-if="interfaceEditRole" @click.native="addGroup">
                     <i class="el-icon-plus"></i>
+                </el-col>
+                <el-col class="col" :span="3" style="cursor: pointer;text-align: center;line-height: 50px;" title="排序">
+                    <el-dropdown trigger="hover" style="width: 100%;height: 100%;cursor: pointer">
+                        <div class="el-dropdown-link">
+                            <i class="fa fa-sort-amount-desc" style="color: white"></i>
+                        </div>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item><div @click="sortType=0"><i class="el-icon-check" style="color: #11b95c" v-if="sortType==0"></i>&nbsp;名称</div></el-dropdown-item>
+                            <el-dropdown-item><div @click="sortType=1"><i class="el-icon-check" style="color: #11b95c" v-if="sortType==1"></i>&nbsp;修改时间</div></el-dropdown-item>
+                            <el-dropdown-item><el-tooltip class="item" effect="dark" content="自定义排序下可以拖动接口或分组来排序" placement="right"><div @click="sortType=2"><i class="el-icon-check" style="color: #11b95c" v-if="sortType==2"></i>&nbsp;自定义</div></el-tooltip></el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
                 </el-col>
                 <el-col class="col" :span="3" style="cursor: pointer;text-align: center;line-height: 50px;" title="搜索" @click.native="search=true">
                     <i class="el-icon-search"></i>
@@ -117,7 +129,11 @@
                             分享
                         </el-col>
                         <el-col class="col" :span="22" style="text-align: left">
-                            <el-input style="width: 95%" v-model="shareUrl" disabled></el-input>
+                            <el-input style="width: 95%" v-model="shareUrl" id="shareUrl" disabled>
+                                <template slot="append">
+                                    <el-button type="primary" style="font-size: 14px;width: 60px;color: #20a0ff" @click="copyClipboard">复制</el-button>
+                                </template>
+                            </el-input>
                         </el-col>
                     </el-row>
                     <el-row class="row" style="height: 90px;line-height: 90px;text-align: center">
@@ -231,7 +247,8 @@
               savePending:false,
               snapshot:{},
               bMax:false,
-              mailShow:false
+              mailShow:false,
+              sortType:session.get("sort")?session.get("sort"):0
           }
         },
         mixins:[sessionChange],
@@ -243,6 +260,17 @@
             "interfacepreview":interfacePreview
         },
         watch:{
+            sortType:function (val) {
+                session.set("sort",val);
+                $.startHud("#body");
+                this.$store.dispatch("refresh").then(function (data) {
+                    $.stopHud();
+                    if(data.code!=200)
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
+            },
             mailShow:function (val) {
                 if(val)
                 {
@@ -860,6 +888,14 @@
                         id:_this.interfaceEdit._id
                     })
                 })
+            },
+            copyClipboard:function () {
+                var ele=document.getElementById("shareUrl").getElementsByTagName("input")[0];
+                ele.disabled=false;
+                ele.select();
+                document.execCommand("Copy");
+                ele.disabled=true;
+                $.tip("已复制到剪贴板",1);
             }
         },
         created:function () {

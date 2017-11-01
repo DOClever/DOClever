@@ -842,16 +842,16 @@ function inArrKey(str,arr,key) {
     return -1;
 }
 
-var resultSave=function (data,json) {
+var resultSave=function (data,json,globalVar) {
     var arr=[];
     for(var i=0;i<data.length;i++)
     {
-        eachResult(data[i],data[i].name===null?{type:3}:null,arr,json);
+        eachResult(data[i],data[i].name===null?{type:3}:null,arr,json,globalVar);
     }
     return arr;
 }
 
-var eachResult=function (item,pItem,arr,json) {
+var eachResult=function (item,pItem,arr,json,globalVar) {
     if(item.name || (!item.name && pItem && pItem.type==3))
     {
         var obj={
@@ -859,7 +859,7 @@ var eachResult=function (item,pItem,arr,json) {
             type:item.type,
             remark:item.remark,
             must:item.must,
-            mock:item.mock
+            mock:globalVar?exports.handleGlobalVar(item.mock,globalVar):item.mock
         }
         if(json)
         {
@@ -905,7 +905,7 @@ var eachResult=function (item,pItem,arr,json) {
             obj.data=[];
             for(var i=0;i<item.data.length;i++)
             {
-                arguments.callee(item.data[i],item,obj.data,json)
+                arguments.callee(item.data[i],item,obj.data,json,globalVar)
             }
         }
     }
@@ -1001,6 +1001,15 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
     var name=obj.name
     var method=obj.method;
     var baseUrl=obj.baseUrl=="defaultUrl"?baseUrl:obj.baseUrl;
+    var globalVar={};
+    global.baseUrls.forEach(function (obj) {
+        if(obj.url==baseUrl && obj.env)
+        {
+            obj.env.forEach(function (obj) {
+                globalVar[obj.key]=obj.value;
+            })
+        }
+    })
     if(!baseUrl)
     {
         root.output+="baseUrl为空，请设置baseUrl<br>"
@@ -1038,10 +1047,15 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
             path="/"+path;
         }
     }
+    path=exports.handleGlobalVar(path,globalVar);
+    if(path.substr(0,2)=="//")
+    {
+        path=path.substr(1);
+    }
     var objParam=clone(obj.restParam);
     var param1={};
     objParam.forEach(function (obj) {
-        param1[obj.name]=obj.selValue;
+        param1[obj.name]=exports.handleGlobalVar(obj.selValue,globalVar);
     })
     var query={};
     obj.queryParam.forEach(function (obj) {
@@ -1051,7 +1065,7 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
         }
         if(obj.encrypt && obj.encrypt.type)
         {
-            var value=encrypt(obj.encrypt.type,obj.selValue,obj.encrypt.salt);
+            var value=encrypt(obj.encrypt.type,exports.handleGlobalVar(obj.selValue,globalVar),obj.encrypt.salt);
             var key=obj.name;
             if(obj.encrypt.key)
             {
@@ -1061,9 +1075,16 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
         }
         else
         {
-            query[obj.name]=obj.selValue;
+            query[obj.name]=exports.handleGlobalVar(obj.selValue,globalVar);
         }
     })
+    if(obj.pullInject)
+    {
+        if(opt && opt.query)
+        {
+            Object.assign(query,opt.query);
+        }
+    }
     var header={};
     obj.header.forEach(function (obj) {
         if(!obj.name || !obj.enable)
@@ -1072,17 +1093,27 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
         }
         if(obj.encrypt && obj.encrypt.type)
         {
-            var value=encrypt(obj.encrypt.type,obj.value,obj.encrypt.salt);
+            var value=encrypt(obj.encrypt.type,exports.handleGlobalVar(obj.value,globalVar),obj.encrypt.salt);
             var key=obj.name;
             header[key]=value;
 
         }
         else
         {
-            header[obj.name]=obj.value;
+            header[obj.name]=exports.handleGlobalVar(obj.value,globalVar);
 
         }
     })
+    if(obj.pullInject)
+    {
+        if(opt && opt.header)
+        {
+            for(var key in opt.header)
+            {
+                header[key]=opt.header[key];
+            }
+        }
+    }
     var body={},bUpload=false;
     if(method=="POST" || method=="PUT" || method=="PATCH")
     {
@@ -1099,7 +1130,7 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
                 {
                     if(obj1.encrypt && obj1.encrypt.type)
                     {
-                        var value=encrypt(obj1.encrypt.type,obj1.selValue,obj1.encrypt.salt);
+                        var value=encrypt(obj1.encrypt.type,exports.handleGlobalVar(obj1.selValue,globalVar),obj1.encrypt.salt);
                         var key=obj1.name;
                         if(obj1.encrypt.key)
                         {
@@ -1109,7 +1140,7 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
                     }
                     else
                     {
-                        body[obj1.name]=obj1.selValue;
+                        body[obj1.name]=exports.handleGlobalVar(obj1.selValue,globalVar);
                     }
                 }
                 else if(obj1.type==1)
@@ -1126,17 +1157,17 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
                 var encryptType=obj.encrypt.type;
                 if(encryptType)
                 {
-                    body=encrypt(encryptType,obj.bodyInfo.rawText,obj.encrypt.salt)
+                    body=encrypt(encryptType,exports.handleGlobalVar(obj.bodyInfo.rawText,globalVar),obj.encrypt.salt)
                 }
                 else
                 {
-                    body=obj.bodyInfo.rawText;
+                    body=exports.handleGlobalVar(obj.bodyInfo.rawText,globalVar);
                 }
             }
             else if(obj.bodyInfo.rawType==2)
             {
                 var obj1={};
-                var result=resultSave(obj.bodyInfo.rawJSON);
+                var result=resultSave(obj.bodyInfo.rawJSON,0,globalVar);
                 convertToJSON(result,obj1,null,1);
                 body=obj1;
             }
@@ -1144,6 +1175,68 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
             {
                 var startDate=new Date();
                 body="";
+            }
+        }
+    }
+    if(obj.pullInject)
+    {
+        if((method=="POST" || method=="PUT" || method=="PATCH") && obj.bodyInfo)
+        {
+            if(obj.bodyInfo.type==0)
+            {
+                if(opt && opt.body)
+                {
+                    Object.assign(body,opt.body);
+                }
+            }
+            else
+            {
+                if(obj.bodyInfo.rawType==0)
+                {
+                    if(opt && opt.body!==undefined)
+                    {
+                        body=opt.body;
+                    }
+                }
+                else if(obj.bodyInfo.rawType==2)
+                {
+                    if(opt && opt.body)
+                    {
+                        for(var key in opt.body)
+                        {
+                            var val=opt.body[key];
+                            var arr=key.split(".");
+                            if(arr.length>1)
+                            {
+                                var obj1=body;
+                                for(var i=0;i<arr.length;i++)
+                                {
+                                    var key1=arr[i];
+                                    if(i!=arr.length-1)
+                                    {
+                                        if(obj1[key1]!==undefined)
+                                        {
+                                            obj1=obj1[key1];
+                                        }
+                                        else
+                                        {
+                                            obj1=obj1[key1]={};
+                                        }
+                                    }
+                                    else
+                                    {
+                                        obj1[key1]=val;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                body[key]=val;
+                            }
+                        }
+                    }
+                    body=JSON.stringify(body);
+                }
             }
         }
     }
@@ -1171,74 +1264,96 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
     {
         path=path.replace("{"+paramKey+"}",param1[paramKey])
     }
-    if(opt && opt.query)
+    if(!obj.pullInject)
     {
-        Object.assign(query,opt.query);
-    }
-    if(opt && opt.header)
-    {
-        for(var key in opt.header)
+        if(opt && opt.param)
         {
-            header[key]=opt.header[key];
-        }
-    }
-    if((method=="POST" || method=="PUT" || method=="PATCH") && obj.bodyInfo)
-    {
-        if(obj.bodyInfo.type==0)
-        {
-            if(opt && opt.body)
+            for(var key in opt.param)
             {
-                Object.assign(body,opt.body);
+                var val=opt.param[key];
+                param[key]=val;
             }
         }
-        else
+        for(var paramKey in param)
         {
-            if(obj.bodyInfo.rawType==0)
+            path=path.replace("{"+paramKey+"}",param[paramKey])
+        }
+        if(opt && opt.query)
+        {
+            Object.assign(query,opt.query);
+        }
+        if(opt && opt.header)
+        {
+            for(var key in opt.header)
             {
-                if(opt && opt.body!==undefined)
-                {
-                    body=opt.body;
-                }
+                header[key]=opt.header[key];
             }
-            else if(obj.bodyInfo.rawType==2)
+        }
+        if((method=="POST" || method=="PUT" || method=="PATCH") && obj.bodyInfo)
+        {
+            if(obj.bodyInfo.type==0)
             {
                 if(opt && opt.body)
                 {
-                    for(var key in opt.body)
+                    Object.assign(body,opt.body);
+                }
+            }
+            else
+            {
+                if(obj.bodyInfo.rawType==0)
+                {
+                    if(opt && opt.body!==undefined)
                     {
-                        var val=opt.body[key];
-                        var arr=key.split(".");
-                        if(arr.length>1)
+                        body=opt.body;
+                    }
+                }
+                else if(obj.bodyInfo.rawType==2)
+                {
+                    if(opt && opt.body)
+                    {
+                        for(var key in opt.body)
                         {
-                            var obj1=body;
-                            for(var i=0;i<arr.length;i++)
+                            var val=opt.body[key];
+                            var arr=key.split(".");
+                            if(arr.length>1)
                             {
-                                var key1=arr[i];
-                                if(i!=arr.length-1)
+                                var obj1=body;
+                                for(var i=0;i<arr.length;i++)
                                 {
-                                    if(obj1[key1]!==undefined)
+                                    var key1=arr[i];
+                                    if(i!=arr.length-1)
                                     {
-                                        obj1=obj1[key1];
+                                        if(obj1[key1]!==undefined)
+                                        {
+                                            obj1=obj1[key1];
+                                        }
+                                        else
+                                        {
+                                            obj1=obj1[key1]={};
+                                        }
                                     }
                                     else
                                     {
-                                        obj1=obj1[key1]={};
+                                        obj1[key1]=val;
                                     }
                                 }
-                                else
-                                {
-                                    obj1[key1]=val;
-                                }
+                            }
+                            else
+                            {
+                                body[key]=val;
                             }
                         }
-                        else
-                        {
-                            body[key]=val;
-                        }
                     }
+                    body=JSON.stringify(body);
                 }
-                body=JSON.stringify(body);
             }
+        }
+    }
+    else
+    {
+        for(var paramKey in param)
+        {
+            path=path.replace("{"+paramKey+"}",param[paramKey])
         }
     }
     query=param(query);
@@ -1345,7 +1460,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
         var text;
         if(type=="1")
         {
-            text="(function (opt) {return runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"'}"+",test,root,opt)})"
+            text="(function (opt) {return runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',baseUrls:"+JSON.stringify(opt.baseUrls)+"}"+",test,root,opt)})"
         }
         else if(type=="2")
         {
@@ -2089,12 +2204,14 @@ let runPoll=async (function (arr) {
             let global={
                 baseUrl:obj.baseUrl,
                 before:obj.project.before,
-                after:obj.project.after
+                after:obj.project.after,
+                baseUrls:obj.project.baseUrls
             }
             if(typeof (obj.version)=="object")
             {
                 global.before=obj.version.before;
                 global.after=obj.version.after;
+                global.baseUrls=obj.version.baseUrls;
             }
             try
             {
@@ -2147,6 +2264,49 @@ let runPoll=async (function (arr) {
     }
 })
 
+function handleGlobalVar(str,global) {
+    str=str.replace(/\{\{.+?\}\}/g,function (str) {
+        var val=str.substr(2,str.length-4);
+        if(global[val]!==undefined)
+        {
+            return global[val]
+        }
+        else
+        {
+            return str;
+        }
+    })
+    return str;
+}
+
+function getPostmanGlobalVar(str,baseUrls) {
+    let arr=str.match(/\{\{(.+?)\}\}/g);
+    if(!arr)
+    {
+        return;
+    }
+    arr.forEach(function (obj) {
+        let bExist=false;
+        let val=obj.substr(2,obj.length-4);
+        baseUrls[0].env.forEach(function (obj) {
+            if(obj.key==val)
+            {
+                bExist=true;
+            }
+        })
+        if(!bExist)
+        {
+            baseUrls.forEach(function (obj) {
+                obj.env.push({
+                    key:val,
+                    value:"",
+                    remark:""
+                })
+            })
+        }
+    })
+}
+
 exports.err=err;
 exports.ok=ok;
 exports.dateDiff=dateDiff;
@@ -2175,4 +2335,5 @@ exports.getMockParam=getMockParam;
 exports.handleResultData=handleResultData;
 exports.parseURL=parseURL
 exports.runPoll=runPoll;
-
+exports.handleGlobalVar=handleGlobalVar;
+exports.getPostmanGlobalVar=getPostmanGlobalVar

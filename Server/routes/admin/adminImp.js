@@ -237,6 +237,263 @@ var interface=[
         admin:1,
         handle:[admin.editPassword]
     },
+    {
+        "method":"GET",
+        "path":"/admin/userprojectlist",
+        "param": {
+            id:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.userProjectList]
+    },
+    {
+        "method":"GET",
+        "path":"/admin/userteamlist",
+        "param": {
+            id:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.userTeamList]
+    },
+    {
+        "method":"DELETE",
+        "path":"/admin/userproject",
+        "param": {
+            id:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.userRemoveProject]
+    },
+    {
+        "method":"DELETE",
+        "path":"/admin/userteam",
+        "param": {
+            id:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.userRemoveTeam]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/userprojectown",
+        "param": {
+            id:String,
+            user:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.userTransferProject]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/userteamown",
+        "param": {
+            id:String,
+            user:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.userTransferTeam]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/userquitproject",
+        "param": {
+            id:String,
+            user:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.userQuitProject]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/userquitteam",
+        "param": {
+            id:String,
+            user:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.userQuitTeam]
+    },
+    {
+        "method":"GET",
+        "path":"/admin/userteamuser",
+        "param": {
+            id:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.userTeamUser]
+    },
+    {
+        "method":"POST",
+        "path":"/admin/project",
+        "param": {
+            name:String,
+            dis:{
+                type:String,
+                optional:1
+            },
+            public:{
+                type:Number,
+                optional:1
+            },
+            owner:{
+                type:String
+            },
+            users:{
+                type:String,
+                optional:1
+            },
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.addProject]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/projectuser",
+        "param": {
+            id:String,
+            users:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.setProjectUser]
+    },
+    {
+        "method":"POST",
+        "path":"/admin/team",
+        "param": {
+            name:String,
+            dis:{
+                type:String,
+                optional:1
+            },
+            owner:{
+                type:String
+            },
+            users:{
+                type:String,
+                optional:1
+            },
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.addTeam]
+    },
+    {
+        "method":"POST",
+        "path":"/admin/teamgroup",
+        "param": {
+            id:{
+                type:String,
+                optional:1
+            },
+            group:{
+                type:String,
+                optional:1
+            },
+            name:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.addTeamGroup]
+    },
+    {
+        "method":"POST",
+        "path":"/admin/addteamuser",
+        "param": {
+            id:String,
+            group:{
+                type:String,
+            },
+            user:String,
+            role:Number
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.addTeamUser]
+    },
+    {
+        "method":"DELETE",
+        "path":"/admin/teamgroup",
+        "param": {
+            group:{
+                type:String
+            },
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.removeTeamGroup]
+    },
+    {
+        "method":"DELETE",
+        "path":"/admin/teamuser",
+        "param": {
+            id:String,
+            user:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.removeTeamUser]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/teamuser",
+        "param": {
+            id:String,
+            user:String,
+            role:Number
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.setTeamUserRole]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/teampullproject",
+        "param": {
+            id:String,
+            project:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.pullTeamProject]
+    },
+    {
+        "method":"POST",
+        "path":"/admin/projectuserrole",
+        "param": {
+            id:String,
+            user:String,
+            role:Number,
+            option:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.setProjectUserRole]
+    },
+    {
+        "method":"DELETE",
+        "path":"/admin/projectuser",
+        "param": {
+            id:String,
+            user:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.removeProjectUser]
+    },
 ];
 
 module.exports=interface;

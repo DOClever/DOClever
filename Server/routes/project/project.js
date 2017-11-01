@@ -53,8 +53,17 @@ function Project() {
         {
             query.version=req.headers["docleverversion"]
         }
+        let sort="name";
+        if(req.cookies.sort==1)
+        {
+            sort="-updatedAt";
+        }
+        else if(req.cookies.sort==2)
+        {
+            sort="sort";
+        }
         let arr=await (req.groupModel.findAsync(query,null,{
-            sort:"name"
+            sort:sort
         }))
         for(let obj of arr)
         {
@@ -65,7 +74,7 @@ function Project() {
             let arrInterface=await (req.interfaceModel.findAsync({
                 group:obj._id
             },"_id name method finish url id delete",{
-                sort:"name"
+                sort:sort
             }));
             arr=arr.concat(arrInterface);
         }
@@ -4030,10 +4039,12 @@ function Project() {
                 baseUrls:arr.map(function (obj) {
                     return {
                         url:obj,
-                        remark:""
+                        remark:"",
+                        env:[]
                     }
                 })
             };
+            let baseUrls=update.baseUrls;
             if(req.headers["docleverversion"])
             {
                 update.version=req.headers["docleverversion"]
@@ -4082,6 +4093,7 @@ function Project() {
                         {
                             let objUrl=util.parseURL(grp.request.url.raw);
                             let url=objUrl.source;
+                            util.getPostmanGlobalVar(url,baseUrls);
                             let index=url.indexOf("?");
                             if(index>-1)
                             {
@@ -4171,7 +4183,17 @@ function Project() {
                                 };
                                 if(objUrl.params[key]!=="" && objUrl.params[key]!==undefined)
                                 {
-                                    v.value=[objUrl.params[key]];
+                                    util.getPostmanGlobalVar(objUrl.params[key],baseUrls);
+                                    v.value={
+                                        status:"",
+                                        type:0,
+                                        data:[
+                                            {
+                                                value:objUrl.params[key],
+                                                remark:""
+                                            }
+                                        ]
+                                    };
                                 }
                                 param.push(v);
                             }
@@ -4181,6 +4203,7 @@ function Project() {
                         {
                             let objUrl=util.parseURL(grp.request.url);
                             let url=objUrl.source,index=url.indexOf("?");
+                            util.getPostmanGlobalVar(url,baseUrls);
                             if(index>-1)
                             {
                                 url=url.substr(0,index);
@@ -4244,7 +4267,17 @@ function Project() {
                                 };
                                 if(objUrl.params[key]!=="" && objUrl.params[key]!==undefined)
                                 {
-                                    v.value=[objUrl.params[key]];
+                                    util.getPostmanGlobalVar(objUrl.params[key],baseUrls);
+                                    v.value={
+                                        status:"",
+                                        type:0,
+                                        data:[
+                                            {
+                                                value:objUrl.params[key],
+                                                remark:""
+                                            }
+                                        ]
+                                    };
                                 }
                                 param.push(v);
                             }
@@ -4273,6 +4306,7 @@ function Project() {
                             {
                                 bJSON=true;
                             }
+                            util.getPostmanGlobalVar(obj.value,baseUrls);
                             return {
                                 name:obj.key,
                                 value:obj.value,
@@ -4301,7 +4335,17 @@ function Project() {
                                     }
                                     if(o.type==0 && obj.value!=="" && obj.value!==undefined)
                                     {
-                                        o.value=[obj.value];
+                                        util.getPostmanGlobalVar(obj.value,baseUrls);
+                                        o.value={
+                                            status:"",
+                                            type:0,
+                                            data:[
+                                                {
+                                                    value:obj.value,
+                                                    remark:""
+                                                }
+                                            ]
+                                        };
                                     }
                                     return o;
                                 })
@@ -4314,6 +4358,7 @@ function Project() {
                                     let objJSON,bSuccess;
                                     try
                                     {
+                                        util.getPostmanGlobalVar(grp.request.body.raw,baseUrls);
                                         objJSON=eval("("+grp.request.body.raw+")");
                                         bSuccess=true;
                                     }
@@ -4324,7 +4369,7 @@ function Project() {
                                     if(!bSuccess)
                                     {
                                         let str=grp.request.body.raw;
-                                        str=str.replace(/\{\{.+?\}\}/g,"\"\"");
+                                        str=str.replace(/(\{\{.+?\}\})/g,"\"$1\"");
                                         try
                                         {
                                             objJSON=eval("("+str+")");
@@ -4363,6 +4408,7 @@ function Project() {
                                 }
                                 else
                                 {
+                                    util.getPostmanGlobalVar(grp.request.body.raw,baseUrls);
                                     bodyInfo={
                                         type:1,
                                         rawType:0,
@@ -4421,6 +4467,11 @@ function Project() {
                 }
             })
             await (_map(obj));
+            await (project.updateAsync({
+                _id:objProject._id
+            },{
+                baseUrls:baseUrls
+            }));
             objProject._doc.role=0;
             objProject._doc.userCount=1;
             objProject._doc.interfaceCount=interfaceCount;

@@ -1,7 +1,7 @@
 <template>
     <el-row class="row" style="cursor: pointer;white-space: nowrap" id="tree">
         <template v-for="(item,index) in arr">
-            <el-row class="row" :draggable="interfaceEditRole && item.type==0" style="height: 40px;line-height: 40px;white-space: nowrap" :id="item.type==1?'recycle':('group'+index)" @dragover.native="dragOver($event,item)" @dragleave.native="dragLeave($event)" @drop.native="drop($event,item)" :key="item._id" v-if="level==0 || (item.data && parent.show)" @mouseenter.native="mouseEnter($event,item)" @mouseleave.native="mouseLeave($event,item)" :style="{backgroundColor:item.select?'#50bfff':(item.menu?'rgb(247,246,242':'')}" @dragstart.native="dragStart($event,item,index)">
+            <el-row class="row" :draggable="interfaceEditRole && ((item.type==0 && session.sort!=2) || session.sort==2)" style="height: 40px;line-height: 40px;white-space: nowrap" :id="item.type==1?'recycle':('group'+index)" @dragover.native="dragOver($event,item)" @dragleave.native="dragLeave($event)" @dragenter.native="dragEnter($event,item)" @drop.native="drop($event,item,index)" @dragend.native="dragEnd($event)" :key="item._id" v-if="level==0 || (item.data && parent.show)" @mouseenter.native="mouseEnter($event,item)" @mouseleave.native="mouseLeave($event,item)" :style="{backgroundColor:item.select?'#50bfff':(item.menu?'rgb(247,246,242':'')}" @dragstart.native="dragStart($event,item,index)">
                 <template v-if="level>0">
                     <el-col :span="2" class="col" v-for="n in level" :style="{'borderRight':'1px lightgray dashed'}">
                         &nbsp;
@@ -35,7 +35,7 @@
                 </div>
             </el-row>
             <interfacelist v-if="item.data && item.data.length>0 && item.show" :level="level+1" :data="item.data" :parent="item"></interfacelist>
-            <el-row class="row" :draggable="interfaceEditRole" style="height: 40px;line-height: 40px;cursor: move" @mouseenter.native="mouseEnter($event,item)" @mouseleave.native="mouseLeave($event,item)" @click.native="info(item,index,$event)" :section="index" :row="index" :style="{backgroundColor:item.select?'#50bfff':(item.menu?'rgb(247,246,242':'')}" @dragstart.native="dragStart($event,item,index)" :key="item._id" v-else-if="!item.data && parent.show">
+            <el-row class="row" :draggable="interfaceEditRole" style="height: 40px;line-height: 40px;cursor: move" @mouseenter.native="mouseEnter($event,item)" @mouseleave.native="mouseLeave($event,item)" @click.native="info(item,index,$event)" :section="index" :row="index" :style="{backgroundColor:item.select?'#50bfff':(item.menu?'rgb(247,246,242':'')}" @dragstart.native="dragStart($event,item,index)" @dragenter.native="dragEnter($event,item)" @dragover.native="dragOver($event,item)" @dragleave.native="dragLeave($event)" @drop.native="drop($event,item,index)" @dragend.native="dragEnd($event)" :key="item._id" v-else-if="!item.data && parent.show">
                 <template v-if="level>0">
                     <el-col :span="2" class="col" v-for="n in level" :style="{'borderRight':'1px lightgray dashed'}">
                         &nbsp;
@@ -67,6 +67,7 @@
 </template>
 
 <script>
+    var dragItem=null,lastEle=null;
     var sessionChange=require("../../mixins/session");
     module.exports={
         name:"interfacelist",
@@ -233,25 +234,44 @@
                 {
                     return;
                 }
-                session.remove("snapshotId");
-                session.remove("snapshotDis");
-                session.remove("snapshotCreator");
-                session.remove("snapshotDate");
-                $.startHud("#body");
-                this.$store.dispatch("info",{
-                    item:this.parent,
-                    item1:item,
-                    index:index
-                }).then(function (data) {
-                    $.stopHud();
-                    if(data.code==200)
+                var pro;
+                if(this.$root.autoSave)
+                {
+                    if(this.$store.state.interfaceEdit && this.$store.state.interfaceEdit._id)
                     {
-
+                        pro=this.$store.dispatch("save");
                     }
                     else
                     {
-                        $.notify(data.msg,0);
+                        pro=helper.delay(0);
                     }
+                }
+                else
+                {
+                    pro=helper.delay(0);
+                }
+                var _this=this;
+                pro.then(function () {
+                    session.remove("snapshotId");
+                    session.remove("snapshotDis");
+                    session.remove("snapshotCreator");
+                    session.remove("snapshotDate");
+                    $.startHud("#body");
+                    _this.$store.dispatch("info",{
+                        item:_this.parent,
+                        item1:item,
+                        index:index
+                    }).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
                 })
 
             },
@@ -271,90 +291,192 @@
                     id:item._id,
                     group:this.parent?this.parent._id:"",
                     index:index,
-                    folder:item.data?1:0
+                    folder:item.data?1:0,
+                    trash:(item.data && item.type==1)?1:0,
+                    select:item.select?1:0
                 }));
+                dragItem=item;
+                lastEle=null;
             },
             dragOver:function (event,item) {
-                var ele=event.target;
-                while(ele.className.indexOf("row")==-1)
+                if(dragItem==item || !lastEle)
                 {
-                    ele=ele.parentNode;
+                    return;
                 }
-                if(!item.parent)
+                var bound=lastEle.getBoundingClientRect();
+                var top=event.clientY;
+                var height=bound.bottom-bound.top;
+                if(item.data)
                 {
-                    if(!ele.timer)
+                    if(top<bound.top+height/3 && session.get("sort")==2)
                     {
-                        ele.timer=setTimeout(function () {
-                            ele.style.backgroundColor="orange";
-                        },2000)
-                        ele.style.backgroundColor="rgb(223,236,191)";
+                        lastEle.style.borderTop="2px #50bfff solid";
+                        lastEle.style.borderBottom="";
+                        lastEle.style.backgroundColor="white";
+                    }
+                    else if(top>bound.bottom-height/3 && session.get("sort")==2)
+                    {
+                        lastEle.style.borderTop="";
+                        lastEle.style.borderBottom="2px #50bfff solid";
+                        lastEle.style.backgroundColor="white";
+                    }
+                    else
+                    {
+                        lastEle.style.borderTop="";
+                        lastEle.style.borderBottom="";
+                        lastEle.style.backgroundColor="rgb(223,236,191)";
                     }
                 }
-                else
+                else if(session.get("sort")==2)
                 {
-                    ele.style.backgroundColor="rgb(223,236,191)";
+                    if(top<bound.top+(bound.bottom-bound.top)/2)
+                    {
+                        lastEle.style.borderTop="2px #50bfff solid";
+                        lastEle.style.borderBottom="";
+                    }
+                    else
+                    {
+                        lastEle.style.borderTop="";
+                        lastEle.style.borderBottom="2px #50bfff solid";
+                    }
                 }
                 event.preventDefault();
                 return true;
             },
-            dragLeave:function (event) {
+            dragEnter:function (event,item) {
+                if(dragItem==item)
+                {
+                    return;
+                }
                 var ele=event.target;
                 while(ele.className.indexOf("row")==-1)
                 {
                     ele=ele.parentNode;
                 }
-                ele.style.backgroundColor="white";
-                if(ele.timer)
+                if(lastEle && lastEle==ele)
                 {
-                    clearTimeout(ele.timer);
-                    ele.timer=null;
+                    return true;
                 }
+                else if(lastEle && lastEle!=ele)
+                {
+                    lastEle.style.borderBottom="";
+                    lastEle.style.borderTop="";
+                    lastEle.style.backgroundColor="white";
+                }
+                lastEle=ele;
+                console.log("enter"+item.name);
+                return true;
             },
-            drop:function (event,group) {
-                var ele=event.target;
-                while(ele.className.indexOf("row")==-1)
+            dragLeave:function (event) {
+                return true;
+            },
+            drop:function (event,itemDrop,index) {
+                if(lastEle)
                 {
-                    ele=ele.parentNode;
-                }
-                var bTop=false;
-                if(ele.timer)
-                {
-                    clearTimeout(ele.timer);
-                    ele.timer=null;
-                }
-                if(ele.style.backgroundColor=="orange")
-                {
-                    bTop=true;
-                }
-                ele.style.backgroundColor="white";
-                event.preventDefault();
-                if(event.dataTransfer.getData("text"))
-                {
-                    var obj=JSON.parse(event.dataTransfer.getData("text"));
-                    if(!obj.id)
+                    var bTop=false;
+                    if(!this.parent)
                     {
-                        return;
+                        bTop=true;
                     }
-                    if((group._id==obj.group && !bTop) || group._id==obj.id)
+                    lastEle.style.borderBottom="";
+                    lastEle.style.borderTop="";
+                    lastEle.style.backgroundColor="white";
+                    event.preventDefault();
+                    if(dragItem==itemDrop)
                     {
-                        return;
+                        return false;
                     }
-                    else if(bTop && !obj.group)
+                    var bound=lastEle.getBoundingClientRect();
+                    var top=event.clientY;
+                    var height=bound.bottom-bound.top;
+                    if(event.dataTransfer.getData("text"))
                     {
-                        $.tip("已经是最外层分组了!",0);
-                        return;
-                    }
-                    else if(group.type==1 && obj.folder)
-                    {
-                        this.removeGroup({
-                            _id:obj.id
-                        });
-                        return;
-                    }
-                    else
-                    {
-                        if(obj.folder)
+                        var obj=JSON.parse(event.dataTransfer.getData("text"));
+                        if(!obj.id)
                         {
+                            return;
+                        }
+                        if(session.get("sort")!=2)
+                        {
+                            if((itemDrop._id==obj.group && !bTop) || itemDrop._id==obj.id)
+                            {
+                                return;
+                            }
+                            else if(bTop && !obj.group)
+                            {
+                                $.tip("已经是最外层分组了!",0);
+                                return;
+                            }
+                            else if(itemDrop.type==1 && obj.folder)
+                            {
+                                this.removeGroup({
+                                    _id:obj.id
+                                });
+                                return;
+                            }
+                            else
+                            {
+                                if(obj.folder)
+                                {
+                                    var ret=[];
+                                    (function _map(arr) {
+                                        for(var i=0;i<arr.length;i++)
+                                        {
+                                            var obj=arr[i];
+                                            if(obj.data)
+                                            {
+                                                ret.push(obj._id);
+                                                if(obj._id==itemDrop._id)
+                                                {
+                                                    return true;
+                                                }
+                                                else
+                                                {
+                                                    var v=arguments.callee(obj.data);
+                                                    if(v)
+                                                    {
+                                                        return true;
+                                                    }
+                                                    else
+                                                    {
+                                                        ret.pop();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        return false;
+                                    })(this.$store.state.interfaceList)
+                                    if(ret.indexOf(obj.id)>-1)
+                                    {
+                                        $.tip("不能移动到子分组内！",0);
+                                        return;
+                                    }
+                                }
+                            }
+                            $.startHud("#body");
+                            this.$store.dispatch("move",{
+                                obj:obj,
+                                group:itemDrop,
+                                top:(bTop && obj.group),
+                                index:0
+                            }).then(function (data) {
+                                $.stopHud();
+                                if(data.code==200)
+                                {
+                                    $.notify("移动成功",1)
+                                }
+                                else
+                                {
+                                    $.notify(data.msg,0);
+                                }
+                            })
+                        }
+                        else
+                        {
+                            if(itemDrop._id==obj.id)
+                            {
+                                return;
+                            }
                             var ret=[];
                             (function _map(arr) {
                                 for(var i=0;i<arr.length;i++)
@@ -363,7 +485,7 @@
                                     if(obj.data)
                                     {
                                         ret.push(obj._id);
-                                        if(obj._id==group._id)
+                                        if(obj._id==itemDrop._id)
                                         {
                                             return true;
                                         }
@@ -388,24 +510,107 @@
                                 $.tip("不能移动到子分组内！",0);
                                 return;
                             }
+                            var bIn;
+                            if(itemDrop.data && top>bound.top+height/3 && top<bound.bottom-height/3)
+                            {
+                                bIn=true;
+                                if(itemDrop.type==1 && obj.folder)
+                                {
+                                    this.removeGroup({
+                                        _id:obj.id
+                                    });
+                                    return;
+                                }
+                                else if(obj.trash)
+                                {
+                                    $.tip("回收站不能移动到其他分组内！",0);
+                                    return;
+                                }
+                            }
+                            else if(top<bound.top+height/2)
+                            {
+                                bIn=false;
+                                if(obj.index<index && obj.parent==this.parent)
+                                {
+                                    index--
+                                }
+                                if(this.parent && this.parent.type==1 && obj.folder)
+                                {
+                                    this.removeGroup({
+                                        _id:obj.id
+                                    });
+                                    return;
+                                }
+                                else if(obj.trash && this.parent)
+                                {
+                                    $.tip("回收站不能移动到其他分组内！",0);
+                                    return;
+                                }
+                                else if(!obj.folder && !this.parent)
+                                {
+                                    $.tip("接口不可以移动到最外层！",0);
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                bIn=false;
+                                if(obj.index<index && obj.parent==this.parent)
+                                {
+
+                                }
+                                else
+                                {
+                                    index++;
+                                }
+                                if(this.parent && this.parent.type==1 && obj.folder)
+                                {
+                                    this.removeGroup({
+                                        _id:obj.id
+                                    });
+                                    return;
+                                }
+                                else if(obj.trash && this.parent)
+                                {
+                                    $.tip("回收站不能移动到其他分组内！",0);
+                                    return;
+                                }
+                                else if(!obj.folder && !this.parent)
+                                {
+                                    $.tip("接口不可以移动到最外层！",0);
+                                    return;
+                                }
+                            }
+                            $.startHud("#body");
+                            this.$store.dispatch("move",{
+                                obj:obj,
+                                group:bIn?(itemDrop.data?itemDrop:this.parent):this.parent,
+                                index:index,
+                                top:(bTop && obj.group)
+                            }).then(function (data) {
+                                $.stopHud();
+                                if(data.code==200)
+                                {
+                                    $.notify("移动成功",1)
+                                }
+                                else
+                                {
+                                    $.notify(data.msg,0);
+                                }
+                            })
                         }
                     }
-                    $.startHud("#body");
-                    this.$store.dispatch("move",{
-                        obj:obj,
-                        group:group,
-                        top:(bTop && obj.group)
-                    }).then(function (data) {
-                        $.stopHud();
-                        if(data.code==200)
-                        {
-                            $.notify("移动成功",1)
-                        }
-                        else
-                        {
-                            $.notify(data.msg,0);
-                        }
-                    })
+                    lastEle=null;
+                }
+                return false;
+            },
+            dragEnd:function () {
+                dragItem=null;
+                if(lastEle)
+                {
+                    lastEle.style.borderBottom="";
+                    lastEle.style.borderTop="";
+                    lastEle.style.backgroundColor="white";
                 }
             },
             copy:function (item) {

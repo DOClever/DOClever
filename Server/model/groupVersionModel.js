@@ -20,7 +20,11 @@ var model=new mongoose.Schema({
         ref:"Version"
     },
     parent:String,
-    delete:Number
+    delete:Number,
+    sort:{
+        type:Number,
+        default:0
+    }
 },{
     timestamps:true
 });
