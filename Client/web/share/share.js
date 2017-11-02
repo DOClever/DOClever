@@ -1,6 +1,8 @@
 /**
  * Created by sunxin on 2017/5/26.
  */
+var bodyJSONPreview=require("../projectinfo/interface/bodyJSONPreview.vue");
+var outJSONPreview=require("../projectinfo/interface/outJSONPreview.vue");
 if(location.hash.length<=1)
 {
     alert("分享链接不正确");
@@ -78,6 +80,10 @@ var vue=new Vue({
         }],
         arrDraw:[],
         index:0
+    },
+    components:{
+        "bodyjsonpreview":bodyJSONPreview,
+        "outjsonpreview":outJSONPreview
     },
     computed:{
         curParam:function () {

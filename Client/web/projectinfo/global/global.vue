@@ -3,7 +3,7 @@
         <el-col class="col" :span="6" style="padding: 0 10px 0 10px">
             <el-row class="row" style="background-color: white;text-align: center;border-radius: 5px;box-shadow: 0px 2px 2px #888888;">
                 <el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=0">
-                    修改BaseUrl
+                    环境变量
                 </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=1">
                 状态码
             </el-button><el-button type="primary" style="margin: 20px 0 0 0;width: 80%;" @click="type=2">
@@ -18,7 +18,7 @@
                 <el-row v-show="type==0" class="row">
                     <el-row class="row" style="height: 60px;">
                         <h4 style="margin-left: 10px;color: gray">
-                            修改baseUrl
+                            环境变量
                         </h4>
                     </el-row>
                     <urllist></urllist>

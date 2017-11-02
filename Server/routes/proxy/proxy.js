@@ -97,7 +97,7 @@ function redirect(res,bHttps,opt,location) {
     var urlRedirect=location;
     if(urlRedirect.startsWith("/"))
     {
-        urlRedirect=(bHttps?"https://":"http://")+opt.host+urlRedirect;
+        urlRedirect=(bHttps?"https://":"http://")+opt.host+":"+opt.port+urlRedirect;
     }
     var objUrl=url.parse(urlRedirect);
     var request1,opt1;

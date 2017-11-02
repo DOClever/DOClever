@@ -86,6 +86,10 @@ var interface=[
             to:{
                 type:String,
                 optional:1
+            },
+            index:{
+                type:Number,
+                optional:1
             }
         },
         "data":String,

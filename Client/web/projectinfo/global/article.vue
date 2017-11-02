@@ -48,7 +48,7 @@
         },
         computed:{
             preContent:function () {
-                return markdown.toHTML(this.obj.content);
+                return markdown.toHTML(this.obj.content,"Maruku");
             },
             globalDocRole:function () {
                 return this.$store.getters.globalDocRole;

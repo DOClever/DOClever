@@ -411,6 +411,15 @@ module.exports={
             var method=context.state.interface.method;
             var baseUrl=$.trim(context.state.baseUrl);
             var path=$.trim(context.state.interface.url);
+            var globalVar={};
+            context.getters.baseUrls.forEach(function (obj) {
+                if(obj.url==baseUrl && obj.env)
+                {
+                    obj.env.forEach(function (obj) {
+                        globalVar[obj.key]=obj.value;
+                    })
+                }
+            })
             if(!method || !baseUrl || !path)
             {
                 return new Promise(function (resolve,reject) {
@@ -461,15 +470,20 @@ module.exports={
                 baseUrl=config.baseUrl;
                 path="/mock/"+context.rootState.project._id+(path[0]!="/"?("/"+path):path);
             }
+            path=helper.handleGlobalVar(path,globalVar);
+            if(path.substr(0,2)=="//")
+            {
+                path=path.substr(1);
+            }
             var param={};
             context.getters.param.forEach(function (obj) {
-                param[obj.name]=obj.selValue;
+                param[obj.name]=helper.handleGlobalVar(obj.selValue,globalVar);
             })
             var query={};
             context.getters.querySave.forEach(function (obj) {
                 if(obj.encrypt && obj.encrypt.type)
                 {
-                    var value=helper.encrypt(obj.encrypt.type,obj.selValue,obj.encrypt.salt);
+                    var value=helper.encrypt(obj.encrypt.type,helper.handleGlobalVar(obj.selValue,globalVar),obj.encrypt.salt);
                     var key=obj.name;
                     if(obj.encrypt.key)
                     {
@@ -479,7 +493,7 @@ module.exports={
                 }
                 else
                 {
-                    query[obj.name]=obj.selValue;
+                    query[obj.name]=helper.handleGlobalVar(obj.selValue,globalVar);
                 }
 
             })
@@ -487,7 +501,7 @@ module.exports={
             context.getters.headerSave.forEach(function (obj) {
                 if(obj.encrypt && obj.encrypt.type)
                 {
-                    var value=helper.encrypt(obj.encrypt.type,obj.value,obj.encrypt.salt);
+                    var value=helper.encrypt(obj.encrypt.type,helper.handleGlobalVar(obj.value,globalVar),obj.encrypt.salt);
                     var key=obj.name;
                     if($.inArr(key,arrHeaders))
                     {
@@ -503,11 +517,11 @@ module.exports={
                 {
                     if($.inArr(obj.name,arrHeaders))
                     {
-                        objHeaders[obj.name]=obj.value;
+                        objHeaders[obj.name]=helper.handleGlobalVar(obj.value,globalVar);
                     }
                     else
                     {
-                        header[obj.name]=obj.value;
+                        header[obj.name]=helper.handleGlobalVar(obj.value,globalVar);
                     }
 
                 }
@@ -523,7 +537,7 @@ module.exports={
                         {
                             if(obj.encrypt && obj.encrypt.type)
                             {
-                                var value=helper.encrypt(obj.encrypt.type,obj.selValue,obj.encrypt.salt);
+                                var value=helper.encrypt(obj.encrypt.type,helper.handleGlobalVar(obj.selValue,globalVar),obj.encrypt.salt);
                                 var key=obj.name;
                                 if(obj.encrypt.key)
                                 {
@@ -533,7 +547,7 @@ module.exports={
                             }
                             else
                             {
-                                body[obj.name]=obj.selValue;
+                                body[obj.name]=helper.handleGlobalVar(obj.selValue,globalVar);
                             }
                         }
                         else if(obj.type==1)
@@ -574,17 +588,17 @@ module.exports={
                         var encryptType=context.getters.curParam.encryptType;
                         if(encryptType)
                         {
-                            body=helper.encrypt(encryptType,context.getters.curParam.bodyInfo.rawText,document.getElementById("bodyRawEncryptSalt").querySelector("input").value)
+                            body=helper.encrypt(encryptType,helper.handleGlobalVar(context.getters.curParam.bodyInfo.rawText,globalVar),document.getElementById("bodyRawEncryptSalt").querySelector("input").value)
                         }
                         else
                         {
-                            body=context.getters.curParam.bodyInfo.rawText;
+                            body=helper.handleGlobalVar(context.getters.curParam.bodyInfo.rawText,globalVar);
                         }
                     }
                     else if(context.getters.curParam.bodyInfo.rawType==2)
                     {
                         var obj=context.getters.curParam.bodyInfo.rawJSONType==0?{}:[];
-                        var result=helper.resultSave(context.getters.curParam.bodyInfo.rawJSON);
+                        var result=helper.resultSave(context.getters.curParam.bodyInfo.rawJSON,0,globalVar);
                         helper.convertToJSON(result,obj,null,1);
                         body=obj;
                     }

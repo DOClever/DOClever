@@ -86,7 +86,8 @@
                                     </el-button>
                                     <el-dropdown-menu slot="dropdown">
                                         <el-dropdown-item @click.native="edit(item,index)">编辑</el-dropdown-item>
-
+                                        <el-dropdown-item @click.native="userProject(item,index)">项目</el-dropdown-item>
+                                        <el-dropdown-item @click.native="userTeam(item,index)">团队</el-dropdown-item>
                                         <el-dropdown-item @click.native="remove(item,index)" style="color: red">删除</el-dropdown-item>
                                     </el-dropdown-menu>
                                 </el-dropdown>
@@ -110,6 +111,8 @@
 <script>
     var page=require("../../component/page.vue");
     var proxyImg=require("../../director/proxyImg");
+    var userProject=require("./userProject.vue");
+    var userTeam=require("./userTeam.vue");
     module.exports={
         data:function () {
             return {
@@ -197,6 +200,46 @@
                         $.notify(data.msg,0);
                     }
                 });
+            },
+            userProject:function (item) {
+                var _this=this;
+                $.startHud();
+                net.get("/admin/userprojectlist",{
+                    id:item._id
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        $.showBox(_this.$root,userProject,{
+                            propObj:data.data,
+                            user:item
+                        })
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
+            },
+            userTeam:function (item) {
+                var _this=this;
+                $.startHud();
+                net.get("/admin/userteamlist",{
+                    id:item._id
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        $.showBox(_this.$root,userTeam,{
+                            propObj:data.data,
+                            user:item
+                        })
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
             }
         }
     }

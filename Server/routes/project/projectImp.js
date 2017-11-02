@@ -188,6 +188,10 @@ var interface=[
             group:{            //group存在获取group下的接口，不存在获取未分组的接口
                 type:String,
                 optional:1
+            },
+            sort:{
+                type:Number,   //不存在或者为0 名称  1 修改时间 2 自定义
+                optional:1
             }
         },
         "data":{

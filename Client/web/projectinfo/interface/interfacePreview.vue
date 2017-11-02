@@ -40,6 +40,12 @@
         <el-row class="row" style="padding:0 30px;">
             {{interfaceEdit.remark?interfaceEdit.remark:"无"}}
         </el-row>
+        <el-row class="row" style="padding:0 10px;height: 50px;line-height: 50px;color: #50a3ff">
+            分享URL：
+        </el-row>
+        <el-row class="row" style="padding:0 30px;word-break: break-all">
+            {{shareUrl}}
+        </el-row>
         <el-tabs type="card" style="margin-top: 20px" v-model="tabIndex">
             <template v-for="(item, index) in arrParam">
                 <el-tab-pane :key="item.id"  :label="item.name" :name="index">
@@ -175,10 +181,7 @@
                             </tbody>
                         </table>
                         <el-row v-else-if="bodyInfo.type==1 && bodyInfo.rawType==2">
-                            <template v-for="item in rawJSON">
-                                <div class="row" style="font-size: 18px;min-height: 25px;line-height: 25px;margin: 0;padding: 0;background-color: #fff9e6;word-break: break-all" v-html="item">
-                                </div>
-                            </template>
+                            <bodyjsonpreview :index="index" :data="item"></bodyjsonpreview>
                         </el-row>
                         <div class="row" style="margin: 0;padding: 0" v-else>
                             <table style="width: 100%;font-size: 17px;border-collapse: collapse" border="1" bordercolor="#ddd">
@@ -212,10 +215,7 @@
                     </el-row>
                     <el-row class="row" style="padding: 0 30px;">
                         <el-row class="row" v-if="outInfo.type==0 && drawMix.length>0">
-                            <template v-for="item in drawMix">
-                                <div class="row" style="font-size: 18px;min-height: 25px;line-height: 25px;margin: 0;padding: 0;background-color: #fff9e6;word-break: break-all" v-html="item">
-                                </div>
-                            </template>
+                            <outjsonpreview :index="index" :data="item"></outjsonpreview>
                         </el-row>
                         <table style="width: 100%;font-size: 17px;border-collapse: collapse" border="1" v-if="outInfo.type==1" bordercolor="#ddd">
                             <thead style="background-color: #50a3ff;color:white;text-align: center;vertical-align: middle">
@@ -254,6 +254,9 @@
 
 <script>
     var sessionChange=require("../../mixins/session");
+    var bodyJSONPreview=require("./bodyJSONPreview.vue");
+    var outJSONPreview=require("./outJSONPreview.vue");
+    var con=require("../../util/config");
     module.exports={
         data:function () {
             return {
@@ -261,6 +264,10 @@
             }
         },
         mixins:[sessionChange],
+        components:{
+            "bodyjsonpreview":bodyJSONPreview,
+            "outjsonpreview":outJSONPreview
+        },
         computed:{
             rawJSON:function () {
                 return this.$store.getters.rawJSON;
@@ -338,6 +345,16 @@
             },
             interfaceEdit:function () {
                 return this.$store.state.interfaceEdit
+            },
+            shareUrl:function () {
+                if(this.interfaceEdit)
+                {
+                    return con.baseUrl+"/html/web/share/share.html#"+this.interfaceEdit._id;
+                }
+                else
+                {
+                    return ""
+                }
             },
         },
         methods:{

@@ -1,6 +1,7 @@
 /**
  * Created by sunxin on 2017/2/20.
  */
+var arrCookie=["id","name","photo","qq","email","sex","age","company","loginCount","remember","sort"]
 var config=require("./config");
 function getCookie(c_name)
 {
@@ -147,23 +148,50 @@ local.update=function (data,remember) {
 }
 
 local.get=function (key) {
-    return getCookie(key)
+    if(arrCookie.indexOf(key)>-1)
+    {
+        return getCookie(key)
+    }
+    else
+    {
+        return sessionStorage.getItem(key);
+    }
 }
 
 local.set=function (key,value,remember) {
-    setCookie(key,value,remember?1000*3600*24*7:0);
+    if(arrCookie.indexOf(key)>-1)
+    {
+        setCookie(key,value,remember?1000*3600*24*7:0);
+    }
+    else
+    {
+        sessionStorage.setItem(key,value);
+    }
 }
 
 local.clear=function () {
     clearAllCookie();
+    sessionStorage.clear();
 }
 
 local.raw=function () {
-    return getCookieObj();
+    var obj=getCookieObj();
+    for(var i=0;i<sessionStorage.length;i++)
+    {
+        obj[sessionStorage.key(i)]=sessionStorage.getItem(sessionStorage.key(i));
+    }
+    return obj;
 }
 
 local.remove=function (item) {
-    delCookie(item)
+    if(arrCookie.indexOf(item)>-1)
+    {
+        delCookie(item)
+    }
+    else
+    {
+        sessionStorage.removeItem(item);
+    }
 }
 
 ;(function () {

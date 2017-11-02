@@ -4,25 +4,32 @@
             <template v-for="(item,index) in arr">
                 <tr style="text-align: center;vertical-align: middle">
                     <td style="width: 50%">
-                        <el-input style="width: 90%;margin: 0 auto" placeholder="请填写baseurl地址" v-model="item.url"></el-input>
+                        <el-input style="width: 90%;margin: 0 auto" placeholder="请填写BaseUrl地址" v-model="item.url"></el-input>
                     </td>
                     <td style="width: 30%">
-                        <el-input style="width: 90%;margin: 0 auto" placeholder="请填写备注" v-model="item.remark"></el-input>
+                        <el-input style="width: 90%;margin: 0 auto" placeholder="请填写环境变量备注" v-model="item.remark"></el-input>
+                    </td>
+                    <td style="width: 10%">
+                        <el-button type="text" size="small" style="font-size: 15px;" @click="edit(item)" icon="edit" title="修改变量"></el-button>
                     </td>
                     <td style="width: 10%">
                         <el-button type="text" size="small" style="color: red;font-size: 15px;" @click="remove(index)" icon="close" v-if="globalBaseUrlRole"></el-button>
                     </td>
-                    <td style="width: 10%">
-                        <el-button style="font-size: 15px" v-if="index==arr.length-1 && globalBaseUrlRole" @click="arr.push({url:'',remark:''})" size="small" type="text" icon="plus"></el-button>
-                    </td>
                 </tr>
             </template>
-            <tfoot>
+            <tfoot v-if="globalBaseUrlRole">
             <tr>
-                <td style="text-align: center;vertical-align: middle;width: 100%;padding: 20px" colspan="3">
-                    <el-button type="primary" style="width: 60%" @click="save" :loading="savePending" v-if="globalBaseUrlRole">
-                        保存
-                    </el-button>
+                <td style="text-align: center;vertical-align: middle;width: 100%;padding: 20px" colspan="4">
+                    <el-col class="el-col" :span="12">
+                        <el-button type="primary" style="width: 60%" @click="arr.push({url:'',remark:'',env:[]})" :loading="addPending">
+                            新增
+                        </el-button>
+                    </el-col>
+                    <el-col class="el-col" :span="12">
+                        <el-button type="primary" style="width: 60%" @click="save" :loading="savePending">
+                            保存
+                        </el-button>
+                    </el-col>
                 </td>
             </tr>
             </tfoot>
@@ -32,11 +39,13 @@
 
 <script>
     var sessionChange=require("../../mixins/session");
+    var env=require("./env.vue");
     module.exports={
         data:function () {
             return {
                 arr:[],
-                savePending:false
+                savePending:false,
+                addPending:false
             }
         },
         computed:{
@@ -78,6 +87,15 @@
                         _this.$store.dispatch("setBaseUrls",data.data);
                     }
                 })
+            },
+            edit:function (item) {
+                if(!item.env)
+                {
+                    Vue.set(item,"env",[]);
+                }
+                $.showBox(this,env,{
+                    propObj:item.env
+                });
             }
         },
         created:function () {

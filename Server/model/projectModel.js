@@ -11,7 +11,7 @@ var model=new mongoose.Schema({
         default:""
     },
     baseUrls:{
-        type:mongoose.Schema.Types.Mixed,
+        type:mongoose.Schema.Types.Mixed,  //{remark,"",url:"",env:[{key,value,remark}]}
         default:[]
     },
     owner:{

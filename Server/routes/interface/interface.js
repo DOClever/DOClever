@@ -19,6 +19,63 @@ var fs=require("fs");
 var uuid=require("uuid/v1");
 
 function Interface() {
+    this.sort=async (function (req,objGroup,objMove,index,bGroup) {
+        let arr;
+        if(bGroup)
+        {
+            let query={
+                project:req.project._id
+            };
+            if(objGroup)
+            {
+                query.parent=objGroup.id;
+            }
+            else
+            {
+                query.parent={
+                    $exists:false
+                }
+            }
+            if(req.headers["docleverversion"])
+            {
+                query.version=req.headers["docleverversion"]
+            }
+            arr=await (req.groupModel.findAsync(query,null,{
+                sort:"sort"
+            }))
+        }
+        else
+        {
+            let query={
+                project:req.project._id,
+                group:objGroup._id
+            };
+            if(req.headers["docleverversion"])
+            {
+                query.version=req.headers["docleverversion"]
+            }
+            arr=await (req.interfaceModel.findAsync(query,null,{
+                sort:"sort"
+            }))
+
+        }
+        for(let i=0;i<arr.length;i++)
+        {
+            let obj=arr[i];
+            if(obj._id.toString()==objMove._id.toString())
+            {
+                arr.splice(i,1);
+                break;
+            }
+        }
+        arr.splice(index,0,objMove);
+        for(let i=0;i<arr.length;i++)
+        {
+            let obj=arr[i];
+            obj.sort=i;
+            await (obj.saveAsync());
+        }
+    })
     this.getChild=async (function(req,id,obj,bInter) {
         let query={
             project:id,
@@ -30,8 +87,17 @@ function Interface() {
         {
             query.version=req.headers["docleverversion"]
         }
+        let sort="name";
+        if(req.cookies.sort==1)
+        {
+            sort="-updatedAt";
+        }
+        else if(req.cookies.sort==2)
+        {
+            sort="sort";
+        }
         let arr=await (req.groupModel.findAsync(query,null,{
-            sort:"name"
+            sort:sort
         }))
         for(let obj of arr)
         {
@@ -42,7 +108,7 @@ function Interface() {
             let arrInterface=await (req.interfaceModel.findAsync({
                 group:obj._id
             },"_id name method finish url delete",{
-                sort:"name"
+                sort:sort
             }));
             arr=arr.concat(arrInterface);
         }
@@ -151,6 +217,13 @@ function Interface() {
             }
             else {
                 req.group = g;
+                if(req.clientParam.project)
+                {
+                    if(req.group.project.toString()!=req.clientParam.project)
+                    {
+                        util.throw(e.systemReason, "分组不在当前工程内")
+                    }
+                }
             }
         }
     })
@@ -288,9 +361,11 @@ function Interface() {
             }
             let update = {};
             update.group = req.group._id;
-            await(req.interfaceModel.updateAsync({
+            let obj=await(req.interfaceModel.findOneAndUpdateAsync({
                 _id: req.clientParam.id
-            }, update))
+            }, update,{
+                new:true
+            }))
             let query = {
                 id: req.interface.id,
                 project: req.project._id
@@ -304,7 +379,9 @@ function Interface() {
                 }
             }
             await(interfaceSnapshot.updateAsync(query, update));
-            util.ok(res, "移动成功");
+            await (this.sort(req,req.group,obj,req.clientParam.index?req.clientParam.index:0))
+            let arr = await(this.getChild(req,obj.project, null,1))
+            util.ok(res,arr,"移动成功");
         }
         catch (err) {
             util.catch(res, err);

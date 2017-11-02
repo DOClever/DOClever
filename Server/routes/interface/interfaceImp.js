@@ -84,6 +84,10 @@ var interface=[
             },
             group:{
                 type:String
+            },
+            index:{
+                type:Number,
+                optional:1
             }
         },
         "data":String,

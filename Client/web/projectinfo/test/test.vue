@@ -461,7 +461,8 @@
                     helper.runTestCode(ele.innerHTML,this.test,{},{
                         baseUrl:this.baseUrl,
                         before:this.before,
-                        after:this.after
+                        after:this.after,
+                        baseUrls:this.$store.getters.baseUrls
                     },this.test).then(function (ret) {
                         _this.runPending=false;
                         $.notify("运行完成",1);
@@ -503,7 +504,8 @@
                     opt:{
                         baseUrl:this.baseUrl,
                         before:this.before,
-                        after:this.after
+                        after:this.after,
+                        baseUrls:this.$store.getters.baseUrls
                     }
                 })
             },

@@ -45,6 +45,11 @@
             项目：&nbsp;
             <el-autocomplete class="inline-input" v-model="selProject" :fetch-suggestions="querySearch" placeholder="筛选你的项目" icon="caret-bottom" :on-icon-click="showAutoComplete" @select="changeProject" popper-class="my-autocomplete" custom-item="itemauto" id="projectChange" style="width: 170px"></el-autocomplete>
         </div>
+        <div style="position: absolute;top:10px;right: 10px;z-index: 1000" v-if="type==0">
+            <el-tooltip class="item" effect="dark" content="启用自动保存后，每5秒自动保存当前接口编辑信息" placement="bottom">
+                <el-checkbox v-model="autoSave" :true-label="1" :false-label="0">自动保存</el-checkbox>
+            </el-tooltip>
+        </div>
         <el-tabs v-model="type" type="card" id="mainTab">
             <el-tab-pane label="接口" :name="0">
                 <el-col class="col" :span="24" style="overflow-x: hidden;overflow-y: auto;height: calc(100vh - 122px);">
