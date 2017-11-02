@@ -125,3 +125,121 @@ docker logs -f DOClever
 ```
 
 来查看容器打印的日志信息。
+
+## 更新DOClever版本
+
+### 备份数据
+
+**重要：在升级之前，请备份所有数据**
+
+备份数据：
+
+1. 镜像备份： docker commit <镜像id> <取个名字>
+2. Mongodb备份，[请参考](https://segmentfault.com/a/1190000006236494)；
+3. DOClever备份：在项目设置中，导出项目（这个就比较麻烦了，需要一个个项目导出，如果小团队少项目可以这样做）
+
+
+### 从3.x升级到4.x
+
+之前的版本Mongo与DOClever合在一个容器中，那么需要先把mongo中的数据导出来。
+
+	docker exec -it DOClever /bin/bash
+	
+1. 进入到DOClever容器，导出数据库`/data/db`相关的文件到宿主机，然后使用`volume`参数，挂载到宿主机。
+	
+2. 然后使用`mongo`命令连接到数据库，导出数据库数据；
+
+3. 使用最新的`docker-compoes.yml`文件启新的容器，使用`docker compose up -d`重新启动容器。	
+
+### 使用`docker-compose`更新
+
+直接升级的前提：
+
+1. mongodb的数据进行了本地化（使用了`volume`参数进行了本地化）； 
+2. 使用的是4.x以上的版本镜像（DOClever与mongo已经分离的版本）
+	
+		version: "2"
+		services:
+		  DOClever:
+		    image: lw96/doclever:latest-ubuntu
+		    restart: always
+		    container_name: "DOClever"
+		    ports:
+		    - 10000:10000
+		    volumes:
+		    - /hostdir/file:/root/DOClever/data/file
+		    - /hostdir/img:/root/DOClever/data/img
+		    - /hostdir/tmp:/root/DOClever/data/tmp
+		    environment:
+		    # - DB_HOST=mongodb://localhost:27017/DOClever
+		    - PORT=10000
+		    links:
+		    - mongo:mongo
+			
+		  mongo:
+		    image: mymongo
+		    restart: always
+		    container_name: "mongodb"
+		    volumes:
+		    - /data/db:/data/db 
+
+		 
+ 修改`image: lw96/doclever:latest-ubuntu` 这个地方的版本号，版本号请参考：[https://hub.docker.com/r/lw96/doclever/tags/](https://hub.docker.com/r/lw96/doclever/tags/)   
+    
+
+然后使用`docker-compose up -d`进行更新。
+
+### mongodb没有本地化数据的更新方法
+
+如果你之前使用的是默认的`docker-compose.yml`起的docker容器，那么mongo默认是没有进行`volume`本地化的，那么备份mongo镜像：
+ 
+	docker commit <mongodb-id> mymongo
+ 
+修改`docker-compose.yml`文件如下：
+
+	version: "2"
+	services:
+	  DOClever:
+	    image: lw96/doclever:latest-ubuntu
+	    restart: always
+	    container_name: "DOClever"
+	    ports:
+	    - 10000:10000
+	    volumes:
+	    - /hostdir/file:/root/DOClever/data/file
+	    - /hostdir/img:/root/DOClever/data/img
+	    - /hostdir/tmp:/root/DOClever/data/tmp
+	    environment:
+	    # - DB_HOST=mongodb://localhost:27017/DOClever
+	    - PORT=10000
+	    links:
+	    - mongo:mongo
+	
+	  mongo:
+	    image: mymongo
+	    restart: always
+	    container_name: "mongodb"
+	    volumes:
+	    - /data/db:/data/db 
+
+### 如果使用的数据库为非本地mongodb
+
+修改`docker-compose.yml`文件如下：
+
+	version: "2"
+	services:
+	  DOClever:
+	    image: lw96/doclever:latest
+	    restart: always
+	    container_name: "DOClever"
+	    ports:
+	    - 10000:10000
+	    volumes:
+	    - /hostdir/file:/root/DOClever/data/file
+	    - /hostdir/img:/root/DOClever/data/img
+	    - /hostdir/tmp:/root/DOClever/data/tmp
+	    environment:
+	    - DB_HOST=mongodb://remoteIP:remotePort/DOClever
+	    - PORT=10000
+
+然后使用`docker-compose up -d`进行更新。
