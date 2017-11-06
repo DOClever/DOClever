@@ -67,7 +67,8 @@ function User() {
                 password:req.clientParam.password,
                 qqId:req.clientParam.qqid,
                 question:req.clientParam.question,
-                answer:req.clientParam.answer
+                answer:req.clientParam.answer,
+                email:req.clientParam.email
             };
             obj.photo=await (this.user.downloadImg(req.clientParam.qqimg));
             let ret=await (user.findOneAsync({
@@ -137,6 +138,10 @@ function User() {
                 if(!obj.name || !obj.password)
                 {
                     util.throw(e.paramWrong,"姓名密码不能为空");
+                }
+                else if(!obj.email)
+                {
+                    util.throw(e.paramWrong,"邮箱不能为空");
                 }
                 let ret=await (user.findOneAsync({
                     name:obj.name
