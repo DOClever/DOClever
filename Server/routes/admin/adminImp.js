@@ -580,7 +580,8 @@ var interface=[
         "method":"GET",
         "path":"/admin/statisticlist",
         "param": {
-            page:Number
+            start:String,
+            end:String
         },
         "data":String,
         admin:1,

@@ -42,14 +42,14 @@ module.exports = {
                 NODE_ENV: '"production"'
             }
         }),
-        new webpack.optimize.UglifyJsPlugin({
-            compressor: {
-                warnings: false,
-            },
-            output: {
-                comments: false,  // remove all comments
-            }
-        }),
+        // new webpack.optimize.UglifyJsPlugin({
+        //     compressor: {
+        //         warnings: false,
+        //     },
+        //     output: {
+        //         comments: false,  // remove all comments
+        //     }
+        // }),
         new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: '[name].bundle.js'}),
         //new BundleAnalyzerPlugin()
     ],

@@ -1972,10 +1972,13 @@ function Admin()
     this.statisticList=async ((req,res)=>{
         try
         {
-            let arr=await (statistic.findAsync({},null,{
-                sort:"-date",
-                limit:10,
-                skip:req.clientParam.page*10
+            let arr=await (statistic.findAsync({
+                date:{
+                    $gte:req.clientParam.start,
+                    $lte:req.clientParam.end
+                }
+            },null,{
+                sort:"-date"
             }))
             util.ok(res,arr,"ok");
         }

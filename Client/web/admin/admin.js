@@ -4,6 +4,7 @@ var project=require("./component/project.vue")
 var team=require("./component/team.vue")
 var interface=require("./component/interface.vue")
 var setting=require("./component/setting.vue")
+var statistic=require("./component/statistic.vue")
 var store=require("./store")
 if(!sessionStorage.getItem("admin"))
 {
@@ -21,6 +22,7 @@ var vue=new Vue({
         "user":user,
         "interface":interface,
         "setting":setting,
+        "statistic":statistic
     },
     store:store,
     methods:{

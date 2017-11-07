@@ -2324,6 +2324,50 @@ function getNowFormatDate(fmt,date) {
     return fmt;
 }
 
+var createStatistic=async (function() {
+    let interface=require("../model/interfaceModel");
+    let project=require("../model/projectModel");
+    let team=require("../model/teamModel");
+    let user=require("../model/userModel");
+    let statistic=require("../model/statisticModel");
+    let date=new Date();
+    date.setDate(date.getDate()-1);
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    let obj={
+        date:getNowFormatDate("yyyy-MM-dd",date)
+    }
+    obj.interface=await (interface.countAsync({
+        createdAt:{
+            $gte:date
+        }
+    }))
+    obj.project=await (project.countAsync({
+        createdAt:{
+            $gte:date
+        }
+    }))
+    obj.team=await (team.countAsync({
+        createdAt:{
+            $gte:date
+        }
+    }))
+    obj.user=await (user.countAsync())
+    obj.userRegister=await (user.countAsync({
+        createdAt:{
+            $gte:date
+        }
+    }))
+    obj.userLogin=await (user.countAsync({
+        lastLoginDate:{
+            $gte:date
+        }
+    }))
+    await (statistic.createAsync(obj));
+})
+
 exports.err=err;
 exports.ok=ok;
 exports.dateDiff=dateDiff;
@@ -2355,3 +2399,4 @@ exports.runPoll=runPoll;
 exports.handleGlobalVar=handleGlobalVar;
 exports.getPostmanGlobalVar=getPostmanGlobalVar
 exports.getNowFormatDate=getNowFormatDate
+exports.createStatistic=createStatistic

@@ -1,1 +1,69 @@
-webpackJsonp([15],{347:function(e,n,t){(function(e,n,t){new e({el:"#app",data:{username:"",pwd:"",loginPending:!1},methods:{login:function(){var e=this;if(!this.username||!this.pwd)return void this.$message.error("用户名密码不能为空");this.loginPending=!0,n.post("/admin/login",{name:e.username,password:e.pwd}).then(function(n){e.loginPending=!1,200==n.code?(e.$notify({title:"登录成功",type:"success"}),sessionStorage.setItem("admin",e.username),setTimeout(function(){location.href="./admin.html"},1500)):e.$notify({title:n.msg,type:"error"})})}},created:function(){}});t.ready(function(){document.body.onkeydown=function(e){if(13==(window.event||e).keyCode){var n=document.createEvent("HTMLEvents");n.initEvent("click",!0,!0),n.eventType="message",document.getElementById("login").dispatchEvent(n)}}})}).call(n,t(5),t(2),t(0))}},[347]);
+webpackJsonp([15],{
+
+/***/ 350:
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(Vue, net, $) {var vue=new Vue({
+    el: "#app",
+    data: {
+        username:"",
+        pwd:"",
+        loginPending:false
+    },
+    methods:{
+        login:function () {
+            var _this=this;
+            if(!this.username || !this.pwd)
+            {
+                this.$message.error('用户名密码不能为空');
+                return;
+            }
+            this.loginPending=true;
+            net.post("/admin/login",{
+                name:_this.username,
+                password:_this.pwd,
+            }).then(function (data) {
+                _this.loginPending=false;
+                if(data.code==200)
+                {
+                    _this.$notify({
+                        title: '登录成功',
+                        type: 'success'
+                    });
+                    sessionStorage.setItem("admin",_this.username)
+                    setTimeout(function () {
+                        location.href="./admin.html"
+                    },1500);
+                }
+                else
+                {
+                    _this.$notify({
+                        title: data.msg,
+                        type: 'error'
+                    });
+                }
+            })
+        }
+    },
+    created:function () {
+
+    }
+})
+$.ready(function () {
+    document.body.onkeydown=function (e) {
+        var event=window.event || e;
+        if(event.keyCode==13)
+        {
+            var event1 = document.createEvent('HTMLEvents');
+            event1.initEvent("click", true, true);
+            event1.eventType = 'message';
+            document.getElementById("login").dispatchEvent(event1);
+        }
+    }
+})
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5), __webpack_require__(2), __webpack_require__(0)))
+
+/***/ })
+
+},[350]);
+//# sourceMappingURL=adminlogin.js.map

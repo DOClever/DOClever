@@ -43,25 +43,16 @@ var j = schedule.scheduleJob(rule,async (function(){
 
 }));
 
-// schedule.scheduleJob("0 0 0 * * *",(async (function () {
-//     try
-//     {
-//         let date=new Date();
-//         date.setDate(date.getDate()-1);
-//         date.setHours(0);
-//         date.setMinutes(0);
-//         date.setSeconds(0);
-//         date.setMilliseconds(0);
-//         let obj={
-//             date:util.getNowFormatDate("yyyy-MM-dd",date)
-//         }
-//         obj.interface=await (interface)
-//     }
-//     catch (err)
-//     {
-//         console.log(err);
-//     }
-// })));
+schedule.scheduleJob("0 0 0 * * *",(async (function () {
+    try
+    {
+        await (util.createStatistic());
+    }
+    catch (err)
+    {
+        console.log(err);
+    }
+})));
 
 var j1=schedule.scheduleJob("0 * * * *",(async (function () {
     try
