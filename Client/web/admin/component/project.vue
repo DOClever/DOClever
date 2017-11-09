@@ -22,12 +22,18 @@
                         &nbsp;
                     </span>
                 </el-col>
-                <el-col class="col" :span="4">
+                <el-col class="col" :span="2">
                     <el-button type="primary" @click="$refs.page.init()">查询</el-button>
+                </el-col>
+                <el-col class="col" :span="2">
+                    <el-button type="primary" @click="add">新建</el-button>
                 </el-col>
             </el-row>
             <table class="table-hover" style="width: 100%">
                 <thead>
+                <th>
+                    ID
+                </th>
                 <th>
                     项目名
                 </th>
@@ -44,6 +50,9 @@
                     用户数
                 </th>
                 <th>
+                    团队
+                </th>
+                <th>
                     公开
                 </th>
                 <th>
@@ -53,20 +62,26 @@
                 <tbody>
                 <template v-for="(item,index) in list">
                     <tr style="text-align: center;vertical-align: middle" :key="item._id">
-                        <td style="width: 15%">
+                        <td style="width: 10%">
+                            {{item._id}}
+                        </td>
+                        <td style="width: 10%">
                             {{item.name}}
                         </td>
                         <td style="width: 15%">
                             {{item.createdAt}}
                         </td>
-                        <td style="width: 20%">
+                        <td style="width: 15%">
                             {{item.owner.name}}
                         </td>
-                        <td style="width: 20%">
+                        <td style="width: 10%">
                             {{item.interfaceCount}}
                         </td>
                         <td style="width: 10%">
                             {{item.userCount}}
+                        </td>
+                        <td style="width: 10%">
+                            {{item.team?item.team.name:"无"}}
                         </td>
                         <td style="width: 10%">
                             {{item.public?"公开":"不公开"}}
@@ -78,7 +93,9 @@
                                 </el-button>
                                 <el-dropdown-menu slot="dropdown">
                                     <el-dropdown-item @click.native="edit(item,index)">编辑</el-dropdown-item>
-
+                                    <el-dropdown-item @click.native="own(item,index)">指定所有者</el-dropdown-item>
+                                    <el-dropdown-item @click.native="user(item,index)">管理成员</el-dropdown-item>
+                                    <el-dropdown-item v-if="item.team" @click.native="quit(item,index)">退出团队</el-dropdown-item>
                                     <el-dropdown-item @click.native="remove(item,index)" style="color: red">删除</el-dropdown-item>
                                 </el-dropdown-menu>
                             </el-dropdown>
@@ -101,6 +118,8 @@
 
 <script>
     var page=require("../../component/page.vue");
+    var projectAdd=require("./projectAdd.vue");
+    var editProjectUser=require("./projectUserEdit.vue");
     module.exports={
         data:function () {
             return {
@@ -179,6 +198,74 @@
                         $.notify(data.msg,0);
                     }
                 });
+            },
+            add:function () {
+                $.showBox(this.$root,projectAdd);
+            },
+            own:function (item,index) {
+                var _this=this;
+                $.input("请输入指定的所有者",function (val) {
+                    if(!val.value)
+                    {
+                        $.tip("请输入指定的所有者",0);
+                        return false;
+                    }
+                    $.startHud();
+                    _this.$store.dispatch("setProjectOwner",{
+                        project:item._id,
+                        user:val.value
+                    }).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("指定成功",1);
+                            item.owner=data.data;
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0)
+                        }
+                    })
+                    return true;
+                })
+            },
+            user:function (item,index) {
+                var _this=this;
+                this.$store.dispatch("projectUserList",item._id).then(function (data) {
+                    if(data.code==200)
+                    {
+                        $.showBox(_this.$root,editProjectUser,{
+                            propObj:data.data,
+                            projectId:item._id
+                        })
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0)
+                    }
+                })
+            },
+            quit:function (item,index) {
+                var _this=this;
+                $.confirm("是否确定退出团队",function () {
+                    $.startHud();
+                    _this.$store.dispatch("teamRemoveProject",{
+                        team:item.team._id,
+                        project:item._id
+                    }).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("退出成功",1);
+                            item.team=null;
+                            delete item.team;
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
+                })
             }
         }
     }

@@ -18,6 +18,7 @@
                         <el-option label="今日注册" :value="0"></el-option>
                         <el-option label="今日登陆" :value="1"></el-option>
                         <el-option label="登陆最多" :value="2"></el-option>
+                        <el-option label="活跃用户" :value="4"></el-option>
                         <el-option label="所有用户" :value="3"></el-option>
                     </el-select>
                 </el-col>

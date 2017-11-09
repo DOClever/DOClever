@@ -356,12 +356,13 @@ function Group() {
                 {
                     query.version=req.headers["docleverversion"]
                 }
-                let arr=await (req.groupModel.findAsync(query,"-_id -parent -version -project",{
+                let arr=await (req.groupModel.findAsync(query,"-parent -version -project",{
                     sort:"name"
                 }))
                 for(let obj of arr)
                 {
                     obj._doc.data=await (_map(req,id,obj));
+                    delete obj._doc._id;
                 }
                 let arrInterface=await (req.interfaceModel.findAsync({
                     group:obj._id

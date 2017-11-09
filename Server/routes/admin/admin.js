@@ -23,7 +23,9 @@ var group=require("../../model/groupModel")
 var status=require("../../model/statusModel")
 var poll=require("../../model/pollModel")
 var version=require("../../model/versionModel")
+var statistic=require("../../model/statisticModel")
 var uuid=require("uuid");
+var objectId = require('mongoose').Types.ObjectId;
 function Admin()
 {
     this.teamUserList=async ( (teamId)=> {
@@ -170,6 +172,57 @@ function Admin()
                     name:new RegExp(req.clientParam.key?req.clientParam.key:"","i")
                 };
                 sort="name";
+            }
+            else if(type==4)
+            {
+                let today=new Date();
+                let t=today.getTime()-1000*60*60*24*10;
+                var newDay=new Date(t);
+                query={
+                    lastLoginDate:{
+                        $gt:newDay
+                    },
+                    loginCount:{
+                        $gte:10
+                    }
+                };
+                sort="name";
+                arr=await (user.findAsync(query,"name photo createdAt lastLoginDate loginCount state",{
+                    sort:sort
+                }));
+                let ret=[];
+                for(let obj of arr)
+                {
+                    let bOK=false;
+                    let arrProject=await (project.findAsync({
+                        $or:[
+                            {
+                                owner:obj._id
+                            },
+                            {
+                                "users.user":obj._id
+                            }
+                        ]
+                    }))
+                    for(let obj1 of arrProject)
+                    {
+                        let count=await (interface.countAsync({
+                            project:obj1._id
+                        }));
+                        if(count>=5)
+                        {
+                            bOK=true;
+                            break;
+                        }
+                    }
+                    if(bOK)
+                    {
+                        ret.push(obj);
+                    }
+                }
+                ret=ret.slice(req.clientParam.page*10,10+req.clientParam.page*10);
+                util.ok(res,ret,"ok");
+                return;
             }
             arr=await (user.findAsync(query,"name photo createdAt lastLoginDate loginCount state",{
                 sort:sort,
@@ -368,6 +421,10 @@ function Admin()
                     path:"owner",
                     select:"name photo"
                 }
+            }))
+            arr=await (project.populateAsync(arr,{
+                path:"team",
+                select:"name"
             }))
             for(let obj of arr)
             {
@@ -1039,7 +1096,7 @@ function Admin()
             let bFind=false;
             for(let o of req.obj.users)
             {
-                if(o.user.toString()==req.clientParam.user)
+                if(o.user.toString()==obj._id.toString())
                 {
                     bFind=true;
                     break;
@@ -1053,7 +1110,7 @@ function Admin()
                     owner:obj._id,
                     $pull:{
                         "users":{
-                            user:req.clientParam.user
+                            user:obj._id
                         }
                     }
                 }))
@@ -1070,7 +1127,7 @@ function Admin()
                     util.throw(e.userNotInProject,"用户不在项目里");
                 }
             }
-            util.ok(res,"ok")
+            util.ok(res,obj,"ok")
         }
         catch (err)
         {
@@ -1096,6 +1153,11 @@ function Admin()
             {
                 util.throw(e.userNotFound,"用户不存在");
             }
+            let bExist=await (this.existUserInTeam(obj._id,u._id));
+            if(!bExist)
+            {
+                util.throw(e.userNotInTeam,"用户不在团队内");
+            }
             await (teamGroup.findOneAndUpdateAsync({
                 team:req.clientParam.id,
                 "users.user":req.team.owner
@@ -1110,7 +1172,7 @@ function Admin()
             }))
             req.team.owner=u._id;
             await (req.team.saveAsync());
-            util.ok(res,"ok");
+            util.ok(res,u,"ok");
         }
         catch (err)
         {
@@ -1190,7 +1252,9 @@ function Admin()
                         user:req.clientParam.user
                     }
                 }
-            }))
+            }, {
+                multi: true
+            }));
             await (teamGroup.updateAsync({
                 team:req.team._id
             },{
@@ -1238,14 +1302,7 @@ function Admin()
             {
                 update.dis=req.clientParam.dis;
             }
-            let u=await (user.findOneAsync({
-                _id:req.clientParam.user
-            }))
-            if(!u)
-            {
-                util.throw(e.userNotFound,"用户不存在");
-            }
-            update.owner=req.clientParam.user;
+            update.owner=req.clientParam.owner;
             if(req.clientParam.public)
             {
                 update.public=req.clientParam.public;
@@ -1389,7 +1446,14 @@ function Admin()
     this.addTeamUser=async ((req,res)=>{
         try
         {
-            if(await (this.existUserInTeam(req.clientParam.id,req.clientParam.user)))
+            let u=await (user.findOneAsync({
+                name:req.clientParam.user
+            }))
+            if(!u)
+            {
+                util.throw(e.userNotFound,"用户不存在");
+            }
+            if(await (this.existUserInTeam(req.clientParam.id,u._id)))
             {
                 util.throw(e.userAlreadyInTeam,"用户已经在团队里了");
             }
@@ -1400,12 +1464,15 @@ function Admin()
                 },{
                     $addToSet:{
                         users:{
-                            user:req.clientParam.user,
+                            user:u._id,
                             role:req.clientParam.role
                         }
                     }
                 }))
-                util.ok(res,"ok");
+                util.ok(res,{
+                    user:u,
+                    role:1
+                },"ok");
             }
         }
         catch (err)
@@ -1440,20 +1507,25 @@ function Admin()
         {
             let arr=await (project.findAsync({
                 team:req.clientParam.id,
-                $or:[
-                    {
-                        owner:req.clientParam.user
-                    },
-                    {
-                        "users.user":req.clientParam.user
-                    }
-                ]
+                owner:req.clientParam.user
             }))
             if(arr.length>0)
             {
-                util.throw(e.userInProject,"用户仍然在团队的项目中");
+                util.throw(e.userInProject,"用户仍然拥有团队中的项目");
                 return;
             }
+            await (project.updateAsync({
+                team:req.clientParam.id,
+                "users.user":req.clientParam.user
+            },{
+                $pull:{
+                    users:{
+                        user:req.clientParam.user
+                    }
+                }
+            },{
+                multi:true
+            }))
             await (teamGroup.updateAsync({
                 team:req.clientParam.id
             },{
@@ -1477,6 +1549,11 @@ function Admin()
         {
             let objProject=await (project.findOneAsync({
                 _id:req.clientParam.project
+            },"",{
+                populate:{
+                    path:"owner",
+                    select:"name"
+                }
             }))
             if(!objProject)
             {
@@ -1495,7 +1572,7 @@ function Admin()
             let arrProjectUser=objProject.users.map(function (obj) {
                 return obj.user.toString();
             });
-            arrProjectUser.push(objProject.owner.toString());
+            arrProjectUser.push(objProject.owner._id.toString());
             let arr=[];
             for(let o of arrProjectUser)
             {
@@ -1530,6 +1607,30 @@ function Admin()
             }
             objProject.team=objTeam._id;
             await (objProject.saveAsync());
+            objProject._doc.userCount=objProject.users.length+1;
+            delete objProject._doc.users;
+            objProject._doc.interfaceCount=await (interface.countAsync({
+                project:objProject._id
+            }))
+            util.ok(res,objProject,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.pushTeamProject=async ((req,res)=>{
+        try
+        {
+            let obj=await (project.findOneAndUpdateAsync({
+                _id:req.clientParam.project,
+                team:req.clientParam.id
+            },{
+                $unset:{
+                    team:null
+                }
+            }))
+            util.ok(res,"ok")
         }
         catch (err)
         {
@@ -1572,10 +1673,23 @@ function Admin()
                 util.throw(e.projectNotFound,"项目不存在");
                 return;
             }
+            let u=await (user.findOneAsync({
+                [objectId.isValid(req.clientParam.user)?"_id":"name"]:req.clientParam.user
+            }));
+            if(!u)
+            {
+                util.throw(e.userNotFound,"用户不存在");
+                return;
+            }
+            if(objProject.owner.toString()==u._id.toString())
+            {
+                util.throw(e.systemReason,"用户已经是所有者了");
+                return;
+            }
             let bIn=false;
             for(let obj of objProject.users)
             {
-                if(obj.user.toString()==req.clientParam.user)
+                if(obj.user.toString()==u._id.toString())
                 {
                     bIn=true;
                     break;
@@ -1599,13 +1713,13 @@ function Admin()
                 }
                 await (project.findOneAndUpdateAsync({
                     _id:req.clientParam.id,
-                    "users.user":req.clientParam.user
+                    "users.user":u._id
                 },update))
             }
             else
             {
                 let update={
-                    user:req.clientParam.user,
+                    user:u._id,
                     role:req.clientParam.role
                 }
                 if(req.clientParam.option)
@@ -1619,8 +1733,41 @@ function Admin()
                         users:update
                     }
                 }))
+                if(objProject.team)
+                {
+                    let bExist=await (this.existUserInTeam(objProject.team,u._id));
+                    if(!bExist)
+                    {
+                        let objGroup=await (teamGroup.findOneAndUpdateAsync({
+                            name:"未命名",
+                            team:objProject.team
+                        },{
+                            name:"未命名",
+                            team:objProject.team,
+                            $addToSet:{
+                                users:{
+                                    user:u._id,
+                                    role:0
+                                }
+                            }
+                        },{
+                            upsert:true,
+                            setDefaultsOnInsert:true
+                        }))
+                    }
+                }
+                let ret={
+                    user:u,
+                    role:req.clientParam.role
+                };
+                if(req.clientParam.option)
+                {
+                    ret.option=JSON.parse(req.clientParam.option)
+                }
+                util.ok(res,ret,"ok");
             }
             util.ok(res,"ok");
+            return;
         }
         catch (err)
         {
@@ -1648,6 +1795,189 @@ function Admin()
                 }
             }))
             util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.searchUser=async ((req,res)=>{
+        try
+        {
+            let reg=new RegExp("^"+req.clientParam.user,"i");
+            let arr=await (user.findAsync({
+                name:reg
+            },"name",{
+                sort:"name",
+                limit:20
+            }))
+            util.ok(res,arr,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.projectUserList=async ((req,res)=>{
+        try
+        {
+            let objProject=await (project.findOneAsync({
+                _id:req.clientParam.id
+            },null,{
+                populate:{
+                    path:"users.user",
+                    select:"name photo"
+                }
+            }))
+            if(!objProject)
+            {
+                util.throw(e.projectNotFound,"项目不存在");
+                return;
+            }
+            util.ok(res,objProject.users,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.editTeam=async ((req,res)=>{
+        try
+        {
+            let objTeam=await (team.findOneAsync({
+                _id:req.clientParam.id
+            }))
+            if(!objTeam)
+            {
+                util.throw(e.projectNotFound,"团队不存在");
+                return;
+            }
+            objTeam.name=req.clientParam.name;
+            if(req.clientParam.dis!==undefined)
+            {
+                objTeam.dis=req.clientParam.dis
+            }
+            await (objTeam.saveAsync());
+            util.ok(res,objTeam,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.moveTeamUser=async ((req,res)=>{
+        try
+        {
+            let obj=await (teamGroup.findOneAndUpdateAsync({
+                team:req.clientParam.id,
+                "users.user":req.clientParam.user
+            },{
+                $pull:{
+                    "users":{
+                        user:req.clientParam.user
+                    }
+                }
+            }));
+            if(!obj)
+            {
+                util.throw(e.userNotInTeam,"用户不在团队内");
+            }
+            let role;
+            for(let o of obj.users)
+            {
+                if(o.user.toString()==req.clientParam.user)
+                {
+                    role=o.role;
+                    break;
+                }
+            }
+            let update={
+                user:req.clientParam.user,
+                role:role
+            };
+            obj=await (teamGroup.findOneAndUpdateAsync({
+                _id:req.clientParam.group
+            },{
+                $addToSet:{
+                    users:update
+                }
+            }));
+            if(!obj)
+            {
+                util.throw(e.groupNotFound,"部门不存在");
+            }
+            update.user=await (user.findOneAsync({
+                _id:update.user
+            },"name photo"))
+            util.ok(res,update,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.getTeamUserList=async ((req,res)=>{
+        try
+        {
+            let arrUser=await (teamGroup.findAsync({
+                team:req.clientParam.id
+            },"",{
+                populate:{
+                    path:"users.user",
+                    select:"name photo"
+                }
+            }))
+            let arr=[];
+            arrUser.forEach(function (obj) {
+                arr.push({
+                    users:obj.users,
+                    _id:obj._id,
+                    name:obj.name
+                })
+            })
+            util.ok(res,arr,"ok")
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.teamProjectList=async ((req,res)=>{
+        try
+        {
+            let arr=await (project.findAsync({
+                team:req.clientParam.id
+            },null,{
+                populate:{
+                    path:"owner",
+                    select:"name"
+                },
+                sort:"name"
+            }))
+            for(let obj of arr)
+            {
+                obj._doc.userCount=obj.users.length+1;
+                delete obj._doc.users;
+                obj._doc.interfaceCount=await (interface.countAsync({
+                    project:obj._id
+                }))
+            }
+            util.ok(res,arr,"ok")
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.statisticList=async ((req,res)=>{
+        try
+        {
+            let arr=await (statistic.findAsync({},null,{
+                sort:"-date",
+                limit:10,
+                skip:req.clientParam.page*10
+            }))
+            util.ok(res,arr,"ok");
         }
         catch (err)
         {

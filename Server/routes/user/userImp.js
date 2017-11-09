@@ -55,6 +55,9 @@ var interface=[
             },
             answer:{
                 type:String
+            },
+            email:{
+                type:String
             }
         },
         "data":{
