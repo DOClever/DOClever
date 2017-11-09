@@ -9,14 +9,15 @@ var vue=new Vue({
         pwd1:"",
         question:"",
         answer:"",
+        email:"",
         registerPending:false
     },
     methods:{
         register:function () {
             var _this=this;
-            if(!this.username || !this.pwd || !this.pwd1 || !this.question || !this.answer)
+            if(!this.username || !this.pwd || !this.pwd1 || !this.question || !this.answer || !this.email)
             {
-                this.$message.error("用户名密码,找回密码问题，找回密码答案不能为空");
+                this.$message.error("用户名密码,找回密码问题，找回密码答案,邮箱不能为空");
                 return;
             }
             else if(this.pwd!=this.pwd1)
@@ -24,12 +25,18 @@ var vue=new Vue({
                 this.$message.error("两次输入的密码不一致");
                 return;
             }
+            else if(!(/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(this.email)))
+            {
+                $.tip("邮箱格式不正确",0);
+                return;
+            }
             _this.registerPending=true;
             net.post("/user/save",{
                 name:_this.username,
                 password:_this.pwd,
                 question:_this.question,
-                answer:_this.answer
+                answer:_this.answer,
+                email:_this.email
             },{
                 "content-type":"application/x-www-form-urlencoded"
             }).then(function (data) {

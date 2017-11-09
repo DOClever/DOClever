@@ -136,6 +136,120 @@ module.exports=new Vuex.Store({
             return net.put("/admin/password",query).then(function (data) {
                 return data;
             })
+        },
+        teamRemoveProject:function (context,query) {
+            return net.put("/admin/teampushproject",{
+                id:query.team,
+                project:query.project
+            }).then(function (data) {
+                return data;
+            })
+        },
+        setProjectOwner:function (context,query) {
+            return net.put("/admin/userprojectown",{
+                id:query.project,
+                user:query.user
+            }).then(function (data) {
+                return data;
+            })
+        },
+        searchUser:function (context,name) {
+            return net.get("/admin/searchuser",{
+                user:name
+            }).then(function (data) {
+                return data
+            })
+        },
+        addProject:function (context,obj) {
+            return net.post("/admin/project",obj).then(function (data) {
+                return data;
+            })
+        },
+        removeProjectUser:function (context,obj) {
+            return net.delete("/admin/projectuser",{
+                id:obj.id,
+                user:obj.user
+            }).then(function (data) {
+                return data;
+            })
+        },
+        editProjectUser:function (context,obj) {
+            return net.post("/admin/projectuserrole",obj).then(function (data) {
+                return data;
+            })
+        },
+        projectUserList:function (context,id) {
+            return net.get("/admin/projectuserlist",{
+                id:id
+            }).then(function (data) {
+                return data;
+            })
+        },
+        setTeamOwner:function (context,obj) {
+            return net.put("/admin/userteamown",obj).then(function (data) {
+                return data
+            })
+
+        },
+        addTeam:function (context,obj) {
+            return net.post("/admin/team",obj).then(function (data) {
+                return data;
+            })
+        },
+        pullTeamUser:function (context,obj) {
+            return net.post("/admin/addteamuser",obj).then(function (data) {
+                return data;
+            })
+        },
+        addTeamGroup:function (context,obj) {
+            return net.post("/admin/teamgroup",obj).then(function (data) {
+                return data;
+            })
+        },
+        removeTeamGroup:function (context,obj) {
+            return net.delete("/admin/teamgroup",obj).then(function (data) {
+                return data;
+            })
+        },
+        editTeamUserRole:function (context,obj) {
+            return net.put("/admin/teamuser",obj).then(function (data) {
+                return data;
+            })
+        },
+        removeTeamUser:function (context,obj) {
+            return net.delete("/admin/teamuser",obj).then(function (data) {
+                return data;
+            })
+        },
+        moveTeamUser:function (context,obj) {
+            return net.put("/admin/moveteamuser",obj).then(function (data) {
+                return data;
+            })
+        },
+        getTeamUserList:function (context,obj) {
+            return net.get("/admin/teamuserlist",obj).then(function (data) {
+                return data;
+            })
+        },
+        editTeamInfo:function(context,obj){
+            return net.put("/admin/team",obj).then(function (data) {
+                return data;
+            })
+        },
+        getTeamProjectList:function (context,obj) {
+            return net.get("/admin/teamprojectlist",obj).then(function (data) {
+                return data;
+            })
+        },
+        pullTeamProject:function (context,obj) {
+            return net.put("/admin/teampullproject",obj).then(function (data) {
+                return data;
+            })
+        },
+        pushTeamProject:function (context,obj) {
+            return net.put("/admin/teampushproject",obj).then(function (data) {
+                return data;
+            })
         }
     }
 

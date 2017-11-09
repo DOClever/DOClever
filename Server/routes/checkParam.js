@@ -55,7 +55,7 @@ function route(category) {
                 });
                 return;
             }
-            else if (req.clientParam[key] && param[key].type == Number) {
+            else if (req.clientParam[key] && (param[key].type == Number || param[key]==Number)) {
                 if(isNaN(req.clientParam[key]))
                 {
                     res.json({

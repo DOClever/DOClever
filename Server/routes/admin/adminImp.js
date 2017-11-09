@@ -389,6 +389,35 @@ var interface=[
         handle:[admin.addTeam]
     },
     {
+        "method":"GET",
+        "path":"/admin/teamuserlist",
+        "param": {
+            id:{
+                type:String,
+            },
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.getTeamUserList]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/team",
+        "param": {
+            id:{
+                type:String,
+            },
+            name:String,
+            dis:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.editTeam]
+    },
+    {
         "method":"POST",
         "path":"/admin/teamgroup",
         "param": {
@@ -458,6 +487,18 @@ var interface=[
     },
     {
         "method":"PUT",
+        "path":"/admin/moveteamuser",
+        "param": {
+            id:String,
+            user:String,
+            group:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.moveTeamUser]
+    },
+    {
+        "method":"PUT",
         "path":"/admin/teampullproject",
         "param": {
             id:String,
@@ -466,6 +507,17 @@ var interface=[
         "data":String,
         admin:1,
         handle:[admin.pullTeamProject]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/teampushproject",
+        "param": {
+            id:String,
+            project:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.pushTeamProject]
     },
     {
         "method":"POST",
@@ -493,6 +545,46 @@ var interface=[
         "data":String,
         admin:1,
         handle:[admin.removeProjectUser]
+    },
+    {
+        "method":"GET",
+        "path":"/admin/projectuserlist",
+        "param": {
+            id:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.projectUserList]
+    },
+    {
+        "method":"GET",
+        "path":"/admin/searchuser",
+        "param": {
+            user:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.searchUser]
+    },
+    {
+        "method":"GET",
+        "path":"/admin/teamprojectlist",
+        "param": {
+            id:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.teamProjectList]
+    },
+    {
+        "method":"GET",
+        "path":"/admin/statisticlist",
+        "param": {
+            page:Number
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.statisticList]
     },
 ];
 
