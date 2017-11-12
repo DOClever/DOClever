@@ -47,26 +47,72 @@
                     <el-checkbox :label="6">周日</el-checkbox>
                 </el-checkbox-group>
             </el-form-item>
-            <el-form-item label="baseUrl" style="text-align: center">
-                <el-select v-model="poll.baseUrl" style="width: 80%">
-                    <el-option v-for="item in arrBaseUrl" :value="item.url" style="height: auto" :key="item.url"><span>{{item.url}}</span><br><span style="font-size: 13px;color: gray">{{item.remark}}</span></el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="发件人邮箱账户" style="text-align: center">
-                <el-input placeholder="请输入发件人的邮箱账户(如：aaa@qq.com)" style="width: 80%" v-model="poll.sendInfo.user"></el-input>
-            </el-form-item>
-            <el-form-item label="发件人邮箱密码" style="text-align: center">
-                <el-input placeholder="请输入发件人的邮箱密码" style="width: 80%" v-model="poll.sendInfo.password"></el-input>
-            </el-form-item>
-            <el-form-item label="发件人smtp地址" style="text-align: center">
-                <el-input placeholder="请输入发件人的smtp地址(如：smtp.qq.com)" style="width: 80%" v-model="poll.sendInfo.smtp"></el-input>
-            </el-form-item>
-            <el-form-item label="发件人smtp端口" style="text-align: center">
-                <el-input placeholder="请输入发件人smtp端口号" style="width: 80%" v-model="poll.sendInfo.port"></el-input>
-            </el-form-item>
             <el-form-item label="立即执行一次" style="text-align: center">
                 <el-switch v-model="immediate" on-color="#13ce66" off-color="#ff4949"></el-switch>
             </el-form-item>
+            <el-form-item label="用例失败才发送" style="text-align: center">
+                <el-switch v-model="poll.failSend" on-color="#13ce66" off-color="#ff4949" :on-value="1" :off-value="0"></el-switch>
+            </el-form-item>
+            <el-tabs type="card">
+                <el-tab-pane label="邮箱">
+                    <el-form-item label="baseUrl" style="text-align: center">
+                        <el-select v-model="poll.baseUrl" style="width: 80%">
+                            <el-option v-for="item in arrBaseUrl" :value="item.url" style="height: auto" :key="item.url"><span>{{item.url}}</span><br><span style="font-size: 13px;color: gray">{{item.remark}}</span></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="发件人邮箱账户" style="text-align: center">
+                        <el-input placeholder="请输入发件人的邮箱账户(如：aaa@qq.com)" style="width: 80%" v-model="poll.sendInfo.user"></el-input>
+                    </el-form-item>
+                    <el-form-item label="发件人邮箱密码" style="text-align: center">
+                        <el-input placeholder="请输入发件人的邮箱密码" style="width: 80%" v-model="poll.sendInfo.password"></el-input>
+                    </el-form-item>
+                    <el-form-item label="发件人smtp地址" style="text-align: center">
+                        <el-input placeholder="请输入发件人的smtp地址(如：smtp.qq.com)" style="width: 80%" v-model="poll.sendInfo.smtp"></el-input>
+                    </el-form-item>
+                    <el-form-item label="发件人smtp端口" style="text-align: center">
+                        <el-input placeholder="请输入发件人smtp端口号" style="width: 80%" v-model="poll.sendInfo.port"></el-input>
+                    </el-form-item>
+                </el-tab-pane>
+                <el-tab-pane label="短信">
+                    <el-form-item label="URL方法" style="text-align: center">
+                        <el-select v-model="poll.phoneInfo.method">
+                            <el-option label="GET" value="GET"></el-option>
+                            <el-option label="POST" value="POST"></el-option>
+                            <el-option label="PUT" value="PUT"></el-option>
+                            <el-option label="DELETE" value="DELETE"></el-option>
+                            <el-option label="PATCH" value="PATCH"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="URL" style="text-align: center">
+                        <el-input placeholder="请输入URL地址" style="width: 80%" v-model="poll.phoneInfo.baseUrl"></el-input>
+                    </el-form-item>
+                    <el-form-item label="号码绑定字段" style="text-align: center">
+                        <el-input placeholder="请输入绑定到url参数的手机号码字段名称" style="width: 80%" v-model="poll.phoneInfo.bindParam"></el-input>
+                    </el-form-item>
+                    <el-form-item label="号码分隔符" style="text-align: center">
+                        <el-input placeholder="请输入手机号码分隔符" style="width: 80%" v-model="poll.phoneInfo.split"></el-input>
+                    </el-form-item>
+                    <el-form-item label="内容绑定字段" style="text-align: center">
+                        <el-input placeholder="请输入绑定到url参数的发送内容的字段名称" style="width: 80%" v-model="poll.phoneInfo.contentParam"></el-input>
+                    </el-form-item>
+                    <el-form-item label="url参数" style="text-align: center">
+                        <template v-for="(item,index) in poll.phoneInfo.param">
+                            <el-row class="row" style="height: 50px;line-height: 50px;width: 90%;display: inline-block">
+                                <el-col :span="10" class="col">
+                                    <el-input placeholder="请输入参数名称" style="width: 80%" v-model="item.key" @input="index==poll.phoneInfo.param.length-1?addParam():''"></el-input>
+                                </el-col>
+                                <el-col :span="10" class="col">
+                                    <el-input placeholder="请输入参数值" style="width: 80%" v-model="item.value"></el-input>
+                                </el-col>
+                                <el-col :span="4" class="col">
+                                    <el-button type="text" icon="close" style="color: red" @click="removeParam(item,index)">
+                                    </el-button>
+                                </el-col>
+                            </el-row>
+                        </template>
+                    </el-form-item>
+                </el-tab-pane>
+            </el-tabs>
         </el-form>
         <el-row class="dialog-footer" slot="footer">
             <el-button type="danger" @click="remove" :loading="removePending" v-if="propPoll">
@@ -88,6 +134,20 @@
                 poll:function () {
                    if(this.propPoll)
                    {
+                       if(!this.propPoll.phoneInfo)
+                       {
+                           this.propPoll.phoneInfo={
+                               method:"GET",
+                               baseUrl:"",
+                               param:[{
+                                   key:"",
+                                   value:""
+                               }],
+                               bindParam:"",
+                               split:",",
+                               contentParam:""
+                           }
+                       }
                         return this.propPoll
                    }
                    else
@@ -101,7 +161,19 @@
                                 smtp:"",
                                 port:465
                             },
-                            baseUrl:this.propBaseUrl.length>0?this.propBaseUrl[0].url:""
+                            baseUrl:this.propBaseUrl.length>0?this.propBaseUrl[0].url:"",
+                            phoneInfo:{
+                                method:"GET",
+                                baseUrl:"",
+                                param:[{
+                                    key:"",
+                                    value:""
+                                }],
+                                bindParam:"",
+                                split:",",
+                                contentParam:""
+                            },
+                            failSend:0
                         }
                    }
                 }.call(this),
@@ -212,7 +284,9 @@
                     port:this.poll.sendInfo.port,
                     url:this.poll.baseUrl,
                     test:JSON.stringify(arrTest),
-                    immediate:this.immediate?1:0
+                    immediate:this.immediate?1:0,
+                    phoneinfo:JSON.stringify(this.poll.phoneInfo),
+                    failsend:this.poll.failSend
                 }).then(function (data) {
                     _this.savePending=false;
                     if(data.code==200)
@@ -245,7 +319,26 @@
                         }
                     })
                 })
-            }
+            },
+            addParam:function () {
+                this.poll.phoneInfo.param.push({
+                    key:"",
+                    value:""
+                })
+            },
+            removeParam:function (item,index) {
+                if(index==0)
+                {
+                    this.poll.phoneInfo.param[0]={
+                        key:"",
+                        value:""
+                    }
+                }
+                else
+                {
+                    this.obj.phoneInfo.param.splice(index,1)
+                }
+            },
         },
         created:function () {
             if(this.propPoll)

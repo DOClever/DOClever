@@ -81,6 +81,10 @@ var interface=[
                 type:String,
                 optional:1
             },
+            phone:{
+                type:String,
+                optional:1
+            },
             qq:{
                 type:String,
                 optional:1

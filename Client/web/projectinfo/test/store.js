@@ -434,6 +434,17 @@ module.exports={
                             type:"",
                             salt:""
                         });
+                        if(objParam.bodyParam===undefined)
+                        {
+                            Vue.set(objParam,"bodyParam",[]);
+                        }
+                        if(objParam.bodyInfo===undefined)
+                        {
+                            Vue.set(objParam,"bodyInfo",{
+                                type:0,
+                                rawType:0
+                            });
+                        }
                         if(objParam.bodyInfo.rawText===undefined)
                         {
                             Vue.set(objParam.bodyInfo,"rawText","");

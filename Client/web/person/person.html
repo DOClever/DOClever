@@ -70,6 +70,9 @@
                     <el-form-item label="邮箱" style="text-align: center">
                         <el-input style="width: 80%" name="email" v-model="session.email"></el-input>
                     </el-form-item>
+                    <el-form-item label="手机" style="text-align: center">
+                        <el-input style="width: 80%" name="phone" v-model="session.phone"></el-input>
+                    </el-form-item>
                     <el-form-item style="text-align: center">
                         <el-button type="primary" style="width: 60%;margin: 20px auto 0 auto" @click.prevent="saveInfo" :loading="savePending">
                             保存

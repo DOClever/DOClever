@@ -42,7 +42,9 @@ function  Poll() {
                     port:req.clientParam.port
                 },
                 test:JSON.parse(req.clientParam.test),
-                baseUrl:req.clientParam.url
+                baseUrl:req.clientParam.url,
+                phoneInfo:JSON.parse(req.clientParam.phoneinfo),
+                failSend:req.clientParam.failsend
             }
             if(req.headers["docleverversion"])
             {

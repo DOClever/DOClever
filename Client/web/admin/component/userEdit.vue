@@ -31,6 +31,9 @@
             <el-form-item label="邮箱" style="text-align: center">
                 <el-input style="width: 80%" name="email" v-model="obj.email"></el-input>
             </el-form-item>
+            <el-form-item label="手机" style="text-align: center">
+                <el-input style="width: 80%" name="phone" v-model="obj.phone"></el-input>
+            </el-form-item>
             <el-form-item label="状态" style="text-align: center">
                 <el-switch v-model="obj.state" on-color="#13ce66" off-color="#ff4949" :on-value="1" :off-value="0"></el-switch>
             </el-form-item>
@@ -69,6 +72,7 @@
                     sex:"男",
                     qq:"",
                     email:"",
+                    phone:"",
                     company:"",
                     state:1,
                     question:"",
@@ -101,6 +105,7 @@
                 obj.company=(this.obj.company!==undefined && this.obj.company!==null)?this.obj.company:""
                 obj.qq=(this.obj.qq!=undefined && this.obj.qq!==null)?this.obj.qq:""
                 obj.email=(this.obj.email!==undefined && this.obj.email!==null)?this.obj.email:""
+                obj.phone=(this.obj.phone!==undefined && this.obj.phone!==null)?this.obj.phone:""
                 if(this.obj.question)
                 {
                     obj.question=this.obj.question

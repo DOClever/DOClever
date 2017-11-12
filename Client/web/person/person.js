@@ -50,6 +50,10 @@ var vue=new Vue({
             {
                 obj.email=this.session.email
             }
+            if(this.session.phone)
+            {
+                obj.phone=this.session.phone
+            }
             obj.userid=this.session.id;
             this.savePending=true;
             net.upload("post","/user/save",obj).then(function (data) {
