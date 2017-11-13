@@ -2391,7 +2391,7 @@ function getNowFormatDate(fmt,date) {
 }
 
 var createStatistic=async (function() {
-    let interface=require("../model/interfaceModel");
+    let inter=require("../model/interfaceModel");
     let project=require("../model/projectModel");
     let team=require("../model/teamModel");
     let user=require("../model/userModel");
@@ -2405,7 +2405,7 @@ var createStatistic=async (function() {
     let obj={
         date:getNowFormatDate("yyyy-MM-dd",date)
     }
-    obj.interface=await (interface.countAsync({
+    obj.interface=await (inter.countAsync({
         createdAt:{
             $gte:date
         }
