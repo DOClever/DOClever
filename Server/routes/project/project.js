@@ -2839,7 +2839,10 @@ function Project() {
                                                 value:obj,
                                                 remark:""
                                             }
-                                        }):[],
+                                        }):(o.default?[{
+                                            value:o.default,
+                                            remark:""
+                                        }]:[]),
                                         "type" : 0
                                     }
                                 })
@@ -2849,7 +2852,7 @@ function Project() {
                                 header.push({
                                     name:o.name,
                                     remark:o.description?o.description:"",
-                                    value:""
+                                    value:o.default?o.default:""
                                 })
                             }
                             else if(o.in=="body")
@@ -3773,7 +3776,10 @@ function Project() {
                                                 value:obj,
                                                 remark:""
                                             }
-                                        }):[],
+                                        }):(o.default?[{
+                                            value:o.default,
+                                            remark:""
+                                        }]:[]),
                                         "type" : 0
                                     }
                                 })
@@ -3783,7 +3789,7 @@ function Project() {
                                 header.push({
                                     name:o.name,
                                     remark:o.description?o.description:"",
-                                    value:""
+                                    value:o.default?o.default:""
                                 })
                             }
                             else if(o.in=="body")

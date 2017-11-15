@@ -508,7 +508,7 @@
                         }
                         else
                         {
-                            $.tip(data.msg,0)
+                            $.tip(data.msg,2)
                         }
                         _this.mailShow=true;
                     }

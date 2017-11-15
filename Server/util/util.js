@@ -1362,6 +1362,27 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
     {
         path=path+"?"+query;
     }
+    let cookie=header["cookie"] || header["Cookie"];
+    if(cookie)
+    {
+        let arr=cookie.split(";");
+        let objCookie={};
+        arr.forEach(function (obj) {
+            let arr1=obj.split("=");
+            objCookie[arr1[0]]=arr1[1];
+        })
+        for(let key in objCookie)
+        {
+            opt.cookie[key]=objCookie[key];
+        }
+    }
+    let strCookie="",arrCookie=[];
+    for(let key in opt.cookie)
+    {
+        arrCookie.push(key+"="+opt.cookie[key]);
+    }
+    strCookie=arrCookie.join(";");
+    header["Cookie"]=strCookie
     var startDate=new Date();
     var func;
     var objReq={
@@ -1373,7 +1394,7 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
     {
         if(obj.bodyInfo.type==0)
         {
-            objReq.body=param(body,true);
+            objReq.form=body;
         }
         else
         {
@@ -1425,6 +1446,17 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
             runAfter(obj.after.code,res.status,res.header,res.data)
         }
         root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]结束运行接口："+obj.name+"(耗时：<span style='color: green'>"+res.second+"秒</span>)<br>"
+        let cookies = res.header["set-cookie"];
+        if (cookies) {
+            for (let index in cookies) {
+                let cookie = cookies[index];
+                let realOfCookie = cookie.split(";")[0];
+                let obj=realOfCookie.split("=");
+                let key=obj[0].trim();
+                let val=encodeURIComponent(obj[1]);
+                opt.cookie[key]=val;
+            }
+        }
         return res;
     })
 })
@@ -1444,6 +1476,10 @@ var runTestCode=async (function (code,test,global,opt,root) {
         global={};
     }
     var env={};
+    if(!opt.cookie)
+    {
+        opt.cookie={};
+    }
     if(opt.baseUrls && opt.baseUrl)
     {
         opt.baseUrls.forEach(function (obj) {
@@ -1473,7 +1509,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
         var text;
         if(type=="1")
         {
-            text="(function (opt) {return runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',baseUrls:"+JSON.stringify(opt.baseUrls)+"}"+",test,root,opt)})"
+            text="(function (opt) {return runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',baseUrls:"+JSON.stringify(opt.baseUrls)+",cookie:"+JSON.stringify(opt.cookie).replace(/'/g,"\\'")+"}"+",test,root,opt)})"
         }
         else if(type=="2")
         {
