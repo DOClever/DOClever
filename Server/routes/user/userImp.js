@@ -103,6 +103,10 @@ var interface=[
                 optional:1,
                 type:String
             },
+            phone:{
+                optional:1,
+                type:String
+            },
             qq:{
                 optional:1,
                 type:String

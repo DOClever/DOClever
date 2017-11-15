@@ -2768,6 +2768,20 @@ function Project() {
                         jsonType:0
                     };
                     let contentType=interRaw.consumes?interRaw.consumes[0]:null;
+                    if(!contentType)
+                    {
+                        if(interRaw.parameters)
+                        {
+                            for(let obj of interRaw.parameters)
+                            {
+                                if(obj.in=="body" && obj.schema)
+                                {
+                                    contentType="application/json";
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     if(contentType)
                     {
                         header.push({
@@ -2871,7 +2885,14 @@ function Project() {
                                                 o1.must=objBody.must;
                                                 o1.name=objBody.name;
                                                 objBody=o1;
-                                                bodyInfo.rawJSON.push(objBody);
+                                                if(bodyInfo.rawJSON[0].name)
+                                                {
+                                                    bodyInfo.rawJSON.push(objBody);
+                                                }
+                                                else
+                                                {
+                                                    bodyInfo.rawJSON[0]=objBody;
+                                                }
                                             }
                                         }
                                         else
@@ -2887,7 +2908,14 @@ function Project() {
                                                     {
                                                         let o1=util.clone(objDef[key]);
                                                         objBody.data.push(o1);
-                                                        bodyInfo.rawJSON.push(objBody);
+                                                        if(bodyInfo.rawJSON[0].name)
+                                                        {
+                                                            bodyInfo.rawJSON.push(objBody);
+                                                        }
+                                                        else
+                                                        {
+                                                            bodyInfo.rawJSON[0]=objBody;
+                                                        }
                                                     }
                                                 }
                                                 else
@@ -2914,7 +2942,42 @@ function Project() {
                                                         name :null
                                                     }
                                                     objBody.data.push(o2);
+                                                    if(bodyInfo.rawJSON[0].name)
+                                                    {
+                                                        bodyInfo.rawJSON.push(objBody);
+                                                    }
+                                                    else
+                                                    {
+                                                        bodyInfo.rawJSON[0]=objBody;
+                                                    }
+                                                }
+                                            }
+                                            else if(o.schema.type=="cust" && o.schema.format=="json")
+                                            {
+                                                objBody.data=[];
+                                                objBody.type=3;
+                                                let objJSON;
+                                                try
+                                                {
+                                                    objJSON=JSON.parse(o.schema.content);
+                                                }
+                                                catch (err)
+                                                {
+                                                    continue;
+                                                }
+                                                let result=[];
+                                                for(let key in objJSON)
+                                                {
+                                                    util.handleResultData(key,objJSON[key],result,null,1,1)
+                                                }
+                                                objBody.data=result;
+                                                if(bodyInfo.rawJSON[0].name)
+                                                {
                                                     bodyInfo.rawJSON.push(objBody);
+                                                }
+                                                else
+                                                {
+                                                    bodyInfo.rawJSON[0]=objBody;
                                                 }
                                             }
                                         }
@@ -3108,6 +3171,27 @@ function Project() {
                                 for(let key in objRes.schema.properties)
                                 {
                                     __handleRes(key,objRes.schema.properties[key],result);
+                                }
+                            }
+                            else if(objRes.schema && objRes.schema.type=="cust" && objRes.schema.format=="json")
+                            {
+                                let objJSON;
+                                try
+                                {
+                                    objJSON=JSON.parse(objRes.schema.content);
+                                }
+                                catch (err)
+                                {
+
+                                }
+                                if(objJSON)
+                                {
+                                    let result1=[];
+                                    for(let key in objJSON)
+                                    {
+                                        util.handleResultData(key,objJSON[key],result1,null,1)
+                                    }
+                                    result=result1;
                                 }
                             }
                             else
@@ -3533,6 +3617,7 @@ function Project() {
                     {
                         update={
                             name:name,
+                            method:objInter.method,
                             remark:interRaw.description?interRaw.description:objInter.remark,
                             param:[
                                 {
@@ -3617,6 +3702,20 @@ function Project() {
                         jsonType:0
                     };
                     let contentType=interRaw.consumes?interRaw.consumes[0]:null;
+                    if(!contentType)
+                    {
+                        if(interRaw.parameters)
+                        {
+                            for(let obj of interRaw.parameters)
+                            {
+                                if(obj.in=="body" && obj.schema)
+                                {
+                                    contentType="application/json";
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     if(contentType)
                     {
                         header.push({
@@ -3720,7 +3819,14 @@ function Project() {
                                                 o1.must=objBody.must;
                                                 o1.name=objBody.name;
                                                 objBody=o1;
-                                                bodyInfo.rawJSON.push(objBody);
+                                                if(bodyInfo.rawJSON[0].name)
+                                                {
+                                                    bodyInfo.rawJSON.push(objBody);
+                                                }
+                                                else
+                                                {
+                                                    bodyInfo.rawJSON[0]=objBody;
+                                                }
                                             }
                                         }
                                         else
@@ -3736,7 +3842,14 @@ function Project() {
                                                     {
                                                         let o1=util.clone(objDef[key]);
                                                         objBody.data.push(o1);
-                                                        bodyInfo.rawJSON.push(objBody);
+                                                        if(bodyInfo.rawJSON[0].name)
+                                                        {
+                                                            bodyInfo.rawJSON.push(objBody);
+                                                        }
+                                                        else
+                                                        {
+                                                            bodyInfo.rawJSON[0]=objBody;
+                                                        }
                                                     }
                                                 }
                                                 else
@@ -3763,7 +3876,42 @@ function Project() {
                                                         name :null
                                                     }
                                                     objBody.data.push(o2);
+                                                    if(bodyInfo.rawJSON[0].name)
+                                                    {
+                                                        bodyInfo.rawJSON.push(objBody);
+                                                    }
+                                                    else
+                                                    {
+                                                        bodyInfo.rawJSON[0]=objBody;
+                                                    }
+                                                }
+                                            }
+                                            else if(o.schema.type=="cust" && o.schema.format=="json")
+                                            {
+                                                objBody.data=[];
+                                                objBody.type=3;
+                                                let objJSON;
+                                                try
+                                                {
+                                                    objJSON=JSON.parse(o.schema.content);
+                                                }
+                                                catch (err)
+                                                {
+                                                    continue;
+                                                }
+                                                let result=[];
+                                                for(let key in objJSON)
+                                                {
+                                                    util.handleResultData(key,objJSON[key],result,null,1,1)
+                                                }
+                                                objBody.data=result;
+                                                if(bodyInfo.rawJSON[0].name)
+                                                {
                                                     bodyInfo.rawJSON.push(objBody);
+                                                }
+                                                else
+                                                {
+                                                    bodyInfo.rawJSON[0]=objBody;
                                                 }
                                             }
                                         }
@@ -3957,6 +4105,27 @@ function Project() {
                                 for(let key in objRes.schema.properties)
                                 {
                                     __handleRes(key,objRes.schema.properties[key],result);
+                                }
+                            }
+                            else if(objRes.schema && objRes.schema.type=="cust" && objRes.schema.format=="json")
+                            {
+                                let objJSON;
+                                try
+                                {
+                                    objJSON=JSON.parse(objRes.schema.content);
+                                }
+                                catch (err)
+                                {
+
+                                }
+                                if(objJSON)
+                                {
+                                    let result1=[];
+                                    for(let key in objJSON)
+                                    {
+                                        util.handleResultData(key,objJSON[key],result1,null,1)
+                                    }
+                                    result=result1;
                                 }
                             }
                             else

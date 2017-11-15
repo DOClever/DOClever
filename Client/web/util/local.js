@@ -1,7 +1,7 @@
 /**
  * Created by sunxin on 2017/2/20.
  */
-var arrCookie=["id","name","photo","qq","email","sex","age","company","loginCount","remember","sort"]
+var arrCookie=["id","name","photo","phone","qq","email","sex","age","company","loginCount","remember","sort"]
 var config=require("./config");
 function getCookie(c_name)
 {
@@ -108,6 +108,14 @@ local.update=function (data,remember) {
     else
     {
         local.remove("email");
+    }
+    if(data.phone!==undefined && data.phone!==null)
+    {
+        local.set("phone",data.phone,remember);
+    }
+    else
+    {
+        local.remove("phone");
     }
     if(data.sex!==undefined && data.sex!==null)
     {

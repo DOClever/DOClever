@@ -942,7 +942,7 @@ module.exports={
             if(val)
             {
                 var arrParam=[];
-                var arr=val.match(/\{([^\s]+?)\}/g);
+                var arr=val.match(/\{([^\s|\}|\{]+?)\}(?!\})/g);
                 if(arr)
                 {
                     for(var i=0;i<arr.length;i++)

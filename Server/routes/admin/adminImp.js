@@ -81,6 +81,10 @@ var interface=[
                 type:String,
                 optional:1
             },
+            phone:{
+                type:String,
+                optional:1
+            },
             qq:{
                 type:String,
                 optional:1
@@ -580,7 +584,8 @@ var interface=[
         "method":"GET",
         "path":"/admin/statisticlist",
         "param": {
-            page:Number
+            start:String,
+            end:String
         },
         "data":String,
         admin:1,

@@ -171,6 +171,10 @@
                         bMark=true;
                         _this.interface.url=_this.interface.url.substring(0,index);
                     }
+                    else
+                    {
+                        return;
+                    }
                     for(var i=0;i<_this.$store.state.interface.param.length;i++)
                     {
                         var arrStoreQuery=_this.$store.state.interface.param[i].query;

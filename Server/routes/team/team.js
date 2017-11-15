@@ -440,10 +440,15 @@ function Team() {
                 return;
             }
             let arr=objPro.users.map(function (obj) {
-                return {
+                let o={
                     user:obj.user.toString(),
                     role:obj.role
                 }
+                if(obj.option)
+                {
+                    o.option=obj.option;
+                }
+                return o;
             });
             let arrUser=await (teamGroup.findAsync({
                 team:req.team._id
@@ -469,6 +474,10 @@ function Team() {
                         {
                             obj1._doc.select=1;
                             obj1.role=arr[index].role;
+                            if(arr[index].option)
+                            {
+                                obj1._doc.option=arr[index].option
+                            }
                         }
                         else
                         {

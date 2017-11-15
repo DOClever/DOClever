@@ -181,7 +181,17 @@
                             </tbody>
                         </table>
                         <el-row v-else-if="bodyInfo.type==1 && bodyInfo.rawType==2">
-                            <bodyjsonpreview :index="index" :data="item"></bodyjsonpreview>
+                            <el-tabs type="card">
+                                <el-tab-pane label="JSON">
+                                    <template v-for="item in rawJSON">
+                                        <div class="row" style="font-size: 18px;min-height: 25px;line-height: 25px;margin: 0;padding: 0;background-color: #fff9e6;word-break: break-all" v-html="item">
+                                        </div>
+                                    </template>
+                                </el-tab-pane>
+                                <el-tab-pane label="Table">
+                                    <bodyjsonpreview :index="index" :data="item"></bodyjsonpreview>
+                                </el-tab-pane>
+                            </el-tabs>
                         </el-row>
                         <div class="row" style="margin: 0;padding: 0" v-else>
                             <table style="width: 100%;font-size: 17px;border-collapse: collapse" border="1" bordercolor="#ddd">
@@ -215,7 +225,17 @@
                     </el-row>
                     <el-row class="row" style="padding: 0 30px;">
                         <el-row class="row" v-if="outInfo.type==0 && drawMix.length>0">
-                            <outjsonpreview :index="index" :data="item"></outjsonpreview>
+                            <el-tabs type="card">
+                                <el-tab-pane label="JSON">
+                                    <template v-for="item in drawMix">
+                                        <div class="row" style="font-size: 18px;min-height: 25px;line-height: 25px;margin: 0;padding: 0;background-color: #fff9e6;word-break: break-all" v-html="item">
+                                        </div>
+                                    </template>
+                                </el-tab-pane>
+                                <el-tab-pane label="Table">
+                                    <outjsonpreview :index="index" :data="item"></outjsonpreview>
+                                </el-tab-pane>
+                            </el-tabs>
                         </el-row>
                         <table style="width: 100%;font-size: 17px;border-collapse: collapse" border="1" v-if="outInfo.type==1" bordercolor="#ddd">
                             <thead style="background-color: #50a3ff;color:white;text-align: center;vertical-align: middle">
