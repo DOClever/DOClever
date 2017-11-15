@@ -367,7 +367,7 @@ module.exports={
             if(val)
             {
                 var arrParam=[];
-                var arr=val.match(/\{([^\s]+?)\}/g);
+                var arr=val.match(/\{([^\s|\}|\{]+?)\}(?!\})/g);
                 if(arr)
                 {
                     for(var i=0;i<arr.length;i++)
@@ -739,7 +739,7 @@ module.exports={
                     {
                         var ele=document.createElement("div");
                         ele.innerHTML=result.data;
-                        if(ele.childNodes.length>1 || ele.childNodes[0].nodeType==1)
+                        if(ele.childNodes.length>1 || (ele.childNodes.length>0 && ele.childNodes[0].nodeType==1))
                         {
                             context.getters.curParam.type="html";
                         }

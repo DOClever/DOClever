@@ -245,10 +245,11 @@ function Interface() {
             if (req.headers["docleverversion"]) {
                 query.version = req.headers["docleverversion"]
             }
+            let bDuplicate=false;
             let obj=await (req.interfaceModel.findOneAsync(query));
             if(obj)
             {
-                util.throw(e.interfaceDuplicate,"项目内接口的路径和方法重复");
+                bDuplicate=true;
             }
             let update = {};
             for (let key in req.clientParam) {
@@ -298,7 +299,7 @@ function Interface() {
                         return;
                     }
                 }
-                util.ok(res, obj._id, "修改成功");
+                util.ok(res, obj._id, bDuplicate?"有重复接口，请尽量避免":"修改成功");
             }
             else
             {
@@ -309,7 +310,7 @@ function Interface() {
                     update.version = req.headers["docleverversion"]
                 }
                 let obj = await(req.interfaceModel.createAsync(update))
-                util.ok(res, obj, "新建成功");
+                util.ok(res, obj, bDuplicate?"有重复接口，请尽量避免":"新建成功");
             }
         }
         catch (err) {

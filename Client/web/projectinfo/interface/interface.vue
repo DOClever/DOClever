@@ -502,7 +502,14 @@
                     _this.savePending=false;
                     if(data.code==200)
                     {
-                        $.notify("保存成功",1)
+                        if(data.msg.indexOf("成功")>-1)
+                        {
+                            $.notify("保存成功",1)
+                        }
+                        else
+                        {
+                            $.tip(data.msg,0)
+                        }
                         _this.mailShow=true;
                     }
                     else
@@ -542,6 +549,10 @@
                     {
                         bMark=true;
                         _this.interfaceEdit.url=_this.interfaceEdit.url.substring(0,index);
+                    }
+                    else
+                    {
+                        return;
                     }
                     for(var i=0;i<_this.$store.state.param.length;i++)
                     {

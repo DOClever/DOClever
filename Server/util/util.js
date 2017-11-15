@@ -16,7 +16,8 @@ var mongoose = require('mongoose');
 var mail=require("nodemailer");
 var readline=require("readline");
 var dom = require("jsdom").JSDOM;
-var document=(new dom(`...`)).window.document;
+var window=(new dom(`...`)).window;
+var document=window.document;
 var argv=require("yargs").argv;
 var URL=require("url");
 var mockjs=require("mockjs")
@@ -1442,6 +1443,18 @@ var runTestCode=async (function (code,test,global,opt,root) {
     {
         global={};
     }
+    var env={};
+    if(opt.baseUrls && opt.baseUrl)
+    {
+        opt.baseUrls.forEach(function (obj) {
+            if(obj.url==opt.baseUrl && obj.env)
+            {
+                obj.env.forEach(function (obj) {
+                    env[obj.key]=obj.value;
+                })
+            }
+        })
+    }
     function log(text) {
         if(typeof(text)=="object")
         {
@@ -1612,6 +1625,25 @@ function sendMail(smtp,port,user,pass,to,subject,content) {
             console.log(err);
         }
     });
+}
+
+function sendSMS(method,baseUrl,param) {
+    if(method=="GET" || method=="DELETE")
+    {
+        request({
+            url:baseUrl,
+            method:method,
+            qs:param
+        })
+    }
+    else
+    {
+        request({
+            url:baseUrl,
+            method:method,
+            form:param
+        })
+    }
 }
 
 function versionDiff(obj1,obj2) {
@@ -2234,6 +2266,10 @@ let runPoll=async (function (arr) {
                 root.output+=err+"<br>"
             }
         }
+        if(obj.failSend && root.fail==0)
+        {
+            return;
+        }
         var arrPollUser=obj.users.map(function (obj) {
             return obj.toString();
         });
@@ -2241,7 +2277,7 @@ let runPoll=async (function (arr) {
             return obj.user.toString();
         })
         arrProjectUser.unshift(obj.project.owner.toString());
-        let arr=[];
+        let arr=[],arrUser=[];
         for(let u of arrPollUser)
         {
             if(arrProjectUser.indexOf(u)>-1)
@@ -2249,6 +2285,7 @@ let runPoll=async (function (arr) {
                 let obj=await (user.findOneAsync({
                     _id:u
                 }));
+                arrUser.push(obj);
                 if(obj && obj.email)
                 {
                     arr.push(obj.email);
@@ -2260,6 +2297,35 @@ let runPoll=async (function (arr) {
             let subject="[DOClever]"+moment().format("YYYY-MM-DD HH:mm:ss")+" 项目"+obj.project.name+"轮询结果";
             let content=`<h3>测试：${root.count}&nbsp;&nbsp;成功：${root.success}&nbsp;&nbsp;失败：${root.fail}&nbsp;&nbsp;未判定：${root.unknown}</h3>`+root.output;
             exports.sendMail(obj.sendInfo.smtp,obj.sendInfo.port,obj.sendInfo.user,obj.sendInfo.password,arr,subject,content);
+        }
+        if(obj.phoneInfo && obj.phoneInfo.baseUrl && obj.phoneInfo.contentParam)
+        {
+            let method,baseUrl,param={};
+            method=obj.phoneInfo.method;
+            baseUrl=obj.phoneInfo.baseUrl;
+            obj.phoneInfo.param.forEach(function (obj) {
+                if(obj.key)
+                {
+                    param[obj.key]=obj.value;
+                }
+            })
+            if(obj.phoneInfo.bindParam)
+            {
+                let arr=[];
+                arrUser.forEach(function (obj) {
+                    if(obj.phone)
+                    {
+                        arr.push(obj.phone);
+                    }
+                })
+                if(arr.length>0)
+                {
+                    let str=arr.join(obj.phoneInfo.split);
+                    param[obj.phoneInfo.bindParam]=str;
+                }
+            }
+            param[obj.phoneInfo.contentParam]=`测试：${root.count} 成功：${root.success} 失败：${root.fail} 未判定：${root.unknown}`
+            sendSMS(method,baseUrl,param);
         }
     }
 })
@@ -2324,6 +2390,50 @@ function getNowFormatDate(fmt,date) {
     return fmt;
 }
 
+var createStatistic=async (function() {
+    let inter=require("../model/interfaceModel");
+    let project=require("../model/projectModel");
+    let team=require("../model/teamModel");
+    let user=require("../model/userModel");
+    let statistic=require("../model/statisticModel");
+    let date=new Date();
+    date.setDate(date.getDate()-1);
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    let obj={
+        date:getNowFormatDate("yyyy-MM-dd",date)
+    }
+    obj.interface=await (inter.countAsync({
+        createdAt:{
+            $gte:date
+        }
+    }))
+    obj.project=await (project.countAsync({
+        createdAt:{
+            $gte:date
+        }
+    }))
+    obj.team=await (team.countAsync({
+        createdAt:{
+            $gte:date
+        }
+    }))
+    obj.user=await (user.countAsync())
+    obj.userRegister=await (user.countAsync({
+        createdAt:{
+            $gte:date
+        }
+    }))
+    obj.userLogin=await (user.countAsync({
+        lastLoginDate:{
+            $gte:date
+        }
+    }))
+    await (statistic.createAsync(obj));
+})
+
 exports.err=err;
 exports.ok=ok;
 exports.dateDiff=dateDiff;
@@ -2346,6 +2456,7 @@ exports.handleMockInfo=handleMockInfo;
 exports.inArrKey=inArrKey;
 exports.runTestCode=runTestCode;
 exports.sendMail=sendMail;
+exports.sendSMS=sendSMS;
 exports.clone=clone;
 exports.init=init;
 exports.getMockParam=getMockParam;
@@ -2355,3 +2466,4 @@ exports.runPoll=runPoll;
 exports.handleGlobalVar=handleGlobalVar;
 exports.getPostmanGlobalVar=getPostmanGlobalVar
 exports.getNowFormatDate=getNowFormatDate
+exports.createStatistic=createStatistic

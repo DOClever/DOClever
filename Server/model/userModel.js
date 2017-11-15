@@ -11,6 +11,7 @@ var model=new mongoose.Schema({
     age:Number,
     company:String,
     photo:String,
+    phone:String,
     state:{
         type:Number,
         default:1

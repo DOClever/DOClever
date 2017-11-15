@@ -331,8 +331,8 @@ $.stopHud=function () {
     }
 }
 
-$.getNowFormatDate=function(fmt) {
-    var date=new Date();
+$.getNowFormatDate=function(fmt,date) {
+    var date=date || new Date();
     var o = {
         "M+": date.getMonth() + 1, //月份
         "d+": date.getDate(), //日

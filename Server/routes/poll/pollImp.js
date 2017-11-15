@@ -36,7 +36,9 @@ var interface=[
                 type:String,
             },
             test:String,
-            immediate:Number
+            immediate:Number,
+            phoneinfo:String,
+            failsend:Number
         },
         "data":String,
         user:1,

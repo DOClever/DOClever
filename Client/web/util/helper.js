@@ -2269,6 +2269,18 @@ helper.runTestCode=async function (code,test,global,opt,root) {
     {
         global={};
     }
+    var env={};
+    if(opt.baseUrls && opt.baseUrl)
+    {
+        opt.baseUrls.forEach(function (obj) {
+            if(obj.url==opt.baseUrl && obj.env)
+            {
+                obj.env.forEach(function (obj) {
+                    env[obj.key]=obj.value;
+                })
+            }
+        })
+    }
     function log(text) {
         if(typeof(text)=="object")
         {
