@@ -2836,11 +2836,11 @@ function Project() {
                                         "status" : "",
                                         "data" : (o.items && o.items.enum)?o.items.enum.map(function (obj) {
                                             return {
-                                                value:obj,
+                                                value:obj.toString(),
                                                 remark:""
                                             }
                                         }):(o.default?[{
-                                            value:o.default,
+                                            value:o.default.toString(),
                                             remark:""
                                         }]:[]),
                                         "type" : 0
@@ -3773,11 +3773,11 @@ function Project() {
                                         "status" : "",
                                         "data" : (o.items && o.items.enum)?o.items.enum.map(function (obj) {
                                             return {
-                                                value:obj,
+                                                value:obj.toString(),
                                                 remark:""
                                             }
                                         }):(o.default?[{
-                                            value:o.default,
+                                            value:o.default.toString(),
                                             remark:""
                                         }]:[]),
                                         "type" : 0

@@ -2367,7 +2367,20 @@ let runPoll=async (function (arr) {
 })
 
 function handleGlobalVar(str,global) {
-    str=str.replace(/\{\{.+?\}\}/g,function (str) {
+    var type;
+    if(typeof (str)=="string")
+    {
+        type==1;
+    }
+    else if(typeof(str)=="number")
+    {
+        type=2;
+    }
+    else if(typeof(str)=="boolean")
+    {
+        type=3;
+    }
+    str=str.toString().replace(/\{\{.+?\}\}/g,function (str) {
         var val=str.substr(2,str.length-4);
         if(global[val]!==undefined)
         {
@@ -2378,6 +2391,14 @@ function handleGlobalVar(str,global) {
             return str;
         }
     })
+    if(type==2)
+    {
+        str=Number(str);
+    }
+    else if(type==3)
+    {
+        str=Boolean(str);
+    }
     return str;
 }
 

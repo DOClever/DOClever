@@ -115,7 +115,7 @@
                 if(queryString)
                 {
                     results=results.filter(function (obj) {
-                        return obj.value.toLowerCase().indexOf(queryString.toLowerCase()) > -1
+                        return obj.value.toString().toLowerCase().indexOf(queryString.toString().toLowerCase()) > -1
                     })
                 }
                 cb(results);
