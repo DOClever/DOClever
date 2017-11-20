@@ -336,7 +336,7 @@
                 }
                 else
                 {
-                    this.obj.phoneInfo.param.splice(index,1)
+                    this.poll.phoneInfo.param.splice(index,1)
                 }
             },
         },
