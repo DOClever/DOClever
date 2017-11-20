@@ -2302,7 +2302,7 @@ let runPoll=async (function (arr) {
                 root.output+=err+"<br>"
             }
         }
-        if(obj.failSend && root.fail==0)
+        if(obj.failSend && root.fail==0 && root.unknown==0)
         {
             return;
         }
@@ -2334,7 +2334,7 @@ let runPoll=async (function (arr) {
             let content=`<h3>测试：${root.count}&nbsp;&nbsp;成功：${root.success}&nbsp;&nbsp;失败：${root.fail}&nbsp;&nbsp;未判定：${root.unknown}</h3>`+root.output;
             exports.sendMail(obj.sendInfo.smtp,obj.sendInfo.port,obj.sendInfo.user,obj.sendInfo.password,arr,subject,content);
         }
-        if(obj.phoneInfo && obj.phoneInfo.baseUrl && obj.phoneInfo.contentParam)
+        if(obj.phoneInfo && obj.phoneInfo.baseUrl && obj.phoneInfo.contentParam && obj.phoneInfo.sign)
         {
             let method,baseUrl,param={};
             method=obj.phoneInfo.method;
@@ -2360,7 +2360,7 @@ let runPoll=async (function (arr) {
                     param[obj.phoneInfo.bindParam]=str;
                 }
             }
-            param[obj.phoneInfo.contentParam]=`测试：${root.count} 成功：${root.success} 失败：${root.fail} 未判定：${root.unknown}`
+            param[obj.phoneInfo.contentParam]=encodeURI(`测试：${root.count} 成功：${root.success} 失败：${root.fail} 未判定：${root.unknown} ${obj.phoneInfo.sign}`)
             sendSMS(method,baseUrl,param);
         }
     }

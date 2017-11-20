@@ -95,6 +95,9 @@
                     <el-form-item label="内容绑定字段" style="text-align: center">
                         <el-input placeholder="请输入绑定到url参数的发送内容的字段名称" style="width: 80%" v-model="poll.phoneInfo.contentParam"></el-input>
                     </el-form-item>
+                    <el-form-item label="签名" style="text-align: center">
+                        <el-input placeholder="请输入附加到发送内容的签名" style="width: 80%" v-model="poll.phoneInfo.sign"></el-input>
+                    </el-form-item>
                     <el-form-item label="url参数" style="text-align: center">
                         <template v-for="(item,index) in poll.phoneInfo.param">
                             <el-row class="row" style="height: 50px;line-height: 50px;width: 90%;display: inline-block">
@@ -145,7 +148,8 @@
                                }],
                                bindParam:"",
                                split:",",
-                               contentParam:""
+                               contentParam:"",
+                               sign:""
                            }
                        }
                         return this.propPoll
@@ -171,7 +175,8 @@
                                 }],
                                 bindParam:"",
                                 split:",",
-                                contentParam:""
+                                contentParam:"",
+                                sign:""
                             },
                             failSend:0
                         }

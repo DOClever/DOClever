@@ -71,6 +71,10 @@ var model=new mongoose.Schema({
             type:String,
             default:"GET"
         },
+        sign:{
+            type:String,
+            default:""
+        },
         baseUrl:{
             type:String,
             default:""
