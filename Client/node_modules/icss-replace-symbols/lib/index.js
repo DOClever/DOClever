@@ -1,13 +1,13 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.replaceAll = replaceAll;
 var matchConstName = /[$#]?[\w-\.]+/g;
 
 function replaceAll(replacements, text) {
-  var matches = undefined;
+  var matches = void 0;
   while (matches = matchConstName.exec(text)) {
     var replacement = replacements[matches[0]];
     if (replacement) {
@@ -18,7 +18,7 @@ function replaceAll(replacements, text) {
   return text;
 }
 
-exports['default'] = function (css, translations) {
+exports.default = function (css, translations) {
   css.walkDecls(function (decl) {
     return decl.value = replaceAll(translations, decl.value);
   });

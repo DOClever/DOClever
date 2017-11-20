@@ -4,9 +4,9 @@ Object.defineProperty(exports, '__esModule', {
   value: true
 });
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }; })();
 
-function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var _postcss = require('postcss');
 
@@ -32,7 +32,7 @@ var processor = _postcss2['default'].plugin('modules-extract-imports', function 
       if (matches) {
         var _matches = _slicedToArray(matches, 5);
 
-        var symbols = _matches[1];
+        var /*match*/symbols = _matches[1];
         var doubleQuotePath = _matches[2];
         var singleQuotePath = _matches[3];
         var _global = _matches[4];
@@ -65,7 +65,7 @@ var processor = _postcss2['default'].plugin('modules-extract-imports', function 
       if (matches) {
         var _matches2 = _slicedToArray(matches, 3);
 
-        var doubleQuotePath = _matches2[1];
+        var /*match*/doubleQuotePath = _matches2[1];
         var singleQuotePath = _matches2[2];
 
         existingImports[doubleQuotePath || singleQuotePath] = rule;
@@ -78,7 +78,7 @@ var processor = _postcss2['default'].plugin('modules-extract-imports', function 
       if (!rule) {
         rule = _postcss2['default'].rule({
           selector: ':import("' + path + '")',
-          raws: { after: '\n' }
+          raws: { after: "\n" }
         });
         css.prepend(rule);
       }
@@ -86,7 +86,7 @@ var processor = _postcss2['default'].plugin('modules-extract-imports', function 
         rule.append(_postcss2['default'].decl({
           value: importedSymbol,
           prop: imports[path][importedSymbol],
-          raws: { before: '\n  ' }
+          raws: { before: "\n  " }
         }));
       });
     });
@@ -95,4 +95,3 @@ var processor = _postcss2['default'].plugin('modules-extract-imports', function 
 
 exports['default'] = processor;
 module.exports = exports['default'];
-/*match*/ /*match*/

@@ -27,8 +27,11 @@ Pass arbitrary values between your module files
 
 ```css
 /* my-component.css */
-@value colors: "./colors.css";
+/* alias paths for other values or composition */
+@value colors: "./colors.css"; 
+/* import multiple from a single file */
 @value primary, secondary from colors;
+/* make local aliases to imported values */
 @value small as bp-small, large as bp-large from "./breakpoints.css";
 
 .header {
@@ -49,6 +52,12 @@ Pass arbitrary values between your module files
 ```
 
 **If you are using Sass** along with this PostCSS plugin, do not use the colon `:` in your `@value` definitions. It will cause Sass to crash.
+
+Note also you can _import_ multiple values at once but can only _define_ one value per line.
+
+```css
+@value a: b, c: d; /* defines a as "b, c: d" */
+```
 
 ### Justification
 

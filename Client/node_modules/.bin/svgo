@@ -1,3 +1,1 @@
-#!/usr/bin/env node
-
-require('../lib/svgo/coa').run();
+../svgo/bin/svgo

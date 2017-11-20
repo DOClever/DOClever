@@ -42,14 +42,14 @@ module.exports = {
                 NODE_ENV: '"production"'
             }
         }),
-        new webpack.optimize.UglifyJsPlugin({
-            compressor: {
-                warnings: false,
-            },
-            output: {
-                comments: false,  // remove all comments
-            }
-        }),
+        // new webpack.optimize.UglifyJsPlugin({
+        //     compressor: {
+        //         warnings: false,
+        //     },
+        //     output: {
+        //         comments: false,  // remove all comments
+        //     }
+        // }),
         new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: '[name].bundle.js'}),
         //new BundleAnalyzerPlugin()
     ],
@@ -62,7 +62,7 @@ module.exports = {
             },
             {
                 test: /\.vue$/,
-                loader:"vue-loader",
+                loader:"vue-loader?cacheDirectory",
                 include: path.resolve(__dirname, 'web')
             },
             {
@@ -82,7 +82,7 @@ module.exports = {
             }
          ]
     },
-    //devtool: 'cheap-eval-source-map',
+    //devtool: 'cheap-module-eval-source-map',
     devtool: 'source-map',
     resolve: {
         modules: [path.resolve(__dirname, 'node_modules')],

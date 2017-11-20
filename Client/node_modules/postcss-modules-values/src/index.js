@@ -8,7 +8,7 @@ let options = {}
 let importIndex = 0
 let createImportedName = options && options.createImportedName || ((importName/*, path*/) => `i__const_${importName.replace(/\W/g, '_')}_${importIndex++}`)
 
-export default (css, result) => {
+export default postcss.plugin('postcss-modules-values', () => (css, result) => {
   let importAliases = []
   let definitions = {}
 
@@ -97,4 +97,4 @@ export default (css, result) => {
 
     css.prepend(importRule)
   })
-}
+})

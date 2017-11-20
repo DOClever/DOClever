@@ -1,5 +1,5 @@
 var global=require("./global/store");
-var interface=require("./interface/store");
+var inter=require("./interface/store");
 var setting=require("./setting/store");
 var test=require("./test/store");
 var version=require("./version/store");
@@ -213,7 +213,7 @@ module.exports=new Vuex.Store({
     },
     modules:{
         global:global,
-        interface:interface,
+        interface:inter,
         setting:setting,
         test:test,
         version:version

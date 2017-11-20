@@ -1,1 +1,4 @@
-node_modules
+src
+test
+.babelrc
+.travis.yml

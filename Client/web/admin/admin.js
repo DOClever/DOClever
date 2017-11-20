@@ -2,7 +2,7 @@ var mainNav=require("../component/mainNav.vue")
 var user=require("./component/user.vue")
 var project=require("./component/project.vue")
 var team=require("./component/team.vue")
-var interface=require("./component/interface.vue")
+var inter=require("./component/interface.vue")
 var setting=require("./component/setting.vue")
 var statistic=require("./component/statistic.vue")
 var store=require("./store")
@@ -20,7 +20,7 @@ var vue=new Vue({
         "project":project,
         "team":team,
         "user":user,
-        "interface":interface,
+        "interface":inter,
         "setting":setting,
         "statistic":statistic
     },

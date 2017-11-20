@@ -2,7 +2,7 @@
  * Created by sunxin on 2016/12/22.
  */
 var mainNav=require("../component/mainNav.vue")
-var interface=require("./interface/interface.vue")
+var inter=require("./interface/interface.vue")
 var setting=require("./setting/setting.vue")
 var global=require("./global/global.vue")
 var test=require("./test/test.vue")
@@ -34,7 +34,7 @@ var vue=new Vue({
     mixins:[sessionChange],
     components:{
         "mainnav":mainNav,
-        "interface":interface,
+        "interface":inter,
         "setting":setting,
         "global":global,
         "test":test,
