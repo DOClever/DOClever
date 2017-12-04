@@ -40,6 +40,20 @@ var vue=new Vue({
         "message":message
     },
     store:store,
+    watch:{
+        proxy:function (val) {
+            if(val)
+            {
+                session.set("proxy",1);
+                $.tip("Proxy代理已开启",1)
+            }
+            else
+            {
+                session.remove("proxy");
+                $.tip("Proxy代理已关闭",1)
+            }
+        }
+    },
     computed:{
         backTitle:function () {
             if(this.type==0 && this.session.projectId)

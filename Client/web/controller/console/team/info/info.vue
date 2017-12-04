@@ -49,6 +49,11 @@
             this.$store.getters.event.$on("updateTeamProjectList",function (list) {
                 _this.$store.state.project=list;
             })
+        },
+        mounted:function () {
+            this.$nextTick(function () {
+                Vue.prototype.$message("团队的项目列表移动到左侧的项目标签页了！")
+            })
         }
     }
 </script>
