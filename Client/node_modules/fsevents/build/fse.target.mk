@@ -4,6 +4,9 @@ TOOLSET := target
 TARGET := fse
 DEFS_Debug := \
 	'-DNODE_GYP_MODULE_NAME=fse' \
+	'-DUSING_UV_SHARED=1' \
+	'-DUSING_V8_SHARED=1' \
+	'-DV8_DEPRECATION_WARNINGS=1' \
 	'-D_DARWIN_USE_64_BIT_INODE=1' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
@@ -15,7 +18,7 @@ DEFS_Debug := \
 CFLAGS_Debug := \
 	-O0 \
 	-gdwarf-2 \
-	-mmacosx-version-min=10.5 \
+	-mmacosx-version-min=10.7 \
 	-arch x86_64 \
 	-Wall \
 	-Wendif-labels \
@@ -41,14 +44,17 @@ CFLAGS_OBJC_Debug :=
 CFLAGS_OBJCC_Debug :=
 
 INCS_Debug := \
-	-I/Users/eshanker/.node-gyp/5.0.0/include/node \
-	-I/Users/eshanker/.node-gyp/5.0.0/src \
-	-I/Users/eshanker/.node-gyp/5.0.0/deps/uv/include \
-	-I/Users/eshanker/.node-gyp/5.0.0/deps/v8/include \
+	-I/Users/eshanker/.node-gyp/6.10.2/include/node \
+	-I/Users/eshanker/.node-gyp/6.10.2/src \
+	-I/Users/eshanker/.node-gyp/6.10.2/deps/uv/include \
+	-I/Users/eshanker/.node-gyp/6.10.2/deps/v8/include \
 	-I$(srcdir)/node_modules/nan
 
 DEFS_Release := \
 	'-DNODE_GYP_MODULE_NAME=fse' \
+	'-DUSING_UV_SHARED=1' \
+	'-DUSING_V8_SHARED=1' \
+	'-DV8_DEPRECATION_WARNINGS=1' \
 	'-D_DARWIN_USE_64_BIT_INODE=1' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
@@ -58,7 +64,7 @@ DEFS_Release := \
 CFLAGS_Release := \
 	-Os \
 	-gdwarf-2 \
-	-mmacosx-version-min=10.5 \
+	-mmacosx-version-min=10.7 \
 	-arch x86_64 \
 	-Wall \
 	-Wendif-labels \
@@ -84,10 +90,10 @@ CFLAGS_OBJC_Release :=
 CFLAGS_OBJCC_Release :=
 
 INCS_Release := \
-	-I/Users/eshanker/.node-gyp/5.0.0/include/node \
-	-I/Users/eshanker/.node-gyp/5.0.0/src \
-	-I/Users/eshanker/.node-gyp/5.0.0/deps/uv/include \
-	-I/Users/eshanker/.node-gyp/5.0.0/deps/v8/include \
+	-I/Users/eshanker/.node-gyp/6.10.2/include/node \
+	-I/Users/eshanker/.node-gyp/6.10.2/src \
+	-I/Users/eshanker/.node-gyp/6.10.2/deps/uv/include \
+	-I/Users/eshanker/.node-gyp/6.10.2/deps/v8/include \
 	-I$(srcdir)/node_modules/nan
 
 OBJS := \
@@ -122,27 +128,31 @@ $(obj).$(TOOLSET)/$(TARGET)/%.o: $(obj)/%.cc FORCE_DO_CMD
 LDFLAGS_Debug := \
 	-framework CoreFoundation -framework CoreServices \
 	-undefined dynamic_lookup \
+	-Wl,-no_pie \
 	-Wl,-search_paths_first \
-	-mmacosx-version-min=10.5 \
+	-mmacosx-version-min=10.7 \
 	-arch x86_64 \
 	-L$(builddir)
 
 LIBTOOLFLAGS_Debug := \
 	-framework CoreFoundation -framework CoreServices \
 	-undefined dynamic_lookup \
+	-Wl,-no_pie \
 	-Wl,-search_paths_first
 
 LDFLAGS_Release := \
 	-framework CoreFoundation -framework CoreServices \
 	-undefined dynamic_lookup \
+	-Wl,-no_pie \
 	-Wl,-search_paths_first \
-	-mmacosx-version-min=10.5 \
+	-mmacosx-version-min=10.7 \
 	-arch x86_64 \
 	-L$(builddir)
 
 LIBTOOLFLAGS_Release := \
 	-framework CoreFoundation -framework CoreServices \
 	-undefined dynamic_lookup \
+	-Wl,-no_pie \
 	-Wl,-search_paths_first
 
 LIBS :=

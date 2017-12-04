@@ -1,13 +1,13 @@
+var Promise = require('bluebird');
+var fs = require('fs');
 var os = require('os');
 var path = require('path');
-var fs = require('fs');
+var semver = require('semver');
 var util = require('util');
-var Promise = require('bluebird');
 var whenReadFile = Promise.promisify(fs.readFile);
 
-var minimatch = require('./lib/fnmatch');
 var iniparser = require('./lib/ini');
-var Version = require('./lib/version');
+var minimatch = require('./lib/fnmatch');
 var pkg = require('./package.json');
 
 var knownProps = [
@@ -52,7 +52,7 @@ function processMatches(matches, version) {
   // Set indent_size to "tab" if indent_size is unspecified and
   // indent_style is set to "tab".
   if ("indent_style" in matches && matches.indent_style === "tab" &&
-    !("indent_size" in matches) && version.gte(new Version(0, 10))) {
+    !("indent_size" in matches) && semver.gte(version, "0.10.0")) {
     matches.indent_size = "tab";
   }
 
@@ -74,7 +74,7 @@ function processOptions(options, filepath) {
   options = options || {};
   return {
     config: options.config || '.editorconfig',
-    version: new Version(options.version || pkg.version),
+    version: options.version || pkg.version,
     root: path.resolve(options.root || getFilepathRoot(filepath))
   };
 }

@@ -69,6 +69,7 @@ Error: Could not load the bindings file. Tried:
     ...
 ```
 
+The searching for the `.node` file will originate from the first directory in which has a `package.json` file is found. 
 
 License
 -------

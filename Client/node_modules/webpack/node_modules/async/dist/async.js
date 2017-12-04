@@ -14,6 +14,59 @@ function slice(arrayLike, start) {
     return newArr;
 }
 
+/**
+ * Creates a continuation function with some arguments already applied.
+ *
+ * Useful as a shorthand when combined with other control flow functions. Any
+ * arguments passed to the returned function are added to the arguments
+ * originally passed to apply.
+ *
+ * @name apply
+ * @static
+ * @memberOf module:Utils
+ * @method
+ * @category Util
+ * @param {Function} fn - The function you want to eventually apply all
+ * arguments to. Invokes with (arguments...).
+ * @param {...*} arguments... - Any number of arguments to automatically apply
+ * when the continuation is called.
+ * @returns {Function} the partially-applied function
+ * @example
+ *
+ * // using apply
+ * async.parallel([
+ *     async.apply(fs.writeFile, 'testfile1', 'test1'),
+ *     async.apply(fs.writeFile, 'testfile2', 'test2')
+ * ]);
+ *
+ *
+ * // the same process without using apply
+ * async.parallel([
+ *     function(callback) {
+ *         fs.writeFile('testfile1', 'test1', callback);
+ *     },
+ *     function(callback) {
+ *         fs.writeFile('testfile2', 'test2', callback);
+ *     }
+ * ]);
+ *
+ * // It's possible to pass any number of additional arguments when calling the
+ * // continuation:
+ *
+ * node> var fn = async.apply(sys.puts, 'one');
+ * node> fn('two', 'three');
+ * one
+ * two
+ * three
+ */
+var apply = function(fn/*, ...args*/) {
+    var args = slice(arguments, 1);
+    return function(/*callArgs*/) {
+        var callArgs = slice(arguments);
+        return fn.apply(null, args.concat(callArgs));
+    };
+};
+
 var initialParams = function (fn) {
     return function (/*...args, callback*/) {
         var args = slice(arguments);
@@ -291,8 +344,7 @@ function baseGetTag(value) {
   if (value == null) {
     return value === undefined ? undefinedTag : nullTag;
   }
-  value = Object(value);
-  return (symToStringTag && symToStringTag in value)
+  return (symToStringTag && symToStringTag in Object(value))
     ? getRawTag(value)
     : objectToString(value);
 }
@@ -701,7 +753,7 @@ var freeProcess = moduleExports$1 && freeGlobal.process;
 /** Used to access faster Node.js helpers. */
 var nodeUtil = (function() {
   try {
-    return freeProcess && freeProcess.binding('util');
+    return freeProcess && freeProcess.binding && freeProcess.binding('util');
   } catch (e) {}
 }());
 
@@ -1215,59 +1267,6 @@ var mapSeries = doLimit(mapLimit, 1);
  * function call.
  */
 var applyEachSeries = applyEach$1(mapSeries);
-
-/**
- * Creates a continuation function with some arguments already applied.
- *
- * Useful as a shorthand when combined with other control flow functions. Any
- * arguments passed to the returned function are added to the arguments
- * originally passed to apply.
- *
- * @name apply
- * @static
- * @memberOf module:Utils
- * @method
- * @category Util
- * @param {Function} fn - The function you want to eventually apply all
- * arguments to. Invokes with (arguments...).
- * @param {...*} arguments... - Any number of arguments to automatically apply
- * when the continuation is called.
- * @returns {Function} the partially-applied function
- * @example
- *
- * // using apply
- * async.parallel([
- *     async.apply(fs.writeFile, 'testfile1', 'test1'),
- *     async.apply(fs.writeFile, 'testfile2', 'test2')
- * ]);
- *
- *
- * // the same process without using apply
- * async.parallel([
- *     function(callback) {
- *         fs.writeFile('testfile1', 'test1', callback);
- *     },
- *     function(callback) {
- *         fs.writeFile('testfile2', 'test2', callback);
- *     }
- * ]);
- *
- * // It's possible to pass any number of additional arguments when calling the
- * // continuation:
- *
- * node> var fn = async.apply(sys.puts, 'one');
- * node> fn('two', 'three');
- * one
- * two
- * three
- */
-var apply = function(fn/*, ...args*/) {
-    var args = slice(arguments, 1);
-    return function(/*callArgs*/) {
-        var callArgs = slice(arguments);
-        return fn.apply(null, args.concat(callArgs));
-    };
-};
 
 /**
  * A specialized version of `_.forEach` for arrays without support for
@@ -1823,15 +1822,17 @@ function asciiToArray(string) {
 
 /** Used to compose unicode character classes. */
 var rsAstralRange = '\\ud800-\\udfff';
-var rsComboMarksRange = '\\u0300-\\u036f\\ufe20-\\ufe23';
-var rsComboSymbolsRange = '\\u20d0-\\u20f0';
+var rsComboMarksRange = '\\u0300-\\u036f';
+var reComboHalfMarksRange = '\\ufe20-\\ufe2f';
+var rsComboSymbolsRange = '\\u20d0-\\u20ff';
+var rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange;
 var rsVarRange = '\\ufe0e\\ufe0f';
 
 /** Used to compose unicode capture groups. */
 var rsZWJ = '\\u200d';
 
 /** Used to detect strings with [zero-width joiners or code points from the astral planes](http://eev.ee/blog/2015/09/12/dark-corners-of-unicode/). */
-var reHasUnicode = RegExp('[' + rsZWJ + rsAstralRange  + rsComboMarksRange + rsComboSymbolsRange + rsVarRange + ']');
+var reHasUnicode = RegExp('[' + rsZWJ + rsAstralRange  + rsComboRange + rsVarRange + ']');
 
 /**
  * Checks if `string` contains Unicode symbols.
@@ -1846,13 +1847,15 @@ function hasUnicode(string) {
 
 /** Used to compose unicode character classes. */
 var rsAstralRange$1 = '\\ud800-\\udfff';
-var rsComboMarksRange$1 = '\\u0300-\\u036f\\ufe20-\\ufe23';
-var rsComboSymbolsRange$1 = '\\u20d0-\\u20f0';
+var rsComboMarksRange$1 = '\\u0300-\\u036f';
+var reComboHalfMarksRange$1 = '\\ufe20-\\ufe2f';
+var rsComboSymbolsRange$1 = '\\u20d0-\\u20ff';
+var rsComboRange$1 = rsComboMarksRange$1 + reComboHalfMarksRange$1 + rsComboSymbolsRange$1;
 var rsVarRange$1 = '\\ufe0e\\ufe0f';
 
 /** Used to compose unicode capture groups. */
 var rsAstral = '[' + rsAstralRange$1 + ']';
-var rsCombo = '[' + rsComboMarksRange$1 + rsComboSymbolsRange$1 + ']';
+var rsCombo = '[' + rsComboRange$1 + ']';
 var rsFitz = '\\ud83c[\\udffb-\\udfff]';
 var rsModifier = '(?:' + rsCombo + '|' + rsFitz + ')';
 var rsNonAstral = '[^' + rsAstralRange$1 + ']';
@@ -2199,6 +2202,7 @@ function queue(worker, concurrency, payload) {
     var numRunning = 0;
     var workersList = [];
 
+    var processingScheduled = false;
     function _insert(data, insertAtFront, callback) {
         if (callback != null && typeof callback !== 'function') {
             throw new Error('task callback must be a function');
@@ -2226,7 +2230,14 @@ function queue(worker, concurrency, payload) {
                 q._tasks.push(item);
             }
         }
-        setImmediate$1(q.process);
+
+        if (!processingScheduled) {
+            processingScheduled = true;
+            setImmediate$1(function() {
+                processingScheduled = false;
+                q.process();
+            });
+        }
     }
 
     function _next(tasks) {
@@ -2237,7 +2248,9 @@ function queue(worker, concurrency, payload) {
                 var task = tasks[i];
 
                 var index = baseIndexOf(workersList, task, 0);
-                if (index >= 0) {
+                if (index === 0) {
+                    workersList.shift();
+                } else if (index > 0) {
                     workersList.splice(index, 1);
                 }
 
@@ -3804,7 +3817,7 @@ function memoize(fn, hasher) {
 
 /**
  * Calls `callback` on a later loop around the event loop. In Node.js this just
- * calls `setImmediate`.  In the browser it will use `setImmediate` if
+ * calls `process.nextTicl`.  In the browser it will use `setImmediate` if
  * available, otherwise `setTimeout(callback, 0)`, which means other higher
  * priority events may precede the execution of `callback`.
  *
@@ -3814,7 +3827,7 @@ function memoize(fn, hasher) {
  * @static
  * @memberOf module:Utils
  * @method
- * @alias setImmediate
+ * @see [async.setImmediate]{@link module:Utils.setImmediate}
  * @category Util
  * @param {Function} callback - The function to call on a later loop around
  * the event loop. Invoked with (args...).
@@ -4274,43 +4287,6 @@ function reflect(fn) {
     });
 }
 
-function reject$1(eachfn, arr, iteratee, callback) {
-    _filter(eachfn, arr, function(value, cb) {
-        iteratee(value, function(err, v) {
-            cb(err, !v);
-        });
-    }, callback);
-}
-
-/**
- * The opposite of [`filter`]{@link module:Collections.filter}. Removes values that pass an `async` truth test.
- *
- * @name reject
- * @static
- * @memberOf module:Collections
- * @method
- * @see [async.filter]{@link module:Collections.filter}
- * @category Collection
- * @param {Array|Iterable|Object} coll - A collection to iterate over.
- * @param {Function} iteratee - An async truth test to apply to each item in
- * `coll`.
- * The should complete with a boolean value as its `result`.
- * Invoked with (item, callback).
- * @param {Function} [callback] - A callback which is called after all the
- * `iteratee` functions have finished. Invoked with (err, results).
- * @example
- *
- * async.reject(['file1','file2','file3'], function(filePath, callback) {
- *     fs.access(filePath, function(err) {
- *         callback(null, !err)
- *     });
- * }, function(err, results) {
- *     // results now equals an array of missing files
- *     createFiles(results);
- * });
- */
-var reject = doParallel(reject$1);
-
 /**
  * A helper function that wraps an array or an object of functions with `reflect`.
  *
@@ -4390,6 +4366,43 @@ function reflectAll(tasks) {
     }
     return results;
 }
+
+function reject$1(eachfn, arr, iteratee, callback) {
+    _filter(eachfn, arr, function(value, cb) {
+        iteratee(value, function(err, v) {
+            cb(err, !v);
+        });
+    }, callback);
+}
+
+/**
+ * The opposite of [`filter`]{@link module:Collections.filter}. Removes values that pass an `async` truth test.
+ *
+ * @name reject
+ * @static
+ * @memberOf module:Collections
+ * @method
+ * @see [async.filter]{@link module:Collections.filter}
+ * @category Collection
+ * @param {Array|Iterable|Object} coll - A collection to iterate over.
+ * @param {Function} iteratee - An async truth test to apply to each item in
+ * `coll`.
+ * The should complete with a boolean value as its `result`.
+ * Invoked with (item, callback).
+ * @param {Function} [callback] - A callback which is called after all the
+ * `iteratee` functions have finished. Invoked with (err, results).
+ * @example
+ *
+ * async.reject(['file1','file2','file3'], function(filePath, callback) {
+ *     fs.access(filePath, function(err) {
+ *         callback(null, !err)
+ *     });
+ * }, function(err, results) {
+ *     // results now equals an array of missing files
+ *     createFiles(results);
+ * });
+ */
+var reject = doParallel(reject$1);
 
 /**
  * The same as [`reject`]{@link module:Collections.reject} but runs a maximum of `limit` async operations at a
@@ -4530,8 +4543,8 @@ function constant$1(value) {
  *     // do something with the result
  * });
  *
- * // It can also be embedded within other control flow functions to retry
- * // individual methods that are not as reliable, like this:
+ * // to retry individual methods that are not as reliable within other
+ * // control flow functions, use the `retryable` wrapper:
  * async.auto({
  *     users: api.getUsers.bind(api),
  *     payments: async.retryable(3, api.getPayments.bind(api))
@@ -5098,7 +5111,7 @@ function transform (coll, accumulator, iteratee, callback) {
  * `result` arguments of the last attempt at completing the `task`. Invoked with
  * (err, results).
  * @example
- * async.try([
+ * async.tryEach([
  *     function getDataFromFirstWebsite(callback) {
  *         // Try getting the data from the first website
  *         callback(err, data);
@@ -5373,9 +5386,9 @@ var waterfall = function(tasks, callback) {
  */
 
 var index = {
+    apply: apply,
     applyEach: applyEach,
     applyEachSeries: applyEachSeries,
-    apply: apply,
     asyncify: asyncify,
     auto: auto,
     autoInject: autoInject,
@@ -5453,7 +5466,14 @@ var index = {
 
     // aliases
     all: every,
+    allLimit: everyLimit,
+    allSeries: everySeries,
     any: some,
+    anyLimit: someLimit,
+    anySeries: someSeries,
+    find: detect,
+    findLimit: detectLimit,
+    findSeries: detectSeries,
     forEach: eachLimit,
     forEachSeries: eachSeries,
     forEachLimit: eachLimit$1,
@@ -5470,9 +5490,9 @@ var index = {
 };
 
 exports['default'] = index;
+exports.apply = apply;
 exports.applyEach = applyEach;
 exports.applyEachSeries = applyEachSeries;
-exports.apply = apply;
 exports.asyncify = asyncify;
 exports.auto = auto;
 exports.autoInject = autoInject;

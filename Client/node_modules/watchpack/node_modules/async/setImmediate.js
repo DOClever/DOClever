@@ -22,7 +22,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @static
  * @memberOf module:Utils
  * @method
- * @alias nextTick
+ * @see [async.nextTick]{@link module:Utils.nextTick}
  * @category Util
  * @param {Function} callback - The function to call on a later loop around
  * the event loop. Invoked with (args...).

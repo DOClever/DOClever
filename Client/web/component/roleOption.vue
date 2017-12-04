@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="编辑用户的权限"  size="small" ref="box" :modal="hud" v-model="showDialog">
+    <el-dialog title="编辑用户的权限" width="50%" ref="box" :visible.sync="showDialog" append-to-body>
         <el-form label-width="80px">
             <el-form-item label="接口" style="text-align: center">
                 <el-checkbox :true-label="1" :false-label="0" v-model="option.ie">接口编辑</el-checkbox>

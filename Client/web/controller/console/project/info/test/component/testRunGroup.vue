@@ -1,0 +1,82 @@
+<template>
+    <el-dialog title="输出"  width="50%" ref="box" :close-on-click-modal="false" :visible.sync="showDialog" append-to-body>
+        <el-row class="row" style="height: 300px;overflow: auto" v-html="obj.output">
+
+        </el-row>
+        <el-row class="dialog-footer" slot="footer">
+            <el-button type="primary" @click="save" :disable="!finish">
+                确定
+            </el-button>
+        </el-row>
+    </el-dialog>
+</template>
+<script>
+    module.exports={
+        props:["source","opt"],
+        data:function () {
+            return {
+                obj:{
+                    output:""
+                },
+                finish:false,
+                showDialog:false
+            }
+        },
+        computed:{
+
+        },
+        methods:{
+            save:function () {
+                this.showDialog=false;
+            },
+            run:async function(){
+                var index=0;
+                try
+                {
+                    for(var i=0;i<this.source.length;i++)
+                    {
+                        var ret=await helper.runTestCode(this.source[i].code,this.source[i],{},this.opt,this.obj);
+                        var val;
+                        if(ret===undefined)
+                        {
+                            val=0;
+                        }
+                        else if(Boolean(ret)==true)
+                        {
+                            val=1
+                        }
+                        else
+                        {
+                            val=2
+                        }
+                        var output=this.obj.output.substr(index);
+                        index=this.obj.output.length;
+                        await net.put("/test/status",{
+                            id:this.source[i]._id,
+                            status:val,
+                            output:output
+                        })
+                        var node=this.$parent.$refs.tree.$refs.tree.store.getNode(this.source[i].id);
+                        node.data.status=val;
+                    }
+                }
+                catch (err)
+                {
+                    this.obj.output+=err+"<br>"
+                    this.finish=true;
+                }
+                this.obj.output+="全部运行完成<br>"
+                this.finish=true;
+            },
+        },
+        created:function () {
+
+        },
+        mounted:function () {
+            var _this=this;
+            setTimeout(function () {
+                _this.run();
+            },100);
+        }
+    }
+</script>

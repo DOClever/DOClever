@@ -43,7 +43,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * `result` arguments of the last attempt at completing the `task`. Invoked with
  * (err, results).
  * @example
- * async.try([
+ * async.tryEach([
  *     function getDataFromFirstWebsite(callback) {
  *         // Try getting the data from the first website
  *         callback(err, data);

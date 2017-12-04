@@ -19,7 +19,7 @@ Use at least `scrypt` or `pbkdf2-hmac-sha256` instead.
 
 * `password` - `Buffer`, password used to derive the key data.
 * `salt` - 8 byte `Buffer` or `null`, salt is used as a salt in the derivation.
-* `keyLen` - `number`, key length in bytes.
+* `keyBits` - `number`, key length in **bits**.
 * `ivLen` - `number`, iv length in bytes.
 
 *Returns*: `{ key: Buffer, iv: Buffer }`

@@ -1373,13 +1373,13 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
         })
         for(let key in objCookie)
         {
-            opt.cookie[key]=objCookie[key];
+            root.cookie[key]=objCookie[key];
         }
     }
     let strCookie="",arrCookie=[];
-    for(let key in opt.cookie)
+    for(let key in root.cookie)
     {
-        arrCookie.push(key+"="+opt.cookie[key]);
+        arrCookie.push(key+"="+root.cookie[key]);
     }
     strCookie=arrCookie.join(";");
     header["Cookie"]=strCookie
@@ -1454,7 +1454,7 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
                 let obj=realOfCookie.split("=");
                 let key=obj[0].trim();
                 let val=encodeURIComponent(obj[1]);
-                opt.cookie[key]=val;
+                root.cookie[key]=val;
             }
         }
         return res;
@@ -1476,9 +1476,9 @@ var runTestCode=async (function (code,test,global,opt,root) {
         global={};
     }
     var env={};
-    if(!opt.cookie)
+    if(!root.cookie)
     {
-        opt.cookie={};
+        root.cookie={};
     }
     if(opt.baseUrls && opt.baseUrl)
     {
@@ -1509,7 +1509,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
         var text;
         if(type=="1")
         {
-            text="(function (opt) {return runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',baseUrls:"+JSON.stringify(opt.baseUrls)+",cookie:"+JSON.stringify(opt.cookie).replace(/'/g,"\\'")+"}"+",test,root,opt)})"
+            text="(function (opt) {return runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',baseUrls:"+JSON.stringify(opt.baseUrls)+",cookie:"+JSON.stringify(root.cookie).replace(/'/g,"\\'")+"}"+",test,root,opt)})"
         }
         else if(type=="2")
         {
@@ -2299,6 +2299,7 @@ let runPoll=async (function (arr) {
             }
             catch (err)
             {
+                root.fail++;
                 root.output+=err+"<br>"
             }
         }

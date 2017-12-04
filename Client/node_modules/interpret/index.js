@@ -31,8 +31,8 @@ const extensions = {
   '.cirru': 'cirru-script/lib/register',
   '.cjsx': 'node-cjsx/register',
   '.co': 'coco',
-  '.coffee': ['coffee-script/register', 'coffee-script', 'coffeescript/register', 'coffeescript'],
-  '.coffee.md': ['coffee-script/register', 'coffee-script', 'coffeescript/register', 'coffeescript'],
+  '.coffee': ['coffeescript/register', 'coffee-script/register', 'coffeescript', 'coffee-script'],
+  '.coffee.md': ['coffeescript/register', 'coffee-script/register', 'coffeescript', 'coffee-script'],
   '.csv': 'require-csv',
   '.eg': 'earlgrey/register',
   '.iced': ['iced-coffee-script/register', 'iced-coffee-script'],
@@ -76,7 +76,7 @@ const extensions = {
       }
     }
   ],
-  '.litcoffee': ['coffee-script/register', 'coffee-script', 'coffeescript/register', 'coffeescript'],
+  '.litcoffee': ['coffeescript/register', 'coffee-script/register', 'coffeescript', 'coffee-script'],
   '.liticed': 'iced-coffee-script/register',
   '.ls': ['livescript', 'LiveScript'],
   '.node': null,

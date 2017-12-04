@@ -494,8 +494,6 @@ function Project() {
         try
         {
             let obj={},ret=[];
-            obj.project={};
-            obj.team={};
             let arr=await (project.findAsync({
                 owner:req.userInfo._id,
                 team:{
@@ -530,7 +528,7 @@ function Project() {
                     project:obj._id
                 }))
             }
-            obj.project.create=arr;
+            obj.create=arr;
             arr=await (project.findAsync({
                 users:{
                     $elemMatch:{
@@ -589,7 +587,7 @@ function Project() {
                     project:obj._id
                 }))
             }
-            obj.project.join=ret;
+            obj.join=ret;
             arr=await (project.findAsync({
                 owner:{
                     $ne:req.userInfo._id
@@ -627,108 +625,7 @@ function Project() {
                     project:obj._id
                 }))
             }
-            obj.project.public=arr;
-            arr=await (team.findAsync({
-                owner:req.userInfo._id
-            },"",{
-                sort:"-createdAt"
-            }))
-            arr.forEach(function (obj) {
-                obj._doc.role=0;
-                obj._doc.own=1;
-            })
-            for(let obj of arr)
-            {
-                let arr1=await (teamGroup.findAsync({
-                    team:obj._id
-                }))
-                let count=0;
-                for(let o of arr1)
-                {
-                    count+=o.users.length;
-                }
-                obj._doc.userCount=count;
-                obj._doc.projectCount=await (project.countAsync({
-                    team:obj._id
-                }))
-            }
-            obj.team.create=arr;
-            let arrTemp=await (teamGroup.findAsync({
-                users:{
-                    $elemMatch:{
-                        user:req.userInfo._id,
-                        role:0
-                    }
-                }
-            },"",{
-                sort:"-createdAt"
-            }))
-            let arrTeam=[];
-            for(let obj of arrTemp)
-            {
-                if(arrTeam.indexOf(obj.team.toString())==-1)
-                {
-                    arrTeam.push(obj.team);
-                }
-            }
-            arr=await (team.findAsync({
-                _id:{
-                    $in:arrTeam
-                }
-            },"",{
-                sort:"-createdAt"
-            }))
-            arr.forEach(function (obj) {
-                obj._doc.own=0;
-                obj._doc.role=0;
-            })
-            ret=arr;
-            arrTemp=await (teamGroup.findAsync({
-                users:{
-                    $elemMatch:{
-                        user:req.userInfo._id,
-                        role:1
-                    }
-                }
-            },"",{
-                sort:"-createdAt"
-            }))
-            arrTeam=[];
-            for(let obj of arrTemp)
-            {
-                if(arrTeam.indexOf(obj.team.toString())==-1)
-                {
-                    arrTeam.push(obj.team);
-                }
-            }
-            arr=await (team.findAsync({
-                _id:{
-                    $in:arrTeam
-                }
-            },"",{
-                sort:"-createdAt"
-            }))
-            arr.forEach(function (obj) {
-                obj._doc.own=0;
-                obj._doc.role=1;
-            })
-            ret=ret.concat(arr);
-            for(let obj of ret)
-            {
-                let arr=await (teamGroup.findAsync({
-                    team:obj._id
-                }))
-                let count=0;
-                for(let o of arr)
-                {
-                    count+=o.users.length;
-                }
-                obj._doc.userCount=count;
-                obj._doc.projectCount=await (project.countAsync({
-                    team:obj._id
-                }))
-            }
-            obj.team.join=ret;
+            obj.public=arr;
             util.ok(res,obj,"ok");
         }
         catch (err)
@@ -2616,7 +2513,7 @@ function Project() {
                         objRaw.data.push(obj1);
                     }
                 }
-                else if(obj.type=="object")
+                else if(obj.type=="object" || obj.type===undefined)
                 {
                     objRaw.type=4;
                     objRaw.data=[];
@@ -3513,7 +3410,7 @@ function Project() {
                         objRaw.data.push(obj1);
                     }
                 }
-                else if(obj.type=="object")
+                else if(obj.type=="object" || obj.type===undefined)
                 {
                     objRaw.type=4;
                     objRaw.data=[];

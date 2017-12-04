@@ -46,6 +46,16 @@ var interface=[
         user:1,
         handle:[message.newMsg]
     },
+    {
+        "method":"GET",
+        "path":"/message/applylist",
+        "param": {
+
+        },
+        "data":String,
+        user:1,
+        handle:[message.applyList]
+    },
 ];
 
 module.exports=interface;

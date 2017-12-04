@@ -133,8 +133,6 @@ function Team() {
         })
         return arr;
     })
-
-
     this.save=async ((req,res)=> {
         try
         {
@@ -198,7 +196,7 @@ function Team() {
             {
                 ret=await (project.findAsync({
                     team:obj._id
-                },"name dis users",{
+                },"name dis users createdAt",{
                     sort:"-createdAt"
                 }));
                 ret.forEach(function (obj) {
@@ -211,7 +209,7 @@ function Team() {
                 let arr=await (project.findAsync({
                     owner:req.userInfo._id,
                     team:obj._id
-                },"name dis users",{
+                },"name dis users createdAt",{
                     sort:"-createdAt"
                 }));
                 arr.forEach(function (obj) {
@@ -227,7 +225,7 @@ function Team() {
                         }
                     },
                     team:obj._id
-                },"name dis users",{
+                },"name dis users createdAt",{
                     sort:"-createdAt"
                 }))
                 arr.forEach(function (obj) {
@@ -243,7 +241,7 @@ function Team() {
                         }
                     },
                     team:obj._id
-                },"name dis users",{
+                },"name dis users createdAt",{
                     sort:"-createdAt"
                 }))
                 arr.forEach(function (obj) {
@@ -253,7 +251,18 @@ function Team() {
                 ret=ret.concat(arr);
             }
             ret.sort(function (obj1,obj2) {
-                return obj1.createdAt<obj2.createdAt
+                if(obj1.createdAt>obj2.createdAt)
+                {
+                    return -1;
+                }
+                else if(obj1.createdAt<obj2.createdAt)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
             })
             let count=0;
             for(let obj of ret)
@@ -1195,6 +1204,209 @@ function Team() {
                     select:"name photo"
                 }
             }))
+            util.ok(res,ret,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.list=async (function (req,res) {
+        try
+        {
+            let obj={},ret=[];
+            let arr=await (team.findAsync({
+                owner:req.userInfo._id
+            },"",{
+                sort:"-createdAt"
+            }))
+            arr.forEach(function (obj) {
+                obj._doc.role=0;
+                obj._doc.own=1;
+            })
+            for(let obj of arr)
+            {
+                let arr1=await (teamGroup.findAsync({
+                    team:obj._id
+                }))
+                let count=0;
+                for(let o of arr1)
+                {
+                    count+=o.users.length;
+                }
+                obj._doc.userCount=count;
+                obj._doc.projectCount=await (project.countAsync({
+                    team:obj._id
+                }))
+            }
+            obj.create=arr;
+            let arrTemp=await (teamGroup.findAsync({
+                users:{
+                    $elemMatch:{
+                        user:req.userInfo._id,
+                        role:0
+                    }
+                }
+            },"",{
+                sort:"-createdAt"
+            }))
+            let arrTeam=[];
+            for(let obj of arrTemp)
+            {
+                if(arrTeam.indexOf(obj.team.toString())==-1)
+                {
+                    arrTeam.push(obj.team);
+                }
+            }
+            arr=await (team.findAsync({
+                _id:{
+                    $in:arrTeam
+                }
+            },"",{
+                sort:"-createdAt"
+            }))
+            arr.forEach(function (obj) {
+                obj._doc.own=0;
+                obj._doc.role=0;
+            })
+            ret=arr;
+            arrTemp=await (teamGroup.findAsync({
+                users:{
+                    $elemMatch:{
+                        user:req.userInfo._id,
+                        role:1
+                    }
+                }
+            },"",{
+                sort:"-createdAt"
+            }))
+            arrTeam=[];
+            for(let obj of arrTemp)
+            {
+                if(arrTeam.indexOf(obj.team.toString())==-1)
+                {
+                    arrTeam.push(obj.team);
+                }
+            }
+            arr=await (team.findAsync({
+                _id:{
+                    $in:arrTeam
+                }
+            },"",{
+                sort:"-createdAt"
+            }))
+            arr.forEach(function (obj) {
+                obj._doc.own=0;
+                obj._doc.role=1;
+            })
+            ret=ret.concat(arr);
+            for(let obj of ret)
+            {
+                let arr=await (teamGroup.findAsync({
+                    team:obj._id
+                }))
+                let count=0;
+                for(let o of arr)
+                {
+                    count+=o.users.length;
+                }
+                obj._doc.userCount=count;
+                obj._doc.projectCount=await (project.countAsync({
+                    team:obj._id
+                }))
+            }
+            obj.join=ret;
+            util.ok(res,obj,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    });
+    this.projectList=async (function (req,res) {
+        try
+        {
+            let ret=[];
+            if(req.access)
+            {
+                ret=await (project.findAsync({
+                    team:req.team._id
+                },"name dis users createdAt",{
+                    sort:"-createdAt"
+                }));
+                ret.forEach(function (obj) {
+                    obj._doc.role=0;
+                    obj._doc.own=1;
+                })
+            }
+            else
+            {
+                let arr=await (project.findAsync({
+                    owner:req.userInfo._id,
+                    team:req.team._id
+                },"name dis users createdAt",{
+                    sort:"-createdAt"
+                }));
+                arr.forEach(function (obj) {
+                    obj._doc.role=0;
+                    obj._doc.own=1;
+                })
+                ret=ret.concat(arr);
+                arr=await (project.findAsync({
+                    users:{
+                        $elemMatch:{
+                            user:req.userInfo._id,
+                            role:0
+                        }
+                    },
+                    team:req.team._id
+                },"name dis users createdAt",{
+                    sort:"-createdAt"
+                }))
+                arr.forEach(function (obj) {
+                    obj._doc.own=0;
+                    obj._doc.role=0;
+                })
+                ret=ret.concat(arr);
+                arr=await (project.findAsync({
+                    users:{
+                        $elemMatch:{
+                            user:req.userInfo._id,
+                            role:1
+                        }
+                    },
+                    team:req.team._id
+                },"name dis users createdAt",{
+                    sort:"-createdAt"
+                }))
+                arr.forEach(function (obj) {
+                    obj._doc.own=0;
+                    obj._doc.role=1;
+                })
+                ret=ret.concat(arr);
+            }
+            ret.sort(function (obj1,obj2) {
+                if(obj1.createdAt>obj2.createdAt)
+                {
+                    return -1;
+                }
+                else if(obj1.createdAt<obj2.createdAt)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            })
+            for(let obj of ret)
+            {
+                obj._doc.userCount=obj.users.length+1;
+                delete obj._doc.users;
+                obj._doc.interfaceCount=await (interface.countAsync({
+                    project:obj._id
+                }))
+            }
             util.ok(res,ret,"ok");
         }
         catch (err)
