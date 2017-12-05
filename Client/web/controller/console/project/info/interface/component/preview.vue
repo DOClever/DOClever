@@ -83,7 +83,7 @@
                                         名称
                                     </td>
                                     <td style="width: 20%">
-                                        是否可选
+                                        是否必填
                                     </td>
                                     <td style="width: 50%">
                                         备注
@@ -96,7 +96,7 @@
                                                 {{item.name}}
                                             </td>
                                             <td style="width: 20%">
-                                                {{item.must?"必选":"可选"}}
+                                                {{item.must?"必填":"选填"}}
                                             </td>
                                             <td style="width: 50%">
                                                 {{item.remark?item.remark:"无"}}
@@ -152,7 +152,7 @@
                                         类型
                                     </td>
                                     <td style="width: 20%">
-                                        是否可选
+                                        是否必填
                                     </td>
                                     <td style="width: 30%">
                                         备注
@@ -168,7 +168,7 @@
                                                 {{item.type==0?"文本":"文件"}}
                                             </td>
                                             <td style="width: 20%">
-                                                {{item.must?"必选":"可选"}}
+                                                {{item.must?"必填":"选填"}}
                                             </td>
                                             <td style="width: 30%">
                                                 {{item.remark?item.remark:"无"}}

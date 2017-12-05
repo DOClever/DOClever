@@ -12,6 +12,12 @@
     <link type="text/css"  rel="stylesheet" href="../../../node_modules/animate.css/animate.min.css">
     <link type="text/css"  rel="stylesheet" href="../../common/lib/element/index.css">
     <title>接口分享</title>
+    <style>
+        #previewParam .el-tabs__nav-scroll {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+    </style>
 </head>
 <body>
 <div class="container" id="app"  v-cloak>
@@ -46,9 +52,9 @@
                 {{interface.remark?interface.remark:"无"}}
             </el-row>
             <el-tabs style="margin-top: 20px" v-model="tabIndex" id="previewParam">
-                <template v-for="(item, index) in paramSave">
+                <template v-for="(item, index) in param">
                     <el-tab-pane :key="item.id"  :label="item.name" :name="index">
-                        <expand v-if="param && param.length>0" ref="param">
+                        <expand v-if="paramSave && paramSave.length>0" ref="param">
                             <div slot="title">Restful Param:</div>
                             <el-row class="row" style="padding:0 30px;">
                                 <table style="width: 100%;border-collapse: collapse" class="table-hover">
@@ -61,7 +67,7 @@
                                     </td>
                                     </thead>
                                     <tbody>
-                                    <template v-for="item in param">
+                                    <template v-for="item in paramSave">
                                         <tr style="text-align: center;vertical-align: middle;height: 40px;word-break: break-all">
                                             <td style="width: 30%">
                                                 {{item.name}}
@@ -84,7 +90,7 @@
                                         名称
                                     </td>
                                     <td style="width: 20%">
-                                        是否可选
+                                        是否必填
                                     </td>
                                     <td style="width: 50%">
                                         备注
@@ -97,7 +103,7 @@
                                                 {{item.name}}
                                             </td>
                                             <td style="width: 20%">
-                                                {{item.must?"必选":"可选"}}
+                                                {{item.must?"必填":"选填"}}
                                             </td>
                                             <td style="width: 50%">
                                                 {{item.remark?item.remark:"无"}}
@@ -153,7 +159,7 @@
                                         类型
                                     </td>
                                     <td style="width: 20%">
-                                        是否可选
+                                        是否必填
                                     </td>
                                     <td style="width: 30%">
                                         备注
@@ -169,7 +175,7 @@
                                                 {{item.type==0?"文本":"文件"}}
                                             </td>
                                             <td style="width: 20%">
-                                                {{item.must?"必选":"可选"}}
+                                                {{item.must?"必选":"选填"}}
                                             </td>
                                             <td style="width: 30%">
                                                 {{item.remark?item.remark:"无"}}

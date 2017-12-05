@@ -13,6 +13,8 @@ var id=location.hash.substr(1);
 var vue=new Vue({
     el: "#app",
     data: {
+        bodyJSONType:0,
+        outJSONType:0,
         tabIndex:0,
         interface:{},
         param:[{
