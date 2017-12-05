@@ -17,7 +17,7 @@ li{list-style-type:none;}
 .w100{width: 100%}
 /*通用公共样式end*/
 .header2{
-    background: url("../../resource/pic/线条.svg") no-repeat scroll center center/cover border-box, linear-gradient(60deg, #17b9e6 0%, #17e67e 100%) ;
+    background: url("../../resource/pic/xiantiao.svg") no-repeat scroll center center/cover border-box, linear-gradient(60deg, #17b9e6 0%, #17e67e 100%) ;
 }
 @media screen and (max-width: 863px ) {
     .loginvisable{display: none}
