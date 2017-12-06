@@ -73,10 +73,12 @@ Get generated code and SourceMap. `options` can contains `file` property which d
 ### `SourceListMap.prototype.mapGeneratedCode`
 
 ``` js
-SourceListMap.prototype.mapGeneratedCode(fn: function)
+SourceListMap.prototype.mapGeneratedCode(fn: function) : SourceListMap
 ```
 
-Applies `fn` to each generated code block. The returned value is set as new generated code. The number of lines must not change.
+Applies `fn` to each generated code block (per line). The returned value is set as new generated code. Returns a new SourceListMap.
+
+Removing and adding lines is supported. The SourceMap complexity will increase when doing this.
 
 ## Test
 
@@ -84,6 +86,6 @@ Applies `fn` to each generated code block. The returned value is set as new gene
 
 ## License
 
-Copyright (c) 2015 Tobias Koppers
+Copyright (c) 2017 JS Foundation
 
 MIT (http://www.opensource.org/licenses/mit-license.php)

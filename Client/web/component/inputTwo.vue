@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="DOClever"  size="small" ref="box" :modal="hud" v-model="showDialog">
+    <el-dialog title="DOClever"  size="50%" ref="box" :modal="hud" :visible.sync="showDialog" append-to-body>
         <el-form label-width="100px">
             <el-form-item style="text-align: center" :label="data.labelTitle">
                 <el-input  :placeholder="data.placeholderTitle"  v-model="data.textTitle"></el-input>

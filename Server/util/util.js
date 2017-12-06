@@ -1362,6 +1362,27 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
     {
         path=path+"?"+query;
     }
+    let cookie=header["cookie"] || header["Cookie"];
+    if(cookie)
+    {
+        let arr=cookie.split(";");
+        let objCookie={};
+        arr.forEach(function (obj) {
+            let arr1=obj.split("=");
+            objCookie[arr1[0]]=arr1[1];
+        })
+        for(let key in objCookie)
+        {
+            root.cookie[key]=objCookie[key];
+        }
+    }
+    let strCookie="",arrCookie=[];
+    for(let key in root.cookie)
+    {
+        arrCookie.push(key+"="+root.cookie[key]);
+    }
+    strCookie=arrCookie.join(";");
+    header["Cookie"]=strCookie
     var startDate=new Date();
     var func;
     var objReq={
@@ -1373,7 +1394,7 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
     {
         if(obj.bodyInfo.type==0)
         {
-            objReq.body=param(body,true);
+            objReq.form=body;
         }
         else
         {
@@ -1425,6 +1446,17 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
             runAfter(obj.after.code,res.status,res.header,res.data)
         }
         root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]结束运行接口："+obj.name+"(耗时：<span style='color: green'>"+res.second+"秒</span>)<br>"
+        let cookies = res.header["set-cookie"];
+        if (cookies) {
+            for (let index in cookies) {
+                let cookie = cookies[index];
+                let realOfCookie = cookie.split(";")[0];
+                let obj=realOfCookie.split("=");
+                let key=obj[0].trim();
+                let val=encodeURIComponent(obj[1]);
+                root.cookie[key]=val;
+            }
+        }
         return res;
     })
 })
@@ -1444,6 +1476,10 @@ var runTestCode=async (function (code,test,global,opt,root) {
         global={};
     }
     var env={};
+    if(!root.cookie)
+    {
+        root.cookie={};
+    }
     if(opt.baseUrls && opt.baseUrl)
     {
         opt.baseUrls.forEach(function (obj) {
@@ -1473,7 +1509,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
         var text;
         if(type=="1")
         {
-            text="(function (opt) {return runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',baseUrls:"+JSON.stringify(opt.baseUrls)+"}"+",test,root,opt)})"
+            text="(function (opt) {return runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',baseUrls:"+JSON.stringify(opt.baseUrls)+",cookie:"+JSON.stringify(root.cookie).replace(/'/g,"\\'")+"}"+",test,root,opt)})"
         }
         else if(type=="2")
         {
@@ -2263,10 +2299,11 @@ let runPoll=async (function (arr) {
             }
             catch (err)
             {
+                root.fail++;
                 root.output+=err+"<br>"
             }
         }
-        if(obj.failSend && root.fail==0)
+        if(obj.failSend && root.fail==0 && root.unknown==0)
         {
             return;
         }
@@ -2298,7 +2335,7 @@ let runPoll=async (function (arr) {
             let content=`<h3>测试：${root.count}&nbsp;&nbsp;成功：${root.success}&nbsp;&nbsp;失败：${root.fail}&nbsp;&nbsp;未判定：${root.unknown}</h3>`+root.output;
             exports.sendMail(obj.sendInfo.smtp,obj.sendInfo.port,obj.sendInfo.user,obj.sendInfo.password,arr,subject,content);
         }
-        if(obj.phoneInfo && obj.phoneInfo.baseUrl && obj.phoneInfo.contentParam)
+        if(obj.phoneInfo && obj.phoneInfo.baseUrl && obj.phoneInfo.contentParam && obj.phoneInfo.sign)
         {
             let method,baseUrl,param={};
             method=obj.phoneInfo.method;
@@ -2324,14 +2361,27 @@ let runPoll=async (function (arr) {
                     param[obj.phoneInfo.bindParam]=str;
                 }
             }
-            param[obj.phoneInfo.contentParam]=`测试：${root.count} 成功：${root.success} 失败：${root.fail} 未判定：${root.unknown}`
+            param[obj.phoneInfo.contentParam]=encodeURI(`测试：${root.count} 成功：${root.success} 失败：${root.fail} 未判定：${root.unknown} ${obj.phoneInfo.sign}`)
             sendSMS(method,baseUrl,param);
         }
     }
 })
 
 function handleGlobalVar(str,global) {
-    str=str.replace(/\{\{.+?\}\}/g,function (str) {
+    var type;
+    if(typeof (str)=="string")
+    {
+        type==1;
+    }
+    else if(typeof(str)=="number")
+    {
+        type=2;
+    }
+    else if(typeof(str)=="boolean")
+    {
+        type=3;
+    }
+    str=str.toString().replace(/\{\{.+?\}\}/g,function (str) {
         var val=str.substr(2,str.length-4);
         if(global[val]!==undefined)
         {
@@ -2342,6 +2392,14 @@ function handleGlobalVar(str,global) {
             return str;
         }
     })
+    if(type==2)
+    {
+        str=Number(str);
+    }
+    else if(type==3)
+    {
+        str=Boolean(str);
+    }
     return str;
 }
 

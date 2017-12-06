@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DOClever 移动时代首选接口管理平台！</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="API管理平台,接口管理平台,mock测试,接口文档管理,接口文档平台,接口文档系统,API文档管理"/>
+    <meta name="description" content="DOClever是一款开源免费的可视化接口管理工具，专业的api接口管理系统，集接口文档、接口自动化测试、Mock数据、团队协作、接口快照等于一身的移动时代首选接口管理平台！"/>
+    <link href="../../resource/pic/logo.ico" rel="shortcut icon">
+    <link type="text/css"  rel="stylesheet" href="../../common/css/common.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/font-awesome/css/font-awesome.min.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/element/index.css">
+    <link type="text/css"  rel="stylesheet" href="./index.css">
+</head>
+<body>
+    <el-col class="page-container" id="app" v-cloak>
+        <el-row class="row">
+            <el-col class="header1 curve1">
+                    <el-row class="row" style="z-index: 999">
+                        <el-col :span="20" class="col" :offset="2"  ><mainnav></mainnav></el-col>
+                    </el-row>
+                    <div class="vedio">
+                        <h2 class="tc">DOClever,让接口<strong>更懂你!</strong></h2>
+                        <p style="margin-top: 40px;cursor: pointer" @click="dialogVisible=true">观看视频&nbsp;<i class="fa fa-play-circle-o"></i></p>
+                    </div>
+                    <el-row :gutter="5" class="row item-boxs" >
+                            <el-col :span="5" class="col item" :offset="3" >
+                                <p><img src="../../resource/pic/xiezuo.svg" ><br><br><span>协作管理</span></p>
+                                <div class="txt">
+                                    DOClever提供了项目和团队两种协作模式，您可以在不同的模式间自由的切换，大大提高您的协作效率。
+                                </div>
+                            </el-col>
+                            <el-col :span="5" class="col item" :offset="1" >
+                                <p><img src="../../resource/pic/zidonghuaceshi.svg" ><br><br><span>自动化测试</span></p>
+                                <div class="txt">
+                                    DOClever独创的接口业务场景的自动化测试功能，并且可以通过后台轮询将结果及时发送到您的邮箱。
+                                </div>
+                            </el-col>
+                            <el-col :span="5" class="col item" :offset="1" >
+                                <p><img src="../../resource/pic/mianfeikaiyuan.svg" ><br><br><span>免费开源</span></p>
+                                <div class="txt">
+                                    DOClever本着共享和自由的开放精神，目前开放所有源代码，其托管在GitHub上的项目star已经过千。
+                                </div>
+                            </el-col>
+                        </el-row>
+                </el-col>
+        </el-row>
+        <div class="sxhn"></div>
+        <el-row class="row index-body">
+            <el-col :span="20" :offset="2">
+                <el-row class="row">
+                    <el-col :span="12">
+                        <img src="../../resource/pic/zaixianwendang.svg" width="98%">
+                    </el-col>
+                    <el-col :span="12" class="gn-txt">
+                        <p class="gn-title">在线文档，版本管理</p>
+                        <p class="txt">Restful,Query,Header,Body,Raw信息一应俱全<br>JSON层次采用可视化编辑,结构清晰.<br>项目版本和接口快照保证你可以实时回溯到任何状态.</p>
+                    </el-col>
+                </el-row>
+                <el-row class="row">
+                    <el-col :span="12" class="gn-txt">
+                        <p class="gn-title">调试运行<br>接口场景自动化测试</p>
+                        <p class="txt">通过独创的自动化测试技术可以联调不同的业务场景<br>https,接口加密，文件上传，so easy！
+                            <br>独有的proxy技术加持为您冲破内网的束缚..</p>
+                    </el-col>
+                    <el-col :span="12">
+                           <img src="../../resource/pic/tiaoshiyunxing.svg" width="98%">
+                    </el-col>
+                </el-row>
+                <el-row class="row">
+                    <el-col :span="12">
+                        <img src="../../resource/pic/wufengmock.svg" width="98%">
+                    </el-col>
+                    <el-col :span="12" class="gn-txt">
+                        <p class="gn-title">无缝MOCK<br>我们要的是卓越</p>
+                        <p class="txt">简单强大，只需要把Mock Server的根地址替换成你web项目的地址<br>Mock就会在神不知鬼不觉中悄悄进行！.</p>
+                    </el-col>
+                </el-row>
+                <el-row class="row">
+                    <el-col :span="12" class="gn-txt">
+                        <p class="gn-title">团队协作<br>日常动态一网打尽</p>
+                        <p class="txt">作为团队的管理员，你可以查看团队的所有状态以及编辑项目和成员信息.</p>
+                    </el-col>
+                    <el-col :span="12">
+                        <img src="../../resource/pic/tuanduixiezuo.svg" width="98%">
+                    </el-col>
+                </el-row>
+            </el-col>
+        </el-row>
+        <el-row class="row hezuo">
+            <el-col :span="20" class="col" :offset="2">
+            <h2 class="tc" style="margin-bottom: 30px">DOClever已为上千项目的数万接口提供服务</h2>
+                <table style="width: 100%;margin: 0 auto" cellspacing="10">
+                    <tbody>
+                    <tr>
+                        <td style="width: 20%;"><a href="http://www.xiaojukeji.com/index/index" target="_blank" rel="nofollow"><img src="../../resource/pic/didi.png" style="width: 100%;transform: scale(0.8,0.8)"></a></td>
+                        <td style="width: 20%;"><a href="http://meituan.com/" target="_blank" rel="nofollow"><img
+                                src="../../resource/pic/meituan.png" style="width: 100%;transform: scale(0.8,0.8)"></a></td>
+                        <td style="width: 20%;"><a href="http://58.com/" target="_blank" rel="nofollow"><img
+                                src="../../resource/pic/58.png" style="width: 100%;transform: scale(0.8,0.8)"></a></td>
+                        <td style="width: 20%;"><a href="http://www.ly.com/" target="_blank" rel="nofollow"><img
+                                src="../../resource/pic/tongcheng.png" style="width: 100%;"></a></td>
+                        <td style="width: 20%;"><a href="http://www.injedu.com/" target="_blank" rel="nofollow"><img
+                                src="../../resource/pic/yingjie.png" style="width: 100%;transform: scale(0.9,0.9)"></a></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 20%;"><a href="http://www.gaodun.cn/" target="_blank" rel="nofollow"><img
+                                src="../../resource/pic/gaodun.png" style="width: 100%;color: #416abc"></a></td>
+                        <td style="width: 20%;"><a href="http://pingan.com/" target="_blank" rel="nofollow"><img
+                                src="../../resource/pic/pingan.png" style="width: 100%;"></a></td>
+                        <td style="width: 20%;"><a href="http://www.kuaimaxueche.com/" target="_blank" rel="nofollow"><img
+                                src="../../resource/pic/kuaima.png" style="width: 100%;"></a></td>
+                        <td style="width: 20%;"><a href="http://www.leadbank.com.cn/" target="_blank" rel="nofollow"><img
+                                src="../../resource/pic/deli.png" style="width: 100%;transform: scale(0.9,0.9)"></a></td>
+                        <td style="width: 20%;"><a href="http://www.youxinpai.com/" target="_blank" rel="nofollow"><img
+                                src="../../resource/pic/youxin.png" style="width: 100%;transform: scale(0.8,0.8)"></a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </el-col>
+        </el-row>
+        <div class="slide curveb">
+            <h2 class="tc pt50" style="color:#fff;">5000+的团队在使用,被千余个开发者点赞</h2>
+            <el-row class="row" style="text-align: center;margin-top: 30px">
+                <el-carousel height="150px"
+                             style="width: 70%;margin: 0 auto;color: white;font-size: small;background-position:center center;background-size: cover;">
+                    <el-carousel-item v-for="item in dis">
+                        <div class="row" style="height: 100%;text-align: center">
+                            <h3>
+                                {{item.title}}
+                            </h3>
+                            <h4>
+                                {{item.name}}
+                            </h4>
+                        </div>
+                    </el-carousel-item>
+                </el-carousel>
+            </el-row>
+        </div>
+        <commonfooter>
+            <img src="http://doclever.cn:8090/logo.png" style="width:120px;height:40px">
+        </commonfooter>
+        <el-dialog title="DOClever产品介绍" :visible.sync="dialogVisible">
+            <embed src="https://imgcache.qq.com/tencentvideo_v1/playerv3/TPout.swf?max_age=86400&v=20161117&vid=i0548uvxzu6&auto=0" allowFullScreen="true" quality="high" width="100%" height="400" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed>
+        </el-dialog>
+    </el-col>
+    <script src="../../../dist/vendor.bundle.js"></script>
+    <script src="../../common/lib/element/index.js"></script>
+    <script src="../../../dist/index.js"></script>
+</body>
+</html>

@@ -17,9 +17,15 @@ function testbinary(gyp, argv, callback) {
     var shell_cmd = process.execPath;
     var package_json = JSON.parse(fs.readFileSync('./package.json'));
     var opts = versioning.evaluate(package_json, gyp.opts);
+    // skip validation for runtimes we don't explicitly support (like electron)
+    if (opts.runtime &&
+        opts.runtime !== 'node-webkit' &&
+        opts.runtime !== 'node') {
+        return callback();
+    }
+    var nw = (opts.runtime && opts.runtime === 'node-webkit');
     // ensure on windows that / are used for require path
     var binary_module = opts.module.replace(/\\/g, '/');
-    var nw = (opts.runtime && opts.runtime === 'node-webkit');
     if ((process.arch != opts.target_arch) ||
         (process.platform != opts.target_platform)) {
         var msg = "skipping validation since host platform/arch (";
@@ -62,7 +68,7 @@ function testbinary(gyp, argv, callback) {
         return;
     }
     args.push('--eval');
-    args.push("'require(\\'" + binary_module.replace(/\'/g, '\\\'') +"\\')'");
+    args.push("require('" + binary_module.replace(/'/g, '\'') +"')");
     log.info("validate","Running test command: '" + shell_cmd + ' ' + args.join(' ') + "'");
     cp.execFile(shell_cmd, args, options, function(err, stdout, stderr) {
         if (err) {

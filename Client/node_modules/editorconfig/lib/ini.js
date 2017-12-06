@@ -23,7 +23,7 @@ var regex = {
  * @param: {Function} callback, the function that will be called when parsing is done
  * @return: none
  */
-module.exports.parse = function (file, callback) {
+exports.parse = function (file, callback) {
   if (!callback) {
     return;
   }
@@ -36,11 +36,11 @@ module.exports.parse = function (file, callback) {
   });
 };
 
-module.exports.parseSync = function (file) {
+exports.parseSync = function (file) {
   return parse(fs.readFileSync(file, 'utf8'));
 };
 
-function parse (data) {
+exports.parseString = function (data) {
   var sectionBody = {};
   var sectionName = null;
   var value = [[sectionName, sectionBody]];
@@ -60,6 +60,4 @@ function parse (data) {
     }
   });
   return value;
-}
-
-module.exports.parseString = parse;
+};

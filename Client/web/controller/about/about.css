@@ -1,0 +1,75 @@
+/*通用公共样式*/
+body,html,div{font-size: 14px;}
+body{background: #fff}
+h1{font-size:48px;font-weight: normal}
+h2{font-size: 30px;font-weight: normal}
+.fl{float: left;}
+.fr{float:right}
+a{text-decoration:none}
+.wrap{width: 1170px;margin: 0 auto;min-width: 1170px;overflow: hidden}
+.pt50{padding-top: 50px}
+.pt80{padding-top: 80px}
+.clear{overflow: hidden}
+.tc{text-align: center}
+li{list-style-type:none;}
+.blue{color: #17b9e6}
+.wrap-about{width:865px;margin: 0 auto;overflow: hidden}
+.w100{width: 100%}
+/*通用公共样式end*/
+.header2{
+    background: url("../../resource/pic/xiantiao.svg") no-repeat scroll center center/cover border-box, linear-gradient(60deg, #17b9e6 0%, #17e67e 100%) ;
+}
+@media screen and (max-width: 863px ) {
+    .loginvisable{display: none}
+    .login{text-align: right}
+}
+@media screen and (max-width: 768px) {
+    .logovisiable{display: none}
+    .login{text-align: right}
+}
+.curve2::after {
+    content: ' ';
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 1.875rem;
+    margin-top: -1.875rem;
+    z-index: 10;
+    background-image: url("data:image/svg+xml,%3Csvg version=%221.1%22 xmlns=%22http://www.w3.org/2000/svg%22 x=%220%22 y=%220%22 viewBox=%220 0 1800 125.2%22 preserveAspectRatio=%22none%22%3E%3Cpath fill=%22%23fff%22 d=%22M1800,125.2V0c0,0-455.3,80.7-950.6,104.5C354.2,128.3,0,122.2,0,122.2v3H1800z%22/%3E%3C/svg%3E");
+
+}
+
+/*通用导航CSS样式start*/
+.el-menu--horizontal .el-submenu .el-submenu__title,.page-container .el-menu--horizontal .el-menu-item{
+    color: #fff;
+}
+.el-menu--horizontal .el-menu-item a:hover,.el-menu--horizontal .el-submenu .el-submenu__title:hover,.page-container .el-menu--horizontal .el-menu-item:hover{
+    background: none;
+}
+.el-menu--horizontal {
+    border-right: none;
+    border-bottom: none;
+}
+.page-container .logo{padding: 0}
+.page-container .logo a{color: #fff;}
+.page-container .el-mainNav{background: none;margin-bottom:100px;margin-top:15px  }
+.page-container .login{margin-top: 25px}
+.page-container .login button{color: #fff}
+.page-container .login button.free{border: 1px solid #eee;padding: 8px 15px;margin-top: 3px}
+.el-submenu__title i{display: none}
+.page-container li.el-submenu ul.el-menu li{padding: 10px 15px;height: auto;line-height: none;}
+.page-container li.el-submenu ul.el-menu li a{color:#17b9e6;text-align: center}
+.page-container li.el-submenu ul.el-menu li i{display:inline-block;width: 32px;height: 32px;margin: 0 10px}
+.page-container li.el-submenu ul.el-menu li .github{background: url(../../resource/pic/githublogo.svg) no-repeat center center/cover}
+.page-container li.el-submenu ul.el-menu li .mayun{background: url(../../resource/pic/mayunlogo.svg) no-repeat center center/cover}
+.page-container li.qq ul.el-menu li{padding: 0 45px}
+.page-container li.el-submenu ul.el-menu li span.qqico{display: block;width:200px; height:270px;background: url("../../resource/pic/qqqun.jpg") no-repeat center center/cover;margin: 0 auto;}
+.el-menu--horizontal>.el-menu-item.is-active, .el-menu--horizontal>.el-submenu.is-active .el-submenu__title{border-bottom:none }
+/*通用导航CSS样式end*/
+
+/*通用底部CSS样式start*/
+.footer{background: #191919;padding: 100px 0;color: #fff}
+.footer ul{width: 450px;margin: 0 auto}
+.footer ul li{display: inline-block;margin: 0 10px}
+.footer  a{color: #fff}
+/*通用底部CSS样式end*/

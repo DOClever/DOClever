@@ -1,3 +1,8 @@
+### v2.7.4
+
+* Reset colors prior to ending a line, to eliminate flicker when a line
+  is trucated between start and end color sequences.
+
 ### v2.7.3
 
 * Only create our onExit handler when we're enabled and remove it when we're

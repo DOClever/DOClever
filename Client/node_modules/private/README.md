@@ -1,5 +1,4 @@
-private [![Build Status](https://travis-ci.org/benjamn/private.png?branch=master)](https://travis-ci.org/benjamn/private)
-===
+# private [![Build Status](https://travis-ci.org/benjamn/private.png?branch=master)](https://travis-ci.org/benjamn/private) [![Greenkeeper badge](https://badges.greenkeeper.io/benjamn/private.svg)](https://greenkeeper.io/)
 
 A general-purpose utility for associating truly private state with any JavaScript object.
 

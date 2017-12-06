@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link href="../pic/logo.ico" rel="shortcut icon">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/element/index.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/font-awesome/css/font-awesome.min.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/css/common.css">
+    <title>绑定QQ</title>
+</head>
+<body>
+<div class="container" id="app" v-cloak>
+    <div class="row" style="text-align: center;color: #50a3ff;margin-top: 80px">
+        <h1><a style="text-decoration: none;cursor: pointer;color: inherit" href="javascript:void(0)">DOClever</a></h1>
+        <img :src="photo" style="width: 50px;height: 50px;border-radius: 25px">;
+    </div>
+    <div class="row">
+        <el-form ref="form" style="width: 50%;margin: 0 auto;padding: 20px 20px 0px 20px" >
+            <el-form-item style="text-align: center">
+                <el-input  placeholder="用户名" style="width: 400px;"  v-model="username"></el-input>
+            </el-form-item>
+            <el-form-item  style="text-align: center">
+                <el-input  placeholder="密码" style="width: 400px;"  v-model="pwd" type="password"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center">
+                <el-input  placeholder="确认密码" style="width: 400px;"  v-model="pwd1" type="password"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center">
+                <el-input  placeholder="邮箱" style="width: 400px;"  v-model="email"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center">
+                <el-input  placeholder="密码找回问题" style="width: 400px;"  v-model="question"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center">
+                <el-input  placeholder="密码找回答案" style="width: 400px;"  v-model="answer"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center">
+                <el-button type="primary" :loading="registerPending" style="width: 400px;" @click.prevent="register">立即绑定</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
+</div>
+<script src="../../dist/vendor.bundle.js"></script>
+<script src="../lib/element/index.js"></script>
+<script src="../../dist/registerqq.js"></script>
+</body>
+</html>

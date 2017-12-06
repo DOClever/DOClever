@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>找回密码-DOClever 移动时代首选接口管理平台！</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="API管理平台,接口管理平台,mock测试,接口文档管理,接口文档平台,接口文档系统,API文档管理"/>
+    <meta name="description" content="DOClever是一款开源免费的可视化接口管理工具，专业的api接口管理系统，集接口文档、接口自动化测试、Mock数据、团队协作、接口快照等于一身的移动时代首选接口管理平台！"/>
+    <link href="../../resource/pic/logo.ico" rel="shortcut icon">
+    <link type="text/css"  rel="stylesheet" href="../../common/css/common.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/font-awesome/css/font-awesome.min.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/element/index.css">
+    <link type="text/css"  rel="stylesheet" href="reset.css">
+</head>
+<body>
+<div class="page-container" id="app" v-cloak>
+    <div class="login-register-bg">
+        <el-row>
+            <el-col :span="24" :xs="24">
+                <h2 style="text-align: center;margin: 0;padding: 50px 0 30px"><a href="/"><img src="../../resource/pic/Logo4.png"></a></h2>
+                <el-row>
+                    <el-col :span="8" :xs="4" :sm="7" :md="8">&nbsp;</el-col>
+                    <el-col :span="8" class="login-box-bg" :xs="16" :sm="10" :md="8">
+                        <el-row>
+                            <el-col :span="2" :xs="2">&nbsp;</el-col>
+                            <el-col :span="20" class="login-box" :xs="20">
+                                <el-form  v-if="step==1">
+                                    <el-form-item label="请输入您预留的问题">
+                                        <el-input v-model="question" :disabled="true"></el-input>
+                                    </el-form-item>
+                                    <el-form-item  label="请输入找回密码的问题答案">
+                                        <el-input   v-model="answer"></el-input>
+                                    </el-form-item>
+                                    <el-form-item  label="请输入新密码">
+                                        <el-input   v-model="pwd" type="password"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="请确认新密码">
+                                        <el-input  v-model="pwd1" type="password"></el-input>
+                                    </el-form-item>
+                                    <el-form-item >
+                                        <el-button type="warning" :loading="resetPending" @click.prevent="reset" style="width: 100%">立即重置</el-button>
+                                    </el-form-item>
+                                </el-form>
+                                <el-form  v-else>
+                                    <el-form-item label="请输入您要找回密码的用户名">
+                                        <el-input   v-model="username"></el-input>
+                                    </el-form-item>
+                                    <el-form-item >
+                                        <el-button type="warning" :loading="questionPending"  @click.prevent="getQuestion" style="width: 100%">立即找回 </el-button>
+                                    </el-form-item>
+                                </el-form>
+                            </el-col>
+                        </el-row>
+                    </el-col>
+                </el-row>
+            </el-col>
+        </el-row>
+    </div>
+</div>
+<script src="../../../dist/vendor.bundle.js"></script>
+<script src="../../common/lib/element/index.js"></script>
+<script src="../../../dist/reset.js"></script>
+
+</body>
+</html>

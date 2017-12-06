@@ -133,6 +133,10 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm.$el) {
       vm.$el.__vue__ = null
     }
+    // release circular reference (#6759)
+    if (vm.$vnode) {
+      vm.$vnode.parent = null
+    }
   }
 }
 
@@ -176,12 +180,12 @@ export function mountComponent (
       mark(startTag)
       const vnode = vm._render()
       mark(endTag)
-      measure(`${name} render`, startTag, endTag)
+      measure(`vue ${name} render`, startTag, endTag)
 
       mark(startTag)
       vm._update(vnode, hydrating)
       mark(endTag)
-      measure(`${name} patch`, startTag, endTag)
+      measure(`vue ${name} patch`, startTag, endTag)
     }
   } else {
     updateComponent = () => {
@@ -229,11 +233,11 @@ export function updateChildComponent (
   }
   vm.$options._renderChildren = renderChildren
 
-  // update $attrs and $listensers hash
+  // update $attrs and $listeners hash
   // these are also reactive so they may trigger child update if the child
   // used them during render
-  vm.$attrs = parentVnode.data && parentVnode.data.attrs
-  vm.$listeners = listeners
+  vm.$attrs = (parentVnode.data && parentVnode.data.attrs) || emptyObject
+  vm.$listeners = listeners || emptyObject
 
   // update props
   if (propsData && vm.$options.props) {

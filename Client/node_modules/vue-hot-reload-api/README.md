@@ -17,7 +17,7 @@ const myComponentOptions = {
 }
 
 // assuming Webpack's HMR API.
-// https://webpack.github.io/docs/hot-module-replacement.html
+// https://webpack.js.org/guides/hot-module-replacement/
 if (module.hot) {
   const api = require('vue-hot-reload-api')
   const Vue = require('vue')

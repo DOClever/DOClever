@@ -17,6 +17,14 @@ template<typename T> struct ValueFactoryBase { typedef Maybe<T> return_t; };
 
 template<typename T> struct ToFactory;
 
+template<>
+struct ToFactory<v8::Function> : ToFactoryBase<v8::Function> {
+  static inline return_t convert(v8::Local<v8::Value> val) {
+    if (val.IsEmpty() || !val->IsFunction()) return MaybeLocal<v8::Function>();
+    return MaybeLocal<v8::Function>(val.As<v8::Function>());
+  }
+};
+
 #define X(TYPE)                                                                \
     template<>                                                                 \
     struct ToFactory<v8::TYPE> : ToFactoryBase<v8::TYPE> {                     \

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>注入规则-DOClever 移动时代首选接口管理平台！</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="API管理平台,接口管理平台,mock测试,接口文档管理,接口文档平台,接口文档系统,API文档管理"/>
+    <meta name="description" content="DOClever是一款开源免费的可视化接口管理工具，专业的api接口管理系统，集接口文档、接口自动化测试、Mock数据、团队协作、接口快照等于一身的移动时代首选接口管理平台！"/>
+    <link href="../common/common.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <p>
+        可以在运行接口开始前和结束后进行js代码的注入操作，这样我们可以自由的修改很多功能，比如我们需要对接口的字段进行自定义的加密处理，那么这种情况只能注入代码了。DOClever提供了很多内置变量供用户操作！
+    </p>
+    <h2>
+        Before:
+    </h2>
+    <p>
+        接口在运行前执行的代码，内置变量：<br>
+        url:BaseUrl字符串<br>
+        path:path路径字符串<br>
+        method:HTTP方法字符串<br>
+        param:Object对象，里面存放了Param的数据<br>
+        query:Object对象，里面存放了Query的数据<br>
+        header:Object对象，里面存放了Header的数据<br>
+        body:Object对象，里面存放了Body的数据<br>
+        Base64,MD5,SHA1,SHA256,SHA512,SHA3,RIPEMD160:这些加密函数只有一个参数，为加密的字符串<br>
+        AES,TripleDES,DES,Rabbit,RC4,RC4Drop:这些加密函数有两个参数，第一个参数是加密的字符串，第二个参数是salt<br>
+    </p>
+    <h2>
+        After:
+    </h2>
+    <p>
+        接口在运行后执行的代码，内置变量：<br>
+        status:接口返回的状态字符串<br>
+        header:Object对象，接口返回的HTTP头部<br>
+        data:不确定，可能是JSON对象，可能是String，可能是Blob，根据具体接口来<br>
+    </p>
+</div>
+<script type="text/javascript">
+    var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+    document.write(unescape("%3Cspan id='cnzz_stat_icon_1264554939'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s19.cnzz.com/z_stat.php%3Fid%3D1264554939%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+</script>
+</body>
+</html>

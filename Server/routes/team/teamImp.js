@@ -391,6 +391,28 @@ var interface=[
         user:1,
         handle:[team.validate,team.userList]
     },
+    {
+        "method":"GET",
+        "path":"/team/list",
+        "param": {
+
+        },
+        "data":String,
+        user:1,
+        handle:[team.list]
+    },
+    {
+        "method":"GET",
+        "path":"/team/projectlist",
+        "param": {
+            id:{
+                type:String,
+            },
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.projectList]
+    },
 ];
 
 module.exports=interface;

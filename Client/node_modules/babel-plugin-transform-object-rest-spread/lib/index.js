@@ -118,14 +118,21 @@ exports.default = function (_ref) {
             }
 
             var ref = this.originalPath.node.init;
+            var refPropertyPath = [];
 
             path.findParent(function (path) {
               if (path.isObjectProperty()) {
-                ref = t.memberExpression(ref, t.identifier(path.node.key.name));
+                refPropertyPath.unshift(path.node.key.name);
               } else if (path.isVariableDeclarator()) {
                 return true;
               }
             });
+
+            if (refPropertyPath.length) {
+              refPropertyPath.forEach(function (prop) {
+                ref = t.memberExpression(ref, t.identifier(prop));
+              });
+            }
 
             var _createObjectSpread = createObjectSpread(file, path.parentPath.node.properties, ref),
                 argument = _createObjectSpread[0],

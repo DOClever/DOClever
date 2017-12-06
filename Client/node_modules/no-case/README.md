@@ -4,6 +4,7 @@
 [![NPM downloads][downloads-image]][downloads-url]
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
+[![Greenkeeper badge](https://badges.greenkeeper.io/blakeembrey/no-case.svg)](https://greenkeeper.io/)
 
 Transform a string to lower space cased. Optional locale and replacement character supported.
 

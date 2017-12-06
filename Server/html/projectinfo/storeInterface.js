@@ -267,7 +267,7 @@ module.exports=new Vuex.Store({
         initParam:function (state,data) {
             state.param=[
                 {
-                    name:"未命名",
+                    name:"参数",
                     remark:"",
                     id:uuid(),
                     query:[{

@@ -93,8 +93,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *     // do something with the result
  * });
  *
- * // It can also be embedded within other control flow functions to retry
- * // individual methods that are not as reliable, like this:
+ * // to retry individual methods that are not as reliable within other
+ * // control flow functions, use the `retryable` wrapper:
  * async.auto({
  *     users: api.getUsers.bind(api),
  *     payments: async.retryable(3, api.getPayments.bind(api))

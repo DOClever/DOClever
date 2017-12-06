@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>控制台-DOClever 移动时代首选接口管理平台！</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="API管理平台,接口管理平台,mock测试,接口文档管理,接口文档平台,接口文档系统,API文档管理"/>
+    <meta name="description" content="DOClever是一款开源免费的可视化接口管理工具，专业的api接口管理系统，集接口文档、接口自动化测试、Mock数据、团队协作、接口快照等于一身的移动时代首选接口管理平台！"/>
+    <link href="../../resource/pic/logo.ico" rel="shortcut icon">
+    <link type="text/css"  rel="stylesheet" href="../../common/css/common.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/font-awesome/css/font-awesome.min.css">
+    <link type="text/css"  rel="stylesheet" href="../../../node_modules/animate.css/animate.min.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/element/index.css">
+</head>
+<body>
+<div class="container" id="app" v-cloak>
+    <el-row class="row" style="height: 60px;line-height: 60px">
+        <el-col class="col" style="width: 100px;line-height: 60px;text-align: center;background-color:#17B9E6 ">
+            <a href="/">
+                <img src="../../resource/pic/consoleLogo.png" style="width:40px;height:40px;margin-top: 10px">
+            </a>
+        </el-col>
+        <el-col class="col" style="width: calc(100vw - 100px);background-color: white;box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 3px 0px; ">
+            <el-row class="row" style="text-align: center">
+                <el-col class="col" :span="6">
+                    <el-tooltip class="item" effect="dark" :content="backTitle" placement="bottom" v-if="(type==0 && session.projectId) || (type==1 && session.teamId)">
+                        <el-button icon="el-icon-back" type="text" size="medium" style="font-size: 20px;float: left;margin-left: 20px;margin-top: 8px" @click="back"></el-button>
+                    </el-tooltip>
+                    <span v-else>
+                        &nbsp;
+                    </span>
+                </el-col>
+                <el-col class="col" :span="12" style="font-size: 15px;font-weight: bold;color:#17B9E6 ">
+                    {{title}}
+                </el-col>
+                <el-col class="col" :span="6" style="height: 60px;text-align: right;padding-right: 20px">
+                    <img v-proxy="session.photo" style="width: 40px;height: 40px; border-radius:50%;margin-top: 10px">&nbsp;
+                    <el-dropdown @command="handleCommand" style="top: -15px;">
+                        <span class="el-dropdown-link" style="color: #50bfff;cursor: pointer">
+                            <span>
+                                {{session.name}}
+                            </span>
+                            <i class="el-icon-caret-bottom el-icon--right"></i>
+                        </span>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item>
+                                Proxy:<br>
+                                <el-switch v-model="proxy" on-color="#13ce66" off-color="#ff4949" @click.native.stop="">
+                                </el-switch>
+                            </el-dropdown-item>
+                            <el-dropdown-item command="update">检查更新</el-dropdown-item>
+                            <el-dropdown-item command="help">帮助中心</el-dropdown-item>
+                            <el-dropdown-item command="quit">退出</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </el-col>
+            </el-row>
+        </el-col>
+    </el-row>
+    <el-row class="row" style="height: calc(100vh - 60px);position: fixed">
+        <el-col class="col" style="width: 100px;background-color: #333333">
+            <el-row class="row" style="height: 80px;text-align: center;font-size: 14px;cursor: pointer" :style="{color:type==0?'white':'#888888',backgroundColor:type==0?'#333333':''}" @click.native="type=0">
+                <mysvg src="../../resource/pic/xiangmu.svg" style="width: 32px;height: 32px;margin-top: 15px;" :color="type==0?'white':'#888888'" @click="type=0"></mysvg><br>
+                项目
+            </el-row>
+            <el-row class="row" style="height: 80px;text-align: center;font-size: 14px;cursor: pointer" :style="{color:type==1?'white':'#888888',backgroundColor:type==1?'#333333':''}" @click.native="type=1">
+                <mysvg src="../../resource/pic/tuandui.svg" style="width: 32px;height: 32px;margin-top: 15px;" :color="type==1?'white':'#888888'" @click="type=1"></mysvg><br>
+                团队
+            </el-row>
+            <el-row class="row" style="height: 80px;text-align: center;font-size: 14px;cursor: pointer" :style="{color:type==2?'white':'#888888',backgroundColor:type==2?'#333333':''}" @click.native="type=2">
+                <mysvg src="../../resource/pic/shezhi.svg" style="width: 32px;height: 32px;margin-top: 15px;" :color="type==2?'white':'#888888'" @click="type=2"></mysvg><br>
+                设置
+            </el-row>
+            <el-row class="row" style="height: 80px;text-align: center;font-size: 14px;cursor: pointer" :style="{color:type==3?'white':'#888888',backgroundColor:type==3?'#333333':''}" @click.native="type=3">
+                <mysvg src="../../resource/pic/xiaoxi.svg" style="width: 32px;height: 32px;margin-top: 15px;" :color="type==3?'white':'#888888'" @click="type=3"></mysvg><br>
+                消息
+                <div style="position: absolute;width: 10px;height: 10px;border-radius: 5px;background-color: red;top: 10px;right: 25px" v-if="showDot">
+                </div>
+            </el-row>
+        </el-col>
+        <el-col class="col" style="width: calc(100vw - 100px);overflow-y: hidden" id="showContent">
+            <project v-show="type==0"></project>
+            <team v-show="type==1"></team>
+            <person v-show="type==2"></person>
+            <message v-show="type==3"></message>
+        </el-col>
+    </el-row>
+</div>
+<script src="../../../dist/vendor.bundle.js"></script>
+<script src="../../common/lib/element/index.js"></script>
+<script src="../../../dist/console.js"></script>
+
+</body>
+</html>

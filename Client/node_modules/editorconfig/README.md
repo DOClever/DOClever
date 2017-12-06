@@ -68,6 +68,11 @@ promise.then(function onFulfilled(result) {
 
 Synchronous version of `editorconfig.parse()`.
 
+#### parseString(fileContent)
+
+The `parse()` function above uses `parseString()` under the hood. If you have your file contents
+just pass it to `parseString()` and it'll return the same results as `parse()`.
+
 #### parseFromFiles(filePath, configs[, options])
 
 options is an object with the following defaults:

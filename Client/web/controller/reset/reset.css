@@ -1,0 +1,7 @@
+.fr{float: right}
+.fl{float: left;}
+.login-register-bg{background: linear-gradient(60deg,#541466 0,#17b9e6 100%);min-height: 650px;}
+.login-box-bg{background-color: rgba(255,255,255,0.1);border-radius: 10px;padding: 30px 0;margin: 0 auto}
+.login-box label{color: #fff}
+
+.login-box .el-form-item a{color: #fff}

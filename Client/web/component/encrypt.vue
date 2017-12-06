@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="编辑值"  size="small" ref="box" :modal="false" v-model="showDialog">
+    <el-dialog title="编辑值"  size="small" ref="box" :visible.sync="showDialog" append-to-body>
         <el-form ref="form" label-width="100px">
             <el-form-item label="加密类型" style="text-align: center">
                 <el-select style="width: 80%" v-model="val.type">
@@ -57,7 +57,7 @@
                         this.source[key]=this.val[key];
                     }
                 }
-                this.$refs.box.close();
+                this.showDialog=false;
             }
         }
     }

@@ -1,42 +1,40 @@
+* {
+    -webkit-overflow-scrolling: touch;
+}
 .fullpage-container {
-	position: relative;
-  width: 100%;
-  height: 100%;
-	overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
-
 .fullpage-wp {
-	display: flex;
-	width: 100%;
-	height: 100%;
-	flex-flow: column nowrap;
-	justify-content: flex-start;
-	align-items: center;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
 }
-
-.fullpage-wp.anim{
-		transform: translate3d(0,0,0);
+.fullpage-wp.anim {
+    transform: translate3d(0, 0, 0);
     -webkit-transition: all 500ms ease-out 0s;
     transition: all 500ms ease-out 0s;
 }
-
 .fullpage-wp.fullpage-wp-h {
-  display: flex;
-	flex-flow: row nowrap;
-	justify-content: flex-start;
-	align-items: center;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    align-items: center;
 }
-
 .page {
-	box-sizing: border-box;
-  display: block;
-	position: relative;
-	width: 100%;
-	height: 100%;
-	flex-shrink: 0;
-  overflow: hidden;
+    box-sizing: border-box;
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    flex-shrink: 0;
+    overflow: hidden;
 }
-
 .animated {
-	opacity: 1;
+    opacity: 1;
 }
