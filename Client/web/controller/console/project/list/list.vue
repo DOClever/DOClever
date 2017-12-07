@@ -3,7 +3,7 @@
         <template v-if="bEmpty">
             <el-row class="row" style="text-align: center;margin-top: 100px;color: gray">
                 <i class="fa fa-list-alt" style="font-size: 60px"></i><br><br>
-                <span style="font-size: 14px">还没有项目，点击下方按钮新增或者导入项目</span><br><br>
+                <span style="font-size: 14px">{{session.teamId?"当前团队下您":""}}还没有项目，点击下方按钮新增或者导入项目</span><br><br>
                 <el-dropdown  v-if="session.teamId">
                     <el-button type="primary" size="small" style="margin-left: 20px;">
                         <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目

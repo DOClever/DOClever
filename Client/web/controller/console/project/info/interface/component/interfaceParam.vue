@@ -23,7 +23,7 @@
             <div slot="title">Inject</div>
             <inparaminject :index="index" :item="item"></inparaminject>
         </expand>
-        <expand ref="result">
+        <expand ref="result" :expand="1">
             <div slot="title">Result</div>
             <el-row class="row" style="background-color: white;margin-top: 15px;">
                 <el-row class="row" style="padding:0 0 0 20px;height: 30px;line-height: 30px;margin-bottom: 20px">

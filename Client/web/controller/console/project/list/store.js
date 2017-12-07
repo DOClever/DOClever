@@ -11,6 +11,9 @@ module.exports={
         projectTeamSort:0
     },
     getters:{
+        projectNotTeamLength:function (state) {
+            return state.projectCreateList.length+state.projectJoinList.length;
+        },
         projectCreateSort:function (state) {
             return state.projectCreateSort;
         },

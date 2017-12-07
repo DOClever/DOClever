@@ -5,8 +5,15 @@ module.exports={
         teamJoinList:[],
         teamCreateSort:0,
         teamJoinSort:0,
+        bRefreshProjectList:1
     },
     getters:{
+        event:function (state,getters,rootState) {
+            return rootState.event;
+        },
+        teamListLength:function (state) {
+            return state.teamCreateList.length+state.teamJoinList.length;
+        },
         projectCreateSort:function (state) {
             return state.teamCreateSort;
         },
@@ -98,7 +105,7 @@ module.exports={
                 return data;
             })
         },
-        init:function (context,data) {
+        init:function (context) {
             context.state.teamCreateList=[];
             context.state.teamJoinList=[];
             context.state.teamCreateSort=0;
@@ -106,12 +113,13 @@ module.exports={
             var arr=[
                 net.get("/team/list",{}),
             ];
-            if(context.getters.rootInit && context.rootState.project.type=="list")
+            if(context.getters.rootInit && context.rootState.project.type=="list" && context.state.bRefreshProjectList)
             {
                 arr.push(context.dispatch("project/list/init",null,{
                     root:true
                 }))
             }
+            context.state.bRefreshProjectList=1;
             return Promise.all(arr).then(function (arr) {
                 var data1=arr[0];
                 if(data1.code==200)
@@ -129,6 +137,7 @@ module.exports={
                 {
                     throw data1.msg;
                 }
+                context.getters.event.$emit("initTeamList");
                 return arr;
             })
         },

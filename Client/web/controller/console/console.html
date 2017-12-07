@@ -23,7 +23,10 @@
         <el-col class="col" style="width: calc(100vw - 100px);background-color: white;box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 3px 0px; ">
             <el-row class="row" style="text-align: center">
                 <el-col class="col" :span="6">
-                    <el-tooltip class="item" effect="dark" :content="backTitle" placement="bottom" v-if="(type==0 && session.projectId) || (type==1 && session.teamId)">
+                    <el-tooltip class="item" effect="dark" :content="backTitle" placement="bottom" v-if="(type==0 && !session.projectId && session.teamId) || (type==1 && session.teamId)">
+                        <el-button icon="el-icon-back" type="text" size="medium" style="font-size: 20px;float: left;margin-left: 20px;margin-top: 8px" @click="back"></el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item" effect="dark" :content="backTitle" placement="bottom" v-else-if="type==0 && session.projectId">
                         <el-button icon="el-icon-back" type="text" size="medium" style="font-size: 20px;float: left;margin-left: 20px;margin-top: 8px" @click="back"></el-button>
                     </el-tooltip>
                     <span v-else>
@@ -79,10 +82,10 @@
             </el-row>
         </el-col>
         <el-col class="col" style="width: calc(100vw - 100px);overflow-y: hidden" id="showContent">
-            <project v-show="type==0"></project>
-            <team v-show="type==1"></team>
-            <person v-show="type==2"></person>
-            <message v-show="type==3"></message>
+            <project v-show="type==0" ref="project"></project>
+            <team v-show="type==1" ref="team"></team>
+            <person v-show="type==2" ref="person"></person>
+            <message v-show="type==3" ref="message"></message>
         </el-col>
     </el-row>
 </div>

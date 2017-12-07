@@ -51,9 +51,7 @@
             })
         },
         mounted:function () {
-            this.$nextTick(function () {
-                Vue.prototype.$message("团队的项目列表移动到左侧的项目标签页了！")
-            })
+            this.$root.type=0;
         }
     }
 </script>

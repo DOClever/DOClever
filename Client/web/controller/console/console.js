@@ -56,13 +56,20 @@ var vue=new Vue({
     },
     computed:{
         backTitle:function () {
-            if(this.type==0 && this.session.projectId)
+            if(this.type==0)
             {
-                return "返回项目列表"
+                if(this.session.projectId)
+                {
+                    return "返回项目列表"
+                }
+                else
+                {
+                    return "退出团队"
+                }
             }
             else if(this.type==1 && this.session.teamId)
             {
-                return "返回团队列表"
+                return "退出团队"
             }
         },
         showDot:function () {
@@ -205,13 +212,28 @@ var vue=new Vue({
                 window.open("../help/help.html","_blank");
             }
         },
-        back:function () {
-            if(this.type==0 && this.session.projectId)
+        back:function (event,type) {
+            if(this.type==0 && !this.session.projectId && this.session.teamId)
+            {
+                var _this=this;
+                var display=this.$refs.project.$el.style.display;
+                this.$refs.project.$el.style.display="none";
+                store.state.event.$on("initTeamList",function() {
+                    _this.$refs.project.$el.style.display=display;
+                    store.state.event.$off("initTeamList");
+                })
+                store.dispatch("team/changeToList");
+            }
+            else if(this.type==0 && this.session.projectId)
             {
                 store.dispatch("project/changeToList");
             }
             else if(this.type==1 && this.session.teamId)
             {
+                if(this.session.projectId)
+                {
+                    store.state.team.list.bRefreshProjectList=0;
+                }
                 store.dispatch("team/changeToList");
             }
         }
@@ -220,6 +242,10 @@ var vue=new Vue({
         var _this=this;
         store.dispatch("init").then(function () {
             $.stopLoading();
+            if(store.getters["project/list/projectNotTeamLength"]==0 && store.getters["team/list/teamListLength"]>0)
+            {
+                _this.type=1;
+            }
         }).catch(function (err) {
             $.notify(err,0);
         })

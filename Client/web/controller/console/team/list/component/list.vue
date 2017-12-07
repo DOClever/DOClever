@@ -3,17 +3,17 @@
         <table style="background-color: transparent;width: 100%;height: 100%" v-if="arr.length>0">
             <tbody>
             <tr v-for="n in arrLength">
-                <td v-for="index in 5" style="padding: 10px;width: 20%;height: 100px">
+                <td v-for="index in 5" style="padding: 10px;width: 20%;height: 120px">
                     <el-row v-if="arr[(n-1)*5+(index-1)]" :style="{borderRadius:'5px',color:'gray'}" style="text-align: center;height: 100%;cursor: pointer;border: 1px #ebebeb solid;" @click.native="info(arr[(n-1)*5+(index-1)])">
-                        <el-row class="row" style="height: 50px;">
-                            <div type="primary" size="small" style="width: 24px;height: 24px;line-height:26px;border-radius: 22px;display: inline-block;font-size: 10px;color:white;margin-top: 10px " :style="{backgroundColor:type=='create'?'#17b9e6':(type=='join'?'#67C23A':'#EB9E05')}">
+                        <el-row class="row" style="height: 65px;">
+                            <div type="primary" size="small" style="width: 26px;height: 26px;line-height:26px;border-radius: 13px;display: inline-block;font-size: 14px;color:white;margin-top: 15px " :style="{backgroundColor:color(arr[(n-1)*5+(index-1)])}">
                                 团
                             </div>
-                            <div style="font-size: 13px;color: black;display: table;table-layout: fixed;width: 100%;"><div style="display: table-cell;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">{{arr[(n-1)*5+(index-1)].name}}</div></div>
+                            <div style="font-size: 14px;color: black;display: table;table-layout: fixed;width: 100%;margin-top: 5px"><div style="display: table-cell;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">{{arr[(n-1)*5+(index-1)].name}}</div></div>
                         </el-row>
-                        <el-row class="row" style="height: 25px;line-height: 25px;font-size: 12px;display: table;table-layout: fixed;">
+                        <el-row class="row" style="height: 30px;line-height: 30px;font-size: 13px;display: table;table-layout: fixed;">
                             <div style="text-overflow:ellipsis;overflow:hidden;white-space:nowrap;display: table-cell;height: 25px">
-                                {{arr[(n-1)*5+(index-1)].dis}}
+                                {{arr[(n-1)*5+(index-1)].dis?arr[(n-1)*5+(index-1)].dis:"&nbsp;"}}
                             </div>
                         </el-row>
                         <el-row class="row" style="height: 25px;line-height:25px;font-size: 12px;color: #b9b9b9;border-top: 1px lightgray solid;background-color: rgb(245,246,249)">
@@ -61,6 +61,23 @@
             }
         },
         methods:{
+            color:function (item) {
+                if(item.own)
+                {
+                    return "#17b9e6"
+                }
+                else
+                {
+                    if(item.role==0)
+                    {
+                        return "#17b9e6"
+                    }
+                    else
+                    {
+                        return "#67C23A";
+                    }
+                }
+            },
             info:function (item) {
                 this.$store.dispatch("info",{
                     id:item._id,

@@ -30,7 +30,7 @@
                 状态:
             </el-row>
             <el-row class="row" style="padding-left: 20px;padding-top: 10px;">
-                {{interfaceEdit.finish==1?"开发url完成":(interfaceEdit.finish==2?"已废弃":"开发中")}}
+                {{interfaceEdit.finish==1?"开发完成":(interfaceEdit.finish==2?"已废弃":"开发中")}}
             </el-row>
             <el-row class="row" style="padding-left: 10px;padding-top: 20px">
                 描述:

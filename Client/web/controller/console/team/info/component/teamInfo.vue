@@ -96,11 +96,11 @@
             <el-row class="row" style="padding: 10px 20px 20px 20px">
                 <el-button type="primary" size="mini" @click.stop="addNotice" v-if="manageRole" style="margin-bottom: 10px">新增</el-button>
                 <template v-for="n in arrLength">
-                    <el-row class="row" style="height: 100px">
+                    <el-row class="row" style="height: 120px">
                         <template v-for="n1 in 4">
                             <el-col class="col" :span="6" v-if="notice[(n-1)*4+(n1-1)]">
-                                <el-row class="row" style="margin-top: 10px;margin-left: 10px;width: calc(100% - 20px);height: 80px;border: 1px lightgray solid;border-radius: 5px">
-                                    <el-row class="row" style="height: 50px;padding: 10px;font-size: 13px">
+                                <el-row class="row" style="margin-top: 10px;margin-left: 10px;width: calc(100% - 20px);height: 100px;border: 1px lightgray solid;border-radius: 5px">
+                                    <el-row class="row" style="height: 70px;padding: 10px;font-size: 13px;overflow: auto;" :title="notice[(n-1)*4+(n1-1)].content">
                                         {{notice[(n-1)*4+(n1-1)].content}}
                                     </el-row>
                                     <el-row class="row" style="height: 30px;line-height: 30px;padding-left: 10px">
