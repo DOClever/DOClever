@@ -5,8 +5,8 @@
             <el-menu class="el-mainNav" mode="horizontal"  text-color="#ffffff">
                 <el-submenu index="1" class="code">
                     <template slot="title">项目开源</template>
-                    <el-menu-item index="1-1"><a href="https://github.com/sx1989827/DOClever" target="_blank"><i class="github"></i>GitHub</a></el-menu-item>
-                    <el-menu-item index="1-2"><a href="https://git.oschina.net/sx1989827/SBDoc" target="_blank"><i class="mayun"></i>码云</a></el-menu-item>
+                    <el-menu-item index="1-1"><a href="https://github.com/sx1989827/DOClever" target="_blank" rel="nofollow"><i class="github"></i>GitHub</a></el-menu-item>
+                    <el-menu-item index="1-2"><a href="https://git.oschina.net/sx1989827/SBDoc" target="_blank" rel="nofollow"><i class="mayun"></i>码云</a></el-menu-item>
                 </el-submenu>
                 <el-submenu index="2" class="qq">
                     <template slot="title">QQ交流群</template>
