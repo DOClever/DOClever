@@ -10,16 +10,19 @@
                         {{item.user.name}}
                     </td>
                     <td style="width: 15%;text-align: center">
-                        <el-select size="small" v-model="item.role" @input="editRole(item)" style="width: 90%">
+                        <el-select size="small" v-model="item.role" @input="editRole(item)" style="width: 90%" v-if="manageRole">
                             <el-option :value="1" label="观察者"></el-option>
                             <el-option :value="0" label="管理员"></el-option>
                         </el-select>
+                        <span v-else>
+                            {{item.role==0?"管理员":"观察者"}}
+                        </span>
                     </td>
                     <td style="width: 10%;text-align: center">
-                        <el-button   size="mini" @click="editRoleOption(item,index)" type="text" v-if="item.role==1">权限</el-button>
+                        <el-button   size="mini" @click="editRoleOption(item,index)" type="text" v-if="item.role==1 && manageRole">权限</el-button>
                     </td>
                     <td style="width: 10%;text-align: center">
-                        <el-button  style="color:red;font-size: 15px" size="mini" icon="el-icon-close" @click="remove(item,index)" type="text"></el-button>
+                        <el-button  style="color:red;font-size: 15px" size="mini" icon="el-icon-close" @click="remove(item,index)" type="text" v-if="manageRole"></el-button>
                     </td>
                 </tr>
             </template>
@@ -39,6 +42,9 @@
             proxy:proxyImg
         },
         computed:{
+            manageRole:function () {
+                return this.$store.getters.manageRole;
+            },
             arr:function () {
                 var arr=this.$store.getters.project.users.filter(function (obj) {
                     if(obj.user._id==session.get("id"))
@@ -109,6 +115,7 @@
                                 "gb":0,
                                 "gs":0,
                                 "gi":0,
+                                "gt":0,
                                 "gd":0,
                                 "ve":0,
                                 "vr":0

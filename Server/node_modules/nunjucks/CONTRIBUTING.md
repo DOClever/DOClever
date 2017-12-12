@@ -1,3 +1,7 @@
+**Nunjucks is currently lacking an active maintainer. Issues and pull requests
+will not be reviewed or merged, unfortunately. If you are interested in 
+picking up nunjucks maintenance, file an issue and mention @vecmezoni.**
+
 # Contributing
 
 Thanks for your interest in contributing! The advice below will help you get your issue fixed / pull request merged.
@@ -18,7 +22,7 @@ Nunjucks has the following purpose:
 
 Notes:
 
-* We don't aim for parity of language specific syntax like Python's splice notation `{{ foo[start:end:step] }}`.
+* We don't aim for parity of all language specific syntax.
 * We don't aim for parity of language specific filters like [Twig's PHP date format](http://twig.sensiolabs.org/doc/functions/date.html).
 
 Issues and pull requests contributing to this purpose have the best chance to make it into Nunjucks.

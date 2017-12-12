@@ -1,9 +1,9 @@
 "use strict";
-const HTMLElementImpl = require("./HTMLElement-impl").implementation;
 const whatwgURL = require("whatwg-url");
-const fallbackBaseURL = require("../helpers/document-base-url").fallbackBaseURL;
+const HTMLElementImpl = require("./HTMLElement-impl").implementation;
+const { fallbackBaseURL } = require("../helpers/document-base-url");
 
-class HTMLBaseElement extends HTMLElementImpl {
+class HTMLBaseElementImpl extends HTMLElementImpl {
   get href() {
     const document = this._ownerDocument;
 
@@ -23,5 +23,5 @@ class HTMLBaseElement extends HTMLElementImpl {
 }
 
 module.exports = {
-  implementation: HTMLBaseElement
+  implementation: HTMLBaseElementImpl
 };

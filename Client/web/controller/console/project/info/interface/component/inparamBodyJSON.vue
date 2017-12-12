@@ -11,8 +11,15 @@
                             &nbsp;
                         </el-col>
                         <el-col class="col" :span="22">
-                            <el-input size="small" style="width: 90%;" placeholder="请填写名称" v-model.trim="item.name" v-if="item.name!=null && (level!=0 || type!=1)" @focus="focus(item)" @blur="blur(item)"></el-input>
-                            <el-input size="small" style="width: 90%;" placeholder="该字段没有名称" disabled v-else></el-input>
+                            <el-input size="small" style="width: 90%;" :placeholder="(item.name!=null && (level!=0 || type!=1))?'请填写名称':'该字段没有名称'" v-model.trim="item.name" @focus="focus(item)" @blur="blur(item)" :disabled="(item.name!=null && (level!=0 || type!=1))?false:true">
+                                <el-dropdown slot="suffix" placement="bottom">
+                                    <i class="el-icon-menu el-input__icon" style="cursor: pointer"></i>
+                                    <el-dropdown-menu slot="dropdown">
+                                        <el-dropdown-item @click.native="copy(item,index)">复制</el-dropdown-item>
+                                        <el-dropdown-item @click.native="paste(item,index)" v-if="objCopyJSON">粘贴</el-dropdown-item>
+                                    </el-dropdown-menu>
+                                </el-dropdown>
+                            </el-input>
                         </el-col>
                     </td>
                     <td style="width: 14%">
@@ -38,18 +45,39 @@
                         </el-tooltip>
                     </td>
                     <td style="width: 10%">
-                        <el-button size="mini" type="text" @click="configValue(item)"  v-if="item.type!=3 && item.type!=4" style="font-size: 13px">{{(item.value && (item.value.data.length>0 || item.value.status))?"已填值":"未填值"}}</el-button>
+                        <el-popover trigger="hover" placement="bottom" width="200" :disabled="!(item.value && (item.value.data.length>0 || item.value.status))" v-if="item.type!=3 && item.type!=4">
+                            <div style="width: 200px;overflow: auto;text-align: center" v-if="item.value && (item.value.data.length>0 || item.value.status)">
+                                <template v-if="item.value.data.length>0">
+                                    <table width="100%" class="table-hover" style="border-collapse: collapse">
+                                        <template v-for="item1 in item.value.data">
+                                            <tr style="text-align: center;vertical-align: middle;">
+                                                <td style="width: 40%;border-bottom: 1px solid #e6ebf5">
+                                                    {{item1.value}}
+                                                </td>
+                                                <td style="width: 60%;border-bottom: 1px solid #e6ebf5">
+                                                    {{item1.remark?item1.remark:"无备注"}}
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </table>
+                                </template>
+                                <template v-else>
+                                    绑定了状态码：{{validStatus(item.value.status)}}
+                                </template>
+                            </div>
+                            <el-button slot="reference" size="mini" type="text" @click="configValue(item)"  style="font-size: 13px">{{(item.value && (item.value.data.length>0 || item.value.status))?"已填值":"未填值"}}</el-button>
+                        </el-popover>
                     </td>
                     <td style="width: 5%">
                         <el-button size="mini" type="text" icon="el-icon-close" style="color: red;font-size: 15px" @click="remove(item,index,level)"></el-button>
                     </td>
                     <td style="width: 5%">
-                        <el-button size="mini" type="text" style="font-size: 15px" icon="el-icon-plus"  @click="add(arr)" v-if="(item.type==0 || item.type==1 || item.type==2 || item.type==5)"></el-button>
+                        <el-button size="mini" type="text" style="font-size: 15px" icon="el-icon-plus"  @click="add(arr,index)" v-if="(item.type==0 || item.type==1 || item.type==2 || item.type==5)"></el-button>
                         <el-dropdown v-else>
                             <el-button size="mini" type="text" icon="el-icon-plus" style="font-size: 15px">
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item @click.native="add(arr)">兄弟节点</el-dropdown-item>
+                                <el-dropdown-item @click.native="add(arr,index)">兄弟节点</el-dropdown-item>
                                 <el-dropdown-item @click.native="addChild(item)">子节点</el-dropdown-item>
                             </el-dropdown-menu>
                         </el-dropdown>
@@ -67,6 +95,7 @@
 
 <script>
     var dragArr=null,dragItem=null,lastEle=null;
+    var copyJSON=require("./copyJSON.vue");
     module.exports={
         name:"inparambodyjson",
         props:["source","le","parent","index","data"],
@@ -81,6 +110,9 @@
             },
             type:function () {
                 return this.data.bodyInfo.rawJSONType;
+            },
+            objCopyJSON:function () {
+                return this.$store.getters.objCopyJSON;
             }
         },
         methods:{
@@ -117,8 +149,8 @@
             toggle:function (item) {
                 item.show=Number(!item.show);
             },
-            add:function (arr) {
-                arr.push({
+            add:function (arr,index) {
+                arr.splice(index+1,0,{
                     name:((this.parent && this.parent.type==3) || (this.level==0 && this.type==1))?null:"",
                     must:1,
                     type:0,
@@ -417,6 +449,62 @@
                     return true;
                 },1,item.remark)
             },
+            validStatus:function (status) {
+                var name="";
+                this.$store.getters.status.forEach(function (obj) {
+                    if(obj.id==status)
+                    {
+                        name=obj.name;
+                    }
+                })
+                return name;
+            },
+            copy:function (item) {
+                var _this=this;
+                $.showBox(this,copyJSON,{
+                    source:item,
+                    type:"body"
+                })
+            },
+            paste:function (item,index) {
+                var _this=this;
+                $.confirm("是否确认粘贴，粘贴内容会替换该节点！",function () {
+                    var obj=$.clone(_this.objCopyJSON.obj);
+                    _this.arr.splice(index,1,obj);
+                    if(_this.parent && _this.parent.type==3)
+                    {
+                        obj.name=null;
+                    }
+                    else if(obj.name===null)
+                    {
+                        obj.name=""
+                    }
+                    if(_this.objCopyJSON.src=="result")
+                    {
+                        (function (item) {
+                            if(item.type!=3 && item.type!=4 && item.mock && item.mock[0]!="@")
+                            {
+                                Vue.set(item,"value",{
+                                    type: 0,
+                                    data: [{
+                                        value:item.mock,
+                                        remark:""
+                                    }],
+                                    status: ""
+                                })
+                            }
+                            if(item.data)
+                            {
+                                for(var i=0;i<item.data.length;i++)
+                                {
+                                    arguments.callee(item.data[i]);
+                                }
+                            }
+                        })(obj);
+                    }
+                    $.tip("粘贴成功",1)
+                })
+            }
         }
     }
 </script>

@@ -15,6 +15,7 @@ var interfaceVersion=require("../../model/interfaceVersionModel")
 var interfaceSnapshot=require("../../model/interfaceSnapshotModel")
 var version=require("../../model/versionModel")
 var teamGroup=require("../../model/teamGroupModel")
+var example=require("../../model/exampleModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
 
@@ -179,12 +180,12 @@ function Interface() {
                             }
                         }
                     }))
-                    if (arrUser.length == 0 && !obj.public) {
+                    if (arrUser.length == 0 && !obj.public && !req.headers["referer"].endsWith("public/public.html")) {
                         util.throw(e.userForbidden, "你没有权限");
                         return;
                     }
                 }
-                else if(!obj.public)
+                else if(!obj.public && !req.headers["referer"].endsWith("public/public.html"))
                 {
                     util.throw(e.userForbidden, "你没有权限");
                     return;
@@ -275,6 +276,15 @@ function Interface() {
                 }, update, {
                     new: false
                 }));
+                let arr=update.param.map(function (obj) {
+                    return obj.id;
+                })
+                await (example.removeAsync({
+                    interface:req.clientParam.id,
+                    paramId:{
+                        $nin:arr
+                    }
+                }))
                 if (req.clientParam.group) {
                     if (obj.group.toString() != req.clientParam.group) {
                         if (req.interfaceModel != interfaceSnapshot) {
@@ -494,6 +504,9 @@ function Interface() {
                 }
             }
             await(interfaceSnapshot.removeAsync(query))
+            await (example.removeAsync({
+                interface:req.interface._id
+            }))
             let arr = await(this.getChild(req,req.project._id, null,1));
             util.ok(res, arr, "删除成功");
         }

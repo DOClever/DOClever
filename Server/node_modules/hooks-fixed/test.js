@@ -9,7 +9,7 @@ module.exports = {
   'should be able to assign multiple hooks at once': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook({
+    A.$hook({
       hook1: function (a) {},
       hook2: function (b) {}
     });
@@ -20,7 +20,7 @@ module.exports = {
   'should run without pres and posts when not present': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     var a = new A();
@@ -30,7 +30,7 @@ module.exports = {
   'should run with pres when present': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     A.pre('save', function (next) {
@@ -45,7 +45,7 @@ module.exports = {
   'should run with posts when present': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     A.post('save', function (next) {
@@ -59,7 +59,7 @@ module.exports = {
   'should run pres and posts when present': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     A.pre('save', function (next) {
@@ -78,7 +78,7 @@ module.exports = {
   'should run posts after pres': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     A.pre('save', function (next) {
@@ -98,7 +98,7 @@ module.exports = {
     var A = function () {};
     _.extend(A, hooks);
     var counter = 0;
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     }, function (err) {
       counter++;
@@ -114,7 +114,7 @@ module.exports = {
   'should be able to run multiple pres': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     A.pre('save', function (next) {
@@ -132,7 +132,7 @@ module.exports = {
   'should run multiple pres until a pre fails and not call the hook': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     }, function (err) {});
     A.pre('save', function (next) {
@@ -153,7 +153,7 @@ module.exports = {
   'should be able to run multiple posts': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     A.post('save', function (next) {
@@ -174,7 +174,7 @@ module.exports = {
   'should run only posts up until an error': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     }, function (err) {});
     A.post('save', function (next) {
@@ -195,7 +195,7 @@ module.exports = {
     var A = function () {};
     _.extend(A, hooks);
     var counter = 0;
-    A.hook('save', function (callback) {
+    A.$hook('save', function (callback) {
       this.value = 1;
     });
     A.pre('save', true, function (next, done) {
@@ -212,7 +212,7 @@ module.exports = {
     var A = function () {};
     _.extend(A, hooks);
     var counter = 0;
-    A.hook('save', function (callback) {
+    A.$hook('save', function (callback) {
       this.value = 1;
     }, function (err) {
       if (err instanceof Error) counter++;
@@ -231,7 +231,7 @@ module.exports = {
     };
     _.extend(A, hooks);
     var counter = 0;
-    A.hook('save', function (callback) {
+    A.$hook('save', function (callback) {
       this.value = 1;
     }, function (err) {
       if (err instanceof Error) this.counter++;
@@ -248,7 +248,7 @@ module.exports = {
     var A = function () {};
     _.extend(A, hooks);
     var counter = 0;
-    A.hook('save', function (err) {
+    A.$hook('save', function (err) {
       if (err instanceof Error) return counter++;
       this.value = 1;
     });
@@ -308,7 +308,7 @@ module.exports = {
   'should not run any posts if a pre fails': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 2;
     }, function (err) {});
     A.pre('save', function (next) {
@@ -326,7 +326,7 @@ module.exports = {
   "can pass the hook's arguments verbatim to pres": function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('set', function (path, val) {
+    A.$hook('set', function (path, val) {
       this[path] = val;
     });
     A.pre('set', function (next, path, val) {
@@ -357,7 +357,7 @@ module.exports = {
   "can pass the hook's arguments verbatim to posts": function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('set', function (path, val) {
+    A.$hook('set', function (path, val) {
       this[path] = val;
     });
     A.post('set', function (next, path, val) {
@@ -387,7 +387,7 @@ module.exports = {
   "pres should be able to modify and pass on a modified version of the hook's arguments": function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('set', function (path, val) {
+    A.$hook('set', function (path, val) {
       this[path] = val;
       assert.equal(arguments[2], 'optional');
     });
@@ -413,7 +413,7 @@ module.exports = {
   'posts should see the modified version of arguments if the pres modified them': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('set', function (path, val) {
+    A.$hook('set', function (path, val) {
       this[path] = val;
     });
     A.pre('set', function (next, path, val) {
@@ -437,7 +437,7 @@ module.exports = {
 
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('set', function (path, val, opts) {
+    A.$hook('set', function (path, val, opts) {
       this[path] = val;
     });
     A.pre('set', function (next, path, val, opts) {
@@ -452,7 +452,7 @@ module.exports = {
     var counter = 0;
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('set', function (path, val) {
+    A.$hook('set', function (path, val) {
       counter++;
       this[path] = val;
       counter.should.equal(7);
@@ -489,7 +489,7 @@ module.exports = {
     var counter = 0;
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('set', function (path, val) {
+    A.$hook('set', function (path, val) {
       this[path] = val;
       if (path === 'hello') counter.should.equal(1);
       if (path === 'foo') counter.should.equal(2);
@@ -511,7 +511,7 @@ module.exports = {
       this.acked = false;
     };
     _.extend(A, hooks);
-    A.hook('ack', function () {
+    A.$hook('ack', function () {
       console.log("UH OH, YOU SHOULD NOT BE SEEING THIS");
       this.acked = true;
     });
@@ -536,7 +536,7 @@ module.exports = {
       this.acked = false;
     };
     _.extend(A, hooks);
-    A.hook('ack', function () {
+    A.$hook('ack', function () {
       console.log("UH OH, YOU SHOULD NOT BE SEEING THIS");
       this.acked = true;
     });
@@ -562,7 +562,7 @@ module.exports = {
     var counter = 0;
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('set', function (path, val, fn) {
+    A.$hook('set', function (path, val, fn) {
       counter++;
       this[path] = val;
       fn(null);
@@ -586,7 +586,7 @@ module.exports = {
     var A = function () {}
       , preTwo;
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     A.pre('save', function (next) {
@@ -608,7 +608,7 @@ module.exports = {
   'should be able to remove all pres associated with a hook': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     A.pre('save', function (next) {
@@ -631,7 +631,7 @@ module.exports = {
     var A = function () {}
       , postTwo;
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     A.post('save', function (next) {
@@ -653,7 +653,7 @@ module.exports = {
   'should be able to remove all posts associated with a hook': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function () {
+    A.$hook('save', function () {
       this.value = 1;
     });
     A.post('save', function (next) {
@@ -737,7 +737,7 @@ module.exports = {
   'should intercept method callbacks for post handlers': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function (val, callback) {
+    A.$hook('save', function (val, callback) {
       this.value = val;
       callback();
     });
@@ -764,7 +764,7 @@ module.exports = {
   'should handle parallel followed by serial': function () {
     var A = function () {};
     _.extend(A, hooks);
-    A.hook('save', function (val, callback) {
+    A.$hook('save', function (val, callback) {
       this.value = val;
       callback();
     });

@@ -83,10 +83,12 @@ function validate(req,res,next) {
                 let arrUrl=o.url.split("/");
                 if(arrUrl.length==mockArr.length)
                 {
-                    let bMatch=true;
+                    let bMatch=true,param={};
                     for(let i=0;i<arrUrl.length;i++)
                     {
-                        if(!(arrUrl[i].indexOf("{")>-1 && arrUrl[i].indexOf("}")>-1 && arrUrl[i].length>2))
+                        let start=arrUrl[i].indexOf("{");
+                        let end=arrUrl[i].indexOf("}");
+                        if(!(start>-1 && end>-1 && arrUrl[i].length>2))
                         {
                             if(arrUrl[i]!=mockArr[i])
                             {
@@ -94,10 +96,17 @@ function validate(req,res,next) {
                                 break;
                             }
                         }
+                        else if(start>-1 && end>-1 && arrUrl[i].length>2)
+                        {
+                            let str=arrUrl[i].substring(start+1,end);
+                            let len=arrUrl[i].substr(end+1).length;
+                            param[str]=mockArr[i].substr(start,mockArr[i].length-(start+len));
+                        }
                     }
                     if(bMatch)
                     {
                         req.obj=o;
+                        req.param=param;
                         next();
                         return;
                     }

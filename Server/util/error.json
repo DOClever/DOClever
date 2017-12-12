@@ -40,5 +40,7 @@
   "userNotInProject":38,
   "interfaceDuplicate":39,
   "adminNotFound":40,
-  "passwordWrong":41
+  "passwordWrong":41,
+  "templateNotFound":42,
+  "exampleNotFound":43
 }

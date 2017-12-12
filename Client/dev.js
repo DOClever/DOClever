@@ -16,7 +16,8 @@ module.exports = {
         console:[path.join(__dirname,"./web/controller/console/console"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         share:[path.join(__dirname,"./web/controller/share/share"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         admin:[path.join(__dirname,"./web/controller/admin/admin"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
-        adminlogin:[path.join(__dirname,"./web/controller/admin/adminlogin"),hotMiddlewareScript,'webpack/hot/only-dev-server']
+        adminlogin:[path.join(__dirname,"./web/controller/admin/adminlogin"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
+        public:[path.join(__dirname,"./web/controller/public/public"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
     },
     output: {
         path: path.join(__dirname, 'dist'),

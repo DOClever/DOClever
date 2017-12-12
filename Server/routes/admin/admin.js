@@ -24,6 +24,8 @@ var status=require("../../model/statusModel")
 var poll=require("../../model/pollModel")
 var version=require("../../model/versionModel")
 var statistic=require("../../model/statisticModel")
+var template=require("../../model/templateModel")
+var example=require("../../model/exampleModel")
 var uuid=require("uuid");
 var objectId = require('mongoose').Types.ObjectId;
 function Admin()
@@ -561,6 +563,12 @@ function Admin()
                 project:req.clientParam.id
             }))
             await (poll.removeAsync({
+                project:req.clientParam.id
+            }))
+            await (template.removeAsync({
+                project:req.clientParam.id
+            }))
+            await (example.removeAsync({
                 project:req.clientParam.id
             }))
             await (project.removeAsync({

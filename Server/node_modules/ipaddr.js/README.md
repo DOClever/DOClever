@@ -174,6 +174,22 @@ ipaddr.IPv4.parse('255.255.255.240').prefixLengthFromSubnetMask() == 28
 ipaddr.IPv4.parse('255.192.164.0').prefixLengthFromSubnetMask()  == null
 ```
 
+`subnetMaskFromPrefixLength()` will return an IPv4 netmask for a valid CIDR prefix length.
+
+```js
+ipaddr.IPv4.subnetMaskFromPrefixLength("24") == "255.255.255.0"
+ipaddr.IPv4.subnetMaskFromPrefixLength("29") == "255.255.255.248"
+```
+
+`broadcastAddressFromCIDR()` will return the broadcast address for a given IPv4 interface and netmask in CIDR notation. 
+```js
+ipaddr.IPv4.broadcastAddressFromCIDR("172.0.0.1/24") == "172.0.0.255"
+```
+`networkAddressFromCIDR()` will return the network address for a given IPv4 interface and netmask in CIDR notation.
+```js
+ipaddr.IPv4.networkAddressFromCIDR("172.0.0.1/24") == "172.0.0.0"
+```
+
 #### Conversion
 
 IPv4 and IPv6 can be converted bidirectionally to and from network byte order (MSB) byte arrays.

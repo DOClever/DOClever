@@ -337,3 +337,21 @@ describe('clone()', function() {
     assert.deepEqual(['cook'], Object.keys(k2._posts));
   });
 });
+
+describe('merge()', function() {
+  it('pulls hooks from another Kareem object', function() {
+    var k1 = new Kareem();
+    var test1 = function() {};
+    k1.pre('cook', test1);
+    k1.post('cook', function() {});
+
+    var k2 = new Kareem();
+    var test2 = function() {};
+    k2.pre('cook', test2);
+    var k3 = k2.merge(k1);
+    assert.equal(k3._pres['cook'].length, 2);
+    assert.equal(k3._pres['cook'][0].fn, test2);
+    assert.equal(k3._pres['cook'][1].fn, test1);
+    assert.equal(k3._posts['cook'].length, 1);
+  });
+});

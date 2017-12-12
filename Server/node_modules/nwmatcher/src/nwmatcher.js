@@ -5,9 +5,9 @@
  * nwmatcher.js - A fast CSS selector engine and matcher
  *
  * Author: Diego Perini <diego.perini at gmail com>
- * Version: 1.4.1
+ * Version: 1.4.3
  * Created: 20070722
- * Release: 20170610
+ * Release: 20171011
  *
  * License:
  *  http://javascript.nwbox.com/NWMatcher/MIT-LICENSE
@@ -28,7 +28,7 @@
 
 })(this, function(global) {
 
-  var version = 'nwmatcher-1.4.1',
+  var version = 'nwmatcher-1.4.3',
 
   // processing context & root element
   doc = global.document,
@@ -123,7 +123,7 @@
     // structural pseudo-classes and child selectors
     spseudos: /^\:(root|empty|(?:first|last|only)(?:-child|-of-type)|nth(?:-last)?(?:-child|-of-type)\(\s*(even|odd|(?:[-+]{0,1}\d*n\s*)?[-+]{0,1}\s*\d*)\s*\))?(.*)/i,
     // uistates + dynamic + negation pseudo-classes
-    dpseudos: /^\:(link|visited|target|active|focus|hover|checked|disabled|enabled|selected|lang\(([-\w]{2,})\)|not\(\s*(:nth(?:-last)?(?:-child|-of-type)\(\s*(?:even|odd|(?:[-+]{0,1}\d*n\s*)?[-+]{0,1}\s*\d*)\s*\)|[^()]*)\s*\))?(.*)/i,
+    dpseudos: /^\:(link|visited|target|active|focus|hover|checked|disabled|enabled|selected|lang\(([-\w]{2,})\)|(?:matches|not)\(\s*(:nth(?:-last)?(?:-child|-of-type)\(\s*(?:even|odd|(?:[-+]{0,1}\d*n\s*)?[-+]{0,1}\s*\d*)\s*\)|[^()]*)\s*\))?(.*)/i,
     // pseudo-elements selectors
     epseudos: /^((?:[:]{1,2}(?:after|before|first-letter|first-line))|(?:[:]{2,2}(?:selection|backdrop|placeholder)))?(.*)/i,
     // E > F
@@ -856,6 +856,9 @@
     // ':not()' pseudo-classes as for specifications
     SIMPLENOT: true,
 
+    // true to match lowercase tag names of SVG elements in HTML
+    SVG_LCASE: false,
+
     // strict QSA match all non-unique IDs (false)
     // speed & libs compat match unique ID (true)
     UNIQUE_ID: true,
@@ -903,7 +906,7 @@
       // build attribute string
       attrcheck = '(' + quotedvalue + '|' + identifier + ')';
       attributes = whitespace + '*(' + identifier + '(?::' + identifier + ')?)' +
-        whitespace + '*(?:' + operators + whitespace + '*' + attrcheck + ')?' + whitespace + '*';
+        whitespace + '*(?:' + operators + whitespace + '*' + attrcheck + ')?' + whitespace + '*' + '(i)?' + whitespace + '*';
       attrmatcher = attributes.replace(attrcheck, '([\\x22\\x27]*)((?:\\\\?.)*?)\\3');
 
       // build pseudoclass string
@@ -1069,9 +1072,10 @@
         else if ((match = selector.match(Patterns.tagName))) {
           // both tagName and nodeName properties may be upper/lower case
           // depending on their creation NAMESPACE in createElementNS()
+          test = Config.SVG_LCASE ? '||e.nodeName=="' + match[1].toLowerCase() + '"' : '';
           source = 'if(e.nodeName' + (XML_DOCUMENT ?
             '=="' + match[1] + '"' : '.toUpperCase()' +
-            '=="' + match[1].toUpperCase() + '"') +
+            '=="' + match[1].toUpperCase() + '"' + test) +
             '){' + source + '}';
         }
 
@@ -1110,7 +1114,7 @@
           if (match[2] && match[4] && (test = Operators[match[2]])) {
             match[4] = (/\\/).test(match[4]) ? convertEscapes(match[4]) : match[4];
             // case treatment depends on document type
-            type = XML_DOCUMENT ? 0 : HTML_TABLE[expr.toLowerCase()];
+            type = match[5] == 'i' || HTML_TABLE[expr.toLowerCase()];
             test = test.replace(/\%m/g, type ? match[4].toLowerCase() : match[4]);
           } else if (match[2] == '!=' || match[2] == '=') {
             test = 'n' + match[2] + '=""';
@@ -1127,30 +1131,28 @@
         // E + F (F adiacent sibling of E)
         else if ((match = selector.match(Patterns.adjacent))) {
           source = NATIVE_TRAVERSAL_API ?
-            'var N' + k + '=e;while(e&&(e=e.previousElementSibling)){' + source + 'break;}e=N' + k + ';' :
-            'var N' + k + '=e;while(e&&(e=e.previousSibling)){if(e.nodeName>"@"){' + source + 'break;}}e=N' + k + ';';
+            'var N' + k + '=e;if((e=e.previousElementSibling)){' + source + '}e=N' + k + ';' :
+            'var N' + k + '=e;while((e=e.previousSibling)){if(e.nodeType==1){' + source + 'break;}}e=N' + k + ';';
         }
 
         // *** General sibling combinator
         // E ~ F (F relative sibling of E)
         else if ((match = selector.match(Patterns.relative))) {
           source = NATIVE_TRAVERSAL_API ?
-            ('var N' + k + '=e;e=e.parentNode.firstElementChild;' +
-            'while(e&&e!==N' + k + '){' + source + 'e=e.nextElementSibling;}e=N' + k + ';') :
-            ('var N' + k + '=e;e=e.parentNode.firstChild;' +
-            'while(e&&e!==N' + k + '){if(e.nodeName>"@"){' + source + '}e=e.nextSibling;}e=N' + k + ';');
+            'var N' + k + '=e;while((e=e.previousElementSibling)){' + source + '}e=N' + k + ';' :
+            'var N' + k + '=e;while((e=e.previousSibling)){if(e.nodeType==1){' + source + '}}e=N' + k + ';';
         }
 
         // *** Child combinator
         // E > F (F children of E)
         else if ((match = selector.match(Patterns.children))) {
-          source = 'var N' + k + '=e;while(e&&e!==h&&e!==g&&(e=e.parentNode)){' + source + 'break;}e=N' + k + ';';
+          source = 'var N' + k + '=e;if((e=e.parentNode)&&e.nodeType==1){' + source + '}e=N' + k + ';';
         }
 
         // *** Descendant combinator
         // E F (E ancestor of F)
         else if ((match = selector.match(Patterns.ancestor))) {
-          source = 'var N' + k + '=e;while(e&&e!==h&&e!==g&&(e=e.parentNode)){' + source + '}e=N' + k + ';';
+          source = 'var N' + k + '=e;while((e=e.parentNode)&&e.nodeType==1){' + source + '}e=N' + k + ';';
         }
 
         // *** Structural pseudo-classes
@@ -1229,12 +1231,19 @@
 
         // *** negation, user action and target pseudo-classes
         // *** UI element states and dynamic pseudo-classes
+        // CSS4 :matches 
         // CSS3 :not, :checked, :enabled, :disabled, :target
         // CSS3 :active, :hover, :focus
         // CSS3 :link, :visited
         else if ((match = selector.match(Patterns.dpseudos)) && match[1]) {
 
           switch (match[1].match(/^\w+/)[0]) {
+            // CSS4 matches pseudo-class
+            case 'matches':
+              expr = match[3].replace(reTrimSpaces, '');
+              source = 'if(s.match(e, "' + expr.replace(/\x22/g, '\\"') + '",g)){' + source +'}';
+              break;
+
             // CSS3 negation pseudo-class
             case 'not':
               // compile nested selectors, DO NOT pass the callback parameter
@@ -1543,7 +1552,7 @@
         }
 
         // ID optimization RTL, to reduce number of elements to visit
-        if (Config.UNIQUE_ID && (parts = lastSlice.match(Optimize.ID)) && (token = parts[1])) {
+        if (Config.UNIQUE_ID && lastSlice && (parts = lastSlice.match(Optimize.ID)) && (token = parts[1])) {
           if ((element = _byId(token, from))) {
             if (match(element, selector)) {
               callback && callback(element);
@@ -1571,12 +1580,12 @@
           return elements;
         }
 
-        if (!NATIVE_GEBCN && (parts = lastSlice.match(Optimize.TAG)) && (token = parts[1])) {
+        if (!NATIVE_GEBCN && lastSlice && (parts = lastSlice.match(Optimize.TAG)) && (token = parts[1])) {
           if ((elements = _byTag(token, from)).length === 0) { return [ ]; }
           selector = selector.slice(0, lastPosition) + selector.slice(lastPosition).replace(token, '*');
         }
 
-        else if ((parts = lastSlice.match(Optimize.CLASS)) && (token = parts[1])) {
+        else if (lastSlice && (parts = lastSlice.match(Optimize.CLASS)) && (token = parts[1])) {
           if ((elements = _byClass(token, from)).length === 0) { return [ ]; }
           selector = selector.slice(0, lastPosition) + selector.slice(lastPosition).replace('.' + token,
             reOptimizeSelector.test(selector.charAt(selector.indexOf(token) - 1)) ? '' : '*');
@@ -1592,7 +1601,7 @@
             reOptimizeSelector.test(selector.charAt(selector.indexOf(token) - 1)) ? '' : '*');
         }
 
-        else if (NATIVE_GEBCN && (parts = lastSlice.match(Optimize.TAG)) && (token = parts[1])) {
+        else if (NATIVE_GEBCN && lastSlice && (parts = lastSlice.match(Optimize.TAG)) && (token = parts[1])) {
           if ((elements = _byTag(token, from)).length === 0) { return [ ]; }
           selector = selector.slice(0, lastPosition) + selector.slice(lastPosition).replace(token, '*');
         }

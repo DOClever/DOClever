@@ -60,6 +60,7 @@ ZipStream.prototype._normalizeFileData = function(data) {
   data = util.defaults(data, {
     type: 'file',
     name: null,
+    linkname: null,
     date: null,
     mode: null,
     store: this.options.store,
@@ -67,11 +68,12 @@ ZipStream.prototype._normalizeFileData = function(data) {
   });
 
   var isDir = data.type === 'directory';
+  var isSymlink = data.type === 'symlink';
 
   if (data.name) {
     data.name = util.sanitizePath(data.name);
 
-    if (data.name.slice(-1) === '/') {
+    if (!isSymlink && data.name.slice(-1) === '/') {
       isDir = true;
       data.type = 'directory';
     } else if (isDir) {
@@ -79,7 +81,7 @@ ZipStream.prototype._normalizeFileData = function(data) {
     }
   }
 
-  if (isDir) {
+  if (isDir || isSymlink) {
     data.store = true;
   }
 
@@ -110,13 +112,18 @@ ZipStream.prototype.entry = function(source, data, callback) {
 
   data = this._normalizeFileData(data);
 
-  if (data.type !== 'file' && data.type !== 'directory') {
+  if (data.type !== 'file' && data.type !== 'directory' && data.type !== 'symlink') {
     callback(new Error(data.type + ' entries not currently supported'));
     return;
   }
 
   if (typeof data.name !== 'string' || data.name.length === 0) {
     callback(new Error('entry name must be a non-empty string value'));
+    return;
+  }
+
+  if (data.type === 'symlink' && typeof data.linkname !== 'string') {
+    callback(new Error('entry linkname must be a non-empty string value when type equals symlink'));
     return;
   }
 
@@ -131,8 +138,20 @@ ZipStream.prototype.entry = function(source, data, callback) {
     entry.setComment(data.comment);
   }
 
+  if (data.type === 'symlink' && typeof data.mode !== 'number') {
+    data.mode = 40960; // 0120000
+  }
+
   if (typeof data.mode === 'number') {
+    if (data.type === 'symlink') {
+      data.mode |= 40960;
+    }
+
     entry.setUnixMode(data.mode);
+  }
+
+  if (data.type === 'symlink' && typeof data.linkname === 'string') {
+    source = new Buffer(data.linkname);
   }
 
   return ZipArchiveOutputStream.prototype.entry.call(this, entry, source, callback);

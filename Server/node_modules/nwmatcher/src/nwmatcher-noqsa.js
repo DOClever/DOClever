@@ -5,9 +5,9 @@
  * nwmatcher-noqsa.js - A fast CSS selector engine and matcher
  *
  * Author: Diego Perini <diego.perini at gmail com>
- * Version: 1.4.1
+ * Version: 1.4.3
  * Created: 20070722
- * Release: 20170610
+ * Release: 20171011
  *
  * License:
  *  http://javascript.nwbox.com/NWMatcher/MIT-LICENSE
@@ -28,7 +28,7 @@
 
 })(this, function(global) {
 
-  var version = 'nwmatcher-1.4.1',
+  var version = 'nwmatcher-1.4.3',
 
   doc = global.document,
   root = doc.documentElement,
@@ -77,7 +77,7 @@
 
   Patterns = {
     spseudos: /^\:(root|empty|(?:first|last|only)(?:-child|-of-type)|nth(?:-last)?(?:-child|-of-type)\(\s*(even|odd|(?:[-+]{0,1}\d*n\s*)?[-+]{0,1}\s*\d*)\s*\))?(.*)/i,
-    dpseudos: /^\:(link|visited|target|active|focus|hover|checked|disabled|enabled|selected|lang\(([-\w]{2,})\)|not\(\s*(:nth(?:-last)?(?:-child|-of-type)\(\s*(?:even|odd|(?:[-+]{0,1}\d*n\s*)?[-+]{0,1}\s*\d*)\s*\)|[^()]*)\s*\))?(.*)/i,
+    dpseudos: /^\:(link|visited|target|active|focus|hover|checked|disabled|enabled|selected|lang\(([-\w]{2,})\)|(?:matches|not)\(\s*(:nth(?:-last)?(?:-child|-of-type)\(\s*(?:even|odd|(?:[-+]{0,1}\d*n\s*)?[-+]{0,1}\s*\d*)\s*\)|[^()]*)\s*\))?(.*)/i,
     epseudos: /^((?:[:]{1,2}(?:after|before|first-letter|first-line))|(?:[:]{2,2}(?:selection|backdrop|placeholder)))?(.*)/i,
     children: RegExp('^' + whitespace + '*\\>' + whitespace + '*(.*)'),
     adjacent: RegExp('^' + whitespace + '*\\+' + whitespace + '*(.*)'),
@@ -128,6 +128,10 @@
     'rules': 1, 'scope': 1, 'scrolling': 1, 'selected': 1, 'shape': 1, 'target': 1,
     'text': 1, 'type': 1, 'valign': 1, 'valuetype': 1, 'vlink': 1
   },
+
+  NATIVE_TRAVERSAL_API =
+    'nextElementSibling' in root &&
+    'previousElementSibling' in root,
 
   Selectors = { },
 
@@ -385,6 +389,7 @@
     UNICODE16: true,
     SHORTCUTS: false,
     SIMPLENOT: true,
+    SVG_LCASE: false,
     UNIQUE_ID: true,
     USE_HTML5: true,
     VERBOSITY: true,
@@ -412,7 +417,7 @@
 
       attrcheck = '(' + quotedvalue + '|' + identifier + ')';
       attributes = whitespace + '*(' + identifier + '(?::' + identifier + ')?)' +
-        whitespace + '*(?:' + operators + whitespace + '*' + attrcheck + ')?' + whitespace + '*';
+        whitespace + '*(?:' + operators + whitespace + '*' + attrcheck + ')?' + whitespace + '*' + '(i)?' + whitespace + '*';
       attrmatcher = attributes.replace(attrcheck, '([\\x22\\x27]*)((?:\\\\?.)*?)\\3');
 
       pseudoclass = '((?:' +
@@ -523,9 +528,10 @@
         }
 
         else if ((match = selector.match(Patterns.tagName))) {
+          test = Config.SVG_LCASE ? '||e.nodeName=="' + match[1].toLowerCase() + '"' : '';
           source = 'if(e.nodeName' + (XML_DOCUMENT ?
             '=="' + match[1] + '"' : TO_UPPER_CASE +
-            '=="' + match[1].toUpperCase() + '"') +
+            '=="' + match[1].toUpperCase() + '"' + test) +
             '){' + source + '}';
         }
 
@@ -542,6 +548,7 @@
         else if ((match = selector.match(Patterns.attribute))) {
           expr = match[1].split(':');
           expr = expr.length == 2 ? expr[1] : expr[0] + '';
+
           if (match[2] && !Operators[match[2]]) {
             emit('Unsupported operator in attribute selectors "' + selector + '"');
             return '';
@@ -549,7 +556,7 @@
           test = 'false';
           if (match[2] && match[4] && (test = Operators[match[2]])) {
             match[4] = (/\\/).test(match[4]) ? convertEscapes(match[4]) : match[4];
-            type = XML_DOCUMENT ? 0 : HTML_TABLE[expr.toLowerCase()];
+            type = match[5] == 'i' || HTML_TABLE[expr.toLowerCase()];
             test = test.replace(/\%m/g, type ? match[4].toLowerCase() : match[4]);
           } else if (match[2] == '!=' || match[2] == '=') {
             test = 'n' + match[2] + '=""';
@@ -561,19 +568,23 @@
         }
 
         else if ((match = selector.match(Patterns.adjacent))) {
-          source = 'var N' + k + '=e;while(e&&(e=e.previousSibling)){if(e.nodeName>"@"){' + source + 'break;}}e=N' + k + ';';
+          source = NATIVE_TRAVERSAL_API ?
+            'var N' + k + '=e;if((e=e.previousElementSibling)){' + source + '}e=N' + k + ';' :
+            'var N' + k + '=e;while((e=e.previousSibling)){if(e.nodeType==1){' + source + 'break;}}e=N' + k + ';';
         }
 
         else if ((match = selector.match(Patterns.relative))) {
-          source = 'var N' + k + '=e;e=e.parentNode.firstChild;while(e&&e!==N' + k + '){if(e.nodeName>"@"){' + source + '}e=e.nextSibling;}e=N' + k + ';';
+          source = NATIVE_TRAVERSAL_API ?
+            'var N' + k + '=e;while((e=e.previousElementSibling)){' + source + '}e=N' + k + ';' :
+            'var N' + k + '=e;while((e=e.previousSibling)){if(e.nodeType==1){' + source + '}}e=N' + k + ';';
         }
 
         else if ((match = selector.match(Patterns.children))) {
-          source = 'var N' + k + '=e;while(e&&e!==h&&e!==g&&(e=e.parentNode)){' + source + 'break;}e=N' + k + ';';
+          source = 'var N' + k + '=e;if((e=e.parentNode)&&e.nodeType==1){' + source + '}e=N' + k + ';';
         }
 
         else if ((match = selector.match(Patterns.ancestor))) {
-          source = 'var N' + k + '=e;while(e&&e!==h&&e!==g&&(e=e.parentNode)){' + source + '}e=N' + k + ';';
+          source = 'var N' + k + '=e;while((e=e.parentNode)&&e.nodeType==1){' + source + '}e=N' + k + ';';
         }
 
         else if ((match = selector.match(Patterns.spseudos)) && match[1]) {
@@ -631,6 +642,11 @@
 
         else if ((match = selector.match(Patterns.dpseudos)) && match[1]) {
           switch (match[1].match(/^\w+/)[0]) {
+            case 'matches':
+              expr = match[3].replace(reTrimSpaces, '');
+              source = 'if(s.match(e, "' + expr.replace(/\x22/g, '\\"') + '",g)){' + source +'}';
+              break;
+
             case 'not':
               expr = match[3].replace(reTrimSpaces, '');
               if (Config.SIMPLENOT && !reSimpleNot.test(expr)) {
@@ -834,7 +850,7 @@
           lastPosition = selector.length - token.length;
         }
 
-        if (Config.UNIQUE_ID && (parts = lastSlice.match(Optimize.ID)) && (token = parts[1])) {
+        if (Config.UNIQUE_ID && lastSlice && (parts = lastSlice.match(Optimize.ID)) && (token = parts[1])) {
           if ((element = _byId(token, from))) {
             if (match(element, selector)) {
               callback && callback(element);
@@ -861,12 +877,12 @@
           return elements;
         }
 
-        if (!XML_DOCUMENT && GEBTN && (parts = lastSlice.match(Optimize.TAG)) && (token = parts[1])) {
+        if (!XML_DOCUMENT && GEBTN && lastSlice && (parts = lastSlice.match(Optimize.TAG)) && (token = parts[1])) {
           if ((elements = from.getElementsByTagName(token)).length === 0) { return [ ]; }
           selector = selector.slice(0, lastPosition) + selector.slice(lastPosition).replace(token, '*');
         }
 
-        else if (!XML_DOCUMENT && GEBCN && (parts = lastSlice.match(Optimize.CLASS)) && (token = parts[1])) {
+        else if (!XML_DOCUMENT && GEBCN && lastSlice && (parts = lastSlice.match(Optimize.CLASS)) && (token = parts[1])) {
           if ((elements = from.getElementsByClassName(unescapeIdentifier(token))).length === 0) { return [ ]; }
             selector = selector.slice(0, lastPosition) + selector.slice(lastPosition).replace('.' + token,
               reOptimizeSelector.test(selector.charAt(selector.indexOf(token) - 1)) ? '' : '*');

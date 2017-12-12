@@ -75,7 +75,7 @@
     var inParamInject=require("./inparamInject.vue")
     var expand=require("component/expand.vue");
     module.exports={
-        props:["index","item"],
+        props:["index","item","source"],
         data:function () {
             return {
                 queryAutoExpand:0,
@@ -113,7 +113,7 @@
                 return this.item.rawJSON
             },
             interfaceEdit:function () {
-                return this.$store.state.interfaceEdit
+                return this.source?this.source:this.$store.state.interfaceEdit
             },
             outInfo:function () {
                 return this.item.outInfo

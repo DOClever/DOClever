@@ -1,8 +1,8 @@
 "use strict";
+const DOMException = require("domexception");
 const HTMLElementImpl = require("./HTMLElement-impl").implementation;
 const notImplemented = require("../../browser/not-implemented");
-const reflectURLAttribute = require("../../utils").reflectURLAttribute;
-const DOMException = require("../../web-idl/DOMException");
+const { reflectURLAttribute } = require("../../utils");
 
 function getTimeRangeDummy() {
   return {
@@ -40,7 +40,7 @@ class HTMLMediaElementImpl extends HTMLElementImpl {
   // Implemented accoring to W3C Draft 22 August 2012
   set defaultPlaybackRate(v) {
     if (v === 0.0) {
-      throw new DOMException(DOMException.NOT_SUPPORTED_ERR);
+      throw new DOMException("The operation is not supported.", "NotSupportedError");
     }
     if (this._defaultPlaybackRate !== v) {
       this._defaultPlaybackRate = v;
@@ -100,7 +100,7 @@ class HTMLMediaElementImpl extends HTMLElementImpl {
   }
   set volume(v) {
     if (v < 0 || v > 1) {
-      throw new DOMException(DOMException.INDEX_SIZE_ERR);
+      throw new DOMException("The index is not in the allowed range.", "IndexSizeError");
     }
     if (this._volume !== v) {
       this._volume = v;
@@ -108,8 +108,8 @@ class HTMLMediaElementImpl extends HTMLElementImpl {
     }
   }
 
-    // Not (yet) implemented according to spec
-    // Should return sane default values
+  // Not (yet) implemented according to spec
+  // Should return sane default values
   load() {
     notImplemented("HTMLMediaElement.prototype.load", this._ownerDocument._defaultView);
   }

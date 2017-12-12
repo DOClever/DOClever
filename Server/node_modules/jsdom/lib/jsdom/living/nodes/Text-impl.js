@@ -2,8 +2,8 @@
 
 const CharacterDataImpl = require("./CharacterData-impl").implementation;
 
-const domSymbolTree = require("../helpers/internal-constants").domSymbolTree;
-const DOMException = require("../../web-idl/DOMException");
+const { domSymbolTree } = require("../helpers/internal-constants");
+const DOMException = require("domexception");
 const NODE_TYPE = require("../node-type");
 
 class TextImpl extends CharacterDataImpl {
@@ -16,10 +16,10 @@ class TextImpl extends CharacterDataImpl {
   splitText(offset) {
     offset >>>= 0;
 
-    const length = this.length;
+    const { length } = this;
 
     if (offset > length) {
-      throw new DOMException(DOMException.INDEX_SIZE_ERR);
+      throw new DOMException("The index is not in the allowed range.", "IndexSizeError");
     }
 
     const count = length - offset;

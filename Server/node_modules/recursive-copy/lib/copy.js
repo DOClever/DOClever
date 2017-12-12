@@ -44,7 +44,6 @@ module.exports = function(src, dest, options, callback) {
 	var readlink = wrapFsMethod(fs.readlink);
 	var symlink = wrapFsMethod(fs.symlink);
 	var readdir = wrapFsMethod(fs.readdir);
-	var chmod = wrapFsMethod(fs.chmod);
 
 	var parentDirectory = path.dirname(dest);
 	var shouldExpandSymlinks = Boolean(options.expand);
@@ -311,17 +310,14 @@ module.exports = function(src, dest, options, callback) {
 						var read = fs.createReadStream(srcPath);
 						read.on('error', handleCopyFailed);
 
-						var write = fs.createWriteStream(destPath, { flags: 'w' });
+						var write = fs.createWriteStream(destPath, {
+							flags: 'w',
+							mode: stats.mode
+						});
 						write.on('error', handleCopyFailed);
 						write.on('finish', function() {
-							chmod(destPath, stats.mode)
-								.then(function() {
-									hasFinished = true;
-									resolve();
-								})
-								.catch(function(error) {
-									handleCopyFailed(error);
-								});
+							hasFinished = true;
+							resolve();
 						});
 
 						var transformStream = null;

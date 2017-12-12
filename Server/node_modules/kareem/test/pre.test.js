@@ -135,6 +135,27 @@ describe('execPre', function() {
     });
   });
 
+  it('async pres with clone()', function(done) {
+    var execed = false;
+
+    hooks.pre('cook', true, function(next, done) {
+      execed = true;
+      setTimeout(
+        function() {
+          done();
+        },
+        5);
+
+      next();
+    });
+
+    hooks.clone().execPre('cook', null, function(err) {
+      assert.ifError(err);
+      assert.ok(execed);
+      done();
+    });
+  });
+
   it('returns correct error when async pre errors', function(done) {
     var execed = {};
 

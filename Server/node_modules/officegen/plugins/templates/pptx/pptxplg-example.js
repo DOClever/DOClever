@@ -1,0 +1,226 @@
+/**
+ * This function creating a pptx based plugin object.
+ * <br /><br />
+ * To create a new feature for the pptx document generator:
+ * <br /><br />
+ * <ul>
+ * <li>Make a copy of this file and rename it to your plugin's name.</li>
+ * <li>Create a new test for it.</li>
+ * <li>During your test you can load your plugin using the extraPlugs options when you creating the pptx object (see the example below).
+ * <li>Follow the instructions in this file.</li>
+ * </ul>
+ * @example <caption>Loading your plugin:</caption>
+ * var yourPlugin = require ( 'your-plugin' ); // Load your plugin.
+ *
+ * var pptx = officegen ({
+ * 	type: 'pptx',
+ * 	extraPlugs: [
+ * 		yourPlugin // Tell officegen to use your plugin.
+ * 	]
+ * });
+ * @summary Create a new pptx plugin.
+ * @param {object} pluginsman Access to the plugins manager for pptx documents.
+ * @constructor
+ * @name MakeExamplePlugin
+ */
+function MakeExamplePlugin ( pluginsman ) {
+	var funcThis = this;
+
+	// You can change it if you want to support more types, since that the Word and Excel document generators also supporting very similar plugins:
+	if ( pluginsman.docType !== 'pptx' && pluginsman.docType !== 'ppsx' ) {
+		throw "[pptx-example] This plugin supporting only PowerPoint based documents.";
+	} // Endif.
+
+	this.ogPluginsApi = pluginsman.ogPluginsApi; // Generic officegen API for plugins.
+	this.msPluginsApi = pluginsman.genPrivate.plugs.type.msoffice; // msoffice plugins API.
+	this.pluginsman = pluginsman; // Document type specific plugins API.
+
+	this.pptxData = pluginsman.getDataStorage (); // Here you can store any temporary data needed for generating the document and depending on the data filled by the user.
+
+	this.mainPath = pluginsman.genPrivate.features.type.msoffice.main_path; // The "folder" name inside the document zip that all the specific resources of this document type are stored.
+	this.mainPathFile = pluginsman.genPrivate.features.type.msoffice.main_path_file; // The name of the main real xml resource of this document.
+	this.relsMain = pluginsman.genPrivate.type.msoffice.rels_main; // Main rels file.
+	this.relsApp = pluginsman.genPrivate.type.msoffice.rels_app; // Main rels file inside the specific document type "folder".
+	this.filesList = pluginsman.genPrivate.type.msoffice.files_list; // Resources list xml.
+	this.srcFilesList = pluginsman.genPrivate.type.msoffice.src_files_list; // For storing extra files inside the document zip.
+
+	//
+	// Setup the default data needed by this plugin:
+	//
+
+	this.setData ( pluginsman.genobj );
+
+	//
+	// Catch events inside the document so we can extent it:
+	//
+
+	// We want to extend the main API of the pptx document object:
+	pluginsman.registerCallback ( 'makeDocApi', function ( docObj ) { funcThis.extendPptxApi ( docObj ); } );
+
+	// We want to extend the slide object API:
+	pluginsman.registerCallback ( 'newPage', function ( docData ) { funcThis.extendPptxSlideApi ( docData ); } );
+
+	// This event tell us that we need to re-create the default data:
+	pluginsman.registerCallback ( 'setData', function ( docObj ) { funcThis.setData ( docObj ); } );
+
+	// This event tell us that the generator is about to start working:
+	pluginsman.registerCallback ( 'beforeGen', function ( docObj ) { funcThis.beforeGen ( docObj ); } );
+
+	return this;
+}
+
+//
+// Events implementations:
+//
+
+/**
+ * This function extending the main document object with new API methods.
+ * @param {object} docObj Document object.
+ */
+MakeExamplePlugin.prototype.extendPptxApi = function ( docObj ) {
+	var funcThis = this;
+
+	/*
+	NOTE:
+	Put here any API that effecting ALL the presentation.
+	Then you'll be able to use it (in the user's code) like:
+
+	var pptx = officegen ( 'pptx' );
+
+	// ...
+
+	pptx.myNewApi ( ... );
+	*/
+
+	// Fill this object with your new API:
+	// docObj.???
+
+	// Example:
+	/*
+	docObj.setSomething = function ( data ) {
+		// In this case DON'T save anything in docObj!
+		funcThis.pptxData.someGlobalPptxVal = data;
+	};
+	*/
+
+	// BMK_TODO:
+}
+
+/**
+ * This function extending a new created slide object with new API methods.
+ * @param {object} docData Object with information about the new slide and more.
+ */
+MakeExamplePlugin.prototype.extendPptxSlideApi = function ( docData ) {
+	var funcThis = this;
+	var newSlide = docData.page; // The new slide's API.
+	var slideData = docData.pageData; // Place here data related to the slide.
+
+	/*
+	NOTE:
+	Put here any API that need to be attached to a slide.
+	Then you'll be able to use it (in the user's code) like:
+
+	var pptx = officegen ( 'pptx' );
+
+	var slide = pptx.makeNewSlide ();
+
+	slide.myNewApi ( ... );
+	*/
+
+	// Fill this object with your additional slide API:
+	// newSlide.???
+
+	// Example:
+	/*
+	docObj.setSomething = function ( data ) {
+		// We will save some additional data in the slide itself:
+		newSlide.someNewSlideVal = data;
+
+		// You can add extra resource that needs this data.
+	};
+	*/
+
+	// BMK_TODO:
+}
+
+/**
+ * This function should initialize the default specific data that this plugin needs for the document.
+ * @param {object} docObj Document object.
+ */
+MakeExamplePlugin.prototype.setData = function ( docObj ) {
+	var funcThis = this;
+
+	// BMK_TODO:
+}
+
+/**
+ * This function been called just before starting to generate the output document zip.
+ * @param {object} docObj Document object.
+ */
+MakeExamplePlugin.prototype.beforeGen = function ( docObj ) {
+	var funcThis = this;
+
+	// this.pluginsman.genPrivate.pages = access to all the slides (in case that you need it).
+	// BMK_TODO:
+
+	/*
+	If you need to add a new custom resource then use the following code.
+	NOTE:
+	The false in the last parameter means that this resource is temporary and should be removed after finishing to generate the output document.
+	This is true because if you are adding a resource here then it must be removed at the end of generating the document.
+	If your plugin needs a resource that always need to be added into the zip then add it elsewhere and NOT in this method. In this case use true as the last parameter.
+	*/
+	// this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\myRes.xml', 'buffer', null, function ( data ) { return funcThis.cbMyCallback ( data ) }, false );
+
+	// Example to add a resource to the list of files in the document:
+	/*
+	this.filesList.push ({
+		name: '/' + this.mainPath + '/something/somefile.xml',
+		type: 'application/vnd.openxmlformats-officedocument.sometype+xml',
+		clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+	});
+	*/
+
+	/*
+	// Example to add a rel entry to the main pptx rels:
+	this.relsApp.push ({
+		name: 'something/somefile.xml',
+		type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/something',
+		clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+	});
+	*/
+
+	/*
+	// Example to add a rels that must be added after the slides and depended on the data:
+	this.pptxData.extraMainRelList.push ({
+		type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme',
+		target: 'theme/theme2.xml',
+		clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+	});
+	*/
+}
+
+//
+// Resource generating callbacks:
+//
+
+/**
+ * Example resource generating callback.
+ *
+ * @param {object} data Data needed to generate this resource.
+ * @return Text string.
+ */
+/*
+// Example:
+MakeExamplePlugin.prototype.cbMyCallback = function ( data ) {
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<example></example>';
+}
+*/
+
+//
+// Extra utility methods:
+//
+
+// --- just put it here ---
+
+module.exports = MakeExamplePlugin;

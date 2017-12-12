@@ -18,21 +18,25 @@ function declaresThis(node) {
   return node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration';
 }
 
-function reallyParse(source) {
-  return acorn.parse(source, {
-    allowReturnOutsideFunction: true,
-    allowImportExportEverywhere: true,
-    allowHashBang: true
-  });
+function reallyParse(source, options) {
+  var parseOptions = Object.assign({}, options,
+    {
+      allowReturnOutsideFunction: true,
+      allowImportExportEverywhere: true,
+      allowHashBang: true
+    }
+  );
+  return acorn.parse(source, parseOptions);
 }
 module.exports = findGlobals;
 module.exports.parse = reallyParse;
-function findGlobals(source) {
+function findGlobals(source, options) {
+  options = options || {};
   var globals = [];
   var ast;
   // istanbul ignore else
   if (typeof source === 'string') {
-    ast = reallyParse(source);
+    ast = reallyParse(source, options);
   } else {
     ast = source;
   }

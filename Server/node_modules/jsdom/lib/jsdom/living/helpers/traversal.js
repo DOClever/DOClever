@@ -1,12 +1,12 @@
 "use strict";
-const domSymbolTree = require("./internal-constants").domSymbolTree;
+const { domSymbolTree } = require("./internal-constants");
 const { DOCUMENT_NODE } = require("../node-type");
 
 // All these operate on and return impls, not wrappers!
 
 exports.closest = (e, localName) => {
   while (e) {
-    if (e.localName === localName) {
+    if (e.localName === localName && e.namespaceURI === "http://www.w3.org/1999/xhtml") {
       return e;
     }
     e = domSymbolTree.parent(e);

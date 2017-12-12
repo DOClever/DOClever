@@ -44,6 +44,35 @@
         </expand>
         <expand class="row" style="border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);background-color: white;margin-top: 10px">
             <el-row class="row" style="height: 40px;line-height: 40px;color: #17b9e6" slot="title">
+                接口模板
+            </el-row>
+            <el-row class="row" style="background-color: lightgray;height: 1px"></el-row>
+            <el-row class="row" style="padding: 10px 20px 10px 20px">
+                <table class="table-hover" style="width: 100%;border-collapse: collapse;" id="templateList">
+                    <template v-for="(item,index) in template">
+                        <tr style="height: 40px;">
+                            <td style="width: 50%;cursor: pointer;padding-left: 10px">{{item.name}}</td>
+                            <td style="width: 30%;cursor: pointer;padding-left: 10px">{{item.createdAt}}</td>
+                            <td style="width: 10%">
+                                <el-button type="text" size="mini" @click="editTemplate(item,index)">
+                                    编辑
+                                </el-button>
+                            </td>
+                            <td style="width: 10%">
+                                <el-button type="text" size="mini" style="color: red;"  @click="removeTemplate(item,index)" v-if="globalTemplateRole">
+                                    删除
+                                </el-button>
+                            </td>
+                        </tr>
+                    </template>
+                </table>
+                <el-button type="primary" size="mini"  @click="addTemplate" style="margin-top: 10px" v-if="globalTemplateRole">
+                    新建
+                </el-button>
+            </el-row>
+        </expand>
+        <expand class="row" style="border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);background-color: white;margin-top: 10px">
+            <el-row class="row" style="height: 40px;line-height: 40px;color: #17b9e6" slot="title">
                 文档
             </el-row>
             <el-row class="row" style="background-color: lightgray;height: 1px"></el-row>
@@ -85,6 +114,12 @@
     #statusEdit th{
         border-bottom:1px solid #BBB;
     }
+    #templateList td{
+        border-bottom:1px solid #BBB;
+    }
+    #templateList th{
+        border-bottom:1px solid #BBB;
+    }
 </style>
 
 <script>
@@ -117,9 +152,15 @@
             globalInjectRole:function () {
                 return this.$store.getters.globalInjectRole;
             },
+            globalTemplateRole:function () {
+                return this.$store.getters.globalTemplateRole;
+            },
             globalDocRole:function () {
                 return this.$store.getters.globalDocRole;
             },
+            template:function () {
+                return this.$store.getters.template;
+            }
         },
         components:{
             "urllist":urlList,
@@ -275,6 +316,59 @@
                     {
                         $.notify(data.msg,0);
                     }
+                })
+            },
+            addTemplate:function () {
+                var _this=this;
+                var child=$.showBox(this,require("./component/template.vue"))
+                child.$on("save",function (data) {
+                    _this.template.unshift({
+                        _id:data._id,
+                        name:data.name,
+                        createdAt:data.createdAt
+                    })
+                })
+            },
+            editTemplate:function (item,index) {
+                var _this=this;
+                $.startHud();
+                net.get("/template/item",{
+                    id:item._id
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        var child=$.showBox(_this,require("./component/template.vue"),{
+                            source:data.data
+                        })
+                        child.$on("save",function (data) {
+                            item.name=data.name;
+                        })
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0)
+                    }
+                })
+            },
+            removeTemplate:function (item,index) {
+                var _this=this;
+                $.confirm("是否删除该模板",function () {
+                    $.startHud();
+                    net.delete("/template/item",{
+                        id:item._id
+                    }).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("删除成功",1);
+                            _this.template.splice(index,1);
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0)
+                        }
+                    })
                 })
             }
         },

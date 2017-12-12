@@ -1,6 +1,6 @@
 /*!
  * depd
- * Copyright(c) 2014-2015 Douglas Christopher Wilson
+ * Copyright(c) 2014-2017 Douglas Christopher Wilson
  * MIT Licensed
  */
 
@@ -28,13 +28,13 @@ var basePath = process.cwd()
  * Determine if namespace is contained in the string.
  */
 
-function containsNamespace(str, namespace) {
+function containsNamespace (str, namespace) {
   var val = str.split(/[ ,]+/)
 
   namespace = String(namespace).toLowerCase()
 
-  for (var i = 0 ; i < val.length; i++) {
-    if (!(str = val[i])) continue;
+  for (var i = 0; i < val.length; i++) {
+    if (!(str = val[i])) continue
 
     // namespace contained
     if (str === '*' || str.toLowerCase() === namespace) {
@@ -49,14 +49,14 @@ function containsNamespace(str, namespace) {
  * Convert a data descriptor to accessor descriptor.
  */
 
-function convertDataDescriptorToAccessor(obj, prop, message) {
+function convertDataDescriptorToAccessor (obj, prop, message) {
   var descriptor = Object.getOwnPropertyDescriptor(obj, prop)
   var value = descriptor.value
 
-  descriptor.get = function getter() { return value }
+  descriptor.get = function getter () { return value }
 
   if (descriptor.writable) {
-    descriptor.set = function setter(val) { return value = val }
+    descriptor.set = function setter (val) { return (value = val) }
   }
 
   delete descriptor.value
@@ -71,7 +71,7 @@ function convertDataDescriptorToAccessor(obj, prop, message) {
  * Create arguments string to keep arity.
  */
 
-function createArgumentsString(arity) {
+function createArgumentsString (arity) {
   var str = ''
 
   for (var i = 0; i < arity; i++) {
@@ -85,7 +85,7 @@ function createArgumentsString(arity) {
  * Create stack string from stack.
  */
 
-function createStackString(stack) {
+function createStackString (stack) {
   var str = this.name + ': ' + this.namespace
 
   if (this.message) {
@@ -103,7 +103,7 @@ function createStackString(stack) {
  * Create deprecate for namespace in caller.
  */
 
-function depd(namespace) {
+function depd (namespace) {
   if (!namespace) {
     throw new TypeError('argument namespace is required')
   }
@@ -112,7 +112,7 @@ function depd(namespace) {
   var site = callSiteLocation(stack[1])
   var file = site[0]
 
-  function deprecate(message) {
+  function deprecate (message) {
     // call to self as log
     log.call(deprecate, message)
   }
@@ -133,7 +133,7 @@ function depd(namespace) {
  * Determine if namespace is ignored.
  */
 
-function isignored(namespace) {
+function isignored (namespace) {
   /* istanbul ignore next: tested in a child processs */
   if (process.noDeprecation) {
     // --no-deprecation support
@@ -150,7 +150,7 @@ function isignored(namespace) {
  * Determine if namespace is traced.
  */
 
-function istraced(namespace) {
+function istraced (namespace) {
   /* istanbul ignore next: tested in a child processs */
   if (process.traceDeprecation) {
     // --trace-deprecation support
@@ -167,7 +167,7 @@ function istraced(namespace) {
  * Display deprecation message.
  */
 
-function log(message, site) {
+function log (message, site) {
   var haslisteners = eventListenerCount(process, 'deprecation') !== 0
 
   // abort early if no destination
@@ -240,15 +240,13 @@ function log(message, site) {
     : formatPlain
   var msg = format.call(this, message, caller, stack.slice(i))
   process.stderr.write(msg + '\n', 'utf8')
-
-  return
 }
 
 /**
  * Get call site location as array.
  */
 
-function callSiteLocation(callSite) {
+function callSiteLocation (callSite) {
   var file = callSite.getFileName() || '<anonymous>'
   var line = callSite.getLineNumber()
   var colm = callSite.getColumnNumber()
@@ -269,7 +267,7 @@ function callSiteLocation(callSite) {
  * Generate a default message from the site.
  */
 
-function defaultMessage(site) {
+function defaultMessage (site) {
   var callSite = site.callSite
   var funcName = site.name
 
@@ -300,12 +298,12 @@ function defaultMessage(site) {
  * Format deprecation message without color.
  */
 
-function formatPlain(msg, caller, stack) {
+function formatPlain (msg, caller, stack) {
   var timestamp = new Date().toUTCString()
 
-  var formatted = timestamp
-    + ' ' + this._namespace
-    + ' deprecated ' + msg
+  var formatted = timestamp +
+    ' ' + this._namespace +
+    ' deprecated ' + msg
 
   // add stack trace
   if (this._traced) {
@@ -327,10 +325,10 @@ function formatPlain(msg, caller, stack) {
  * Format deprecation message with color.
  */
 
-function formatColor(msg, caller, stack) {
-  var formatted = '\x1b[36;1m' + this._namespace + '\x1b[22;39m' // bold cyan
-    + ' \x1b[33;1mdeprecated\x1b[22;39m' // bold yellow
-    + ' \x1b[0m' + msg + '\x1b[39m' // reset
+function formatColor (msg, caller, stack) {
+  var formatted = '\x1b[36;1m' + this._namespace + '\x1b[22;39m' + // bold cyan
+    ' \x1b[33;1mdeprecated\x1b[22;39m' + // bold yellow
+    ' \x1b[0m' + msg + '\x1b[39m' // reset
 
   // add stack trace
   if (this._traced) {
@@ -352,17 +350,17 @@ function formatColor(msg, caller, stack) {
  * Format call site location.
  */
 
-function formatLocation(callSite) {
-  return relative(basePath, callSite[0])
-    + ':' + callSite[1]
-    + ':' + callSite[2]
+function formatLocation (callSite) {
+  return relative(basePath, callSite[0]) +
+    ':' + callSite[1] +
+    ':' + callSite[2]
 }
 
 /**
  * Get the stack as array of call sites.
  */
 
-function getStack() {
+function getStack () {
   var limit = Error.stackTraceLimit
   var obj = {}
   var prep = Error.prepareStackTrace
@@ -386,7 +384,7 @@ function getStack() {
  * Capture call site stack from v8.
  */
 
-function prepareObjectStackTrace(obj, stack) {
+function prepareObjectStackTrace (obj, stack) {
   return stack
 }
 
@@ -394,23 +392,24 @@ function prepareObjectStackTrace(obj, stack) {
  * Return a wrapped function in a deprecation message.
  */
 
-function wrapfunction(fn, message) {
+function wrapfunction (fn, message) {
   if (typeof fn !== 'function') {
     throw new TypeError('argument fn must be a function')
   }
 
   var args = createArgumentsString(fn.length)
-  var deprecate = this
+  var deprecate = this // eslint-disable-line no-unused-vars
   var stack = getStack()
   var site = callSiteLocation(stack[1])
 
   site.name = fn.name
 
-  var deprecatedfn = eval('(function (' + args + ') {\n'
-    + '"use strict"\n'
-    + 'log.call(deprecate, message, site)\n'
-    + 'return fn.apply(this, arguments)\n'
-    + '})')
+   // eslint-disable-next-line no-eval
+  var deprecatedfn = eval('(function (' + args + ') {\n' +
+    '"use strict"\n' +
+    'log.call(deprecate, message, site)\n' +
+    'return fn.apply(this, arguments)\n' +
+    '})')
 
   return deprecatedfn
 }
@@ -419,7 +418,7 @@ function wrapfunction(fn, message) {
  * Wrap property in a deprecation message.
  */
 
-function wrapproperty(obj, prop, message) {
+function wrapproperty (obj, prop, message) {
   if (!obj || (typeof obj !== 'object' && typeof obj !== 'function')) {
     throw new TypeError('argument obj must be object')
   }
@@ -451,7 +450,7 @@ function wrapproperty(obj, prop, message) {
 
   // wrap getter
   if (typeof get === 'function') {
-    descriptor.get = function getter() {
+    descriptor.get = function getter () {
       log.call(deprecate, message, site)
       return get.apply(this, arguments)
     }
@@ -459,7 +458,7 @@ function wrapproperty(obj, prop, message) {
 
   // wrap setter
   if (typeof set === 'function') {
-    descriptor.set = function setter() {
+    descriptor.set = function setter () {
       log.call(deprecate, message, site)
       return set.apply(this, arguments)
     }
@@ -472,7 +471,7 @@ function wrapproperty(obj, prop, message) {
  * Create DeprecationError for deprecation
  */
 
-function DeprecationError(namespace, message, stack) {
+function DeprecationError (namespace, message, stack) {
   var error = new Error()
   var stackString
 
@@ -510,9 +509,9 @@ function DeprecationError(namespace, message, stack) {
       }
 
       // prepare stack trace
-      return stackString = createStackString.call(this, stack)
+      return (stackString = createStackString.call(this, stack))
     },
-    set: function setter(val) {
+    set: function setter (val) {
       stackString = val
     }
   })

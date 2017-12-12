@@ -1,9 +1,8 @@
 "use strict";
 const whatwgURL = require("whatwg-url");
-const documentBaseURL = require("../helpers/document-base-url.js").documentBaseURL;
-const parseURLToResultingURLRecord = require("../helpers/document-base-url.js").parseURLToResultingURLRecord;
-const DOMException = require("../../web-idl/DOMException.js");
-const navigate = require("./navigation.js").navigate;
+const DOMException = require("domexception");
+const { documentBaseURL, parseURLToResultingURLRecord } = require("../helpers/document-base-url");
+const { navigate } = require("./navigation");
 
 // Not implemented: use of entry settings object's API base URL in href setter, assign, and replace. Instead we just
 // use the document base URL. The difference matters in the case of cross-frame calls.
@@ -207,8 +206,8 @@ exports.implementation = class LocationImpl {
     const parsedURL = parseURLToResultingURLRecord(url, this._relevantDocument);
 
     if (parsedURL === null) {
-      throw new DOMException(DOMException.SYNTAX_ERR, `Could not resolve the given string "${url}" relative to the ` +
-        `base URL "${this._relevantDocument.URL}"`);
+      throw new DOMException(`Could not resolve the given string "${url}" relative to the ` +
+        `base URL "${this._relevantDocument.URL}"`, "SyntaxError");
     }
 
     this._locationObjectNavigate(parsedURL);
@@ -219,8 +218,8 @@ exports.implementation = class LocationImpl {
     const parsedURL = parseURLToResultingURLRecord(url, this._relevantDocument);
 
     if (parsedURL === null) {
-      throw new DOMException(DOMException.SYNTAX_ERR, `Could not resolve the given string "${url}" relative to the ` +
-        `base URL "${this._relevantDocument.URL}"`);
+      throw new DOMException(`Could not resolve the given string "${url}" relative to the ` +
+        `base URL "${this._relevantDocument.URL}"`, "SyntaxError");
     }
 
     this._locationObjectNavigate(parsedURL, { replacement: true });

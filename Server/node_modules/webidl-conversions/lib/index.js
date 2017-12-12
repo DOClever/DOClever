@@ -192,9 +192,7 @@ exports.float = (V, opts) => {
         return x;
     }
 
-    const array = new Float32Array(1);
-    array[0] = x;
-    const y = array[0];
+    const y = Math.fround(x);
 
     if (!Number.isFinite(y)) {
         throw new TypeError(_("is outside the range of a single-precision floating-point value", opts));
@@ -214,9 +212,7 @@ exports["unrestricted float"] = V => {
         return x;
     }
 
-    const array = new Float32Array(1);
-    array[0] = x;
-    return array[0];
+    return Math.fround(x);
 };
 
 exports.DOMString = function (V, opts) {

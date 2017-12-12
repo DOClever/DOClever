@@ -32,7 +32,11 @@ exports.implementation = class URLSearchParamsImpl {
 
   _updateSteps() {
     if (this._url !== null) {
-      this._url._url.query = urlencoded.serializeUrlencoded(this._list);
+      let query = urlencoded.serializeUrlencoded(this._list);
+      if (query === "") {
+        query = null;
+      }
+      this._url._url.query = query;
     }
   }
 

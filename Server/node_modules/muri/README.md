@@ -1,13 +1,13 @@
-#Meet Muri!
+# Meet Muri!
 
 Muri is your friendly neighborhood [MongoDB URI](http://www.mongodb.org/display/DOCS/Connections) parser for Node.js.
 
 
-###Install
+### Install
 
     $ npm install muri
 
-###Use
+### Use
 
 ```js
  var muri = require('muri');
@@ -43,4 +43,6 @@ The returned object contains the following properties:
   - if a unix domain socket is passed, host/port will be undefined and `ipc` will be set to the value specified `[{ ipc: '/tmp/mongodb-27017' }]`
 - options: this is a hash of all options specified in the querystring
 
-[LICENSE](https://github.com/aheckmann/muri/blob/master/LICENSE)
+### License
+
+[MIT](https://github.com/aheckmann/muri/blob/master/LICENSE)

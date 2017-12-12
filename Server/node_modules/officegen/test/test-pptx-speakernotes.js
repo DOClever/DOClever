@@ -1,0 +1,132 @@
+//======================================================================================================================
+// TEST SUITE FOR OFFICEGEN
+// This generates small individual files that test specific aspects of the API
+// and compares them to reference files.
+//
+// The comparison is based on string comparisons of specified XML subdocuments.
+// Comparing PPTX files for exact-bytewise equality fails because the doc properties include the creation date.
+// This method tests a defined set of XML subdocuments for string equality.
+//======================================================================================================================
+
+var assert = require ( 'assert' );
+var officegen = require ( '../' );
+var fs = require ( 'fs' );
+var path = require ( 'path' );
+
+var pluginSpeakernotes = require ( '../lib/pptxplg-speakernotes' );
+
+var OUTDIR = __dirname + "/../tmp/";
+
+// Common error method
+var onError = function ( err ) {
+	console.log ( err );
+	assert ( false );
+};
+
+describe("PPTX Speaker Notes plugin", function () {
+	this.slow ( 1000 );
+
+	it ( "creates a presentation with one speaker note", function ( done ) {
+		var slide;
+		var pptx = officegen ( 'pptx' );
+		pptx.on ( 'error', onError );
+
+		pptx.setDocTitle ( 'Testing Speaker Notes' );
+
+		//
+		// Slide #1:
+		//
+
+		slide = pptx.makeNewSlide ();
+
+		slide.name = 'Title to the slide?';
+
+		// Change the background color:
+		slide.back = '000000';
+
+		// Declare the default color to use on this slide:
+		slide.color = 'ffffff';
+
+		// Add some text:
+		slide.addText ( 'Created using Officegen version ' + officegen.version, 0, 0, '80%', 20 );
+
+		//
+		// Slide #2:
+		//
+
+		slide = pptx.makeNewSlide ();
+
+		// Change the background color:
+		slide.back = '22c0e7';
+
+		// Declare the default color to use on this slide:
+		slide.color = '000000';
+
+		// Add some text:
+		slide.addText ( 'Just another one', 0, 0, '100%', 20 );
+
+		//
+		// Slide #3:
+		//
+
+		slide = pptx.makeNewSlide ();
+
+		// Change the background color:
+		slide.back = 'e7bb22';
+
+		// Declare the default color to use on this slide:
+		slide.color = '000000';
+
+		// Add some text:
+		slide.addText ( 'This one has a speaker note', 0, 0, '100%', 20 );
+
+		// Add a speaker note:
+		slide.setSpeakerNote ( 'This is a speaker note! Using the new setSpeakerNote feature of the slide API.' );
+
+		//
+		// Slide #4:
+		//
+
+		slide = pptx.makeNewSlide ();
+
+		// Change the background color:
+		slide.back = 'e7db19';
+
+		// Declare the default color to use on this slide:
+		slide.color = '000000';
+
+		// Add some text:
+		slide.addText ( 'This one has a speaker note with 2 lines', 0, 0, '100%', 20 );
+
+		// Add a speaker note:
+		// slide.setSpeakerNote ( 'This is a speaker note!\nUsing the new setSpeakerNote feature of the slide API.' );
+		slide.setSpeakerNote ( 'This is a speaker note!' );
+		slide.setSpeakerNote ( 'Using the new setSpeakerNote feature of the slide API.', true );
+
+		//
+		// Slide #5:
+		//
+
+		slide = pptx.makeNewSlide ();
+
+		// Change the background color:
+		slide.back = '2fe722';
+
+		// Declare the default color to use on this slide:
+		slide.color = '000000';
+
+		// Add some text:
+		slide.addText ( 'Just another slide', 0, 0, '100%', 20 );
+
+		//
+		// Generate the pptx file:
+		//
+
+		var FILENAME = "test-ppt-notes-1.pptx";
+		var out = fs.createWriteStream ( OUTDIR + FILENAME );
+		pptx.generate ( out );
+		out.on ( 'close', function () {
+			done ();
+		});
+	});
+});

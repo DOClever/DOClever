@@ -115,6 +115,12 @@ module.exports={
         type:""
     },
     getters:{
+        template:function (state,getters,rootState) {
+            return rootState.project.info.template;
+        },
+        objCopyJSON:function (state,getters,rootState) {
+              return rootState.objCopyJSON;
+        },
         bodyInfo:function (state,getters) {
             return state.param[state.index].bodyInfo;
         },
@@ -341,6 +347,7 @@ module.exports={
                 obj.bodyInfo.rawJSON=obj.rawJSONObject;
                 obj.result=obj.resultObject;
             }
+            obj.unSave=1;
             state.param.push(obj);
             state.index=state.param.length-1;
         },
@@ -1582,6 +1589,9 @@ module.exports={
                             })(context.state.interfaceList);
                         }
                     }
+                    context.state.param.forEach(function (obj) {
+                        delete obj.unSave;
+                    })
                     context.commit("searchInterface");
                 }
                 return data;
@@ -1671,5 +1681,97 @@ module.exports={
                 context.state.drawMix=helper.format(JSON.stringify(obj),1,result,context.state.status).draw;
             }
         },
+        saveTemplate:function (context,data) {
+            var obj={
+                name:data.name,
+                url:context.state.interfaceEdit.url,
+                remark:context.state.interfaceEdit.remark,
+                project:session.get("projectId"),
+                method:context.state.interfaceEdit.method,
+                param:[]
+            }
+            if(data.id)
+            {
+                obj.id=data.id;
+            }
+            var originIndex=context.state.index;
+            for(var index=0;index<context.state.param.length;index++)
+            {
+                context.state.index=index;
+                var obj1={
+                    before:context.state.param[index].before,
+                    after:context.state.param[index].after,
+                    name:context.state.param[index].name,
+                    id:context.state.param[index].id,
+                    remark:context.state.param[index].remark,
+                }
+                obj1.header=context.getters.headerSave;
+                obj1.queryParam=context.getters.querySave;
+                if(context.state.interfaceEdit.method=="POST" || context.state.interfaceEdit.method=="PUT" || context.state.interfaceEdit.method=="PATCH")
+                {
+                    if(context.getters.bodyInfo.type==0)
+                    {
+                        obj1.bodyParam=context.getters.bodySave;
+                    }
+                    else
+                    {
+                        obj1.bodyParam=[];
+                    }
+                    var bodyInfo=$.clone(context.getters.bodyInfo);
+                    if(bodyInfo.type==1)
+                    {
+                        if(bodyInfo.rawType==0)
+                        {
+                            bodyInfo.rawFileRemark="";
+                            delete bodyInfo.rawJSON;
+                            delete bodyInfo.rawJSONType;
+                        }
+                        else if(bodyInfo.rawType==1)
+                        {
+                            bodyInfo.rawText="";
+                            bodyInfo.rawTextRemark="";
+                            delete bodyInfo.rawJSON;
+                            delete bodyInfo.rawJSONType;
+                        }
+                        else
+                        {
+                            bodyInfo.rawFileRemark="";
+                            bodyInfo.rawText="";
+                            bodyInfo.rawTextRemark="";
+                        }
+                    }
+                    else
+                    {
+                        bodyInfo.rawType=0;
+                        bodyInfo.rawFileRemark="";
+                        bodyInfo.rawText="";
+                        bodyInfo.rawTextRemark="";
+                        delete bodyInfo.rawJSON;
+                        delete bodyInfo.rawJSONType;
+                    }
+                    obj1.bodyInfo=bodyInfo
+                }
+                if(context.getters.outInfo.type==0)
+                {
+                    obj1.outParam=helper.resultSave(context.state.param[context.state.index].result);
+                    var outInfo=$.clone(context.getters.outInfo);
+                    outInfo.rawRemark="";
+                    outInfo.rawMock="";
+                    obj1.outInfo=outInfo
+                }
+                else
+                {
+                    obj1.outParam=[];
+                    obj1.outInfo=context.getters.outInfo
+                }
+                obj1.restParam=context.state.param[context.state.index].param;
+                obj.param.push(obj1);
+            }
+            obj.param=JSON.stringify(obj.param);
+            context.state.index=originIndex;
+            return net.post("/template/item",obj).then(function (data) {
+                return data;
+            })
+        }
     }
 }

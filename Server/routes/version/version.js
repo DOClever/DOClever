@@ -88,13 +88,13 @@ function Version() {
                                 }
                             }
                         }))
-                        if(arrUser.length==0 && !obj.public)
+                        if(arrUser.length==0 && !obj.public && !req.headers["referer"].endsWith("public/public.html"))
                         {
                             util.throw(e.userForbidden,"你没有权限");
                             return;
                         }
                     }
-                    else if(!obj.public)
+                    else if(!obj.public && !req.headers["referer"].endsWith("public/public.html"))
                     {
                         util.throw(e.userForbidden,"你没有权限");
                         return;

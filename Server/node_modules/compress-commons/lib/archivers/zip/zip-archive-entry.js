@@ -26,8 +26,8 @@ var ZipArchiveEntry = module.exports = function(name) {
   this.method = -1;
 
   this.name = null;
-  this.size = -1;
-  this.csize = -1;
+  this.size = 0;
+  this.csize = 0;
   this.gpb = new GeneralPurposeBit();
   this.crc = 0;
   this.time = -1;

@@ -17,6 +17,9 @@
                 <el-checkbox :true-label="1" :false-label="0" v-model="option.gi">
                     环境注入
                 </el-checkbox>&nbsp;&nbsp;
+                <el-checkbox :true-label="1" :false-label="0" v-model="option.gt">
+                    接口模板
+                </el-checkbox>&nbsp;&nbsp;
                 <el-checkbox :true-label="1" :false-label="0" v-model="option.gd">
                     文档
                 </el-checkbox>
@@ -45,6 +48,7 @@
                     "gb":0,
                     "gs":0,
                     "gi":0,
+                    "gt":0,
                     "gd":0,
                     "ve":0,
                     "vr":0

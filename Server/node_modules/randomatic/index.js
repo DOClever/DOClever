@@ -1,9 +1,8 @@
 /*!
  * randomatic <https://github.com/jonschlinkert/randomatic>
  *
- * This was originally inspired by <http://stackoverflow.com/a/10727155/1267639>
- * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License (MIT)
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
  */
 
 'use strict';
@@ -28,7 +27,7 @@ var type = {
   special: '~!@#$%^&()_+-={}[];\',.'
 };
 
-type.all = type.lower + type.upper + type.number;
+type.all = type.lower + type.upper + type.number + type.special;
 
 /**
  * Generate random character sequences of a specified `length`,

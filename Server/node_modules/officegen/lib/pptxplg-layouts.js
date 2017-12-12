@@ -1,0 +1,574 @@
+//
+// officegen: layouts support for pptx documents.
+//
+// Please refer to README.md for this module's documentations.
+//
+// NOTE:
+// - Before changing this code please refer to the hacking the code section on README.md.
+//
+// Copyright (c) 2017 Ziv Barber;
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// 'Software'), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+/**
+ * This function creating the pptx layouts plugin object.
+ * @summary Create a new pptx plugin.
+ * @param {object} pluginsman Access to the plugins manager for pptx documents.
+ * @constructor
+ * @name MakeLayoutPlugin
+ */
+function MakeLayoutPlugin ( pluginsman ) {
+	var funcThis = this;
+
+	this.ogPluginsApi = pluginsman.ogPluginsApi; // Generic officegen API for plugins.
+	this.msPluginsApi = pluginsman.genPrivate.plugs.type.msoffice; // msoffice plugins API.
+	this.pluginsman = pluginsman; // Document type specific plugins API.
+
+	this.pptxData = pluginsman.getDataStorage (); // Here you can store any temporary data needed for generating the document and depending on the data filled by the user.
+
+	this.mainPath = pluginsman.genPrivate.features.type.msoffice.main_path; // The "folder" name inside the document zip that all the specific resources of this document type are stored.
+	this.mainPathFile = pluginsman.genPrivate.features.type.msoffice.main_path_file; // The name of the main real xml resource of this document.
+	this.relsMain = pluginsman.genPrivate.type.msoffice.rels_main; // Main rels file.
+	this.relsApp = pluginsman.genPrivate.type.msoffice.rels_app; // Main rels file inside the specific document type "folder".
+	this.filesList = pluginsman.genPrivate.type.msoffice.files_list; // Resources list xml.
+	this.srcFilesList = pluginsman.genPrivate.type.msoffice.src_files_list; // For storing extra files inside the document zip.
+
+	//
+	// Catch events inside the document so we can extent it:
+	//
+
+	// We want to extend the main API of the pptx document object:
+	pluginsman.registerCallback ( 'makeDocApi', function ( docObj ) { funcThis.extendPptxApi ( docObj ); } );
+
+	// We want to extend the slide object API:
+	pluginsman.registerCallback ( 'newPage', function ( docData ) { funcThis.extendPptxSlideApi ( docData ); } );
+
+	// This event tell us that the generator is about to start working:
+	pluginsman.registerCallback ( 'beforeGen', function ( docObj ) { funcThis.beforeGen ( docObj ); } );
+
+	return this;
+}
+
+//
+// Events implementations:
+//
+
+/**
+ * This function extending the main document object with new API methods.
+ * @param {object} docObj Document object.
+ */
+MakeLayoutPlugin.prototype.extendPptxApi = function ( docObj ) {
+	var funcThis = this;
+
+	/**
+	 * Create a new title layout based slide.
+	 * @param {*} title Optional title string.
+	 * @param {*} subTitle Optional sub-title string.
+	 * @return The new slide object.
+	 */
+	docObj.makeTitleSlide = function ( title, subTitle ) {
+		return docObj.makeNewSlide ({
+			useLayout: 'title',
+			title: title,
+			subTitle: subTitle
+		});
+	};
+
+	/**
+	 * Create a new obj layout based slide.
+	 * @param {*} title Optional title string.
+	 * @param {*} objData Optional obj data.
+	 * @return The new slide object.
+	 */
+	docObj.makeObjSlide = function ( title, objData ) {
+		return docObj.makeNewSlide ({
+			useLayout: 'obj',
+			title: title,
+			objData: objData
+		});
+	};
+
+	/**
+	 * Create a new secHead layout based slide.
+	 * @param {*} title Optional title string.
+	 * @param {*} subTitle Optional sub-title string.
+	 * @return The new slide object.
+	 */
+	docObj.makeSecHeadSlide = function ( title, subTitle ) {
+		return docObj.makeNewSlide ({
+			useLayout: 'secHead',
+			title: title,
+			subTitle: subTitle
+		});
+	};
+
+	/**
+	 * Create a new custom layout.
+	 * @param {string} layoutName New layout name.
+	 * @return The new layout object.
+	 */
+	docObj.makeNewLayout = function ( layoutName ) {
+		if ( !funcThis.pptxData.slideLayouts ) {
+			funcThis.pptxData.slideLayouts = [];
+		} // Endif.
+
+		if ( !layoutName || typeof layoutName !== 'string' ) {
+			throw 'Invalid layout name.';
+		} // Endif.
+
+		var slideLayouts = funcThis.pptxData.slideLayouts;
+
+		var newLayout = {
+			slide: {
+				getPageNumber: function () { return 1; },
+				layoutName: layoutName
+			},
+			data: []
+		}
+
+		// Register a new layout object:
+		slideLayouts.push (
+			{
+				// We are using the slide resource generator to make the new layout since that the format is almost the same:
+				execCb: function ( data ) { return funcThis.pluginsman.genobj.cbMakePptxSlide ( data ); },
+				cbData: newLayout
+			}
+		);
+
+		// (we will add here API to add objects into the layout, but first we must move the slide API into a new file)
+		// BMK_TODO:
+
+		return newLayout;
+	};
+};
+
+/**
+ * This function extending a new created slide object with new API methods.
+ * @param {object} docData Object with information about the new slide and more.
+ */
+MakeLayoutPlugin.prototype.extendPptxSlideApi = function ( docData ) {
+	var funcThis = this;
+	var newSlide = docData.page; // The new slide's API.
+	var slideData = docData.pageData; // Place here data related to the slide.
+	var slideOptions = docData.slideOptions; // Slide creation options.
+
+	// We'll add API only if the user requested it:
+	if ( slideOptions && typeof slideOptions === 'object' && slideOptions.useLayout ) {
+		// Support for the standard office layout1:
+		if ( slideOptions.useLayout === 'title' || slideOptions.useLayout === 'obj' || slideOptions.useLayout === 'secHead' ) {
+			var resCb = this.pluginsman.genobj.cbMakePptxLayout1;
+			var layoutFileNum = 1;
+			if ( slideOptions.useLayout === 'obj' ) {
+				layoutFileNum = 2;
+				resCb = function ( data ) {
+					return funcThis.cbMakePptxLayout2 ( data );
+				};
+			} // Endif.
+
+			if ( slideOptions.useLayout === 'secHead' ) {
+				layoutFileNum = 3;
+				resCb = function ( data ) {
+					return funcThis.cbMakePptxLayout3 ( data );
+				};
+			} // Endif.
+
+			newSlide.useLayout = {
+				mkResCb: resCb,
+				slide: newSlide,
+				ph1: [],
+				ph2: [],
+				ft: [],
+				useDate: new Date (),
+				isRealSlide: true,
+				isFooter: false,
+				isSlideNum: true,
+				isDate: true,
+				layoutFileNum: layoutFileNum
+			};
+
+			// Set the real layout for this slide:
+			newSlide.getRelFile ()[0].target = '../slideLayouts/slideLayout' + layoutFileNum + '.xml';
+
+			newSlide.setTitle = function ( titleStr ) {
+				if ( typeof titleStr === 'string' ) {
+					newSlide.useLayout.ph1 = [
+						{ text: titleStr }
+					];
+
+				} else if ( typeof titleStr === 'object' ) {
+					newSlide.useLayout.ph1 = titleStr;
+				} // Endif.
+			};
+
+			if ( slideOptions.useLayout === 'obj' ) {
+				newSlide.setObjData = function ( objData ) {
+					if ( typeof objData === 'string' ) {
+						newSlide.useLayout.ph2 = [
+							{ text: objData }
+						];
+
+					} else if ( typeof objData === 'object' ) {
+						newSlide.useLayout.ph2 = objData;
+					} // Endif.
+				};
+
+				newSlide.appendObjData = function ( objData ) {
+					if ( typeof objData === 'string' ) {
+						newSlide.useLayout.ph2.push ( { text: objData } );
+
+					} else if ( typeof objData === 'object' && objData.length ) {
+						newSlide.useLayout.ph2 = newSlide.useLayout.ph2.concat ( objData );
+					} // Endif.
+				};
+
+			} else {
+				newSlide.setSubTitle = function ( titleStr ) {
+					if ( typeof titleStr === 'string' ) {
+						newSlide.useLayout.ph2 = [
+							{ text: titleStr }
+						];
+
+					} else if ( typeof titleStr === 'object' ) {
+						newSlide.useLayout.ph2 = titleStr;
+					} // Endif.
+				};
+			} // Endif.
+
+			newSlide.setFooter = function ( footerStr ) {
+				newSlide.useLayout.isFooter = true;
+
+				if ( typeof footerStr === 'string' ) {
+					newSlide.useLayout.ft = [
+						{ text: footerStr }
+					];
+
+				} else if ( typeof footerStr === 'object' ) {
+					newSlide.useLayout.ft = footerStr;
+				} // Endif.
+			};
+
+			if ( slideOptions.title ) {
+				newSlide.setTitle ( slideOptions.title );
+			} // Endif.
+
+			if ( slideOptions.useLayout === 'obj' ) {
+				if ( slideOptions.objData ) {
+					newSlide.setObjData ( slideOptions.objData );
+				} // Endif.
+
+			} else {
+				if ( slideOptions.subTitle ) {
+					newSlide.setSubTitle ( slideOptions.subTitle );
+				} // Endif.
+			} // Endif.
+
+			if ( slideOptions.footer ) {
+				newSlide.setFooter ( slideOptions.footer );
+			} // Endif.
+
+		} else {
+			throw ( 'Invalid office layout.' );
+		} // Endif.
+	} // Endif.
+};
+
+/**
+ * This function been called just before starting to generate the output document zip.
+ * @param {object} docObj Document object.
+ */
+MakeLayoutPlugin.prototype.beforeGen = function ( docObj ) {
+	var funcThis = this;
+
+	if ( !this.pptxData.slideLayouts ) {
+		this.pptxData.slideLayouts = [];
+	} // Endif.
+
+	var slideLayouts = this.pptxData.slideLayouts;
+
+	function addLayout ( curId ) {
+		slideLayouts.push (
+			{
+				execCb: function ( data ) { return funcThis['cbMakePptxLayout' + curId] ( data ); },
+				cbData: { layoutRealOfficeId: curId }
+			}
+		);
+	}
+
+	// Add all the office additional standard layouts:
+	for ( var i = 0; i < 10; i++ ) {
+		addLayout ( i + 2 );
+	} // End of for loop.
+
+	// Work on all the registered layout so we'll add them into the output document:
+	var curId = 0;
+	for ( var item in slideLayouts ) {
+		// Make sure that we'll know the right rel ID of this new slide resource:
+		slideLayouts[item].relIdMaster = funcThis.pluginsman.genobj.slideMasterRels.length + 1;
+
+		// Add it to the rels of the slides master:
+		funcThis.pluginsman.genobj.slideMasterRels.push ({
+			type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout',
+			target: '../slideLayouts/slideLayout' + (curId + 2) + '.xml',
+			clear: 'generate'
+		});
+
+		// Add this slide layout resource + the rels resource of it:
+		slideLayouts[item].cbData.layoutNum = curId + 2;
+		funcThis.ogPluginsApi.intAddAnyResourceToParse ( funcThis.mainPath + '\\slideLayouts\\slideLayout' + (curId + 2) + '.xml', 'buffer', slideLayouts[item].cbData, slideLayouts[item].execCb, false );
+		funcThis.ogPluginsApi.intAddAnyResourceToParse ( funcThis.mainPath + '\\slideLayouts\\_rels\\slideLayout' + (curId + 2) + '.xml.rels', 'buffer', [
+			{
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster',
+				target: '../slideMasters/slideMaster1.xml'
+			}
+		], funcThis.pluginsman.genPrivate.plugs.type.msoffice.cbMakeRels, false );
+
+		// Add it also to the main list of resources in the document:
+		funcThis.filesList.push ({
+			name: '/ppt/slideLayouts/slideLayout' + (curId + 2) + '.xml',
+			type: 'application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml',
+			clear: 'generate'
+		});
+
+		curId++;
+	} // End of for loop.
+};
+
+//
+// Resource generating callbacks:
+//
+
+/**
+ * Create the 'slideLayout2.xml' resource.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeLayoutPlugin.prototype.cbMakePptxLayout2 = function ( data ) {
+	if ( !data || typeof data !== 'object' ) {
+		data = {};
+	} // Endif.
+
+	// You can place here the title:
+	var ph1 = '<a:p><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master title style</a:t></a:r><a:endParaRPr lang="en-US"/></a:p>';
+	if ( data.ph1 && data.slide && data.ph1.length ) {
+		ph1 = this.pluginsman.genobj.cMakePptxOutTextP ( '', data.ph1, {}, data.slide );
+	} // Endif.
+
+	// More data:
+	var ph2 = '<a:p><a:pPr lvl="0"><a:buChar char="•"/></a:pPr><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl="1"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl="2"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl="3"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl="4"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fifth level</a:t></a:r><a:endParaRPr lang="en-US"/></a:p>';
+	if ( data.ph2 && data.slide && data.ph2.length ) {
+		ph2 = this.pluginsman.genobj.cMakePptxOutTextP ( '', data.ph2, {}, data.slide );
+	} // Endif.
+
+	var ph3 = this.pluginsman.genobj.createFieldText ( 'DATE_TIME', 1, data.useDate );
+
+	var footFull = '';
+	var ft = '';
+	var curElNum = 4;
+
+	if ( data.isDate || !data.isRealSlide ) {
+		footFull += '<p:sp><p:nvSpPr><p:cNvPr id="' + curElNum + '" name="Date Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" sz="half" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{A76116CE-C4A3-4A05-B2D7-7C2E9A889C0F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>' + ph3 + '</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp>';
+		curElNum++;
+	} // Endif.
+
+	if ( data.isFooter && data.ft && data.slide && data.ft.length ) {
+		ft = this.pluginsman.genobj.cMakePptxOutTextP ( '', data.ft, {}, data.slide );
+		footFull += '<p:sp><p:nvSpPr><p:cNvPr id="' + curElNum + '" name="Footer Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/>' + ft + '</p:txBody></p:sp>';
+		curElNum++;
+
+	} else if ( !data.isRealSlide ) {
+		footFull += '<p:sp><p:nvSpPr><p:cNvPr id="' + curElNum + '" name="Footer Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp>';
+		curElNum++;
+	} // Endif.
+
+	if ( data.isSlideNum || !data.isRealSlide ) {
+		footFull += '<p:sp><p:nvSpPr><p:cNvPr id="' + curElNum + '" name="Slide Number Placeholder 5"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{B1393E5F-521B-4CAD-9D3A-AE923D912DCE}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp>';
+		curElNum++;
+	} // Endif.
+
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:sld' + (data.isRealSlide ? '' : 'Layout') + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' + (data.isRealSlide ? '' : ' type="obj" preserve="1"') + '><p:cSld name="Title and Content"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Title 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/>' + ph1 + '</p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Content Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph idx="1"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/>'+ ph2 + '</p:txBody></p:sp>' + footFull + '</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld' + (data.isRealSlide ? '' : 'Layout') + '>';
+};
+
+/**
+ * Create the 'slideLayout3.xml' resource.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeLayoutPlugin.prototype.cbMakePptxLayout3 = function ( data ) {
+	if ( !data || typeof data !== 'object' ) {
+		data = {};
+	} // Endif.
+
+	// You can place here the title:
+	var ph1 = '<a:p><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master title style</a:t></a:r><a:endParaRPr lang="en-US"/></a:p>';
+	if ( data.ph1 && data.slide && data.ph1.length ) {
+		ph1 = this.pluginsman.genobj.cMakePptxOutTextP ( '', data.ph1, {}, data.slide );
+	} // Endif.
+
+	// More data:
+	var ph2 = '<a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p>';
+	if ( data.ph2 && data.slide && data.ph2.length ) {
+		ph2 = this.pluginsman.genobj.cMakePptxOutTextP ( '', data.ph2, {}, data.slide );
+	} // Endif.
+
+	var ph3 = this.pluginsman.genobj.createFieldText ( 'DATE_TIME', 1, data.useDate );
+
+	var footFull = '';
+	var ft = '';
+	var curElNum = 4;
+
+	if ( data.isDate || !data.isRealSlide ) {
+		footFull += '<p:sp><p:nvSpPr><p:cNvPr id="' + curElNum + '" name="Date Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" sz="half" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{A76116CE-C4A3-4A05-B2D7-7C2E9A889C0F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>' + ph3 + '</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp>';
+		curElNum++;
+	} // Endif.
+
+	if ( data.isFooter && data.ft && data.slide && data.ft.length ) {
+		ft = this.pluginsman.genobj.cMakePptxOutTextP ( '', data.ft, {}, data.slide );
+		footFull += '<p:sp><p:nvSpPr><p:cNvPr id="' + curElNum + '" name="Footer Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/>' + ft + '</p:txBody></p:sp>';
+		curElNum++;
+
+	} else if ( !data.isRealSlide ) {
+		footFull += '<p:sp><p:nvSpPr><p:cNvPr id="' + curElNum + '" name="Footer Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp>';
+		curElNum++;
+	} // Endif.
+
+	if ( data.isSlideNum || !data.isRealSlide ) {
+		footFull += '<p:sp><p:nvSpPr><p:cNvPr id="' + curElNum + '" name="Slide Number Placeholder 5"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{B1393E5F-521B-4CAD-9D3A-AE923D912DCE}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp>';
+		curElNum++;
+	} // Endif.
+
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:sld' + (data.isRealSlide ? '' : 'Layout') + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' + (data.isRealSlide ? '' : ' type="secHead" preserve="1"') + '><p:cSld name="Section Header"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Title 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="722313" y="4406900"/><a:ext cx="7772400" cy="1362075"/></a:xfrm></p:spPr><p:txBody><a:bodyPr anchor="t"/><a:lstStyle><a:lvl1pPr algn="l"><a:defRPr sz="4000" b="1" cap="all"/></a:lvl1pPr></a:lstStyle>' + ph1 + '</p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Text Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" idx="1"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="722313" y="2906713"/><a:ext cx="7772400" cy="1500187"/></a:xfrm></p:spPr><p:txBody><a:bodyPr anchor="b"/><a:lstStyle><a:lvl1pPr marL="0" indent="0"><a:buNone/><a:defRPr sz="2000"><a:solidFill><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl1pPr><a:lvl2pPr marL="457200" indent="0"><a:buNone/><a:defRPr sz="1800"><a:solidFill><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl2pPr><a:lvl3pPr marL="914400" indent="0"><a:buNone/><a:defRPr sz="1600"><a:solidFill><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl3pPr><a:lvl4pPr marL="1371600" indent="0"><a:buNone/><a:defRPr sz="1400"><a:solidFill><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl4pPr><a:lvl5pPr marL="1828800" indent="0"><a:buNone/><a:defRPr sz="1400"><a:solidFill><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl5pPr><a:lvl6pPr marL="2286000" indent="0"><a:buNone/><a:defRPr sz="1400"><a:solidFill><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl6pPr><a:lvl7pPr marL="2743200" indent="0"><a:buNone/><a:defRPr sz="1400"><a:solidFill><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl7pPr><a:lvl8pPr marL="3200400" indent="0"><a:buNone/><a:defRPr sz="1400"><a:solidFill><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl8pPr><a:lvl9pPr marL="3657600" indent="0"><a:buNone/><a:defRPr sz="1400"><a:solidFill><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl9pPr></a:lstStyle>' + ph2 + '</p:txBody></p:sp>' + footFull + '</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld' + (data.isRealSlide ? '' : 'Layout') + '>';
+};
+
+/**
+ * Create the 'slideLayout4.xml' resource.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeLayoutPlugin.prototype.cbMakePptxLayout4 = function ( data ) {
+	if ( !data || typeof data !== 'object' ) {
+		data = {};
+	} // Endif.
+
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:sld' + (data.isRealSlide ? '' : 'Layout') + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' + (data.isRealSlide ? '' : ' type="twoObj" preserve="1"') + '><p:cSld name="Two Content"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Title 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master title style</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Content Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph sz="half" idx="1"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="457200" y="1600200"/><a:ext cx="4038600" cy="4525963"/></a:xfrm></p:spPr><p:txBody><a:bodyPr/><a:lstStyle><a:lvl1pPr><a:defRPr sz="2800"/></a:lvl1pPr><a:lvl2pPr><a:defRPr sz="2400"/></a:lvl2pPr><a:lvl3pPr><a:defRPr sz="2000"/></a:lvl3pPr><a:lvl4pPr><a:defRPr sz="1800"/></a:lvl4pPr><a:lvl5pPr><a:defRPr sz="1800"/></a:lvl5pPr><a:lvl6pPr><a:defRPr sz="1800"/></a:lvl6pPr><a:lvl7pPr><a:defRPr sz="1800"/></a:lvl7pPr><a:lvl8pPr><a:defRPr sz="1800"/></a:lvl8pPr><a:lvl9pPr><a:defRPr sz="1800"/></a:lvl9pPr></a:lstStyle><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl="1"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl="2"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl="3"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl="4"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fifth level</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Content Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph sz="half" idx="2"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="4648200" y="1600200"/><a:ext cx="4038600" cy="4525963"/></a:xfrm></p:spPr><p:txBody><a:bodyPr/><a:lstStyle><a:lvl1pPr><a:defRPr sz="2800"/></a:lvl1pPr><a:lvl2pPr><a:defRPr sz="2400"/></a:lvl2pPr><a:lvl3pPr><a:defRPr sz="2000"/></a:lvl3pPr><a:lvl4pPr><a:defRPr sz="1800"/></a:lvl4pPr><a:lvl5pPr><a:defRPr sz="1800"/></a:lvl5pPr><a:lvl6pPr><a:defRPr sz="1800"/></a:lvl6pPr><a:lvl7pPr><a:defRPr sz="1800"/></a:lvl7pPr><a:lvl8pPr><a:defRPr sz="1800"/></a:lvl8pPr><a:lvl9pPr><a:defRPr sz="1800"/></a:lvl9pPr></a:lstStyle><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl="1"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl="2"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl="3"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl="4"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fifth level</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="5" name="Date Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" sz="half" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{A76116CE-C4A3-4A05-B2D7-7C2E9A889C0F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>1/30/2017</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="6" name="Footer Placeholder 5"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="7" name="Slide Number Placeholder 6"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{B1393E5F-521B-4CAD-9D3A-AE923D912DCE}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld' + (data.isRealSlide ? '' : 'Layout') + '>';
+};
+
+/**
+ * Create the 'slideLayout5.xml' resource.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeLayoutPlugin.prototype.cbMakePptxLayout5 = function ( data ) {
+	if ( !data || typeof data !== 'object' ) {
+		data = {};
+	} // Endif.
+
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:sld' + (data.isRealSlide ? '' : 'Layout') + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' + (data.isRealSlide ? '' : ' type="twoTxTwoObj" preserve="1"') + '><p:cSld name="Comparison"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Title 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle><a:lvl1pPr><a:defRPr/></a:lvl1pPr></a:lstStyle><a:p><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master title style</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Text Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" idx="1"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="457200" y="1535113"/><a:ext cx="4040188" cy="639762"/></a:xfrm></p:spPr><p:txBody><a:bodyPr anchor="b"/><a:lstStyle><a:lvl1pPr marL="0" indent="0"><a:buNone/><a:defRPr sz="2400" b="1"/></a:lvl1pPr><a:lvl2pPr marL="457200" indent="0"><a:buNone/><a:defRPr sz="2000" b="1"/></a:lvl2pPr><a:lvl3pPr marL="914400" indent="0"><a:buNone/><a:defRPr sz="1800" b="1"/></a:lvl3pPr><a:lvl4pPr marL="1371600" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl4pPr><a:lvl5pPr marL="1828800" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl5pPr><a:lvl6pPr marL="2286000" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl6pPr><a:lvl7pPr marL="2743200" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl7pPr><a:lvl8pPr marL="3200400" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl8pPr><a:lvl9pPr marL="3657600" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl9pPr></a:lstStyle><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Content Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph sz="half" idx="2"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="457200" y="2174875"/><a:ext cx="4040188" cy="3951288"/></a:xfrm></p:spPr><p:txBody><a:bodyPr/><a:lstStyle><a:lvl1pPr><a:defRPr sz="2400"/></a:lvl1pPr><a:lvl2pPr><a:defRPr sz="2000"/></a:lvl2pPr><a:lvl3pPr><a:defRPr sz="1800"/></a:lvl3pPr><a:lvl4pPr><a:defRPr sz="1600"/></a:lvl4pPr><a:lvl5pPr><a:defRPr sz="1600"/></a:lvl5pPr><a:lvl6pPr><a:defRPr sz="1600"/></a:lvl6pPr><a:lvl7pPr><a:defRPr sz="1600"/></a:lvl7pPr><a:lvl8pPr><a:defRPr sz="1600"/></a:lvl8pPr><a:lvl9pPr><a:defRPr sz="1600"/></a:lvl9pPr></a:lstStyle><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl="1"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl="2"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl="3"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl="4"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fifth level</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="5" name="Text Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" sz="quarter" idx="3"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="4645025" y="1535113"/><a:ext cx="4041775" cy="639762"/></a:xfrm></p:spPr><p:txBody><a:bodyPr anchor="b"/><a:lstStyle><a:lvl1pPr marL="0" indent="0"><a:buNone/><a:defRPr sz="2400" b="1"/></a:lvl1pPr><a:lvl2pPr marL="457200" indent="0"><a:buNone/><a:defRPr sz="2000" b="1"/></a:lvl2pPr><a:lvl3pPr marL="914400" indent="0"><a:buNone/><a:defRPr sz="1800" b="1"/></a:lvl3pPr><a:lvl4pPr marL="1371600" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl4pPr><a:lvl5pPr marL="1828800" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl5pPr><a:lvl6pPr marL="2286000" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl6pPr><a:lvl7pPr marL="2743200" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl7pPr><a:lvl8pPr marL="3200400" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl8pPr><a:lvl9pPr marL="3657600" indent="0"><a:buNone/><a:defRPr sz="1600" b="1"/></a:lvl9pPr></a:lstStyle><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="6" name="Content Placeholder 5"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph sz="quarter" idx="4"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="4645025" y="2174875"/><a:ext cx="4041775" cy="3951288"/></a:xfrm></p:spPr><p:txBody><a:bodyPr/><a:lstStyle><a:lvl1pPr><a:defRPr sz="2400"/></a:lvl1pPr><a:lvl2pPr><a:defRPr sz="2000"/></a:lvl2pPr><a:lvl3pPr><a:defRPr sz="1800"/></a:lvl3pPr><a:lvl4pPr><a:defRPr sz="1600"/></a:lvl4pPr><a:lvl5pPr><a:defRPr sz="1600"/></a:lvl5pPr><a:lvl6pPr><a:defRPr sz="1600"/></a:lvl6pPr><a:lvl7pPr><a:defRPr sz="1600"/></a:lvl7pPr><a:lvl8pPr><a:defRPr sz="1600"/></a:lvl8pPr><a:lvl9pPr><a:defRPr sz="1600"/></a:lvl9pPr></a:lstStyle><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl="1"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl="2"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl="3"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl="4"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fifth level</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="7" name="Date Placeholder 6"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" sz="half" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{A76116CE-C4A3-4A05-B2D7-7C2E9A889C0F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>1/30/2017</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="8" name="Footer Placeholder 7"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="9" name="Slide Number Placeholder 8"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{B1393E5F-521B-4CAD-9D3A-AE923D912DCE}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld' + (data.isRealSlide ? '' : 'Layout') + '>';
+};
+
+/**
+ * Create the 'slideLayout6.xml' resource.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeLayoutPlugin.prototype.cbMakePptxLayout6 = function ( data ) {
+	if ( !data || typeof data !== 'object' ) {
+		data = {};
+	} // Endif.
+
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:sld' + (data.isRealSlide ? '' : 'Layout') + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' + (data.isRealSlide ? '' : ' type="titleOnly" preserve="1"') + '><p:cSld name="Title Only"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Title 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master title style</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Date Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" sz="half" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{A76116CE-C4A3-4A05-B2D7-7C2E9A889C0F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>1/30/2017</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Footer Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="5" name="Slide Number Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{B1393E5F-521B-4CAD-9D3A-AE923D912DCE}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld' + (data.isRealSlide ? '' : 'Layout') + '>';
+};
+
+/**
+ * Create the 'slideLayout7.xml' resource.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeLayoutPlugin.prototype.cbMakePptxLayout7 = function ( data ) {
+	if ( !data || typeof data !== 'object' ) {
+		data = {};
+	} // Endif.
+
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:sld' + (data.isRealSlide ? '' : 'Layout') + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' + (data.isRealSlide ? '' : ' type="blank" preserve="1"') + '><p:cSld name="Blank"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Date Placeholder 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" sz="half" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{A76116CE-C4A3-4A05-B2D7-7C2E9A889C0F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>1/30/2017</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Footer Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Slide Number Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{B1393E5F-521B-4CAD-9D3A-AE923D912DCE}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld' + (data.isRealSlide ? '' : 'Layout') + '>';
+};
+
+/**
+ * Create the 'slideLayout8.xml' resource.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeLayoutPlugin.prototype.cbMakePptxLayout8 = function ( data ) {
+	if ( !data || typeof data !== 'object' ) {
+		data = {};
+	} // Endif.
+
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:sld' + (data.isRealSlide ? '' : 'Layout') + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' + (data.isRealSlide ? '' : ' type="objTx" preserve="1"') + '><p:cSld name="Content with Caption"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Title 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="457200" y="273050"/><a:ext cx="3008313" cy="1162050"/></a:xfrm></p:spPr><p:txBody><a:bodyPr anchor="b"/><a:lstStyle><a:lvl1pPr algn="l"><a:defRPr sz="2000" b="1"/></a:lvl1pPr></a:lstStyle><a:p><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master title style</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Content Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph idx="1"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="3575050" y="273050"/><a:ext cx="5111750" cy="5853113"/></a:xfrm></p:spPr><p:txBody><a:bodyPr/><a:lstStyle><a:lvl1pPr><a:defRPr sz="3200"/></a:lvl1pPr><a:lvl2pPr><a:defRPr sz="2800"/></a:lvl2pPr><a:lvl3pPr><a:defRPr sz="2400"/></a:lvl3pPr><a:lvl4pPr><a:defRPr sz="2000"/></a:lvl4pPr><a:lvl5pPr><a:defRPr sz="2000"/></a:lvl5pPr><a:lvl6pPr><a:defRPr sz="2000"/></a:lvl6pPr><a:lvl7pPr><a:defRPr sz="2000"/></a:lvl7pPr><a:lvl8pPr><a:defRPr sz="2000"/></a:lvl8pPr><a:lvl9pPr><a:defRPr sz="2000"/></a:lvl9pPr></a:lstStyle><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl="1"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl="2"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl="3"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl="4"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fifth level</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Text Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" sz="half" idx="2"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="457200" y="1435100"/><a:ext cx="3008313" cy="4691063"/></a:xfrm></p:spPr><p:txBody><a:bodyPr/><a:lstStyle><a:lvl1pPr marL="0" indent="0"><a:buNone/><a:defRPr sz="1400"/></a:lvl1pPr><a:lvl2pPr marL="457200" indent="0"><a:buNone/><a:defRPr sz="1200"/></a:lvl2pPr><a:lvl3pPr marL="914400" indent="0"><a:buNone/><a:defRPr sz="1000"/></a:lvl3pPr><a:lvl4pPr marL="1371600" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl4pPr><a:lvl5pPr marL="1828800" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl5pPr><a:lvl6pPr marL="2286000" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl6pPr><a:lvl7pPr marL="2743200" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl7pPr><a:lvl8pPr marL="3200400" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl8pPr><a:lvl9pPr marL="3657600" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl9pPr></a:lstStyle><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="5" name="Date Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" sz="half" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{A76116CE-C4A3-4A05-B2D7-7C2E9A889C0F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>1/30/2017</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="6" name="Footer Placeholder 5"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="7" name="Slide Number Placeholder 6"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{B1393E5F-521B-4CAD-9D3A-AE923D912DCE}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld' + (data.isRealSlide ? '' : 'Layout') + '>';
+};
+
+/**
+ * Create the 'slideLayout9.xml' resource.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeLayoutPlugin.prototype.cbMakePptxLayout9 = function ( data ) {
+	if ( !data || typeof data !== 'object' ) {
+		data = {};
+	} // Endif.
+
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:sld' + (data.isRealSlide ? '' : 'Layout') + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' + (data.isRealSlide ? '' : ' type="picTx" preserve="1"') + '><p:cSld name="Picture with Caption"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Title 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="1792288" y="4800600"/><a:ext cx="5486400" cy="566738"/></a:xfrm></p:spPr><p:txBody><a:bodyPr anchor="b"/><a:lstStyle><a:lvl1pPr algn="l"><a:defRPr sz="2000" b="1"/></a:lvl1pPr></a:lstStyle><a:p><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master title style</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Picture Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="pic" idx="1"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="1792288" y="612775"/><a:ext cx="5486400" cy="4114800"/></a:xfrm></p:spPr><p:txBody><a:bodyPr/><a:lstStyle><a:lvl1pPr marL="0" indent="0"><a:buNone/><a:defRPr sz="3200"/></a:lvl1pPr><a:lvl2pPr marL="457200" indent="0"><a:buNone/><a:defRPr sz="2800"/></a:lvl2pPr><a:lvl3pPr marL="914400" indent="0"><a:buNone/><a:defRPr sz="2400"/></a:lvl3pPr><a:lvl4pPr marL="1371600" indent="0"><a:buNone/><a:defRPr sz="2000"/></a:lvl4pPr><a:lvl5pPr marL="1828800" indent="0"><a:buNone/><a:defRPr sz="2000"/></a:lvl5pPr><a:lvl6pPr marL="2286000" indent="0"><a:buNone/><a:defRPr sz="2000"/></a:lvl6pPr><a:lvl7pPr marL="2743200" indent="0"><a:buNone/><a:defRPr sz="2000"/></a:lvl7pPr><a:lvl8pPr marL="3200400" indent="0"><a:buNone/><a:defRPr sz="2000"/></a:lvl8pPr><a:lvl9pPr marL="3657600" indent="0"><a:buNone/><a:defRPr sz="2000"/></a:lvl9pPr></a:lstStyle><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Text Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" sz="half" idx="2"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="1792288" y="5367338"/><a:ext cx="5486400" cy="804862"/></a:xfrm></p:spPr><p:txBody><a:bodyPr/><a:lstStyle><a:lvl1pPr marL="0" indent="0"><a:buNone/><a:defRPr sz="1400"/></a:lvl1pPr><a:lvl2pPr marL="457200" indent="0"><a:buNone/><a:defRPr sz="1200"/></a:lvl2pPr><a:lvl3pPr marL="914400" indent="0"><a:buNone/><a:defRPr sz="1000"/></a:lvl3pPr><a:lvl4pPr marL="1371600" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl4pPr><a:lvl5pPr marL="1828800" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl5pPr><a:lvl6pPr marL="2286000" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl6pPr><a:lvl7pPr marL="2743200" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl7pPr><a:lvl8pPr marL="3200400" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl8pPr><a:lvl9pPr marL="3657600" indent="0"><a:buNone/><a:defRPr sz="900"/></a:lvl9pPr></a:lstStyle><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="5" name="Date Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" sz="half" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{A76116CE-C4A3-4A05-B2D7-7C2E9A889C0F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>1/30/2017</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="6" name="Footer Placeholder 5"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="7" name="Slide Number Placeholder 6"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{B1393E5F-521B-4CAD-9D3A-AE923D912DCE}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld' + (data.isRealSlide ? '' : 'Layout') + '>';
+};
+
+/**
+ * Create the 'slideLayout10.xml' resource.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeLayoutPlugin.prototype.cbMakePptxLayout10 = function ( data ) {
+	if ( !data || typeof data !== 'object' ) {
+		data = {};
+	} // Endif.
+
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:sld' + (data.isRealSlide ? '' : 'Layout') + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' + (data.isRealSlide ? '' : ' type="vertTx" preserve="1"') + '><p:cSld name="Title and Vertical Text"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Title 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master title style</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Vertical Text Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" orient="vert" idx="1"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr vert="eaVert"/><a:lstStyle/><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl="1"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl="2"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl="3"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl="4"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fifth level</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Date Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" sz="half" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{A76116CE-C4A3-4A05-B2D7-7C2E9A889C0F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>1/30/2017</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="5" name="Footer Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="6" name="Slide Number Placeholder 5"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{B1393E5F-521B-4CAD-9D3A-AE923D912DCE}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld' + (data.isRealSlide ? '' : 'Layout') + '>';
+};
+
+/**
+ * Create the 'slideLayout11.xml' resource.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeLayoutPlugin.prototype.cbMakePptxLayout11 = function ( data ) {
+	if ( !data || typeof data !== 'object' ) {
+		data = {};
+	} // Endif.
+
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:sld' + (data.isRealSlide ? '' : 'Layout') + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' + (data.isRealSlide ? '' : ' type="vertTitleAndTx" preserve="1"') + '><p:cSld name="Vertical Title and Text"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Vertical Title 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title" orient="vert"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="6629400" y="274638"/><a:ext cx="2057400" cy="5851525"/></a:xfrm></p:spPr><p:txBody><a:bodyPr vert="eaVert"/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master title style</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Vertical Text Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" orient="vert" idx="1"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="457200" y="274638"/><a:ext cx="6019800" cy="5851525"/></a:xfrm></p:spPr><p:txBody><a:bodyPr vert="eaVert"/><a:lstStyle/><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl="1"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl="2"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl="3"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl="4"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fifth level</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Date Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" sz="half" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{A76116CE-C4A3-4A05-B2D7-7C2E9A889C0F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>1/30/2017</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="5" name="Footer Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="11"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="6" name="Slide Number Placeholder 5"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{B1393E5F-521B-4CAD-9D3A-AE923D912DCE}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld' + (data.isRealSlide ? '' : 'Layout') + '>';
+};
+
+module.exports = MakeLayoutPlugin;

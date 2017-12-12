@@ -49,7 +49,7 @@ util.getEightBytes = function(v) {
 
 util.getShortBytes = function(v) {
   var buf = new Buffer(2);
-  buf.writeUInt16LE(v, 0);
+  buf.writeUInt16LE((v & 0xFFFF) >>> 0, 0);
 
   return buf;
 };
@@ -60,7 +60,7 @@ util.getShortBytesValue = function(buf, offset) {
 
 util.getLongBytes = function(v) {
   var buf = new Buffer(4);
-  buf.writeUInt32LE(v, 0);
+  buf.writeUInt32LE((v & 0xFFFFFFFF) >>> 0, 0);
 
   return buf;
 };

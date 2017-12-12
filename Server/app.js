@@ -9,22 +9,22 @@ var async=require("asyncawait/async");
 var await=require("asyncawait/await");
 var util=require("./util/util");
 var app = express();
-// var webpack = require('../Client/node_modules/webpack'),
-//     webpackDevMiddleware = require('../Client/node_modules/webpack-dev-middleware'),
-//     webpackHotMiddleware = require('../Client/node_modules/webpack-hot-middleware'),
-//     webpackDevConfig = require('../Client/dev');
-// var compiler = webpack(webpackDevConfig);
-// app.use(webpackDevMiddleware(compiler, {
-//
-//     // public path should be the same with webpack config
-//     publicPath: webpackDevConfig.output.publicPath,
-//     noInfo: true,
-//     stats: {
-//         colors: true,
-//         chunks: false
-//     }
-// }));
-// app.use(webpackHotMiddleware(compiler));
+var webpack = require('../Client/node_modules/webpack'),
+    webpackDevMiddleware = require('../Client/node_modules/webpack-dev-middleware'),
+    webpackHotMiddleware = require('../Client/node_modules/webpack-hot-middleware'),
+    webpackDevConfig = require('../Client/dev');
+var compiler = webpack(webpackDevConfig);
+app.use(webpackDevMiddleware(compiler, {
+
+    // public path should be the same with webpack config
+    publicPath: webpackDevConfig.output.publicPath,
+    noInfo: true,
+    stats: {
+        colors: true,
+        chunks: false
+    }
+}));
+app.use(webpackHotMiddleware(compiler));
 (async (function () {
     await (util.init());
     var checkUser=require("./routes/checkUser");
@@ -62,6 +62,8 @@ var app = express();
     app.use("/poll",checkFormDataUser(con.imgPath),checkParam("poll"),checkUser);
     app.use("/article",checkFormDataUser(con.imgPath),checkParam("article"),checkUser);
     app.use("/message",checkFormDataUser(con.imgPath),checkParam("message"),checkUser);
+    app.use("/template",checkFormDataUser(con.imgPath),checkParam("template"),checkUser);
+    app.use("/example",checkFormDataUser(con.imgPath),checkParam("example"),checkUser);
     app.use("/admin",checkFormDataUser(con.imgPath),checkParam("admin"),checkAdmin);
     app.use("/mock",checkFormDataUser(con.tempPath),mock);
     app.use("/html",express.static(path.join(__dirname, '../Client')));

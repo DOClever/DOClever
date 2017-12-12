@@ -156,7 +156,7 @@ var decodeStr = function (val, offset, length) {
 var addLength = function (str) {
   var len = Buffer.byteLength(str)
   var digits = Math.floor(Math.log(len) / Math.log(10)) + 1
-  if (len + digits > Math.pow(10, digits)) digits++
+  if (len + digits >= Math.pow(10, digits)) digits++
 
   return (len + digits) + str
 }

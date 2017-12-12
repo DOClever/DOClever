@@ -10,6 +10,7 @@ module.exports= {
             users:[]
         },
         status:[],
+        template:[],
         lastBaseUrl:"",
         roleOption:{},
         role:0,
@@ -19,6 +20,16 @@ module.exports= {
     getters:{
         event:function (state,getters,rootState) {
             return rootState.event;
+        },
+        shareRole:function (state) {
+            if(/\/public\/public\.html/i.test(location.href))
+            {
+                return true
+            }
+            else
+            {
+                return false;
+            }
         },
         interfaceEditRole:function (state) {
             if(state.own==1 || state.role==0)
@@ -82,6 +93,20 @@ module.exports= {
                 return true;
             }
             if(state.roleOption["gi"])
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        },
+        globalTemplateRole:function (state) {
+            if(state.own==1 || state.role==0)
+            {
+                return true;
+            }
+            if(state.roleOption["gt"])
             {
                 return true;
             }
@@ -154,6 +179,7 @@ module.exports= {
                             "gb":0,
                             "gs":0,
                             "gi":0,
+                            "gt":0,
                             "gd":0,
                             "ve":0,
                             "vr":0
@@ -173,7 +199,7 @@ module.exports= {
                         }
                     }
                 })
-                if(!bIn && state.project.public)
+                if(!bIn && (state.project.public || /\/public\/public\.html/i.test(location.href)))
                 {
                     state.role=1;
                     state.guest=1;
@@ -183,6 +209,7 @@ module.exports= {
                         "gb":0,
                         "gs":0,
                         "gi":0,
+                        "gt":0,
                         "gd":0,
                         "ve":0,
                         "vr":0
@@ -212,6 +239,9 @@ module.exports= {
         setLastBaseUrl:function (state,data) {
             state.lastBaseUrl=data;
         },
+        setTemplate:function (state,data) {
+            state.template=data;
+        },
         init:function (state) {
             state.project={
                 users:[]
@@ -222,6 +252,7 @@ module.exports= {
             state.role=0;
             state.own=0;
             state.guest=0;
+            state.template=[];
         }
     },
     actions:{
@@ -247,6 +278,9 @@ module.exports= {
                 net.get("/version/list",{
                     project:session.get("projectId"),
                     page:0
+                }),
+                net.get("/template/list",{
+                    project:session.get("projectId"),
                 })
             ]).then(function (values) {
                 var obj1=values[0];
@@ -254,6 +288,7 @@ module.exports= {
                 var obj3=values[2];
                 var obj4=values[3];
                 var obj5=values[4];
+                var obj6=values[5];
                 if(obj1.code==200)
                 {
                     context.dispatch("interface/getAllInterface",obj1.data)
@@ -293,6 +328,14 @@ module.exports= {
                 else
                 {
                     throw obj5.msg;
+                }
+                if(obj6.code==200)
+                {
+                    context.commit("setTemplate",obj6.data);
+                }
+                else
+                {
+                    throw obj6.msg;
                 }
                 context.getters.event.$emit("init");
                 return values;

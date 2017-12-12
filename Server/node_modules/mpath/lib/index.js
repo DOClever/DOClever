@@ -78,7 +78,67 @@ exports.get = function (path, o, special, map) {
   }
 
   return map(obj);
-}
+};
+
+/**
+ * Returns true if `in` returns true for every piece of the path
+ *
+ * @param {String} path
+ * @param {Object} o
+ */
+
+exports.has = function (path, o) {
+  var parts = typeof path === 'string' ?
+    path.split('.') :
+    path;
+
+  if (!Array.isArray(parts)) {
+    throw new TypeError('Invalid `path`. Must be either string or array');
+  }
+
+  var len = parts.length;
+  var cur = o;
+  for (var i = 0; i < len; ++i) {
+    if (cur == null || typeof cur !== 'object' || !(parts[i] in cur)) {
+      return false;
+    }
+    cur = cur[parts[i]];
+  }
+
+  return true;
+};
+
+/**
+ * Deletes the last piece of `path`
+ *
+ * @param {String} path
+ * @param {Object} o
+ */
+
+exports.unset = function (path, o) {
+  var parts = typeof path === 'string' ?
+    path.split('.') :
+    path;
+
+  if (!Array.isArray(parts)) {
+    throw new TypeError('Invalid `path`. Must be either string or array');
+  }
+
+  var len = parts.length;
+  var cur = o;
+  for (var i = 0; i < len; ++i) {
+    if (cur == null || typeof cur !== 'object' || !(parts[i] in cur)) {
+      return false;
+    }
+    if (i === len - 1) {
+      delete cur[parts[i]];
+      return true;
+    }
+    cur = cur[parts[i]];
+  }
+
+  return true;
+};
 
 /**
  * Sets the `val` at the given `path` of object `o`.

@@ -1,3 +1,7 @@
+1.3.0 / 2017-10-10
+==================
+ * fix: always print uri in error
+
 1.2.1 / 2016-02-01
 ==================
  * fix: only call decodeURIComponent once so you can encode % #11 [sal89](https://github.com/sal89)

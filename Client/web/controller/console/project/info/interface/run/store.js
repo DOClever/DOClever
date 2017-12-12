@@ -4,7 +4,7 @@ module.exports={
     state:{
         interface:{},
         baseUrl:"",
-        index:0
+        index:0,
     },
     getters:{
         event:function (state,getters,rootState) {
@@ -686,6 +686,8 @@ module.exports={
             }
             return func.then(function (result) {
                 context.getters.curParam.run=1;
+                context.getters.curParam.reqHeader=result.header["doclever-request"]?JSON.parse(result.header["doclever-request"]):{};
+                delete result.header["doclever-request"];
                 context.getters.curParam.resHeader=result.header;
                 context.getters.curParam.status=String(result.status);
                 context.getters.curParam.second=(((new Date())-startDate)/1000).toFixed(3);
@@ -850,31 +852,42 @@ module.exports={
                     }
                 }
                 var result=[],outInfo;
-                if(obj.run)
+                if(obj.run || (!obj.run && originIndex==index))
                 {
-                    if(context.getters.curParam.resultData)
+                    var resultData,type;
+                    if(obj.run)
                     {
-                        if((context.getters.curParam.resultData instanceof Array) && context.getters.curParam.resultData.length>0)
+                        resultData=context.getters.curParam.resultData;
+                        type=context.getters.curParam.type;
+                    }
+                    else
+                    {
+                        resultData=JSON.parse(context.getters.curParam.selParam.rawData);
+                        type=context.getters.curParam.selParam.type;
+                    }
+                    if(resultData)
+                    {
+                        if((resultData instanceof Array) && resultData.length>0)
                         {
                             var resultObj=helper.findObj(context.getters.curParam.result,key);
-                            helper.handleResultData(key,context.getters.curParam.resultData[0],result,resultObj)
+                            helper.handleResultData(key,resultData[0],result,resultObj)
                         }
                         else
                         {
-                            for(var key in context.getters.curParam.resultData)
+                            for(var key in resultData)
                             {
                                 var resultObj=helper.findObj(context.getters.curParam.result,key);
-                                helper.handleResultData(key,context.getters.curParam.resultData[key],result,resultObj)
+                                helper.handleResultData(key,resultData[key],result,resultObj)
                             }
                         }
                     }
-                    if(context.getters.curParam.type=="object")
+                    if(type=="object")
                     {
                         outInfo={
                             type:0,
                             rawRemark:"",
                             rawMock:"",
-                            jsonType:(context.getters.curParam.resultData && (context.getters.curParam.resultData instanceof Array))?1:0
+                            jsonType:(resultData && (resultData instanceof Array))?1:0
                         }
                     }
                     else
@@ -1006,6 +1019,7 @@ module.exports={
                 var objKey={
                     fileResult:"",
                     resHeader:[],
+                    reqHeader:{},
                     status:"",
                     second:"",
                     draw:[],
@@ -1132,6 +1146,12 @@ module.exports={
 
                     }
                 }
+                Vue.set(obj,"selParam",$.clone(obj));
+                Vue.set(obj,"selExample",{
+                    id:"",
+                    value:"无运行实例"
+                });
+                Vue.set(obj,"initParam",$.clone(obj));
             })
             context.dispatch("initBaseUrl");
         },
@@ -1139,6 +1159,207 @@ module.exports={
             context.commit("project/info/setLastBaseUrl",data,{
                 root:true
             })
+        },
+        changeExample:function (context,id) {
+            if(id)
+            {
+                return net.get("/example/item",{
+                    id:id
+                }).then(function (data) {
+                    if(data.code==200)
+                    {
+                        var obj={
+                            query:data.data.param.query,
+                            header:data.data.param.header,
+                            body:data.data.param.body?data.data.param.body:[{
+                                name:"",
+                                type:0,
+                                must:0,
+                                remark:"",
+                            }],
+                            param:data.data.param.param,
+                            bodyInfo:data.data.param.bodyInfo?data.data.param.bodyInfo:{
+                                type:0,
+                                rawType:0,
+                                rawTextRemark:"",
+                                rawFileRemark:"",
+                                rawText:"",
+                                rawJSON:[],
+                                rawJSONType:0
+                            },
+                            rawJSONObject:[{
+                                name:"",
+                                must:1,
+                                type:0,
+                                remark:"",
+                                show:1,
+                                mock:"",
+                                drag:1
+                            }],
+                            rawJSONArray:[{
+                                name:null,
+                                must:1,
+                                type:0,
+                                remark:"",
+                                show:1,
+                                mock:"",
+                                drag:1
+                            }],
+                            before:data.data.param.before,
+                            after:data.data.param.after,
+                            fileResult:"",
+                            resHeader:[],
+                            reqHeader:{},
+                            status:"",
+                            second:"",
+                            draw:[],
+                            drawMix:[],
+                            type:"object",
+                            imgUrl:"",
+                            resultData:"",
+                            queryRawShow:0,
+                            headerRawShow:0,
+                            bodyRawShow:0,
+                            queryRawStr:"",
+                            headerRawStr:"",
+                            bodyRawStr:"",
+                            rawData:"",
+                            encryptType:"",
+                            errorCount:0,
+                            run:0
+                        }
+                        for(var key in obj)
+                        {
+                            Vue.set(context.getters.curParam,key,obj[key]);
+                        }
+                        context.getters.curParam.bodyInfo.rawJSON=context.getters.curParam.rawJSONObject;
+                        var param=data.data.param;
+                        if(param.type=="object")
+                        {
+                            param.draw=helper.format(param.rawData,0,[],context.rootState.project.info.status).draw;
+                        }
+                        else
+                        {
+                            param.draw=param.rawData;
+                        }
+                        Vue.set(context.getters.curParam,"selParam",$.clone(data.data.param));
+                        Vue.set(context.getters.curParam,"selExample",{
+                            id:data.data._id,
+                            value:data.data.name
+                        });
+                    }
+                    return data;
+                })
+            }
+            else
+            {
+                var obj=$.clone(context.getters.curParam.initParam);
+                for(var key in obj)
+                {
+                    Vue.set(context.getters.curParam,key,obj[key]);
+                }
+                return new Promise(function (resolve,reject) {
+                    setTimeout(function () {
+                        resolve({
+                            code:200
+                        })
+                    },200);
+                })
+            }
+        },
+        saveExample:function (context,obj) {
+            var obj1={
+                query:context.getters.curParam.query,
+                header:context.getters.curParam.header,
+                body:context.getters.curParam.body,
+                param:context.getters.curParam.param,
+                before:context.getters.curParam.before,
+                after:context.getters.curParam.after,
+                run:context.getters.curParam.run
+            };
+            if(context.getters.curParam.run)
+            {
+                obj1.status=context.getters.curParam.status;
+                obj1.second=context.getters.curParam.second;
+                obj1.type=context.getters.curParam.type;
+                obj1.rawData=context.getters.curParam.rawData;
+                obj1.resHeader=context.getters.curParam.resHeader;
+                obj1.reqHeader=context.getters.curParam.reqHeader
+            }
+            if(context.state.interface.method=="POST" || context.state.interface.method=="PUT" || context.state.interface.method=="PATCH")
+            {
+                obj1.bodyInfo=context.getters.curParam.bodyInfo;
+            }
+            var query={
+                project:session.get("projectId"),
+                interface:context.state.interface._id,
+                paramid:context.getters.curParam.id,
+                param:JSON.stringify(obj1)
+            }
+            if(obj.type=="save")
+            {
+                query.id=context.getters.curParam.selExample.id;
+                query.name=context.getters.curParam.selExample.value;
+            }
+            else if(obj.type=="saveAs")
+            {
+                query.name=obj.name
+            }
+            else if(obj.type=="rename")
+            {
+                query.name=obj.name;
+                query.id=context.getters.curParam.selExample.id
+            }
+            return net.post("/example/item",query).then(function (data) {
+                if(data.code==200)
+                {
+                    if(obj.type=="saveAs")
+                    {
+                        return context.dispatch("changeExample",data.data._id);
+                    }
+                    else if(obj.type=="rename")
+                    {
+                        context.getters.curParam.selExample.value=obj.name
+                    }
+                    else if(obj.type=="save")
+                    {
+                        if(context.getters.curParam.run)
+                        {
+                            context.getters.curParam.selParam.run=1;
+                            context.getters.curParam.selParam.status=context.getters.curParam.status;
+                            context.getters.curParam.selParam.second=context.getters.curParam.second;
+                            context.getters.curParam.selParam.type=context.getters.curParam.type;
+                            context.getters.curParam.selParam.rawData=context.getters.curParam.rawData;
+                            context.getters.curParam.selParam.resHeader=context.getters.curParam.resHeader
+                            context.getters.curParam.selParam.reqHeader=context.getters.curParam.reqHeader
+                            if(context.getters.curParam.type=="object")
+                            {
+                                context.getters.curParam.selParam.draw=helper.format(context.getters.curParam.selParam.rawData,0,[],context.rootState.project.info.status).draw;
+                            }
+                        }
+                    }
+                }
+                return data;
+            })
+        },
+        removeExample:function (context) {
+            return net.delete("/example/item",{
+                id:context.getters.curParam.selExample.id
+            }).then(function (data) {
+                if(data.code==200)
+                {
+                    return context.dispatch("changeExample");
+                }
+                return data;
+            })
         }
     }
 }
+
+
+
+
+
+
+
+

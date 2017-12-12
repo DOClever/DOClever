@@ -7,12 +7,15 @@ module.exports=new Vuex.Store({
     state:{
         init:false,
         event:new Vue(),
+        objCopyJSON:null
     },
     getters:{
 
     },
     mutations:{
-
+        setObjCopyJSON:function (state,data) {
+            state.objCopyJSON=data;
+        }
     },
     actions:{
         init:function (context) {

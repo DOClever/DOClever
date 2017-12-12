@@ -41,9 +41,9 @@ all_deps :=
 
 
 CC.target ?= $(CC)
-CFLAGS.target ?= $(CFLAGS)
+CFLAGS.target ?= $(CPPFLAGS) $(CFLAGS)
 CXX.target ?= $(CXX)
-CXXFLAGS.target ?= $(CXXFLAGS)
+CXXFLAGS.target ?= $(CPPFLAGS) $(CXXFLAGS)
 LINK.target ?= $(LINK)
 LDFLAGS.target ?= $(LDFLAGS)
 AR.target ?= $(AR)
@@ -54,9 +54,9 @@ LINK ?= $(CXX.target)
 # TODO(evan): move all cross-compilation logic to gyp-time so we don't need
 # to replicate this environment fallback in make as well.
 CC.host ?= gcc
-CFLAGS.host ?=
+CFLAGS.host ?= $(CPPFLAGS_host) $(CFLAGS_host)
 CXX.host ?= g++
-CXXFLAGS.host ?=
+CXXFLAGS.host ?= $(CPPFLAGS_host) $(CXXFLAGS_host)
 LINK.host ?= $(CXX.host)
 LDFLAGS.host ?=
 AR.host ?= ar
@@ -336,8 +336,8 @@ ifeq ($(strip $(foreach prefix,$(NO_LOAD),\
 endif
 
 quiet_cmd_regen_makefile = ACTION Regenerating $@
-cmd_regen_makefile = cd $(srcdir); /Users/eshanker/.nvm/versions/node/v5.0.0/lib/node_modules/npm/node_modules/node-gyp/gyp/gyp_main.py -fmake --ignore-environment "--toplevel-dir=." -I/Users/eshanker/Code/fsevents/build/config.gypi -I/Users/eshanker/.nvm/versions/node/v5.0.0/lib/node_modules/npm/node_modules/node-gyp/addon.gypi -I/Users/eshanker/.node-gyp/5.0.0/include/node/common.gypi "--depth=." "-Goutput_dir=." "--generator-output=build" "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/Users/eshanker/.node-gyp/5.0.0" "-Dnode_gyp_dir=/Users/eshanker/.nvm/versions/node/v5.0.0/lib/node_modules/npm/node_modules/node-gyp" "-Dnode_lib_file=node.lib" "-Dmodule_root_dir=/Users/eshanker/Code/fsevents" binding.gyp
-Makefile: $(srcdir)/../../.nvm/versions/node/v5.0.0/lib/node_modules/npm/node_modules/node-gyp/addon.gypi $(srcdir)/../../.node-gyp/5.0.0/include/node/common.gypi $(srcdir)/build/config.gypi $(srcdir)/binding.gyp
+cmd_regen_makefile = cd $(srcdir); /Users/eshanker/.nvm/versions/node/v6.10.2/lib/node_modules/npm/node_modules/node-gyp/gyp/gyp_main.py -fmake --ignore-environment "--toplevel-dir=." -I/Users/eshanker/Code/fsevents/build/config.gypi -I/Users/eshanker/.nvm/versions/node/v6.10.2/lib/node_modules/npm/node_modules/node-gyp/addon.gypi -I/Users/eshanker/.node-gyp/6.10.2/include/node/common.gypi "--depth=." "-Goutput_dir=." "--generator-output=build" "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/Users/eshanker/.node-gyp/6.10.2" "-Dnode_gyp_dir=/Users/eshanker/.nvm/versions/node/v6.10.2/lib/node_modules/npm/node_modules/node-gyp" "-Dnode_lib_file=node.lib" "-Dmodule_root_dir=/Users/eshanker/Code/fsevents" "-Dnode_engine=v8" binding.gyp
+Makefile: $(srcdir)/../../.nvm/versions/node/v6.10.2/lib/node_modules/npm/node_modules/node-gyp/addon.gypi $(srcdir)/../../.node-gyp/6.10.2/include/node/common.gypi $(srcdir)/build/config.gypi $(srcdir)/binding.gyp
 	$(call do_cmd,regen_makefile)
 
 # "all" is a concatenation of the "all" targets from all the included

@@ -33,9 +33,20 @@
                     <div style="height: 35px;line-height: 35px;display: inline-block;margin-right: 3px;float: right;" v-if="interfaceEditRole">
                         <i class="el-icon-delete" style="border: 1px rgba(226, 226, 226, 0.71) solid;font-size: 12px;padding: 3px;color:red;background-color: white;font-weight: 900" v-if="item.type==0" @click="removeGroup(item)" title="删除分组"></i>
                     </div>
-                    <div style="height: 35px;line-height: 35px;display: inline-block;margin-right: 3px;float: right;" v-if="interfaceEditRole">
-                        <i class="el-icon-plus" style="border: 1px rgba(226, 226, 226, 0.71) solid;font-size: 12px;padding: 3px;color:#17B9E6;background-color: white;font-weight: 900" v-if="item.type==0" @click="addInterface(item)" title="新建接口"></i>
-                    </div>
+                    <template v-if="interfaceEditRole && item.type==0">
+                        <div style="height: 35px;line-height: 35px;display: inline-block;margin-right: 3px;float: right;" v-if="template.length==0">
+                            <i class="el-icon-plus" style="border: 1px rgba(226, 226, 226, 0.71) solid;font-size: 12px;padding: 3px;color:#17B9E6;background-color: white;font-weight: 900" @click="addInterface(item)" title="新建接口"></i>
+                        </div>
+                        <el-dropdown style="height: 100%;cursor: pointer;float: right;margin-right: 3px" v-else>
+                            <div class="el-dropdown-link" style="height: 35px;line-height: 35px;display: inline-block;margin-right: 3px;float: right;">
+                                <i class="el-icon-plus" style="border: 1px rgba(226, 226, 226, 0.71) solid;font-size: 12px;padding: 3px;color:#17B9E6;background-color: white;font-weight: 900" title="新建接口"></i>
+                            </div>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item><div @click="addInterface(item)">新接口</div></el-dropdown-item>
+                                <el-dropdown-item><div @click="addInterfaceFromTemplate(item)">从模板创建</div></el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </template>
                 </div>
             </el-row>
             <el-collapse-transition>
@@ -92,6 +103,9 @@
         },
         mixins:[sessionChange],
         computed:{
+            template:function () {
+                return this.$store.getters.template;
+            },
             interfaceEditRole:function () {
                 return this.$store.getters.interfaceEditRole;
             },
@@ -798,6 +812,11 @@
                             $.notify(data.msg,0);
                         }
                     })
+                })
+            },
+            addInterfaceFromTemplate:function (item) {
+                $.showBox(this,require("./chooseTemplate.vue"),{
+                    groupId:item._id
                 })
             }
         }

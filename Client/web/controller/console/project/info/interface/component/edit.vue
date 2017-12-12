@@ -8,9 +8,13 @@
             <el-button type="primary" size="mini" style="float: right;margin-top: 4px;margin-right: 5px;margin-left: 0px" @click="$store.dispatch('changeType','run')">
                 运行
             </el-button>
-            <el-button type="primary" size="mini" style="float: right;margin-top: 4px;margin-right: 5px;margin-left: 0px" @click="save" v-if="interfaceEditRole" id="btnSave" :loading="savePending">
-                保存
-            </el-button>
+            <el-dropdown split-button type="primary" size="mini" style="float: right;margin-right: 5px;margin-left: 0px" @click="save" v-if="interfaceEditRole" id="btnSave" :loading="savePending" :disabled="savePending">
+                <span v-if="!savePending">保存</span>
+                <i class="el-icon-loading" v-else></i>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item @click.native="saveTemplate">保存为模板</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
             <el-button size="mini" style="float: right;margin-top: 4px;margin-right: 5px;margin-left: 0" @click="$store.dispatch('changeType','preview')">
                 预览
             </el-button>
@@ -173,7 +177,8 @@
 
 <script>
     var con=require("common/js/config");
-    var interfaceParam=require("./interfaceParam.vue")
+    var interfaceParam=require("./interfaceParam.vue");
+    var saveTemplate=require("./saveTemplate.vue")
     module.exports = {
         data: function () {
             return {
@@ -751,6 +756,9 @@
                     return true;
                 },1,this.interfaceEdit.remark)
             },
+            saveTemplate:function () {
+                $.showBox(this,saveTemplate);
+            }
         },
         created:function () {
             var _this=this;

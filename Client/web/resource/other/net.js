@@ -257,7 +257,9 @@ function redirect(res,bHttps,opt,location) {
         }
         else
         {
-            res.writeHead(res3.statusCode, filterResHeader(res3.headers,res));
+            var resHeader=filterResHeader(res3.headers,res)
+            resHeader["doclever-request"]=JSON.stringify(handleSelfCookie(req3));
+            res.writeHead(res3.statusCode, resHeader);
             res3.pipe(res);
             res3.on('end', function () {
 
@@ -268,6 +270,27 @@ function redirect(res,bHttps,opt,location) {
     req3.on('error', function (err) {
         res.end(err.stack);
     });
+}
+
+function handleSelfCookie(req) {
+    var arr=req._headers;
+    arr["url"]=req.method+" "+req.path;
+    var cookie=arr["cookie"];
+    var arrCookie=cookie.split(";");
+    var keys=["id","name","photo","qq","sex","company","phone","loginCount","age","email"];
+    arrCookie=arrCookie.filter(function (obj) {
+        obj=obj.trim();
+        for(let key of keys)
+        {
+            if(obj.startsWith(key+"="))
+            {
+                return false;
+            }
+        }
+        return true;
+    })
+    arr["cookie"]=arrCookie.join(";");
+    return arr;
 }
 
 function proxy(req,res) {
@@ -308,7 +331,9 @@ function proxy(req,res) {
         }
         else
         {
-            res.writeHead(res2.statusCode, filterResHeader(res2.headers,res));
+            var resHeader=filterResHeader(res2.headers,res)
+            resHeader["doclever-request"]=JSON.stringify(handleSelfCookie(req2));
+            res.writeHead(res2.statusCode, resHeader);
             res2.pipe(res);
             res2.on('end', function () {
 

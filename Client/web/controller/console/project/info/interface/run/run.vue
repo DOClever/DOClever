@@ -47,6 +47,22 @@
                     <el-input size="small" style="width: 100%" placeholder="请填入你请求的路由地址" v-model="interface.url" @input="changeUrl" @paste.native="paste"></el-input>
                 </el-col>
             </el-row>
+            <div style="position: absolute;top: 105px;right: 10px;z-index: 1000;font-size: 14px" v-if="interface._id && !curParam.unSave">
+                切换:&nbsp;
+                <el-autocomplete size="mini" v-model="curParam.selExample.value" :fetch-suggestions="querySearchExample" placeholder="筛选你的运行实例" @select="changeExample">
+                    <el-dropdown slot="suffix" v-if="interfaceEditRole">
+                            <span class="el-dropdown-link">
+                                <i class="el-icon-menu el-input__icon"></i>
+                            </span>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item @click.native="saveExample" v-if="curParam.selExample.id">保存</el-dropdown-item>
+                            <el-dropdown-item @click.native="renameExample" v-if="curParam.selExample.id">重命名</el-dropdown-item>
+                            <el-dropdown-item @click.native="saveAsExample">另存为</el-dropdown-item>
+                            <el-dropdown-item @click.native="removeExample" v-if="curParam.selExample.id">删除</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </el-autocomplete>
+            </div>
             <el-tabs style="margin-top: 20px" v-model="tabIndex" id="mainRun">
                 <template v-for="(item, index) in param">
                     <el-tab-pane :key="item.id"  :label="item.name" :name="index">
@@ -56,7 +72,7 @@
                             </el-tooltip>
                             <span v-else>{{item.name}}</span>
                         </span>
-                        <runparam :index="index" :item="item"></runparam>
+                        <runparam :index="index" :item="item" ref="runParam"></runparam>
                     </el-tab-pane>
                 </template>
             </el-tabs>
@@ -78,7 +94,7 @@
             return {
                 runPending:false,
                 tabType:"query",
-                showDialog:false
+                showDialog:false,
             }
         },
         mixins:[sessionChange],
@@ -87,6 +103,9 @@
             "runparam":runParam
         },
         computed:{
+            curParam:function () {
+                return this.$store.getters.curParam;
+            },
             interfaceEditRole:function () {
                 return this.$store.getters.interfaceEditRole
             },
@@ -137,7 +156,7 @@
                     _this.runPending=false;
                     if(data.code==200)
                     {
-
+                        _this.$refs.runParam[parseInt(_this.tabIndex)].resultType=1;
                     }
                     else
                     {
@@ -251,6 +270,25 @@
                 }
                 cb(results);
             },
+            querySearchExample:function (queryString,cb) {
+                net.get("/example/list",{
+                    interface:this.interface._id,
+                    paramid:this.param[this.tabIndex].id
+                }).then(function (data) {
+                    var results=data.data;
+                    results=results.map(function (obj) {
+                        return {
+                            id:obj._id,
+                            value:obj.name
+                        }
+                    })
+                    results.unshift({
+                        value:"无运行实例",
+                        id:""
+                    })
+                    cb(results);
+                })
+            },
             showAutoComplete:function (event) {
                 this.baseUrl="";
                 setTimeout(function(){
@@ -260,6 +298,105 @@
             changeUrl:function (val) {
                 this.$store.commit("changeUrl",val);
             },
+            changeExample:function (item) {
+                var _this=this;
+                $.startHud();
+                this.$store.dispatch("changeExample",item.id).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        $.notify("切换成功",1);
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0)
+                    }
+                });
+            },
+            renameExample:function () {
+                var _this=this;
+                $.input("请输入运行实例名称",function (val) {
+                    if(!val.value)
+                    {
+                        $.tip("请输入运行实例名称",0);
+                        return false
+                    }
+                    $.startHud();
+                    _this.$store.dispatch("saveExample",{
+                        type:"rename",
+                        name:val.value
+                    }).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("保存成功",1);
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
+                    return true;
+                });
+            },
+            saveExample:function () {
+                this.$store.dispatch("saveExample",{
+                    type:"save"
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        $.notify("保存成功",1);
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0);
+                    }
+                })
+            },
+            saveAsExample:function () {
+                var _this=this;
+                $.input("请输入运行实例名称",function (val) {
+                    if(!val.value)
+                    {
+                        $.tip("请输入运行实例名称",0);
+                        return false
+                    }
+                    $.startHud();
+                    _this.$store.dispatch("saveExample",{
+                        type:"saveAs",
+                        name:val.value
+                    }).then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("保存成功",1);
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
+                    return true;
+                });
+            },
+            removeExample:function () {
+                var _this=this;
+                $.confirm("是否删除该运行实例?",function () {
+                    $.startHud();
+                    _this.$store.dispatch("removeExample").then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("删除成功",1);
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
+                })
+            }
         },
         created:function () {
             store.dispatch("initData",$.clone(this.interfaceEdit));

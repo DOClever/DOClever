@@ -224,7 +224,7 @@ ZipArchiveOutputStream.prototype._writeCentralDirectoryZip64 = function() {
   this.write(zipUtil.getLongBytes(constants.SIG_ZIP64_EOCD));
 
   // size of the ZIP64 EOCD record
-  this.write(zipUtil.getEightBytes(56));
+  this.write(zipUtil.getEightBytes(44));
 
   // version made by
   this.write(zipUtil.getShortBytes(constants.MIN_VERSION_ZIP64));

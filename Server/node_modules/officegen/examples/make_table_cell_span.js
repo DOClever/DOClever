@@ -1,0 +1,81 @@
+
+var officegen = require('../');
+
+var fs = require('fs');
+var path = require('path');
+
+var docx = officegen ( 'docx' );
+
+docx.on ( 'finalize', function ( written ) {
+			console.log ( 'Finish to create Word file.\nTotal bytes created: ' + written + '\n' );
+		});
+
+docx.on ( 'error', function ( err ) {
+			console.log ( err );
+		});
+
+
+var table = [
+    [{
+        val: "No.",
+        opts: {
+            cellColWidth: 4261,
+            b:true,
+            sz: '48',
+            shd: {
+                fill: "7F7F7F",
+                themeFill: "text1",
+                "themeFillTint": "80"
+            },
+            fontFamily: "Avenir Book"
+        }
+    },{
+        val: "Title1",
+        opts: {
+            b:true,
+            color: "A00000",
+            align: "right",
+            shd: {
+                fill: "92CDDC",
+                themeFill: "text1",
+                "themeFillTint": "80"
+            }
+        }
+    },{
+        val: "Title2",
+        opts: {
+            align: "center",
+            cellColWidth: 42,
+            b:true,
+            sz: '48',
+            shd: {
+                fill: "92CDDC",
+                themeFill: "text1",
+                "themeFillTint": "80"
+            }
+        }
+    }],
+    [1,{val: "I have two spans.", opts: {gridSpan: 2}}],
+    [{val: "I have three spans.", opts: {gridSpan: 3}}],
+    [{val: "I have two spans.", opts: {gridSpan: 2}},'3'],
+    [4,'watch out for the baobabs!','END']
+];
+
+var tableStyle = {
+	tableColWidth: 4261,
+	tableSize: 24,
+	tableColor: "ada",
+	tableAlign: "left",
+	tableFontFamily: "Comic Sans MS",
+	borders: true
+}
+
+docx.createTable (table, tableStyle);
+
+var out = fs.createWriteStream ( 'out_json.docx' );
+
+out.on ( 'error', function ( err ) {
+	console.log ( err );
+});
+
+docx.generate ( out );

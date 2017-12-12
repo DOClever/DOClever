@@ -1,6 +1,9 @@
 module.exports= {
     namespaced: true,
     getters: {
+        objCopyJSON:function (state,getters,rootState) {
+            return rootState.objCopyJSON;
+        },
         baseUrls: function (state, getters, rootState) {
             return rootState.project.info.project.baseUrls;
         },
@@ -16,6 +19,9 @@ module.exports= {
         status:function (state, getters, rootState) {
             return rootState.project.info.status;
         },
+        template:function (state, getters, rootState) {
+            return rootState.project.info.template;
+        },
         interfaceEditRole:function (state,getters,rootState,rootGetters) {
             return rootGetters["project/info/interfaceEditRole"];
         },
@@ -30,6 +36,9 @@ module.exports= {
         },
         globalInjectRole:function (state,getters,rootState,rootGetters) {
             return rootGetters["project/info/globalInjectRole"];
+        },
+        globalTemplateRole:function (state,getters,rootState,rootGetters) {
+            return rootGetters["project/info/globalTemplateRole"];
         },
         globalDocRole:function (state,getters,rootState,rootGetters) {
             return rootGetters["project/info/globalDocRole"];

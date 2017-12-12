@@ -1,3 +1,7 @@
+## 1.0.4
+
+- Added license file
+
 ## 1.0.3
 
 - Replaced `let` with `var` in `lib/btoa.js`

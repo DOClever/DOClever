@@ -19,7 +19,7 @@ var randomBytes = require('random-bytes')
  * @private
  */
 
-var EQUAL_GLOBAL_REGEXP = /=/g
+var EQUAL_END_REGEXP = /=+$/
 var PLUS_GLOBAL_REGEXP = /\+/g
 var SLASH_GLOBAL_REGEXP = /\//g
 
@@ -101,7 +101,7 @@ function generateUid (length, callback) {
 
 function toString (buf) {
   return buf.toString('base64')
+    .replace(EQUAL_END_REGEXP, '')
     .replace(PLUS_GLOBAL_REGEXP, '-')
     .replace(SLASH_GLOBAL_REGEXP, '_')
-    .replace(EQUAL_GLOBAL_REGEXP, '')
 }

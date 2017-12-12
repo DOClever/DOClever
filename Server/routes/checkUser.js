@@ -34,19 +34,37 @@ router.use(async (function(req,res,next)
             }
             else
             {
-                util.throw(e.userNotLogin,"请登录");
+                if(req.headers["referer"].endsWith("public/public.html"))
+                {
+                    userId=0;
+                }
+                else
+                {
+                    util.throw(e.userNotLogin,"请登录");
+                }
             }
         }
-        let obj=await (user.findOneAsync({
-            _id:userId
-        }));
-        if(!obj)
+        let obj;
+        if(userId==0)
         {
-            util.throw(e.userNotFound,"用户没有找到");
+            obj={
+                _id:"000000000000000000000000",
+                name:"temp"
+            }
         }
-        else if(obj.state==0)
+        else
         {
-            util.throw(e.userForbidden,"用户被禁用");
+            obj=await (user.findOneAsync({
+                _id:userId
+            }));
+            if(!obj)
+            {
+                util.throw(e.userNotFound,"用户没有找到");
+            }
+            else if(obj.state==0)
+            {
+                util.throw(e.userForbidden,"用户被禁用");
+            }
         }
         req.userInfo=obj;
         if((req.handle instanceof Array) && req.handle.length>0)

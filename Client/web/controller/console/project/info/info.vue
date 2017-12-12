@@ -1,6 +1,6 @@
 <template>
     <el-row class="row" style="margin-top: 10px">
-        <div style="position: absolute;top: 5px;right: 10px;z-index: 1000;font-size: 14px">
+        <div style="position: absolute;top: 5px;right: 10px;z-index: 1000;font-size: 14px" v-if="!shareRole">
             项目：&nbsp;
             <el-autocomplete size="mini" v-model="selProject" :fetch-suggestions="querySearch" placeholder="筛选你的项目" @select="changeProject" popper-class="my-autocomplete" id="projectChange">
                 <i class="el-icon-caret-bottom el-input__icon" slot="suffix" @click="showAutoComplete"></i>
@@ -68,6 +68,11 @@
             "global":global,
             "test":test,
             "version":version
+        },
+        computed:{
+            shareRole:function () {
+                return this.$store.getters.shareRole;
+            }
         },
         methods: {
             querySearch:function (queryString,cb) {

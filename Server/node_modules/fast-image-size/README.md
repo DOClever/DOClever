@@ -1,0 +1,101 @@
+# fast-image-size #
+
+This module is a simple stand alone module to just extract the image size from image file without using special image libraries.
+
+## Contents: ##
+
+- [Features](#a1)
+- [Installation](#a2)
+- [Public API](#a3)
+- [Examples](#a4)
+- [License](#a5)
+
+<a name="a1"/>
+## Features: ##
+
+- Just reading the size of the image from the given image file.
+- Auto-detect the image type.
+- Supported format:
+	- png
+	- gif
+	- bmp
+	- jpg
+- Don't need any special library!
+- Short and simple code.
+
+<a name="a2"/>
+## Installation: ##
+
+via npm:
+
+```bash
+$ npm install fast-image-size
+```
+
+This module is depending on:
+
+- NOTING!
+
+<a name="a3"/>
+## Public API: ##
+
+Get the fast-image-size function:
+
+```js
+var fast_image_size = require('../index.js');
+```
+
+Async mode:
+
+```js
+	fast_image_size ( path.resolve ( __dirname, 'image_file.png' ), function ( ret_obj ) {
+		console.log ( 'Testing: ' + ret_obj.image );
+		console.log ( 'Type: ' + ret_obj.type );
+		console.log ( 'Image width: ' + ret_obj.width );
+		console.log ( 'Image height: ' + ret_obj.height );
+	});
+```
+
+Sync mode:
+
+```js
+	var ret_data = fast_image_size ( path.resolve ( __dirname, 'image_file.png' ) );
+
+	console.log ( 'Type: ' + ret_data.type );
+	console.log ( 'Image width: ' + ret_data.width );
+	console.log ( 'Image height: ' + ret_data.height );
+```
+
+Note that the image type will be auto-detected even if the file ext is wrong.
+
+<a name="a4"/>
+## Examples: ##
+
+- examples/parse_image_files.js - Example how to use this module.
+
+<a name="a5"/>
+## License: ##
+
+(The MIT License)
+
+Copyright (c) 2013 Ziv Barber;
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+

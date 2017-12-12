@@ -1778,6 +1778,36 @@ describe('mpath', function(){
       })
     })
 
+    it('has', function(done) {
+      assert.ok(mpath.has('a', { a: 1 }));
+      assert.ok(mpath.has('a', { a: undefined }));
+      assert.ok(!mpath.has('a', {}));
+      assert.ok(!mpath.has('a', null));
+
+      assert.ok(mpath.has('a.b', { a: { b: 1 } }));
+      assert.ok(mpath.has('a.b', { a: { b: undefined } }));
+      assert.ok(!mpath.has('a.b', { a: 1 }));
+      assert.ok(!mpath.has('a.b', { a: null }));
+
+      done();
+    });
+
+    it('unset', function(done) {
+      var o = { a: 1 };
+      mpath.unset('a', o);
+      assert.deepEqual(o, {});
+
+      o = { a: { b: 1 } };
+      mpath.unset('a.b', o);
+      assert.deepEqual(o, { a: {} });
+
+      o = { a: null };
+      mpath.unset('a.b', o);
+      assert.deepEqual(o, { a: null });
+
+      done();
+    });
+
     it('ignores setting a nested path that doesnt exist', function(done){
       var o = doc();
       assert.doesNotThrow(function(){

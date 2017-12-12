@@ -29,6 +29,8 @@ var message=require("../../model/messageModel");
 var version=require("../../model/versionModel")
 var poll=require("../../model/pollModel")
 var article=require("../../model/articleModel")
+var template=require("../../model/templateModel")
+var example=require("../../model/exampleModel")
 var blue=require("bluebird");
 var fs=require("fs");
 var uuid=require("uuid/v1");
@@ -39,6 +41,7 @@ var rm=require("rimraf");
 var nunjucks=require("nunjucks");
 var moment=require("moment");
 var request=require("../../third/requestAsync");
+var office=require("officegen");
 blue.promisifyAll(fs);
 
 function Project() {
@@ -278,13 +281,13 @@ function Project() {
                             }
                         }
                     }))
-                    if(arrUser.length==0 && !obj.public)
+                    if(arrUser.length==0 && !obj.public && !req.headers["referer"].endsWith("public/public.html"))
                     {
                         util.throw(e.userForbidden,"你没有权限");
                         return;
                     }
                 }
-                else if(!obj.public)
+                else if(!obj.public && !req.headers["referer"].endsWith("public/public.html"))
                 {
                     util.throw(e.userForbidden,"你没有权限");
                     return;
@@ -959,13 +962,20 @@ function Project() {
                 query.version=req.headers["docleverversion"]
             }
             let obj=await (req.groupModel.findOneAsync(query));
-            await (req.interfaceModel.removeAsync({
+            let arr=await  (req.interfaceModel.findAsync({
                 group:obj._id
-            }));
+            }))
+            for(let o of arr)
+            {
+                await (example.removeAsync({
+                    interface:o._id
+                }))
+                await (o.removeAsync());
+            }
             await (interfaceSnapshot.removeAsync({
                 group:obj._id
             }));
-            let arr=await (this.getChild(req,req.clientParam.id,null,1));
+            arr=await (this.getChild(req,req.clientParam.id,null,1));
             util.ok(res,arr,"ok");
         }
         catch (err)
@@ -1032,6 +1042,12 @@ function Project() {
                 project:req.clientParam.id
             }))
             await (poll.removeAsync({
+                project:req.clientParam.id
+            }))
+            await (template.removeAsync({
+                project:req.clientParam.id
+            }))
+            await (example.removeAsync({
                 project:req.clientParam.id
             }))
             await (project.removeAsync({
@@ -1169,7 +1185,14 @@ function Project() {
             {
                 query.version=req.headers["docleverversion"]
             }
-            obj.global.status=await (req.statusModel.findAsync(query,"-_id -project"));
+            obj.global.status=await (req.statusModel.findAsync(query,"-_id -project -version"));
+            if(!query.version)
+            {
+                query.version={
+                    $exists:false
+                }
+            }
+            obj.global.template=await (template.findAsync(query,"-_id -project -version"))
             obj.test=[];
             query={
                 project:req.obj._id
@@ -1329,6 +1352,14 @@ function Project() {
                 {
                     item.project=objProject._id;
                     await (status.createAsync(item));
+                }
+            }
+            if(obj.global.template.length>0)
+            {
+                for(let item of obj.global.template)
+                {
+                    item.project=objProject._id;
+                    await (template.createAsync(item));
                 }
             }
             if(obj.test.length>0)
@@ -1770,8 +1801,8 @@ function Project() {
                     if(!err)
                     {
                         obj.removeAsync();
-                        fs.exists(pathName,function (exist) {
-                            if(exist)
+                        fs.access(pathName,fs.constants.F_OK,function (err) {
+                            if(!err)
                             {
                                 fs.unlink(pathName);
                             }
@@ -4549,6 +4580,333 @@ function Project() {
             objProject._doc.interfaceCount=interfaceCount;
             objProject._doc.own=1;
             util.ok(res,objProject,"导入成功");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.exportDocx=async ((req,res)=>{
+        try
+        {
+            var docx=office("docx");
+            let func=async (function(req,id,obj) {
+                let query={
+                    project:id,
+                    parent:obj?obj.id:{
+                        $exists:false
+                    }
+                }
+                if(req.headers["docleverversion"])
+                {
+                    query.version=req.headers["docleverversion"]
+                }
+                let arr=await (req.groupModel.findAsync(query,null))
+                for(let obj of arr)
+                {
+                    await (func(req,id,obj));
+                }
+                if(obj)
+                {
+                    let arrInterface=await (req.interfaceModel.findAsync({
+                        group:obj._id
+                    },null));
+                    for(let o of arrInterface)
+                    {
+                        handleDoc(o);
+                    }
+                }
+            })
+            function handleDoc(obj) {
+                var pObj = docx.createP ({
+                    align:"center"
+                });
+                pObj.addText(obj.name,{
+                    font_size:20
+                });
+                pObj=docx.createP();
+                pObj.addLineBreak();
+                pObj.addText(`method:${obj.method}`,{
+                    font_size:18
+                });
+                pObj.addLineBreak();
+                pObj.addText(`path:${obj.url}`,{
+                    font_size:18
+                });
+                pObj.addLineBreak();
+                pObj.addText(`status:${obj.finish==1?"开发完成":(obj.finish==2?"已废弃":"未完成")}`,{
+                    font_size:18
+                });
+                pObj.addLineBreak();
+                pObj.addText(`reamrk:${obj.remark}`,{
+                    font_size:18
+                });
+                pObj.addLineBreak();
+                for(let o of obj.param)
+                {
+                    pObj=docx.createP();
+                    pObj.addText(`参数实例:${o.name}`,{
+                        font_size:18,
+                        bold:true
+                    });
+                    pObj.addLineBreak();
+                    if(o.restParam.length>0)
+                    {
+                        pObj=docx.createP();
+                        pObj.addText(`Rest Param:`,{
+                            font_size:18
+                        });
+                        pObj.addLineBreak();
+                        let table = [
+                            [{
+                                val: "名称",
+                                opts: {
+                                    b:true,
+                                    sz: '24',
+                                    shd: {
+                                        fill: "7F7F7F",
+                                        themeFill: "text1",
+                                        "themeFillTint": "80"
+                                    },
+                                    fontFamily: "Avenir Book"
+                                }
+                            },{
+                                val: "备注",
+                                opts: {
+                                    align: "center",
+                                    vAlign: "center",
+                                    b:true,
+                                    sz: '24',
+                                    shd: {
+                                        fill: "92CDDC",
+                                        themeFill: "text1",
+                                        "themeFillTint": "80"
+                                    }
+                                }
+                            }]
+                        ];
+                        o.restParam.forEach(function (obj) {
+                            table.push([
+                                obj.name,
+                                obj.remark?obj.remark:""
+                            ])
+                        })
+                        let tableStyle = {
+                            tableColWidth: 4261,
+                            tableSize: 24,
+                            tableColor: "ada",
+                            tableAlign: "center",
+                            tableFontFamily: "Comic Sans MS",
+                            borders: true
+                        }
+                        docx.createTable(table,tableStyle);
+                    }
+                    if(o.queryParam.length>0)
+                    {
+                        pObj=docx.createP();
+                        pObj.addText(`Query:`,{
+                            font_size:18
+                        });
+                        pObj.addLineBreak();
+                        let table = [
+                            [{
+                                val: "名称",
+                                opts: {
+                                    b:true,
+                                    sz: '24',
+                                    shd: {
+                                        fill: "7F7F7F",
+                                        themeFill: "text1",
+                                        "themeFillTint": "80"
+                                    },
+                                    fontFamily: "Avenir Book"
+                                }
+                            },{
+                                val: "是否必填",
+                                opts: {
+                                    b:true,
+                                    sz: '24',
+                                    shd: {
+                                        fill: "7F7F7F",
+                                        themeFill: "text1",
+                                        "themeFillTint": "80"
+                                    },
+                                    fontFamily: "Avenir Book"
+                                }
+                            },{
+                                val: "备注",
+                                opts: {
+                                    align: "center",
+                                    vAlign: "center",
+                                    b:true,
+                                    sz: '24',
+                                    shd: {
+                                        fill: "92CDDC",
+                                        themeFill: "text1",
+                                        "themeFillTint": "80"
+                                    }
+                                }
+                            }]
+                        ];
+                        o.queryParam.forEach(function (obj) {
+                            table.push([
+                                obj.name,
+                                obj.must?"必填":"选填",
+                                obj.remark?obj.remark:""
+                            ])
+                        })
+                        let tableStyle = {
+                            tableColWidth: 4261,
+                            tableSize: 24,
+                            tableColor: "ada",
+                            tableAlign: "center",
+                            tableFontFamily: "Comic Sans MS",
+                            borders: true
+                        }
+                        docx.createTable(table,tableStyle);
+                    }
+                    if(obj.method=="POST" || obj.method=="PUT" || obj.method=="PATCH")
+                    {
+                        pObj=docx.createP();
+                        if(o.bodyInfo.type==0)
+                        {
+                            if(o.bodyParam.length>0)
+                            {
+                                pObj.addText(`Body:`,{
+                                    font_size:18
+                                });
+                                pObj.addLineBreak();
+                                let table = [
+                                    [{
+                                        val: "名称",
+                                        opts: {
+                                            b:true,
+                                            sz: '24',
+                                            shd: {
+                                                fill: "7F7F7F",
+                                                themeFill: "text1",
+                                                "themeFillTint": "80"
+                                            },
+                                            fontFamily: "Avenir Book"
+                                        }
+                                    },{
+                                        val: "类型",
+                                        opts: {
+                                            b:true,
+                                            sz: '24',
+                                            shd: {
+                                                fill: "7F7F7F",
+                                                themeFill: "text1",
+                                                "themeFillTint": "80"
+                                            },
+                                            fontFamily: "Avenir Book"
+                                        }
+                                    },{
+                                        val: "是否必填",
+                                        opts: {
+                                            b:true,
+                                            sz: '24',
+                                            shd: {
+                                                fill: "7F7F7F",
+                                                themeFill: "text1",
+                                                "themeFillTint": "80"
+                                            },
+                                            fontFamily: "Avenir Book"
+                                        }
+                                    },{
+                                        val: "备注",
+                                        opts: {
+                                            align: "center",
+                                            vAlign: "center",
+                                            b:true,
+                                            sz: '24',
+                                            shd: {
+                                                fill: "92CDDC",
+                                                themeFill: "text1",
+                                                "themeFillTint": "80"
+                                            }
+                                        }
+                                    }]
+                                ];
+                                o.bodyParam.forEach(function (obj) {
+                                    table.push([
+                                        obj.name,
+                                        obj.type==0?"文本":"文件",
+                                        obj.must?"必填":"选填",
+                                        obj.remark?obj.remark:""
+                                    ])
+                                })
+                                let tableStyle = {
+                                    tableColWidth: 4261,
+                                    tableSize: 24,
+                                    tableColor: "ada",
+                                    tableAlign: "center",
+                                    tableFontFamily: "Comic Sans MS",
+                                    borders: true
+                                }
+                                docx.createTable(table,tableStyle);
+                            }
+                        }
+                        else
+                        {
+                            if(o.bodyInfo.rawType==2)
+                            {
+                                let result=o.bodyInfo.rawJSONType==1?[]:{};
+                                util.convertToJSON(o.bodyInfo.rawJSON,result);
+                                let str=util.formatJson(result);
+                                pObj.addText(`Body JSON:`,{
+                                    font_size:18
+                                });
+                                pObj.addLineBreak();
+                                pObj.addText(str,{
+                                    back:"F0F1F2",
+                                    border: 'dotted',
+                                    borderSize: 2,
+                                    borderColor: '88CCFF'
+                                })
+                            }
+
+                        }
+                    }
+                    if(o.outInfo.type==0)
+                    {
+                        pObj=docx.createP();
+                        let result=o.outInfo.rawJSONType==1?[]:{};
+                        util.convertToJSON(o.outParam,result);
+                        let str=util.formatJson(result);
+                        pObj.addText(`Result JSON:`,{
+                            font_size:18
+                        });
+                        pObj.addLineBreak();
+                        pObj.addText(str,{
+                            back:"F0F1F2",
+                            border: 'dotted',
+                            borderSize: 2,
+                            borderColor: '88CCFF'
+                        })
+                    }
+                    else
+                    {
+                        pObj=docx.createP();
+                        pObj.addText(`Result Raw:${o.outInfo.rawRemark}`,{
+                            font_size:18
+                        });
+                    }
+                }
+                pObj=docx.createP();
+                pObj.addHorizontalLine();
+            }
+            await (func(req,req.clientParam.id,null));
+            res.writeHead(200,{
+                'Content-Type': 'application/octet-stream',
+                'Content-Disposition': 'attachment; filename*=UTF-8\'\''+encodeURIComponent(req.obj.name)+".docx",
+                "Transfer-Encoding": "chunked",
+                "Expires":0,
+                "Cache-Control":"must-revalidate, post-check=0, pre-check=0",
+                "Content-Transfer-Encoding":"binary",
+                "Pragma":"public",
+            });
+            docx.generate(res);
         }
         catch (err)
         {

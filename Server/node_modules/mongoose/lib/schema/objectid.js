@@ -20,6 +20,15 @@ var SchemaType = require('../schematype'),
  */
 
 function ObjectId(key, options) {
+  var isKeyHexStr = typeof key === 'string' && key.length === 24 && /^a-f0-9$/i.test(key);
+  var suppressWarning = options && options.suppressWarning;
+  if ((isKeyHexStr || typeof key === 'undefined') && !suppressWarning) {
+    console.warn('mongoose: To create a new ObjectId please try ' +
+      '`Mongoose.Types.ObjectId` instead of using ' +
+      '`Mongoose.Schema.ObjectId`. Set the `suppressWarning` option if ' +
+      'you\'re trying to create a hex char path in your schema.');
+    console.trace();
+  }
   SchemaType.call(this, key, options, 'ObjectID');
 }
 
@@ -97,6 +106,8 @@ ObjectId.prototype.cast = function(value, doc, init) {
     // setting a populated path
     if (value instanceof oid) {
       return value;
+    } else if ((value.constructor.name || '').toLowerCase() === 'objectid') {
+      return new oid(value.toHexString());
     } else if (Buffer.isBuffer(value) || !utils.isObject(value)) {
       throw new CastError('ObjectId', value, this.path);
     }
@@ -184,7 +195,7 @@ ObjectId.prototype.castForQuery = function($conditional, val) {
     }
     return handler.call(this, val);
   }
-  return this.cast($conditional);
+  return this._castForQuery($conditional);
 };
 
 /*!
@@ -196,7 +207,17 @@ function defaultId() {
 }
 
 function resetId(v) {
-  this.$__._id = null;
+  Document || (Document = require('./../document'));
+
+  if (v === void 0) {
+    var _v = new oid;
+    this.$__._id = _v;
+    return _v;
+  }
+
+  if (this instanceof Document) {
+    this.$__._id = v;
+  }
   return v;
 }
 

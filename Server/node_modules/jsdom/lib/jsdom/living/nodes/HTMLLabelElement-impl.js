@@ -2,8 +2,9 @@
 
 const HTMLElementImpl = require("./HTMLElement-impl").implementation;
 const MouseEvent = require("../generated/MouseEvent");
-const closest = require("../helpers/traversal").closest;
-const domSymbolTree = require("../helpers/internal-constants").domSymbolTree;
+const { closest } = require("../helpers/traversal");
+const { domSymbolTree } = require("../helpers/internal-constants");
+const { isDisabled } = require("../helpers/form-controls");
 
 function isLabelable(node) {
   // labelable logic defined at: https://html.spec.whatwg.org/multipage/forms.html#category-label
@@ -29,8 +30,9 @@ function isLabelable(node) {
 }
 
 function sendClickToAssociatedNode(node) {
-  node.dispatchEvent(
-    MouseEvent.createImpl(["click", {
+  node.dispatchEvent(MouseEvent.createImpl([
+    "click",
+    {
       bubbles: true,
       cancelable: true,
       view: node.ownerDocument ? node.ownerDocument.defaultView : null,
@@ -41,21 +43,24 @@ function sendClickToAssociatedNode(node) {
       button: 0,
       detail: 1,
       relatedTarget: null
-    }])
-  );
+    }
+  ]));
 }
 
 class HTMLLabelElementImpl extends HTMLElementImpl {
   _activationBehavior() {
     if (this.hasAttribute("for")) {
       const node = this.ownerDocument.getElementById(this.getAttribute("for"));
-      if (node && isLabelable(node)) {
+      if (node && isLabelable(node) && !isDisabled(node)) {
         sendClickToAssociatedNode(node);
       }
     } else {
       for (const descendant of domSymbolTree.treeIterator(this)) {
         if (isLabelable(descendant)) {
-          sendClickToAssociatedNode(descendant);
+          if (!isDisabled(descendant)) {
+            sendClickToAssociatedNode(descendant);
+          }
+
           break;
         }
       }

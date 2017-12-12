@@ -87,6 +87,7 @@ The following is the list of currently available configuration options, their de
 * `UNICODE16`: true  - true to allow identifiers containing Unicode (utf-16) chars
 * `SHORTCUTS`: false - false to disable mangled selector strings like "+div" or "ul>"
 * `SIMPLENOT`: true  - true to disallow complex selectors nested in ':not()' classes
+* `SVG_LCASE`: false - false to disable matching lowercase tag names of SVG elements
 * `UNIQUE_ID`: true  - true to disallow multiple elements with the same id (strict)
 * `USE_HTML5`: true  - true to use HTML5 specs for ":checked" and similar UI states
 * `USE_QSAPI`: true  - true to use browsers native Query Selector API if available

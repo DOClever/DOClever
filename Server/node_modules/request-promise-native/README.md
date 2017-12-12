@@ -49,6 +49,9 @@ If you want to debug a test you should use `gulp test-without-coverage` to run a
 
 ## Change History
 
+- v1.0.5 (2017-09-22)
+    - Upgraded `tough-cookie` to a version without regex DoS vulnerability
+      *(Thanks to @sophieklm for [pull request #13](https://github.com/request/request-promise-native/pull/13))*
 - v1.0.4 (2017-05-07)
     - Fix that allows to use `tough-cookie` for [cookie creation](https://github.com/request/request-promise#include-a-cookie)
 - v1.0.3 (2016-08-08)

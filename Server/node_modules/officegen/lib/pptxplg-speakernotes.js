@@ -1,0 +1,251 @@
+//
+// officegen: speaker notes support for pptx documents.
+//
+// Please refer to README.md for this module's documentations.
+//
+// NOTE:
+// - Before changing this code please refer to the hacking the code section on README.md.
+//
+// Copyright (c) 2017 Ziv Barber;
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// 'Software'), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+/**
+ * This function creating the pptx speaker notes plugin object.
+ * @param {object} pluginsman Access to the plugins manager for pptx documents.
+ * @constructor
+ * @name MakeSpknotesPlugin
+ */
+function MakeSpknotesPlugin ( pluginsman ) {
+	var funcThis = this;
+
+	if ( pluginsman.docType !== 'pptx' && pluginsman.docType !== 'ppsx' ) {
+		throw "[pptx-speakernotes] This plugin supporting only PowerPoint based documents.";
+	} // Endif.
+
+	this.ogPluginsApi = pluginsman.ogPluginsApi; // Generic officegen API for plugins.
+	this.msPluginsApi = pluginsman.genPrivate.plugs.type.msoffice; // msoffice plugins API.
+	this.pluginsman = pluginsman; // Document type specific plugins API.
+
+	this.pptxData = pluginsman.getDataStorage (); // Here you can store any temporary data needed for generating the document and depending on the data filled by the user.
+
+	this.mainPath = pluginsman.genPrivate.features.type.msoffice.main_path; // The "folder" name inside the document zip that all the specific resources of this document type are stored.
+	this.mainPathFile = pluginsman.genPrivate.features.type.msoffice.main_path_file; // The name of the main real xml resource of this document.
+	this.relsMain = pluginsman.genPrivate.type.msoffice.rels_main; // Main rels file.
+	this.relsApp = pluginsman.genPrivate.type.msoffice.rels_app; // Main rels file inside the specific document type "folder".
+	this.filesList = pluginsman.genPrivate.type.msoffice.files_list; // Resources list xml.
+	this.srcFilesList = pluginsman.genPrivate.type.msoffice.src_files_list; // For storing extra files inside the document zip.
+
+	//
+	// Catch events inside the document so we can extent it:
+	//
+
+	// We want to extend the slide object API:
+	pluginsman.registerCallback ( 'newPage', function ( docData ) { funcThis.extendPptxSlideApi ( docData ); } );
+
+	// This event tell us that the generator is about to start working:
+	pluginsman.registerCallback ( 'beforeGen', function ( docObj ) { funcThis.beforeGen ( docObj ); } );
+
+	// This event tell us to add our xml code to the main presentation file:
+	pluginsman.registerCallback ( 'presentationGen', function ( docData ) { funcThis.presentationGen ( docData ); } );
+
+	return this;
+}
+
+//
+// Events implementations:
+//
+
+/**
+ * This function extending a new created slide object with new API methods.
+ * @param {object} docData Object with information about the new slide and more.
+ */
+MakeSpknotesPlugin.prototype.extendPptxSlideApi = function ( docData ) {
+	var funcThis = this;
+	var newSlide = docData.page; // The new slide's API.
+	var slideData = docData.pageData; // Place here data related to the slide.
+
+	/**
+	 * Set the speaker notes value.
+	 * @param {*} messageText - speaker note message.
+	 * @param {*} isAppend - is true to append the message as another line.
+	 */
+	newSlide.setSpeakerNote = function ( messageText, isAppend ) {
+		if ( !messageText ) {
+			slideData.speakerNoteMsg = [];
+
+		} else if ( typeof messageText === 'string' ) {
+			if ( isAppend ) {
+				if ( !slideData.speakerNoteMsg || typeof slideData.speakerNoteMsg !== 'object' ) {
+					slideData.speakerNoteMsg = [];
+
+				} else if ( slideData.speakerNoteMsg.length ) {
+					slideData.speakerNoteMsg.push ( { text: '\n' + messageText } );
+					return;
+				} // Endif.
+
+				slideData.speakerNoteMsg.push ( { text: messageText } );
+
+			} else {
+				slideData.speakerNoteMsg = [
+					{ text: messageText }
+				];
+			} // Endif.
+
+		} else if ( typeof messageText === 'object' ) {
+			slideData.speakerNoteMsg = messageText;
+		} // Endif.
+	};
+};
+
+/**
+ * This function been called just before starting to generate the output document zip.
+ * @param {object} docObj Document object.
+ */
+MakeSpknotesPlugin.prototype.beforeGen = function ( docObj ) {
+	var funcThis = this;
+
+	var notesCount = 0;
+	this.pluginsman.genPrivate.pages.forEach ( function ( value, indexId ) {
+		if ( value.speakerNoteMsg && typeof value.speakerNoteMsg === 'object' && value.speakerNoteMsg.length ) {
+			// Add each speaker note:
+			funcThis.ogPluginsApi.intAddAnyResourceToParse ( funcThis.mainPath + '\\notesSlides\\notesSlide' + (notesCount + 1) + '.xml', 'buffer', { slide: value, slideNum: indexId + 1 }, function ( data ) { return funcThis.cbMakePptxSpkNote ( data ); }, false );
+			funcThis.ogPluginsApi.intAddAnyResourceToParse ( funcThis.mainPath + '\\notesSlides\\_rels\\notesSlide' + (notesCount + 1) + '.xml.rels', 'buffer', [
+				{
+					type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster',
+					target: '../notesMasters/notesMaster1.xml'
+				},
+				{
+					type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide',
+					target: '../slides/slide' + (indexId + 1) + '.xml'
+				}
+			], funcThis.pluginsman.genPrivate.plugs.type.msoffice.cbMakeRels, false );
+
+			// We'll connect the slide to this note:
+			value.rels.push ({
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide',
+				target: '../notesSlides/notesSlide' + (notesCount + 1) + '.xml'
+			});
+
+			// Add this speaker note to the list of files in the document:
+			funcThis.filesList.push ({
+				name: '/' + funcThis.mainPath + '/notesSlides/notesSlide' + (notesCount + 1) + '.xml',
+				type: 'application/vnd.openxmlformats-officedocument.presentationml.notesSlide+xml',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+			});
+
+			notesCount++;
+		} // Endif.
+	});
+
+	this.pptxData.haveNotes = notesCount;
+	if ( notesCount ) {
+		// Speaker notes - master:
+		this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\notesMasters\\notesMaster1.xml', 'buffer', null, function ( data ) { return funcThis.cbMakePptxNotesMasters ( data ); }, false );
+		this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\notesMasters\\_rels\\notesMaster1.xml.rels', 'buffer', [
+			{
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme',
+				target: '../theme/theme2.xml'
+			}
+		], this.pluginsman.genPrivate.plugs.type.msoffice.cbMakeRels, false );
+
+		// Add a rel entry to the main pptx rels:
+		this.relsApp.push ({
+			target: 'notesMasters/notesMaster1.xml',
+			type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster',
+			clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		},
+		{
+			type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme',
+			target: 'theme/theme2.xml',
+			clear: 'generate'
+		});
+
+		funcThis.ogPluginsApi.intAddAnyResourceToParse ( funcThis.mainPath + '\\theme\\theme2.xml', 'buffer', null, function ( data ) { return funcThis.cbMakeTheme2 ( data ); }, false );
+
+		// Add the notes master to the list of files in the document:
+		this.filesList.push ({
+			name: '/' + this.mainPath + '/notesMasters/notesMaster1.xml',
+			type: 'application/vnd.openxmlformats-officedocument.presentationml.notesMaster+xml',
+			clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		},
+		{
+			name: '/' + this.mainPath + '/theme/theme2.xml',
+			type: 'application/vnd.openxmlformats-officedocument.theme+xml',
+			clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		});
+	} // Endif.
+};
+
+/**
+ * This function been called to add extra xml code to the main presentation xml file.
+ * @param {object} docObj Document object.
+ */
+MakeSpknotesPlugin.prototype.presentationGen = function ( docData ) {
+	var funcThis = this;
+
+	// Check if we have speaker notes:
+	if ( this.pptxData.haveNotes ) {
+		docData.data += '<p:notesMasterIdLst><p:notesMasterId r:id="rId' + (this.pluginsman.genPrivate.pages.length + 2) + '"/></p:notesMasterIdLst>'
+	} // Endif.
+};
+
+//
+// Resource generating callbacks:
+//
+
+/**
+ * Generate the 2nd theme, needed to support speaker notes.
+ *
+ * @param {object} data Ignored by this callback function.
+ * @return Text string.
+ */
+MakeSpknotesPlugin.prototype.cbMakeTheme2 = function ( data ) {
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Office Theme"><a:themeElements><a:clrScheme name="Office"><a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1><a:lt1><a:sysClr val="window" lastClr="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="1F497D"/></a:dk2><a:lt2><a:srgbClr val="EEECE1"/></a:lt2><a:accent1><a:srgbClr val="4F81BD"/></a:accent1><a:accent2><a:srgbClr val="C0504D"/></a:accent2><a:accent3><a:srgbClr val="9BBB59"/></a:accent3><a:accent4><a:srgbClr val="8064A2"/></a:accent4><a:accent5><a:srgbClr val="4BACC6"/></a:accent5><a:accent6><a:srgbClr val="F79646"/></a:accent6><a:hlink><a:srgbClr val="0000FF"/></a:hlink><a:folHlink><a:srgbClr val="800080"/></a:folHlink></a:clrScheme><a:fontScheme name="Office"><a:majorFont><a:latin typeface="Calibri"/><a:ea typeface=""/><a:cs typeface=""/><a:font script="Jpan" typeface="ＭＳ Ｐゴシック"/><a:font script="Hang" typeface="맑은 고딕"/><a:font script="Hans" typeface="宋体"/><a:font script="Hant" typeface="新細明體"/><a:font script="Arab" typeface="Times New Roman"/><a:font script="Hebr" typeface="Times New Roman"/><a:font script="Thai" typeface="Angsana New"/><a:font script="Ethi" typeface="Nyala"/><a:font script="Beng" typeface="Vrinda"/><a:font script="Gujr" typeface="Shruti"/><a:font script="Khmr" typeface="MoolBoran"/><a:font script="Knda" typeface="Tunga"/><a:font script="Guru" typeface="Raavi"/><a:font script="Cans" typeface="Euphemia"/><a:font script="Cher" typeface="Plantagenet Cherokee"/><a:font script="Yiii" typeface="Microsoft Yi Baiti"/><a:font script="Tibt" typeface="Microsoft Himalaya"/><a:font script="Thaa" typeface="MV Boli"/><a:font script="Deva" typeface="Mangal"/><a:font script="Telu" typeface="Gautami"/><a:font script="Taml" typeface="Latha"/><a:font script="Syrc" typeface="Estrangelo Edessa"/><a:font script="Orya" typeface="Kalinga"/><a:font script="Mlym" typeface="Kartika"/><a:font script="Laoo" typeface="DokChampa"/><a:font script="Sinh" typeface="Iskoola Pota"/><a:font script="Mong" typeface="Mongolian Baiti"/><a:font script="Viet" typeface="Times New Roman"/><a:font script="Uigh" typeface="Microsoft Uighur"/></a:majorFont><a:minorFont><a:latin typeface="Calibri"/><a:ea typeface=""/><a:cs typeface=""/><a:font script="Jpan" typeface="ＭＳ Ｐゴシック"/><a:font script="Hang" typeface="맑은 고딕"/><a:font script="Hans" typeface="宋体"/><a:font script="Hant" typeface="新細明體"/><a:font script="Arab" typeface="Arial"/><a:font script="Hebr" typeface="Arial"/><a:font script="Thai" typeface="Cordia New"/><a:font script="Ethi" typeface="Nyala"/><a:font script="Beng" typeface="Vrinda"/><a:font script="Gujr" typeface="Shruti"/><a:font script="Khmr" typeface="DaunPenh"/><a:font script="Knda" typeface="Tunga"/><a:font script="Guru" typeface="Raavi"/><a:font script="Cans" typeface="Euphemia"/><a:font script="Cher" typeface="Plantagenet Cherokee"/><a:font script="Yiii" typeface="Microsoft Yi Baiti"/><a:font script="Tibt" typeface="Microsoft Himalaya"/><a:font script="Thaa" typeface="MV Boli"/><a:font script="Deva" typeface="Mangal"/><a:font script="Telu" typeface="Gautami"/><a:font script="Taml" typeface="Latha"/><a:font script="Syrc" typeface="Estrangelo Edessa"/><a:font script="Orya" typeface="Kalinga"/><a:font script="Mlym" typeface="Kartika"/><a:font script="Laoo" typeface="DokChampa"/><a:font script="Sinh" typeface="Iskoola Pota"/><a:font script="Mong" typeface="Mongolian Baiti"/><a:font script="Viet" typeface="Arial"/><a:font script="Uigh" typeface="Microsoft Uighur"/></a:minorFont></a:fontScheme><a:fmtScheme name="Office"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="50000"/><a:satMod val="300000"/></a:schemeClr></a:gs><a:gs pos="35000"><a:schemeClr val="phClr"><a:tint val="37000"/><a:satMod val="300000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:tint val="15000"/><a:satMod val="350000"/></a:schemeClr></a:gs></a:gsLst><a:lin ang="16200000" scaled="1"/></a:gradFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:shade val="51000"/><a:satMod val="130000"/></a:schemeClr></a:gs><a:gs pos="80000"><a:schemeClr val="phClr"><a:shade val="93000"/><a:satMod val="130000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="94000"/><a:satMod val="135000"/></a:schemeClr></a:gs></a:gsLst><a:lin ang="16200000" scaled="0"/></a:gradFill></a:fillStyleLst><a:lnStyleLst><a:ln w="9525" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"><a:shade val="95000"/><a:satMod val="105000"/></a:schemeClr></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="25400" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="38100" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst><a:outerShdw blurRad="40000" dist="20000" dir="5400000" rotWithShape="0"><a:srgbClr val="000000"><a:alpha val="38000"/></a:srgbClr></a:outerShdw></a:effectLst></a:effectStyle><a:effectStyle><a:effectLst><a:outerShdw blurRad="40000" dist="23000" dir="5400000" rotWithShape="0"><a:srgbClr val="000000"><a:alpha val="35000"/></a:srgbClr></a:outerShdw></a:effectLst></a:effectStyle><a:effectStyle><a:effectLst><a:outerShdw blurRad="40000" dist="23000" dir="5400000" rotWithShape="0"><a:srgbClr val="000000"><a:alpha val="35000"/></a:srgbClr></a:outerShdw></a:effectLst><a:scene3d><a:camera prst="orthographicFront"><a:rot lat="0" lon="0" rev="0"/></a:camera><a:lightRig rig="threePt" dir="t"><a:rot lat="0" lon="0" rev="1200000"/></a:lightRig></a:scene3d><a:sp3d><a:bevelT w="63500" h="25400"/></a:sp3d></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="40000"/><a:satMod val="350000"/></a:schemeClr></a:gs><a:gs pos="40000"><a:schemeClr val="phClr"><a:tint val="45000"/><a:shade val="99000"/><a:satMod val="350000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="20000"/><a:satMod val="255000"/></a:schemeClr></a:gs></a:gsLst><a:path path="circle"><a:fillToRect l="50000" t="-80000" r="50000" b="180000"/></a:path></a:gradFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="80000"/><a:satMod val="300000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="30000"/><a:satMod val="200000"/></a:schemeClr></a:gs></a:gsLst><a:path path="circle"><a:fillToRect l="50000" t="50000" r="50000" b="50000"/></a:path></a:gradFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/></a:theme>';
+};
+
+/**
+ * Generate the speaker notes master.
+ *
+ * @param {object} data Data needed to generate this resource.
+ * @return Text string.
+ */
+MakeSpknotesPlugin.prototype.cbMakePptxNotesMasters = function ( data ) {
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:notesMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld><p:bg><p:bgRef idx="1001"><a:schemeClr val="bg1"/></p:bgRef></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Header Placeholder 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="hdr" sz="quarter"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="2971800" cy="457200"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0"/><a:lstStyle><a:lvl1pPr algn="l"><a:defRPr sz="1200"/></a:lvl1pPr></a:lstStyle><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Date Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" idx="1"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="3884613" y="0"/><a:ext cx="2971800" cy="457200"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0"/><a:lstStyle><a:lvl1pPr algn="r"><a:defRPr sz="1200"/></a:lvl1pPr></a:lstStyle><a:p><a:fld id="{AA6EBAA8-ADDE-4290-A9BE-D64DC1002B1F}" type="datetimeFigureOut"><a:rPr lang="en-US" smtClean="0"/><a:t>2/3/2017</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Slide Image Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1" noRot="1" noChangeAspect="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldImg" idx="2"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="1143000" y="685800"/><a:ext cx="4572000" cy="3429000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:ln w="12700"><a:solidFill><a:prstClr val="black"/></a:solidFill></a:ln></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="5" name="Notes Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" sz="quarter" idx="3"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="685800" y="4343400"/><a:ext cx="5486400" cy="4114800"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0"><a:normAutofit/></a:bodyPr><a:lstStyle/><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl="1"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl="2"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl="3"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl="4"/><a:r><a:rPr lang="en-US" smtClean="0"/><a:t>Fifth level</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="6" name="Footer Placeholder 5"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="4"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="0" y="8685213"/><a:ext cx="2971800" cy="457200"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0" anchor="b"/><a:lstStyle><a:lvl1pPr algn="l"><a:defRPr sz="1200"/></a:lvl1pPr></a:lstStyle><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="7" name="Slide Number Placeholder 6"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="5"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="3884613" y="8685213"/><a:ext cx="2971800" cy="457200"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0" anchor="b"/><a:lstStyle><a:lvl1pPr algn="r"><a:defRPr sz="1200"/></a:lvl1pPr></a:lstStyle><a:p><a:fld id="{E165F6F6-A11E-4DE0-B2DB-03E2E9A5946D}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree></p:cSld><p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/><p:notesStyle><a:lvl1pPr marL="0" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl1pPr><a:lvl2pPr marL="457200" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl2pPr><a:lvl3pPr marL="914400" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl3pPr><a:lvl4pPr marL="1371600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl4pPr><a:lvl5pPr marL="1828800" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl5pPr><a:lvl6pPr marL="2286000" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl6pPr><a:lvl7pPr marL="2743200" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl7pPr><a:lvl8pPr marL="3200400" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl8pPr><a:lvl9pPr marL="3657600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl9pPr></p:notesStyle></p:notesMaster>';
+};
+
+/**
+ * Generate a speaker note for a slide.
+ *
+ * @param {object} data Data needed to generate this resource.
+ * @return Text string.
+ */
+MakeSpknotesPlugin.prototype.cbMakePptxSpkNote = function ( data ) {
+	var dataOut = this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<p:notes xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Slide Image Placeholder 1"/><p:cNvSpPr><a:spLocks noGrp="1" noRot="1" noChangeAspect="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldImg"/></p:nvPr></p:nvSpPr><p:spPr/></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Notes Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" idx="1"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr><a:normAutofit/></a:bodyPr><a:lstStyle/>';
+
+	// Generate the speaker note lines for this slide:
+	dataOut += this.pluginsman.genobj.cMakePptxOutTextP ( '', data.slide.speakerNoteMsg, {}, data.slide.slide );
+
+	dataOut += '</p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Slide Number Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="{E165F6F6-A11E-4DE0-B2DB-03E2E9A5946D}" type="slidenum"><a:rPr lang="en-US" smtClean="0"/><a:t>' + data.slideNum + '</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:notes>';
+	return dataOut;
+};
+
+module.exports = MakeSpknotesPlugin;

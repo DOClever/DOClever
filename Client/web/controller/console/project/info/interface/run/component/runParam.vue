@@ -30,67 +30,150 @@
         </el-row>
         <el-row class="row" style="height: 1px;background-color: lightgray;margin-top: 10px;margin-left: 10px;width: calc(100% - 20px)"></el-row>
         <el-row class="row">
-            <el-row class="row" style="padding: 10px 10px 10px 20px;margin-bottom: 10px">
-            <span>
-                Result:&nbsp;&nbsp;<span :style="{color:statusStr.match(/^2/)?'green':'red'}">{{statusStr=='0'?'ERROR':statusStr}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #50a3ff">{{second?("耗时"+second+"秒"):""}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span v-if="errorCount>0" style="color: red">Error:&nbsp;{{errorCount}}</span>
-            </span>
-                <el-popover ref="error" placement="bottom" width="400" trigger="hover" v-if="errorCount>0" content="切换到Advance Tab页，移动到红色的行上面即可看到错误信息">
-                </el-popover>
-                <el-button size="mini" type="text" style="font-size: 15px" v-popover:error icon="el-icon-info" v-if="errorCount>0">
-                </el-button>
+            <el-row class="row" style="text-align: center;height: 50px;line-height: 50px" v-if="example.id">
+                <el-radio-group v-model="resultType" size="small">
+                    <el-radio-button :label="0">参考输出</el-radio-button>
+                    <el-radio-button :label="1">实时输出</el-radio-button>
+                </el-radio-group>
             </el-row>
-            <el-row class="row" style="padding-left: 20px;padding-right: 20px">
-                <el-tabs type="border-card" id="result">
-                    <el-tab-pane label="Preview">
-                        <el-row class="row" v-if="type=='object'">
-                            <template v-for="item in draw">
-                                <el-row class="row" style="font-size: 14px;min-height: 25px;line-height: 25px;word-break: break-all" v-html="item">
-                                </el-row>
-                            </template>
-                        </el-row>
-                        <img :src="imgUrl" v-else-if="type=='img'">
-                        <div v-html="draw" v-else-if="type=='html'"></div>
-                        <pre v-else>{{draw}}</pre>
-                    </el-tab-pane>
-                    <el-tab-pane label="Advance">
-                        <el-row class="row" v-if="type=='object'">
-                            <template v-for="item in drawMix" v-if="type=='object'">
-                                <el-popover placement="bottom" title="错误信息" width="300" trigger="hover" v-if="existError(item)">
-                                    {{getError(item)}}
-                                    <el-row class="row" style="font-size: 14px;min-height: 25px;line-height: 25px;word-break: break-all;background-color: rgba(255,0,0,0.3)" v-html="item" slot="reference">
+            <template v-if="resultType==1">
+                <el-row class="row" style="padding: 10px 10px 10px 20px;margin-bottom: 10px" key="real">
+                    <span>
+                        Result:&nbsp;&nbsp;<span :style="{color:statusStr.match(/^2/)?'green':'red'}">{{statusStr=='0'?'ERROR':statusStr}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #50a3ff">{{second?("耗时"+second+"秒"):""}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span v-if="errorCount>0" style="color: red">Error:&nbsp;{{errorCount}}</span>
+                    </span>
+                    <el-popover ref="error" placement="bottom" width="400" trigger="hover" v-if="errorCount>0" content="切换到Advance Tab页，移动到红色的行上面即可看到错误信息">
+                    </el-popover>
+                    <el-button size="mini" type="text" style="font-size: 15px" v-popover:error icon="el-icon-info" v-if="errorCount>0">
+                    </el-button>
+                </el-row>
+                <el-row class="row" style="padding-left: 20px;padding-right: 20px" key="real">
+                    <el-tabs type="border-card" id="result">
+                        <el-tab-pane label="Preview">
+                            <el-row class="row" v-if="type=='object'">
+                                <template v-for="item in draw">
+                                    <el-row class="row" style="font-size: 14px;min-height: 25px;line-height: 25px;word-break: break-all" v-html="item">
                                     </el-row>
-                                </el-popover>
-                                <el-row class="row" style="font-size: 14px;min-height: 25px;line-height: 25px;word-break: break-all" v-html="item" v-else>
-                                </el-row>
-                            </template>
-                        </el-row>
-                        <img :src="imgUrl" v-else-if="type=='img'">
-                        <div v-html="drawMix" v-else-if="type=='html'"></div>
-                        <pre v-else>{{drawMix}}</pre>
-                    </el-tab-pane>
-                    <el-tab-pane label="Raw">
-                        <el-row class="row" style="word-break: break-all">
-                            {{rawData}}
-                        </el-row>
-                    </el-tab-pane>
-                    <el-tab-pane label="Header">
-                        <table class="table-hover" style="width: 100%">
-                            <tbody>
-                            <template v-for="(value,key) in resHeader">
-                                <tr style="vertical-align: middle;height: 30px">
-                                    <td style="width: 30%">
-                                        {{key}}
-                                    </td>
-                                    <td style="width: 70%">
-                                        {{value}}
-                                    </td>
-                                </tr>
-                            </template>
-                            </tbody>
-                        </table>
-                    </el-tab-pane>
-                </el-tabs>
-            </el-row>
+                                </template>
+                            </el-row>
+                            <img :src="imgUrl" v-else-if="type=='img'">
+                            <div v-html="draw" v-else-if="type=='html'"></div>
+                            <pre v-else>{{draw}}</pre>
+                        </el-tab-pane>
+                        <el-tab-pane label="Advance">
+                            <el-row class="row" v-if="type=='object'">
+                                <template v-for="item in drawMix" v-if="type=='object'">
+                                    <el-popover placement="bottom" title="错误信息" width="300" trigger="hover" v-if="existError(item)">
+                                        {{getError(item)}}
+                                        <el-row class="row" style="font-size: 14px;min-height: 25px;line-height: 25px;word-break: break-all;background-color: rgba(255,0,0,0.3)" v-html="item" slot="reference">
+                                        </el-row>
+                                    </el-popover>
+                                    <el-row class="row" style="font-size: 14px;min-height: 25px;line-height: 25px;word-break: break-all" v-html="item" v-else>
+                                    </el-row>
+                                </template>
+                            </el-row>
+                            <img :src="imgUrl" v-else-if="type=='img'">
+                            <div v-html="drawMix" v-else-if="type=='html'"></div>
+                            <pre v-else>{{drawMix}}</pre>
+                        </el-tab-pane>
+                        <el-tab-pane label="Raw">
+                            <el-row class="row" style="word-break: break-all">
+                                {{rawData}}
+                            </el-row>
+                        </el-tab-pane>
+                        <el-tab-pane label="Response Header">
+                            <table class="table-hover" style="width: 100%;">
+                                <tbody>
+                                <template v-for="(value,key) in resHeader">
+                                    <tr style="vertical-align: middle;height: 30px">
+                                        <td style="width: 30%">
+                                            {{key}}
+                                        </td>
+                                        <td style="width: 70%;word-wrap:break-word">
+                                            {{value}}
+                                        </td>
+                                    </tr>
+                                </template>
+                                </tbody>
+                            </table>
+                        </el-tab-pane>
+                        <el-tab-pane label="Request Header">
+                            <table class="table-hover" style="width: 100%;table-layout: fixed">
+                                <tbody>
+                                <template v-for="(value,key) in reqHeader">
+                                    <tr style="vertical-align: middle;height: 30px">
+                                        <td style="width: 30%">
+                                            {{key}}
+                                        </td>
+                                        <td style="width: 70%;word-wrap:break-word">
+                                            {{value}}
+                                        </td>
+                                    </tr>
+                                </template>
+                                </tbody>
+                            </table>
+                        </el-tab-pane>
+                    </el-tabs>
+                </el-row>
+            </template>
+            <template v-else-if="resultType==0 && selParam.run">
+                <el-row class="row" style="padding: 10px 10px 10px 20px;margin-bottom: 10px" key="example">
+                    <span>
+                        Result:&nbsp;&nbsp;<span :style="{color:selParam.status.match(/^2/)?'green':'red'}">{{selParam.status=='0'?'ERROR':selParam.status}}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #50a3ff">{{selParam.second?("耗时"+selParam.second+"秒"):""}}</span>
+                    </span>
+                </el-row>
+                <el-row class="row" style="padding-left: 20px;padding-right: 20px" key="example">
+                    <el-tabs type="border-card" id="result">
+                        <el-tab-pane label="Preview">
+                            <el-row class="row" v-if="selParam.type=='object'">
+                                <template v-for="item in selParam.draw">
+                                    <el-row class="row" style="font-size: 14px;min-height: 25px;line-height: 25px;word-break: break-all" v-html="item">
+                                    </el-row>
+                                </template>
+                            </el-row>
+                            <img :src="selParam.imgUrl" v-else-if="selParam.type=='img'">
+                            <div v-html="selParam.draw" v-else-if="selParam.type=='html'"></div>
+                            <pre v-else>{{selParam.draw}}</pre>
+                        </el-tab-pane>
+                        <el-tab-pane label="Raw">
+                            <el-row class="row" style="word-break: break-all">
+                                {{selParam.rawData}}
+                            </el-row>
+                        </el-tab-pane>
+                        <el-tab-pane label="Response Header">
+                            <table class="table-hover" style="width: 100%">
+                                <tbody>
+                                <template v-for="(value,key) in selParam.resHeader">
+                                    <tr style="vertical-align: middle;height: 30px;table-layout: fixed">
+                                        <td style="width: 30%">
+                                            {{key}}
+                                        </td>
+                                        <td style="width: 70%;word-wrap:break-word">
+                                            {{value}}
+                                        </td>
+                                    </tr>
+                                </template>
+                                </tbody>
+                            </table>
+                        </el-tab-pane>
+                        <el-tab-pane label="Request Header">
+                            <table class="table-hover" style="width: 100%;table-layout: fixed">
+                                <tbody>
+                                <template v-for="(value,key) in selParam.reqHeader">
+                                    <tr style="vertical-align: middle;height: 30px">
+                                        <td style="width: 30%">
+                                            {{key}}
+                                        </td>
+                                        <td style="width: 70%;word-wrap:break-word">
+                                            {{value}}
+                                        </td>
+                                    </tr>
+                                </template>
+                                </tbody>
+                            </table>
+                        </el-tab-pane>
+                    </el-tabs>
+                </el-row>
+            </template>
         </el-row>
     </el-row>
 </template>
@@ -115,7 +198,8 @@
         data:function () {
             return {
                 queryAutoExpand:0,
-                bodyAutoExpand:0
+                bodyAutoExpand:0,
+                resultType:1
             }
         },
         components:{
@@ -139,9 +223,25 @@
                     }
                 },
                 immediate:true
+            },
+            "example.id":function (val) {
+                if(val)
+                {
+                    this.resultType=0;
+                }
+                else
+                {
+                    this.resultType=1;
+                }
             }
         },
         computed:{
+            selParam:function () {
+                return this.item.selParam
+            },
+            example:function () {
+                return this.item.selExample
+            },
             interface:function () {
                 return this.$store.state.interface
             },
@@ -201,6 +301,9 @@
             },
             bodyInfo:function () {
                 return this.item.bodyInfo
+            },
+            reqHeader:function () {
+                return this.item.reqHeader
             },
             queryRawShow:function () {
                 return this.item.queryRawShow;

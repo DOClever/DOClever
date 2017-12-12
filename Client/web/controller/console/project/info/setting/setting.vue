@@ -40,6 +40,11 @@
                         </el-col>
                     </el-row>
                     <el-row class="row">
+                        <el-form-item label="分享地址">
+                            {{publicUrl}}
+                        </el-form-item>
+                    </el-row>
+                    <el-row class="row">
                         <el-col class="col" :span="10">
                             <el-form-item label="公开">
                                 <el-switch v-model="project.public" active-color="#13ce66" inactive-color="lightgray" :active-value="1" :inactive-value="0"></el-switch>
@@ -66,7 +71,7 @@
             </el-row>
             <el-row class="row" style="background-color: lightgray;height: 1px"></el-row>
             <el-row class="row" style="padding: 10px 20px 10px 20px">
-                <el-row class="row" style="height: 50px;text-align: center;line-height: 50px;">
+                <el-row class="row" style="height: 50px;text-align: center;line-height: 50px;" v-if="manageRole">
                     <el-col class="col" :span="3" style="white-space: nowrap">
                         邀请用户
                     </el-col>
@@ -105,6 +110,7 @@
                 <el-row class="row">
                     <el-radio class="radio" :label="0" v-model="exportType">JSON</el-radio>
                     <el-radio class="radio" :label="1" v-model="exportType" style="margin-left: 20px">HTML</el-radio>
+                    <el-radio class="radio" :label="2" v-model="exportType" style="margin-left: 20px">WORD</el-radio>
                     <el-button size="mini" type="primary" @click="exportJSON" style="margin-left: 20px">导出</el-button>
                 </el-row>
             </el-row>
@@ -120,7 +126,7 @@
                 使用方法：在本地用node运行net.js ,加上mock server地址和你需要请求的真实地址的根地址，当您的接口文档的状态为开发完成的时候，net.js不会去请求mock server地址而去请求真实地址（举例：node net.js {{mockUrl}} http://localhost:8081) ,然后将您开发工程下的根地址替换为localhost:36742即可开启您的Mock之旅！
             </el-row>
         </expand>
-        <expand class="row" style="border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);background-color: white;margin-top: 10px">
+        <expand class="row" style="border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);background-color: white;margin-top: 10px" v-if="manageRole">
             <template v-if="!session.teamId && manageRole">
                 <el-row class="row" style="height: 40px;line-height: 40px;color: #17b9e6" slot="title">
                     团队申请
@@ -166,7 +172,7 @@
                 </el-form>
             </template>
         </expand>
-        <expand class="row" style="border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);background-color: white;margin-top: 10px"  v-if="project.source">
+        <expand class="row" style="border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);background-color: white;margin-top: 10px"  v-if="project.source && manageRole">
             <el-row class="row" style="height: 40px;line-height: 40px;color: #17b9e6" slot="title">
                 更新工程
             </el-row>
@@ -221,6 +227,7 @@
                     "gb":0,
                     "gs":0,
                     "gi":0,
+                    "gt":0,
                     "gd":0,
                     "ve":0,
                     "vr":0
@@ -242,6 +249,7 @@
                         "gb":0,
                         "gs":0,
                         "gi":0,
+                        "gt":0,
                         "gd":0,
                         "ve":0,
                         "vr":0
@@ -250,6 +258,12 @@
             }
         },
         computed:{
+            publicUrl:function () {
+                var url=location.href;
+                var index=url.lastIndexOf("/");
+                index=url.lastIndexOf("/",index-1);
+                return url.substring(0,index+1)+"public/public.html#"+session.get("projectId");
+            },
             guestRole:function () {
                 return this.$store.getters.guestRole;
             },
@@ -369,13 +383,13 @@
                 var type=navigator.userAgent;
                 if(type.indexOf("Firefox")>-1)
                 {
-                    window.open(location.protocol+"//"+location.host+"/project/"+(this.exportType==0?"exportjson":"exporthtml")+"?id="+session.get("projectId"));
+                    window.open(location.protocol+"//"+location.host+"/project/"+(this.exportType==0?"exportjson":(this.exportType==1?"exporthtml":"exportdocx"))+"?id="+session.get("projectId"));
                 }
                 else
                 {
                     var link=document.createElement("a");
-                    link.href="/project/"+(this.exportType==0?"exportjson":"exporthtml")+"?id="+session.get("projectId");
-                    link.download=session.get("projectName")+(this.exportType==0?".json":".zip");
+                    link.href="/project/"+(this.exportType==0?"exportjson":(this.exportType==1?"exporthtml":"exportdocx"))+"?id="+session.get("projectId");
+                    link.download=session.get("projectName")+(this.exportType==0?".json":(this.exportType==1?".zip":".docx"));
                     link.click();
                 }
             },

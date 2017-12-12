@@ -1,0 +1,158 @@
+//
+// officegen: document's plugins interface to implement additional features outside of the big mess of gen*.js
+//
+// Please refer to README.md for this module's documentations.
+//
+// NOTE:
+// - Before changing this code please refer to the hacking the code section on README.md.
+//
+// Copyright (c) 2013-2017 Ziv Barber;
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// 'Software'), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+/**
+ * Clear all the information of the current document.
+ *
+ * @param {object} docpluginman The plugin manager object.
+ * @return Callback function to clear all the document's specific data.
+ */
+function clearDocData ( docpluginman ) {
+	return function () {
+		// Clear all the specific document data:
+		docpluginman.genPrivate.type[docpluginman.docType] = {};
+
+		// Set back the default values:
+		if ( typeof defValuesFunc === 'function' ) {
+			defValuesFunc ( docpluginman );
+		} // Endif.
+
+		// Allow all the plugins to set their default data after clearing the document's data:
+		docpluginman.emitEvent ( 'setData', docpluginman.genobj );
+	}
+}
+
+/**
+ * This function implementing the document plugins system so instead of implementing 
+ * everything inside a big mess document generator, you can implement each feature 
+ * as a plugin. For each document generator that want to enable this plugin system 
+ * you must create an instance of this object.
+ *
+ * @param {object} genobj The document object to work on it.
+ * @param {object} genPrivate Access to the internals of this object.
+ * @param {string} docType Must be the same as the new_type parameter to the document generator's constructor.
+ * @param {function} defValuesFunc The function to use to reset the document's data.
+ * @summary Implementation of the pptx document plugins system so it'll be easier to add new features.
+ * @constructor
+ * @name MakeDocPluginapi
+ */
+function MakeDocPluginapi ( genobj, genPrivate, docType, defValuesFunc ) {
+	// Save everything because we'll need it later:
+	this.docType = docType;
+	this.genPrivate = genPrivate;
+	this.ogPluginsApi = genPrivate.plugs;
+	this.genobj = genobj;
+	this.defValuesFunc = defValuesFunc;
+	this.callbacksList = {};
+	this.plugsList = [];
+
+	// Here we can put anything specific to this document type BUT it's not data so if we'll clear the data inside the document we'll not need to clear anything here:
+	this.genPrivate.features.type[this.docType] = this;
+
+	// Prepare the object that we'll use to store data specific to this document type:
+	this.genPrivate.type[this.docType] = {};
+	if ( typeof defValuesFunc === 'function' ) {
+		// Put the default data:
+		defValuesFunc ( this );
+	} // Endif.
+
+	// Catch the clear document data event and connect it to us:
+	genobj.on ( 'clearDocType', clearDocData ( this ) );
+	return this;
+}
+
+/**
+ * Check for verbose mode for this document type.
+ * @param {string} moduleName Optional, Allow filtering by feature / module.
+ */
+MakeDocPluginapi.prototype.getVerboseMode = function ( moduleName ) {
+	return this.ogPluginsApi.getVerboseMode ( this.docType, moduleName );
+}
+
+/**
+ * Allow displaying a verbose messages to the console.
+ * @param {string} message The message to display.
+ */
+MakeDocPluginapi.prototype.logIfVerbose = function ( message ) {
+	if ( this.getVerboseMode () ) {
+		console.log ( message );
+	} // Endif.
+}
+
+/**
+ * Get the object to install features related to this document type.
+ * @return The features object.
+ */
+MakeDocPluginapi.prototype.getFeaturesStorage = function () {
+	return this.genPrivate.features.type[this.docType];
+}
+
+/**
+ * Get the object to place data used by this document.
+ * @return The document's data object.
+ */
+MakeDocPluginapi.prototype.getDataStorage = function () {
+	return this.genPrivate.type[this.docType];
+}
+
+/**
+ * Register a new callback.
+ * @param{string} eventType Type of event to catch.
+ * @param{function} cbFunc Callback function.
+ */
+MakeDocPluginapi.prototype.registerCallback = function ( eventType, cbFunc ) {
+	// First make sure that we have a list of callbacks for this event type:
+	if ( !this.callbacksList[eventType] ) {
+		this.callbacksList[eventType] = [];
+	} // Endif.
+
+	// Now we'll just push this callback:
+	this.callbacksList[eventType].push ( cbFunc );
+};
+
+/**
+ * Emit an event.
+ * @param{string} eventType Type of event to emit.
+ * @param{*} eventData Additional optional data.
+ */
+MakeDocPluginapi.prototype.emitEvent = function ( eventType, eventData ) {
+	var funcThis = this;
+
+	// We'll do something only if we have this type of event:
+	if ( this.callbacksList[eventType] ) {
+		this.callbacksList[eventType].forEach ( function ( value ) {
+			if ( typeof value === 'function' ) {
+				value ( eventData, eventType, funcThis );
+			} // Endif.
+		});
+	} // Endif.
+};
+
+module.exports = MakeDocPluginapi;

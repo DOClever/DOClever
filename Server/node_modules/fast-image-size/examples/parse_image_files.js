@@ -1,0 +1,25 @@
+var fast_image_size = require('../index.js');
+var path = require('path');
+
+var imagesList = [ 'example1.jpg', 'example2.gif', 'example3.gif', 'example4.png', 'example5.png', 'example6.png', 'example7.jpg', 'example8.jpg', 'example9.jpg' ];
+
+function testImage ( image_file ) {
+	var ret_data = fast_image_size ( path.resolve ( __dirname, image_file ) );
+
+	console.log ( 'Testing: ' + image_file );
+	console.log ( 'Type: ' + ret_data.type );
+	console.log ( 'Image width: ' + ret_data.width );
+	console.log ( 'Image height: ' + ret_data.height );
+
+	fast_image_size ( path.resolve ( __dirname, image_file ), function ( ret_obj ) {
+		console.log ( 'Testing: ' + ret_obj.image );
+		console.log ( 'Type: ' + ret_obj.type );
+		console.log ( 'Image width: ' + ret_obj.width );
+		console.log ( 'Image height: ' + ret_obj.height );
+	});
+}
+
+for ( var i = 0, total_size = imagesList.length; i < total_size; i++ ) {
+	testImage ( imagesList[i] );
+} // End of for loop.
+

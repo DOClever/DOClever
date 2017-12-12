@@ -1,0 +1,317 @@
+//
+// officegen: Header and footer support for docx documents.
+//
+// Please refer to README.md for this module's documentations.
+//
+// NOTE:
+// - Before changing this code please refer to the hacking the code section on README.md.
+//
+// Copyright (c) 2017 Ziv Barber;
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// 'Software'), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+var docxP = require('./docx-p.js');
+
+/**
+ * Create the API object for either the header or the footer.
+ * @param {object} headFootPlug Access to our plugin.
+ * @param {string} mainElement The name of the main element of this resource type.
+ * @param {string} pStyleDef The default style for the paragraph.
+ * @constructor
+ * @name MakeHeadFootObj
+ */
+function MakeHeadFootObj ( headFootPlug, mainElement, pStyleDef ) {
+	this.headFootPlug = headFootPlug;
+	this.docType = mainElement;
+	this.docStartExtra = '';
+	this.docEndExtra = '';
+	this.pStyleDef = pStyleDef;
+	this.data = [];
+	return this;
+}
+
+/**
+ * Create a new paragraph.
+ *
+ * @param {string} options Default options for all the objects inside this paragraph.
+ */
+MakeHeadFootObj.prototype.createP = function ( options ) {
+	// Create a new instance of the paragraph object:
+	return new docxP ( this.headFootPlug.pluginsman.genobj, this.headFootPlug.pluginsman.genPrivate, 'docx', this.data, {}, options );
+};
+
+/**
+ * This function creating the docx header-footer plugin object.
+ * @summary Create a new docx plugin.
+ * @param {object} pluginsman Access to the plugins manager for docx documents.
+ * @constructor
+ * @name MakeHeadfootPlugin
+ */
+function MakeHeadfootPlugin ( pluginsman ) {
+	var funcThis = this;
+
+	// You can change it if you want to support more types, since that the Word and Excel document generators also supporting very similar plugins:
+	if ( pluginsman.docType !== 'docx' ) {
+		throw "[docx-headfoot] This plugin supporting only Word based documents.";
+	} // Endif.
+
+	this.ogPluginsApi = pluginsman.ogPluginsApi; // Generic officegen API for plugins.
+	this.msPluginsApi = pluginsman.genPrivate.plugs.type.msoffice; // msoffice plugins API.
+	this.pluginsman = pluginsman; // Document type specific plugins API.
+
+	this.docxData = pluginsman.getDataStorage (); // Here you can store any temporary data needed for generating the document and depending on the data filled by the user.
+
+	this.mainPath = pluginsman.genPrivate.features.type.msoffice.main_path; // The "folder" name inside the document zip that all the specific resources of this document type are stored.
+	this.mainPathFile = pluginsman.genPrivate.features.type.msoffice.main_path_file; // The name of the main real xml resource of this document.
+	this.relsMain = pluginsman.genPrivate.type.msoffice.rels_main; // Main rels file.
+	this.relsApp = pluginsman.genPrivate.type.msoffice.rels_app; // Main rels file inside the specific document type "folder".
+	this.filesList = pluginsman.genPrivate.type.msoffice.files_list; // Resources list xml.
+	this.srcFilesList = pluginsman.genPrivate.type.msoffice.src_files_list; // For storing extra files inside the document zip.
+
+	//
+	// Catch events inside the document so we can extent it:
+	//
+
+	// We want to extend the main API of the docx document object:
+	pluginsman.registerCallback ( 'makeDocApi', function ( docObj ) { funcThis.extenddocxApi ( docObj ); } );
+
+	// This event tell us that the generator is about to start working:
+	pluginsman.registerCallback ( 'beforeGen', function ( docObj ) { funcThis.beforeGen ( docObj ); } );
+
+	return this;
+}
+
+//
+// Events implementations:
+//
+
+/**
+ * This function extending the main document object with new API methods.
+ * @param {object} docObj Document object.
+ */
+MakeHeadfootPlugin.prototype.extenddocxApi = function ( docObj ) {
+	var funcThis = this;
+
+	docObj.getHeader = function ( objSubType ) {
+		if ( objSubType ) {
+			if ( objSubType !== 'even' && objSubType !== 'first' ) {
+				throw 'objSubType can be either "even", "first" or false value';
+			} // Endif.
+		} // Endif.
+
+		objSubType = 'docHeader' + (objSubType || '');
+		if ( funcThis.docxData[objSubType] ) {
+			return funcThis.docxData[objSubType];
+		} // Endif.
+
+		funcThis.docxData[objSubType] = new MakeHeadFootObj ( funcThis, 'hdr', 'Header' );
+		return funcThis.docxData[objSubType];
+	};
+
+	docObj.getFooter = function ( objSubType ) {
+		if ( objSubType ) {
+			if ( objSubType !== 'even' && objSubType !== 'first' ) {
+				throw 'objSubType can be either "even", "first" or false value';
+			} // Endif.
+		} // Endif.
+
+		objSubType = 'docFooter' + (objSubType || '');
+		if ( funcThis.docxData[objSubType] ) {
+			return funcThis.docxData[objSubType];
+		} // Endif.
+
+		funcThis.docxData[objSubType] = new MakeHeadFootObj ( funcThis, 'ftr', 'Footer' );
+		return funcThis.docxData[objSubType];
+	};
+}
+
+/**
+ * This function been called just before starting to generate the output document zip.
+ * @param {object} docObj Document object.
+ */
+MakeHeadfootPlugin.prototype.beforeGen = function ( docObj ) {
+	var funcThis = this;
+
+	var isNeedHeadFoot = false;
+	if ( funcThis.docxData.docHeader || funcThis.docxData.docHeadereven || funcThis.docxData.docHeaderfirst || funcThis.docxData.docFooter || funcThis.docxData.docFootereven || funcThis.docxData.docFooterfirst ) {
+		isNeedHeadFoot = true;
+	} // Endif.
+
+	if ( isNeedHeadFoot ) {
+		// Create the endnotes resource:
+		this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\endnotes.xml', 'buffer', null, function ( data ) { return funcThis.cbEndNotes ( data ) }, false );
+
+		// Create the footnotes resource:
+		this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\footnotes.xml', 'buffer', null, function ( data ) { return funcThis.cbFootNotes ( data ) }, false );
+
+		// Create header1.xml:
+		this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\header1.xml', 'buffer', funcThis.pluginsman.genobj.getHeader ( 'even' ), funcThis.pluginsman.genobj.cbMakeDocxDocument, false );
+
+		// Create header2.xml:
+		this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\header2.xml', 'buffer', funcThis.pluginsman.genobj.getHeader (), funcThis.pluginsman.genobj.cbMakeDocxDocument, false );
+
+		// Create header3.xml:
+		this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\header3.xml', 'buffer', funcThis.pluginsman.genobj.getHeader ( 'first' ), funcThis.pluginsman.genobj.cbMakeDocxDocument, false );
+
+		// Create footer1.xml:
+		this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\footer1.xml', 'buffer', funcThis.pluginsman.genobj.getFooter ( 'even' ), funcThis.pluginsman.genobj.cbMakeDocxDocument, false );
+
+		// Create footer2.xml:
+		this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\footer2.xml', 'buffer', funcThis.pluginsman.genobj.getFooter (), funcThis.pluginsman.genobj.cbMakeDocxDocument, false );
+
+		// Create footer3.xml:
+		this.ogPluginsApi.intAddAnyResourceToParse ( this.mainPath + '\\footer3.xml', 'buffer', funcThis.pluginsman.genobj.getFooter ( 'first' ), funcThis.pluginsman.genobj.cbMakeDocxDocument, false );
+
+		// Add a rel entry to the main docx rels:
+
+		this.relsApp.push ({
+				target: 'header1.xml',
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/header',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		});
+		this.docxData.header1RelId = this.relsApp.length;
+
+		this.relsApp.push ({
+				target: 'header2.xml',
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/header',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		});
+		this.docxData.header2RelId = this.relsApp.length;
+
+		this.relsApp.push ({
+				target: 'header3.xml',
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/header',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		});
+		this.docxData.header3RelId = this.relsApp.length;
+
+		this.relsApp.push ({
+				target: 'footer1.xml',
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		});
+		this.docxData.footer1RelId = this.relsApp.length;
+
+		this.relsApp.push ({
+				target: 'footer2.xml',
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		});
+		this.docxData.footer2RelId = this.relsApp.length;
+
+		this.relsApp.push ({
+				target: 'footer3.xml',
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		});
+		this.docxData.footer3RelId = this.relsApp.length;
+
+		this.relsApp.push ({
+				target: 'endnotes.xml',
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/endnotes',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		});
+
+		this.relsApp.push ({
+				target: 'footnotes.xml',
+				type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/footernotes',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+		});
+
+		// Filling secPrExtra with data will connect the header and footer to the Word document:
+		funcThis.docxData.secPrExtra = '<w:headerReference w:type="default" r:id="rId' + this.docxData.header2RelId + '"/>';
+		funcThis.docxData.secPrExtra += '<w:footerReference w:type="default" r:id="rId' + this.docxData.footer2RelId + '"/>';
+		funcThis.docxData.secPrExtra += '<w:headerReference w:type="first" r:id="rId' + this.docxData.header3RelId + '"/>';
+		funcThis.docxData.secPrExtra += '<w:footerReference w:type="first" r:id="rId' + this.docxData.footer3RelId + '"/>';
+		funcThis.docxData.secPrExtra += '<w:headerReference w:type="even" r:id="rId' + this.docxData.header1RelId + '"/>';
+		funcThis.docxData.secPrExtra += '<w:footerReference w:type="even" r:id="rId' + this.docxData.footer1RelId + '"/>';
+
+		// Add the notes master to the list of files in the document:
+		this.filesList.push (
+			{
+				name: '/' + this.mainPath + '/footnotes.xml',
+				type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+			},
+			{
+				name: '/' + this.mainPath + '/endnotes.xml',
+				type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.endnotes+xml',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+			},
+			{
+				name: '/' + this.mainPath + '/footer1.xml',
+				type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+			},
+			{
+				name: '/' + this.mainPath + '/footer2.xml',
+				type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+			},
+			{
+				name: '/' + this.mainPath + '/footer3.xml',
+				type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+			},
+			{
+				name: '/' + this.mainPath + '/header1.xml',
+				type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+			},
+			{
+				name: '/' + this.mainPath + '/header2.xml',
+				type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+			},
+			{
+				name: '/' + this.mainPath + '/header3.xml',
+				type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml',
+				clear: 'generate' // Placing 'generate' here means that officegen will destroy this entry in the files list after finishing to generate the document.
+			}
+		);
+	} // Endif.
+}
+
+//
+// Resource generating callbacks:
+//
+
+/**
+ * Create the endnotes resource.
+ *
+ * @param {object} data Data needed to generate this resource.
+ * @return Text string.
+ */
+MakeHeadfootPlugin.prototype.cbEndNotes = function ( data ) {
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<w:endnotes xmlns:ve="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml"><w:endnote w:type="separator" w:id="-1"><w:p w:rsidR="002E67D7" w:rsidRDefault="002E67D7" w:rsidP="009F2180"><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr><w:r><w:separator/></w:r></w:p></w:endnote><w:endnote w:type="continuationSeparator" w:id="0"><w:p w:rsidR="002E67D7" w:rsidRDefault="002E67D7" w:rsidP="009F2180"><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr><w:r><w:continuationSeparator/></w:r></w:p></w:endnote></w:endnotes>';
+}
+
+/**
+ * Create the footnotes resource.
+ *
+ * @param {object} data Data needed to generate this resource.
+ * @return Text string.
+ */
+MakeHeadfootPlugin.prototype.cbFootNotes = function ( data ) {
+	return this.msPluginsApi.cbMakeMsOfficeBasicXml ( data ) + '<w:footnotes xmlns:ve="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml"><w:footnote w:type="separator" w:id="-1"><w:p w:rsidR="002E67D7" w:rsidRDefault="002E67D7" w:rsidP="009F2180"><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr><w:r><w:separator/></w:r></w:p></w:footnote><w:footnote w:type="continuationSeparator" w:id="0"><w:p w:rsidR="002E67D7" w:rsidRDefault="002E67D7" w:rsidP="009F2180"><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr><w:r><w:continuationSeparator/></w:r></w:p></w:footnote></w:footnotes>';
+}
+
+module.exports = MakeHeadfootPlugin;
