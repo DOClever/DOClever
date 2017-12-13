@@ -1354,7 +1354,7 @@ function Project() {
                     await (status.createAsync(item));
                 }
             }
-            if(obj.global.template.length>0)
+            if(obj.global.template && obj.global.template.length>0)
             {
                 for(let item of obj.global.template)
                 {
