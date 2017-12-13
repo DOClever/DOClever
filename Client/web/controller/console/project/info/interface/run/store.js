@@ -862,7 +862,7 @@ module.exports={
                     }
                     else
                     {
-                        resultData=JSON.parse(context.getters.curParam.selParam.rawData);
+                        resultData=context.getters.curParam.selParam.rawData?JSON.parse(context.getters.curParam.selParam.rawData):"";
                         type=context.getters.curParam.selParam.type;
                     }
                     if(resultData)
@@ -1232,7 +1232,10 @@ module.exports={
                         {
                             Vue.set(context.getters.curParam,key,obj[key]);
                         }
-                        context.getters.curParam.bodyInfo.rawJSON=context.getters.curParam.rawJSONObject;
+                        if(context.getters.curParam.bodyInfo.rawJSON.length==0)
+                        {
+                            context.getters.curParam.bodyInfo.rawJSON=context.getters.curParam.rawJSONObject;
+                        }
                         var param=data.data.param;
                         if(param.type=="object")
                         {

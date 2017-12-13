@@ -70,8 +70,10 @@
             </template>
         </table>
         <el-row class="row" style="padding: 0 0 0 20px;" v-show="info.type==1 && info.rawType==2">
-            <runbodyjson :index="index" :data="item"></runbodyjson>
-            <el-button type="primary" size="mini" style="margin-top: 10px;margin-left: 20px" @click="importJSON">导入JSON</el-button>
+            <runbodyjson :index="index" :data="item" v-if="editType==0"></runbodyjson>
+            <el-input type="textarea" :rows="6" v-model="rawStr" v-else></el-input>
+            <el-button type="primary" size="mini" style="margin-top: 10px;margin-left: 20px" @click="editJSON">{{editType==0?"Edit JSON":"Commit JSON"}}</el-button>
+            <el-button type="primary" size="mini" style="margin-top: 10px;margin-left: 20px" @click="editType=0" v-if="editType==1">Cancel Edit</el-button>
         </el-row>
         <el-row class="row" style="padding: 0 0 0 20px;" v-show="info.type==1 && info.rawType!=2">
             <el-row class="row" style="height: 50px;line-height: 50px;margin: 0;padding: 0" v-if="info.rawType==0">
@@ -121,6 +123,8 @@
             return {
                 salt:"",
                 itemSel:null,
+                editType:0,
+                rawStr:""
             }
         },
         components:{
@@ -395,10 +399,19 @@
                     event.target.parentNode.parentNode.parentNode.querySelector("input").focus();
                 },100)
             },
-            importJSON:function () {
+            editJSON:function () {
                 var _this=this;
-                $.inputMul(this,"请输入JSON",function (val) {
-                    if(!val)
+                if(this.editType==0)
+                {
+                    this.editType=1;
+                    var obj=this.item.bodyInfo.rawJSONType==0?{}:[];
+                    var result=helper.resultSave(this.item.bodyInfo.rawJSON);
+                    helper.convertToJSON(result,obj,null,1);
+                    this.rawStr=helper.formatJson(obj);
+                }
+                else
+                {
+                    if(!this.rawStr)
                     {
                         $.tip("请输入JSON",0);
                         return false
@@ -406,22 +419,22 @@
                     var obj;
                     try
                     {
-                        obj=JSON.parse(val)
+                        obj=JSON.parse(this.rawStr)
                     }
                     catch (err)
                     {
                         $.tip("JSON不符合格式",0);
                         return false
                     }
+                    this.editType=0;
                     var result=[];
                     for(var key in obj)
                     {
-                        helper.handleResultData(key,obj[key],result,null,1,null,1)
+                        helper.handleResultData(key,obj[key],result,this.item.bodyInfo.rawJSON,1,0,1)
                     }
                     _this.info.rawJSON=result;
                     _this.info.rawJSONType=(obj instanceof Array)?1:0;
-                    return true;
-                },0);
+                }
             }
         }
     }
