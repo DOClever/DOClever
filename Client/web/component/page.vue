@@ -1,7 +1,7 @@
 <template>
     <el-row class="row" style="text-align: center;height: 30px;line-height: 30px">
-        <el-button type="text" size="small" icon="el-arrow-left" @click="pre">
-        </el-button>&nbsp;&nbsp;&nbsp;{{page+1}}&nbsp;&nbsp;&nbsp;<el-button type="text" size="small" icon="el-arrow-right" @click="next" style="margin-left: 0">
+        <el-button type="text" size="small" icon="el-icon-arrow-left" @click="pre">
+        </el-button>&nbsp;&nbsp;&nbsp;{{page+1}}&nbsp;&nbsp;&nbsp;<el-button type="text" size="small" icon="el-icon-arrow-right" @click="next" style="margin-left: 0">
         </el-button>
     </el-row>
 </template>
