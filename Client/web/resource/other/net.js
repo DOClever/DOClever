@@ -276,6 +276,10 @@ function handleSelfCookie(req) {
     var arr=req._headers;
     arr["url"]=req.method+" "+req.path;
     var cookie=arr["cookie"];
+    if(!cookie)
+    {
+        return arr;
+    }
     var arrCookie=cookie.split(";");
     var keys=["id","name","photo","qq","sex","company","phone","loginCount","age","email"];
     arrCookie=arrCookie.filter(function (obj) {
