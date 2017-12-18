@@ -133,7 +133,14 @@ function mock(req,res) {
         }
         else
         {
-            console.log("接口已完成，调用真实接口");
+            if(res2.headers["finish-doclever"]=="1")
+            {
+                console.log("接口已完成，调用真实接口");
+            }
+            else
+            {
+                console.log("接口或者项目未找到，转调真实接口");
+            }
             var headers=getHeader(req);
             var objUrl=url.parse(realUrl);
             var request1,opt1;
@@ -357,9 +364,10 @@ function proxy(req,res) {
 var arguments = process.argv.splice(2);
 var mockUrl=arguments[0];
 var realUrl=arguments[1];
+var port=arguments[2]?arguments[2]:36742;
 var server = http.createServer(onProxy);
-server.listen(36742);
-console.log(arguments.length>0?"内网测试，Mock数据正待命运行中！":"正在运行中，请用DOClever的接口测试页面进行内网测试！");
+server.listen(port);
+console.log(arguments.length>0?("内网测试，Mock数据正监听端口："+port):"正在运行中，请用DOClever的接口测试页面进行内网测试！");
 
 
 

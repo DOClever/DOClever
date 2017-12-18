@@ -2,7 +2,8 @@ var async=require("asyncawait/async")
 var await=require("asyncawait/await")
 var e=require("../../util/error.json");
 var util=require("../../util/util");
-var fs=require("fs");
+var blue=require("bluebird");
+var fs=blue.promisifyAll(require("fs"));
 var admin=require("../../model/adminModel")
 var user=require("../../model/userModel")
 var project=require("../../model/projectModel")
@@ -26,7 +27,10 @@ var version=require("../../model/versionModel")
 var statistic=require("../../model/statisticModel")
 var template=require("../../model/templateModel")
 var example=require("../../model/exampleModel")
+var info=require("../../model/infoModel")
+var config=require("../../../config.json")
 var uuid=require("uuid");
+var path=require("path");
 var objectId = require('mongoose').Types.ObjectId;
 function Admin()
 {
@@ -1989,6 +1993,189 @@ function Admin()
                 sort:"-date"
             }))
             util.ok(res,arr,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.getSetting=async ((req,res)=>{
+        try
+        {
+            let ret={};
+            let objInfo=await (info.findOneAsync());
+            ret.info={
+                version:objInfo.version,
+                register:objInfo.register
+            }
+            ret.connect={
+                db:config.db,
+                filePath:config.filePath,
+                imgPath:config.imgPath,
+                tempPath:config.tempPath,
+                port:config.port
+            };
+            ret.db=objInfo.db;
+            ret.files=[];
+            if(objInfo.db.backPath)
+            {
+                ret.files=await (fs.readdirAsync(objInfo.db.backPath))
+                ret.files=ret.files.filter(function (obj) {
+                    if(obj.indexOf("@")>-1)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                })
+                ret.files.sort(function (obj1,obj2) {
+                    if(obj1>obj2)
+                    {
+                        return -1
+                    }
+                    else if(obj1<obj2)
+                    {
+                        return 1
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                })
+                ret.files=ret.files.slice(0,10);
+            }
+            util.ok(res,ret,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.setBasicInfo=async ((req,res)=>{
+        try
+        {
+            let obj=await (info.findOneAsync());
+            obj.register=req.clientParam.register;
+            await (obj.saveAsync());
+            util.ok(res,"ok")
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.setConnectInfo=async ((req,res)=>{
+        try
+        {
+            let obj={
+                db:req.clientParam.db,
+                filePath:req.clientParam.file,
+                imgPath:req.clientParam.img,
+                tempPath:req.clientParam.temp,
+                port:req.clientParam.port
+            }
+            await (fs.writeFileAsync(path.join(__dirname,"../../../config.json"),JSON.stringify(obj)));
+            util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.backup=async ((req,res)=>{
+        try
+        {
+            let obj=await (info.findOneAsync());
+            obj.db={
+                dbPath:req.clientParam.dbpath,
+                backPath:req.clientParam.backpath,
+                hours:JSON.parse(req.clientParam.hours),
+                host:req.clientParam.host,
+                name:req.clientParam.name
+            }
+            if(req.clientParam.user)
+            {
+                obj.db.user=req.clientParam.user;
+                obj.db.pass=req.clientParam.pass;
+                obj.db.authDb=req.clientParam.authdb;
+            }
+            await (obj.saveAsync());
+            if(req.clientParam.immediate)
+            {
+                await (util.backup(obj.db,obj.version))
+            }
+            util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.restore=async ((req,res)=>{
+        try
+        {
+            let obj=await (info.findOneAsync());
+            await (util.restore(obj.db,req.clientParam.id))
+            util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.backupList=async ((req,res)=>{
+        try
+        {
+            let ret=[];
+            let objInfo=await (info.findOneAsync());
+            if(objInfo.db.backPath)
+            {
+                ret=await (fs.readdirAsync(objInfo.db.backPath))
+                ret=ret.filter(function (obj) {
+                    if(obj.indexOf("@")>-1)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                })
+                ret.sort(function (obj1,obj2) {
+                    if(obj1>obj2)
+                    {
+                        return -1
+                    }
+                    else if(obj1<obj2)
+                    {
+                        return 1
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                })
+                ret=ret.slice(req.clientParam.page*10,10);
+            }
+            util.ok(res,ret,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.removeBackup=async ((req,res)=>{
+        try
+        {
+            let objInfo=await (info.findOneAsync());
+            let backPath=path.join(objInfo.db.backPath,req.clientParam.id);
+            if(fs.existsSync(backPath))
+            {
+                util.removeFolder(backPath);
+            }
+            util.ok(res,"ok");
         }
         catch (err)
         {

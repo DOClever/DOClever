@@ -15,7 +15,6 @@ var vue=new Vue({
     data: {
         bodyJSONType:0,
         outJSONType:0,
-        tabIndex:0,
         interface:{},
         param:[{
             query:[{
@@ -91,6 +90,19 @@ var vue=new Vue({
         "expand":expand
     },
     computed:{
+        tabIndex:{
+            get:function () {
+                var val=this.index;
+                if(val===0)
+                {
+                    val="0"
+                }
+                return val;
+            },
+            set:function (val) {
+                this.index=parseInt(val);
+            }
+        },
         curParam:function () {
             return  this.param[this.index];
         },

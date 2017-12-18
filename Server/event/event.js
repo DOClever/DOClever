@@ -10,6 +10,7 @@ var temp=require("../model/tempModel");
 var poll=require("../model/pollModel");
 var test=require("../model/testModel");
 var user=require("../model/userModel");
+var info=require("../model/infoModel");
 var con=require("../../config.json");
 var util=require("../util/util");
 var blue=require("bluebird");
@@ -65,6 +66,11 @@ var j1=schedule.scheduleJob("0 * * * *",(async (function () {
             time:hour
         },null));
         await (util.runPoll(arr));
+        let objInfo=await (info.findOneAsync());
+        if(objInfo.db.hours.indexOf(hour)>-1)
+        {
+            await (util.backup(objInfo.db,objInfo.version))
+        }
     }
     catch (err)
     {

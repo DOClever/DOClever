@@ -48,10 +48,10 @@
                 </el-checkbox-group>
             </el-form-item>
             <el-form-item label="立即执行一次" style="text-align: center">
-                <el-switch v-model="immediate" on-color="#13ce66" off-color="#ff4949"></el-switch>
+                <el-switch v-model="immediate" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
             </el-form-item>
             <el-form-item label="用例失败才发送" style="text-align: center">
-                <el-switch v-model="poll.failSend" on-color="#13ce66" off-color="#ff4949" :on-value="1" :off-value="0"></el-switch>
+                <el-switch v-model="poll.failSend" active-color="#13ce66" inactive-color="#ff4949" :active-value="1" :inactive-value="0"></el-switch>
             </el-form-item>
             <el-tabs type="card">
                 <el-tab-pane label="邮箱">

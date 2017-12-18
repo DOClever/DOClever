@@ -20,7 +20,9 @@ var window=(new dom(`...`)).window;
 var document=window.document;
 var argv=require("yargs").argv;
 var URL=require("url");
-var mockjs=require("mockjs")
+var mockjs=require("mockjs");
+var blue=require("bluebird");
+var child_process=blue.promisifyAll(require("child_process"));
 require("./Base64")
 var testModel=null;
 var testVersionModel=null;
@@ -997,11 +999,11 @@ var runAfter=function (code,status,header,data) {
     }
 }
 
-var runTest=async (function (obj,baseUrl,global,test,root,opt) {
+var runTest=async (function (obj,global,test,root,opt) {
     root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]开始运行接口："+obj.name+"<br>"
     var name=obj.name
     var method=obj.method;
-    var baseUrl=obj.baseUrl=="defaultUrl"?baseUrl:obj.baseUrl;
+    var baseUrl=obj.baseUrl=="defaultUrl"?global.baseUrl:obj.baseUrl;
     var globalVar={};
     global.baseUrls.forEach(function (obj) {
         if(obj.url==baseUrl && obj.env)
@@ -1409,7 +1411,6 @@ var runTest=async (function (obj,baseUrl,global,test,root,opt) {
             else if(obj.bodyInfo.rawType==2)
             {
                 objReq.body=body;
-                objReq.json=true;
             }
         }
     }
@@ -1509,7 +1510,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
         var text;
         if(type=="1")
         {
-            text="(function (opt) {return runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',baseUrls:"+JSON.stringify(opt.baseUrls)+",cookie:"+JSON.stringify(root.cookie).replace(/'/g,"\\'")+"}"+",test,root,opt)})"
+            text="(function (opt1) {return helper.runTest("+obj.replace(/\r|\n/g,"")+",opt,test,root,opt1)})"
         }
         else if(type=="2")
         {
@@ -1530,7 +1531,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
                 path:"group",
                 select:"name"
             }))
-            text="(function () {return runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'")+"',"+JSON.stringify(testObj)+",global,"+JSON.stringify(opt)+",root)})"
+            text="(function () {return runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'")+"',"+JSON.stringify(testObj)+",global,opt,root)})"
         }
         else
         {
@@ -2552,6 +2553,63 @@ var formatJson = function (json, options) {
     return formatted;
 };
 
+var backup=async (function (db,version) {
+    if(!db.dbPath || !db.host || !db.name || !db.backPath)
+    {
+        return
+    }
+    let fileName="mongodump";
+    if(path.sep=="\\")
+    {
+        fileName+=".exe";
+    }
+    let date=moment().format("YYYYMMDDHHmmss");
+    db.dbPath=path.join(db.dbPath,fileName);
+    db.backPath=path.join(db.backPath,`${version}@${date}`)
+    let str=`${db.dbPath} -h ${db.host} -d ${db.name} -o ${db.backPath}`;
+    if(db.user && db.pass && db.authDb)
+    {
+        str+=` -u ${db.user} -p ${db.pass} --authenticationDatabase ${db.authDb}`
+    }
+    await (child_process.execAsync(str));
+})
+
+var restore=async (function (db,dir) {
+    if(!db.dbPath || !db.host || !db.name || !db.backPath)
+    {
+        return
+    }
+    let fileName="mongorestore";
+    if(path.sep=="\\")
+    {
+        fileName+=".exe";
+    }
+    db.dbPath=path.join(db.dbPath,fileName);
+    db.backPath=path.join(db.backPath,dir,db.name)
+    let str=`${db.dbPath} -h ${db.host} -d ${db.name} ${db.backPath} --drop`;
+    if(db.user && db.pass && db.authDb)
+    {
+        str+=` -u ${db.user} -p ${db.pass} --authenticationDatabase ${db.authDb}`
+    }
+    await (child_process.execAsync(str));
+})
+
+var removeFolder=function (path) {
+    var files = [];
+    if(fs.existsSync(path)) {
+        files = fs.readdirSync(path);
+        files.forEach(function(file, index) {
+            var curPath = path + "/" + file;
+            if(fs.statSync(curPath).isDirectory()) {
+                removeFolder(curPath);
+            } else {
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(path);
+    }
+};
+
 exports.err=err;
 exports.ok=ok;
 exports.dateDiff=dateDiff;
@@ -2586,3 +2644,6 @@ exports.getPostmanGlobalVar=getPostmanGlobalVar
 exports.getNowFormatDate=getNowFormatDate
 exports.createStatistic=createStatistic
 exports.formatJson=formatJson
+exports.backup=backup;
+exports.restore=restore;
+exports.removeFolder=removeFolder;

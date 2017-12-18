@@ -429,7 +429,7 @@ var interface=[
 
         },
         user:1,
-        handle:[project.validateUser,project.getUsers]
+        handle:[project.inProject,project.getUsers]
     },
     {
         "method":"POST",

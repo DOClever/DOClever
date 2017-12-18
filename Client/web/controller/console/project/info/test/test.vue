@@ -100,7 +100,7 @@
                         输出
                     </el-row>
                     <el-row class="row" style="height: 1px;background-color: lightgray"></el-row>
-                    <el-row class="row" v-html="test.output" style="padding: 0px 20px">
+                    <el-row class="row" v-html="test.output" style="padding: 0px 20px;word-break: break-all;word-wrap: break-word;" id="testOutput">
 
                     </el-row>
                 </el-row>
@@ -119,6 +119,11 @@
     }
     #testBasicInfo .el-form-item {
         margin-bottom: 0;
+    }
+    #testOutput pre{
+        white-space: pre-wrap!important;
+        word-wrap: break-word!important;
+        *white-space:normal!important;
     }
 </style>
 

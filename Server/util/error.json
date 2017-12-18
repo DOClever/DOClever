@@ -42,5 +42,6 @@
   "adminNotFound":40,
   "passwordWrong":41,
   "templateNotFound":42,
-  "exampleNotFound":43
+  "exampleNotFound":43,
+  "registerForbidden":44
 }
