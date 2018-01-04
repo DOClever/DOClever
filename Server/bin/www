@@ -8,6 +8,8 @@ var app = require('../app');
 var debug = require('debug')('DOClever:server');
 var http = require('http');
 var util=require("../util/util");
+var addClient=require("../socket/doc")
+var arrScoket=[];
 /**
  * Get port from environment and store in Express.
  */
@@ -16,6 +18,10 @@ util.event.on("init",function () {
     var port = normalizePort(process.env.PORT || config.port?config.port:10000);
     app.set('port', port);
     var server = http.createServer(app);
+    var io=require("socket.io")(server);
+    io.on("connection",function (client) {
+        addClient(client);
+    })
     server.listen(port,"0.0.0.0");
     server.on('error', onError);
     server.on('listening', onListening);

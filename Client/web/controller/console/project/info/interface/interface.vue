@@ -196,15 +196,21 @@
                     return true;
                 })
             },
+            initStatus:function (data) {
+                store.commit("setStatus",data);
+            },
+            toggleMax:function (data) {
+                this.bMax=!this.bMax
+            }
         },
         created:function () {
             var _this=this;
-            store.getters.event.$on("initStatus",function (data) {
-                store.commit("setStatus",data);
-            })
-            store.getters.event.$on("toggleMax",function (data) {
-                _this.bMax=!_this.bMax
-            })
+            store.getters.event.$on("initStatus",this.initStatus)
+            store.getters.event.$on("toggleMax",this.toggleMax)
         },
+        beforeDestroy:function () {
+            store.getters.event.$off("initStatus",this.initStatus)
+            store.getters.event.$off("toggleMax",this.toggleMax)
+        }
     }
 </script>

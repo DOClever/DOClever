@@ -305,7 +305,6 @@
                     if(data.code)
                     {
                         session.set("projectName",_this.project.name);
-                        _this.$root.session.projectName=_this.project.name;
                         $.notify("修改成功",1);
                     }
                     else
@@ -493,7 +492,8 @@
                     if(data.code==200)
                     {
                         $.showBox(_this,require("./component/transfer.vue"),{
-                            source:data.data
+                            source:data.data,
+                            type:"interface"
                         });
                     }
                     else
@@ -568,22 +568,26 @@
                     return true;
                 },1,this.teamDis)
             },
-        },
-        created:function () {
-            var _this=this;
-            this.$store.getters.event.$on("init",function () {
-                if(_this.project.source && _this.project.source.type==0)
+            init:function () {
+                if(this.project.source && this.project.source.type==0)
                 {
-                    if(_this.project.source.url)
+                    if(this.project.source.url)
                     {
-                        _this.importType=0;
+                        this.importType=0;
                     }
                     else
                     {
-                        _this.importType=1;
+                        this.importType=1;
                     }
                 }
-            })
+            }
+        },
+        created:function () {
+            var _this=this;
+            this.$store.getters.event.$on("init",this.init)
+        },
+        beforeDestroy:function () {
+            this.$store.getters.event.$off("init",this.init)
         }
     }
 </script>

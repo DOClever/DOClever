@@ -18,11 +18,13 @@ module.exports = {
         admin:[path.join(__dirname,"./web/controller/admin/admin"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         adminlogin:[path.join(__dirname,"./web/controller/admin/adminlogin"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         public:[path.join(__dirname,"./web/controller/public/public"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
+        read:[path.join(__dirname,"./web/controller/read/read"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
     },
     output: {
         path: path.join(__dirname, 'dist'),
         filename: '[name].js',
-        publicPath:publicPath
+        publicPath:publicPath,
+        chunkFilename: 'chunk[id].js?[chunkhash]'
     },
     plugins: [
         new webpack.ProvidePlugin({

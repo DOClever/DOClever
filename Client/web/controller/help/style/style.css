@@ -1,0 +1,13 @@
+.help .bd .right{background: #f2f2f2;margin: 15px 0}
+.help .bd .right img{max-width: 98%;height: auto;}
+.footer{background: #191919;padding: 50px 0;color: #fff; margin-top: 30px}
+.tc {text-align: center;}
+.footer ul{
+    width: auto;
+    padding: 5px 0px;
+}
+.footer ul li {
+    display: inline-block;
+    margin: 0 10px;
+}
+.footer ul li a{color: #fff}

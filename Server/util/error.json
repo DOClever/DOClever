@@ -42,5 +42,11 @@
   "adminNotFound":40,
   "passwordWrong":41,
   "templateNotFound":42,
-  "exampleNotFound":43
+  "exampleNotFound":43,
+  "registerForbidden":44,
+  "docProjectNotFound":45,
+  "docGroupNotFound":46,
+  "docNotFound":47,
+  "userAlreadyInDoc":48,
+  "userNotInDoc":49
 }

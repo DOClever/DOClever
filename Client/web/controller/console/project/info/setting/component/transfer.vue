@@ -31,7 +31,7 @@
 <script>
     var proxyImg=require("common/director/proxyImg")
     module.exports={
-        props:["source"],
+        props:["source","type"],
         data:function () {
             return {
                 filter:"",
@@ -75,10 +75,22 @@
                 var _this=this;
                 $.confirm("是否确认将该项目转让给用户"+item.name,function () {
                     $.startHud();
-                    net.put("/project/owner",{
-                        id:session.get("projectId"),
-                        user:item._id
-                    }).then(function (data) {
+                    var pro;
+                    if(_this.type=="interface")
+                    {
+                        pro=net.put("/project/owner",{
+                            id:session.get("projectId"),
+                            user:item._id
+                        })
+                    }
+                    else if(_this.type=="doc")
+                    {
+                        pro=net.put("/doc/owner",{
+                            project:session.get("projectId"),
+                            user:item._id
+                        })
+                    }
+                    pro.then(function (data) {
                         $.stopHud();
                         if(data.code==200)
                         {

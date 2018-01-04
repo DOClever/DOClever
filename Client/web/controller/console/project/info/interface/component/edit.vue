@@ -5,6 +5,7 @@
                 <el-checkbox v-model="$store.state.autoSave" :true-label="1" :false-label="0" style="font-size: 14px">自动保存</el-checkbox>
             </el-tooltip>
             <el-button size="mini" type="text" icon="fa fa-arrows-alt" style="margin-left: 5px;font-size: 15px" title="放大/缩小" @click="$store.getters.event.$emit('toggleMax')"></el-button>
+            <el-button size="mini" type="text" icon="el-icon-document" style="margin-left: 5px;font-size: 15px" title="文档引用" @click="docRef" v-if="interfaceEdit._id"></el-button>
             <el-button type="primary" size="mini" style="float: right;margin-top: 4px;margin-right: 5px;margin-left: 0px" @click="$store.dispatch('changeType','run')">
                 运行
             </el-button>
@@ -758,15 +759,44 @@
             },
             saveTemplate:function () {
                 $.showBox(this,saveTemplate);
+            },
+            initInterface:function (data) {
+                this.mailShow=false;
+            },
+            docRef:function () {
+                $.startHud();
+                var _this=this;
+                net.get("/interface/docref",{
+                    id:this.interfaceEdit._id
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        if(data.data.length==0)
+                        {
+                            $.tip("该接口没有文档引用",2)
+                        }
+                        else
+                        {
+                            $.showBox(_this,require("./docRef.vue"),{
+                                arr:data.data,
+                                id:_this.interfaceEdit._id
+                            })
+                        }
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0)
+                    }
+                })
             }
         },
         created:function () {
             var _this=this;
-            this.$store.getters.event.$on("initInterface",function (data) {
-                _this.mailShow=false;
-            })
+            this.$store.getters.event.$on("initInterface",this.initInterface)
         },
         beforeDestroy:function () {
+            this.$store.getters.event.$off("initInterface",this.initInterface)
             if(this.timerSave)
             {
                 clearTimeout(this.timerSave);

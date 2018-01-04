@@ -8,7 +8,7 @@
                 <el-input size="small" type="textarea" :rows="3"  style="width: 80%" name="dis" v-model="obj.dis" placeholder="请输入项目描述"></el-input>
             </el-form-item>
             <el-form-item label="公开" style="text-align: center">
-                <el-switch v-model="obj.public" on-color="#13ce66" off-color="#ff4949" :on-value="1" :off-value="0"></el-switch>
+                <el-switch v-model="obj.public" active-color="#13ce66" inactive-color="#ff4949" :active-value="1" :inactive-value="0"></el-switch>
             </el-form-item>
             <el-form-item label="所有者" style="text-align: center">
                 <el-autocomplete size="small" :fetch-suggestions="querySearchAsync.bind(this,0)" style="width: 80%" name="owner" v-model="obj.owner.name" placeholder="请输入所有者名称" @select="sel"></el-autocomplete>

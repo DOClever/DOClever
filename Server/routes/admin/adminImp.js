@@ -591,6 +591,97 @@ var interface=[
         admin:1,
         handle:[admin.statisticList]
     },
+    {
+        "method":"GET",
+        "path":"/admin/setting",
+        "param": {
+
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.getSetting]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/basicinfo",
+        "param": {
+            register:Number
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.setBasicInfo]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/connectinfo",
+        "param": {
+            db:String,
+            file:String,
+            img:String,
+            temp:String,
+            port:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.setConnectInfo]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/backup",
+        "param": {
+            dbpath:String,
+            backpath:String,
+            hours:String,
+            host:String,
+            name:String,
+            user:{
+                type:String,
+                optional:1
+            },
+            pass:{
+                type:String,
+                optional:1
+            },
+            authdb:{
+                type:String,
+                optional:1
+            },
+            immediate:Number
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.backup]
+    },
+    {
+        "method":"PUT",
+        "path":"/admin/restore",
+        "param": {
+            id:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.restore]
+    },
+    {
+        "method":"GET",
+        "path":"/admin/backuplist",
+        "param": {
+            page:Number
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.backupList]
+    },
+    {
+        "method":"DELETE",
+        "path":"/admin/backup",
+        "param": {
+            id:String
+        },
+        "data":String,
+        admin:1,
+        handle:[admin.removeBackup]
+    },
 ];
 
 module.exports=interface;

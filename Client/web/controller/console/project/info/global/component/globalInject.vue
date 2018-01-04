@@ -65,14 +65,18 @@
                         $.notify(data.msg,0);
                     }
                 })
+            },
+            init:function () {
+                this.before=this.$store.getters.before
+                this.after=this.$store.getters.after
             }
         },
         created:function () {
             var _this=this;
-            this.$store.getters.event.$on("init",function () {
-                _this.before=_this.$store.getters.before
-                _this.after=_this.$store.getters.after
-            })
+            this.$store.getters.event.$on("init",this.init)
+        },
+        beforeDestroy:function () {
+            this.$store.getters.event.$off("init",this.init)
         }
     }
 </script>

@@ -13,6 +13,7 @@ var project=require("../../model/projectModel")
 var team=require("../../model/teamModel")
 var teamGroup=require("../../model/teamGroupModel")
 var message=require("../../model/messageModel")
+var info=require("../../model/infoModel")
 var fs=require("fs");
 
 function User() {
@@ -130,6 +131,11 @@ function User() {
             }
             else
             {
+                let objInfo=await (info.findOneAsync());
+                if(!objInfo.register)
+                {
+                    util.throw(e.registerForbidden,"注册被禁用了");
+                }
                 let obj={};
                 for(let key in req.clientParam)
                 {

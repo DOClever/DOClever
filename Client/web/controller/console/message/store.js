@@ -151,11 +151,24 @@ module.exports={
             })
         },
         handleTeamPullProject:function (context,dt) {
-            return net.put("/project/handleapply",{
-                id:dt.item.to._id,
-                apply:dt.item._id,
-                state:dt.state
-            }).then(function (data) {
+            var pro;
+            if(dt.item.type==1)
+            {
+                pro=net.put("/project/handleapply",{
+                    id:dt.item.to._id,
+                    apply:dt.item._id,
+                    state:dt.state
+                })
+            }
+            else if(dt.item.type==4)
+            {
+                pro=net.put("/doc/handleapply",{
+                    project:dt.item.to._id,
+                    apply:dt.item._id,
+                    state:dt.state
+                })
+            }
+            return pro.then(function (data) {
                 if(data.code==200)
                 {
                     if(dt.state==1)

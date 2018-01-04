@@ -20,6 +20,18 @@ module.exports=new Vuex.Store({
             total:0,
             todayCreate:0,
         },
+        setting:{
+            info: {
+
+            },
+            connect: {
+
+            },
+            db: {
+
+            },
+            files: []
+        }
     },
     mutations:{
         setUserInfo:function (state,data) {
@@ -38,6 +50,9 @@ module.exports=new Vuex.Store({
         setInterfaceInfo:function (state,data) {
             state.interface.total=data.total;
             state.interface.todayCreate=data.today;
+        },
+        setSettingInfo:function (state,data) {
+            state.setting=data;
         }
     },
     actions:{

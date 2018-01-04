@@ -2,7 +2,7 @@ var person=require("./person/store");
 var project=require("./project/store");
 var team=require("./team/store");
 var message=require("./message/store");
-module.exports=new Vuex.Store({
+var store=new Vuex.Store({
     namespaced:true,
     state:{
         init:false,
@@ -36,3 +36,22 @@ module.exports=new Vuex.Store({
         message:message
     }
 })
+
+module.exports=store;
+
+if (module.hot) {
+    module.hot.accept(['./person/store','./project/store','./team/store','./message/store'], function () {
+        var person = require('./person/store')
+        var project = require('./project/store')
+        var team = require('./team/store')
+        var message = require('./message/store')
+        store.hotUpdate({
+            modules: {
+                person:person,
+                project:project,
+                team:team,
+                message:message
+            }
+        })
+    })
+}

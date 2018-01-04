@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>常见问题 - DOClever 移动时代首选接口管理平台！</title>
+  <meta name="description" content="DOClever是一款开源免费的可视化接口管理工具，专业的api接口管理系统，集接口文档、接口自动化测试、Mock数据、团队协作、接口快照等于一身的移动时代首选接口管理平台！">
+  <meta name="keywords" content="API管理平台,接口管理平台,mock测试,接口文档管理,接口文档平台,接口文档系统,API文档管理">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="../style/css/layui.css"  media="all">
+  <link rel="stylesheet" href="../style/style.css"  media="all">
+</head>
+<body>
+<div id="page-container" class="help">
+	<div class="curve2" style="background: url('../style/back.jpg') no-repeat scroll center center / cover border-box, rgba(0, 0, 0, 0) linear-gradient(60deg, rgb(23, 185, 230) 0%, rgb(23, 230, 126) 100%) repeat scroll 0% 0%;padding-bottom: 150px">
+		<div class="layui-container">
+			<ul class="layui-nav" lay-filter="" style="background: none">
+			  <li class="layui-nav-item"><a href="/"><h2 style="font-size: 32px">DOClever</h2></a></li>
+
+			</ul>
+		</div>
+	</div>
+	<div class="layui-container bd">
+		<div class="layui-tab layui-tab-brief">
+		  	<ul class="layui-tab-title">
+		  										<li ><a href="../ksks/" >快速开始</a></li>
+								<li ><a href="../xxsy/" >详细使用</a></li>
+								<li ><a href="../xxbs/" >线下部署</a></li>
+								<li ><a href="../bbgx/" >版本更新</a></li>
+								<li  class="layui-this" ><a href="../changjian/" >常见问题</a></li>
+								<li ><a href="../log/" >更新日志</a></li>
+										  	</ul>
+		</div>  
+	  	<div class="layui-row layui-col-space30">
+	  									<div class="layui-col-md3 left ">  
+					<div class="layui-collapse" lay-accordion="">
+						<div class="layui-colla-item">
+					    															<h2 class="layui-colla-title"><a href="21.html" >如果我用nginx接管了前端，那...</a></h2>
+														<h2 class="layui-colla-title"><a href="22.html" >出现如下错误:Missing binar...</a></h2>
+														<h2 class="layui-colla-title"><a href="23.html" >出现{"info":"Invalid request!"}</a></h2>
+																				</div>
+					</div>
+				</div>
+				<div class="layui-col-md9 right ">
+					<div style="display: block;overflow: hidden;margin-bottom: 15px;background: #fff;padding: 15px">
+						<h2 style="border-bottom: 2px #999 solid;padding-bottom: 10px">常见问题</h2>
+						<div class="layui-row ">
+																		<div class="layui-col-md6" > 
+							<p style="padding: 5px 0"><a href="21.html" >如果我用nginx接管了前端，那么需要注意什么呢？</a></p>
+						</div>
+												<div class="layui-col-md6" > 
+							<p style="padding: 5px 0"><a href="22.html" >出现如下错误:Missing binary.see message above</a></p>
+						</div>
+												<div class="layui-col-md6" > 
+							<p style="padding: 5px 0"><a href="23.html" >出现{"info":"Invalid request!"}</a></p>
+						</div>
+																		</div>
+					</div>
+				</div>
+					</div>
+	</div>
+</div>  
+<div class="footer">
+	<div class="layui-container" style="text-align: center;">
+
+		<p class="tc">©           2016-2017 合肥市胖胖羊信息科技有限责任公司 皖ICP备17002996号</p> 
+
+	</div>  
+</div>         
+<script src="../style/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+layui.use(['element', 'layer'], function(){
+  var element = layui.element;
+  var layer = layui.layer;
+  
+  //监听折叠
+  element.on('collapse(test)', function(data){
+    layer.msg('展开状态：'+ data.show);
+  });
+});
+</script>
+
+</body>
+</html>

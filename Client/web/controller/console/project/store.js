@@ -1,5 +1,6 @@
 var list=require("./list/store.js")
 var info=require("./info/store.js")
+var doc=require("./doc/store.js")
 module.exports={
     namespaced:true,
     state:{
@@ -17,18 +18,31 @@ module.exports={
             session.remove("versionId");
             session.remove("versionName");
             session.remove("versionDis");
+            session.remove("projectType");
             session.remove("projectId");
             session.remove("projectName");
             context.state.type="list"
         },
         changeToInfo:function (context,obj) {
-            session.set("projectId",obj.id);
-            session.set("projectName",obj.name);
-            context.state.type="info";
-        }
+            if(obj.type=="interface")
+            {
+                session.set("projectType","interface");
+                session.set("projectId",obj.id);
+                session.set("projectName",obj.name);
+                context.state.type="info";
+            }
+            else if(obj.type=="doc")
+            {
+                session.set("projectType","doc");
+                session.set("projectId",obj.id);
+                session.set("projectName",obj.name);
+                context.state.type="doc";
+            }
+        },
     },
     modules:{
         list:list,
-        info:info
+        info:info,
+        doc:doc
     },
 }

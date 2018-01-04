@@ -100,7 +100,7 @@
                         输出
                     </el-row>
                     <el-row class="row" style="height: 1px;background-color: lightgray"></el-row>
-                    <el-row class="row" v-html="test.output" style="padding: 0px 20px">
+                    <el-row class="row" v-html="test.output" style="padding: 0px 20px;word-break: break-all;word-wrap: break-word;" id="testOutput">
 
                     </el-row>
                 </el-row>
@@ -119,6 +119,11 @@
     }
     #testBasicInfo .el-form-item {
         margin-bottom: 0;
+    }
+    #testOutput pre{
+        white-space: pre-wrap!important;
+        word-wrap: break-word!important;
+        *white-space:normal!important;
     }
 </style>
 
@@ -592,21 +597,19 @@
                     $.stopHud();
                     $.notify(err,0);
                 })
-            }
-        },
-        created:function () {
-            var _this=this;
-            this.$store.getters.event.$on("initTest",function (data) {
+            },
+            initTest:function (data) {
                 store.commit("init",data);
-            })
-            this.$store.getters.event.$on("init",function (data) {
-                _this.baseUrl=_this.$store.getters.baseUrls.length>0?_this.$store.getters.baseUrls[0].url:"";
-            })
-            this.$store.getters.event.$on("initTestContent",function () {
+            },
+            init:function (data) {
+                this.baseUrl=this.$store.getters.baseUrls.length>0?this.$store.getters.baseUrls[0].url:"";
+            },
+            initTestContent:function () {
                 var ele=document.getElementById("testContent");
                 var arr=ele.getElementsByTagName("a");
                 var arrPromise=[];
                 $.startHud();
+                var _this=this;
                 Array.prototype.slice.call(arr).forEach(function (obj) {
                     if(obj.getAttribute("type")=="1")
                     {
@@ -664,7 +667,18 @@
                 Promise.all(arrPromise).then(function (data) {
                     $.stopHud();
                 })
-            })
+            }
+        },
+        created:function () {
+            var _this=this;
+            this.$store.getters.event.$on("initTest",this.initTest)
+            this.$store.getters.event.$on("init",this.init)
+            this.$store.getters.event.$on("initTestContent",this.initTestContent)
+        },
+        beforeDestroy:function () {
+            this.$store.getters.event.$off("initTest",this.initTest)
+            this.$store.getters.event.$off("init",this.init)
+            this.$store.getters.event.$off("initTestContent",this.initTestContent)
         },
         mounted:function () {
             var _this=this;

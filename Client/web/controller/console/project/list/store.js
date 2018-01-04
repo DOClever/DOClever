@@ -8,7 +8,15 @@ module.exports={
         projectCreateSort:0,
         projectJoinSort:0,
         projectPublicSort:0,
-        projectTeamSort:0
+        projectTeamSort:0,
+        docCreateList:[],
+        docJoinList:[],
+        docPublicList:[],
+        docTeamList:[],
+        docCreateSort:0,
+        docJoinSort:0,
+        docPublicSort:0,
+        docTeamSort:0,
     },
     getters:{
         projectNotTeamLength:function (state) {
@@ -23,6 +31,18 @@ module.exports={
         projectPublicSort:function (state) {
             return state.projectPublicSort;
         },
+        docNotTeamLength:function (state) {
+            return state.docCreateList.length+state.docJoinList.length;
+        },
+        docCreateSort:function (state) {
+            return state.docCreateSort;
+        },
+        docJoinSort:function (state) {
+            return state.docJoinSort;
+        },
+        docPublicSort:function (state) {
+            return state.docPublicSort;
+        },
         rootInit:function (state,getters,rootState) {
             return rootState.init;
         },
@@ -33,53 +53,95 @@ module.exports={
     mutations:{
         addProject:function (state,data) {
             var sort,list;
-            if(session.get("teamId"))
+            if(data.type=="interface")
             {
-                sort=state.projectTeamSort;
-                list=state.projectTeamList;
+                if(session.get("teamId"))
+                {
+                    sort=state.projectTeamSort;
+                    list=state.projectTeamList;
+                }
+                else
+                {
+                    sort=state.projectCreateSort;
+                    list=state.projectCreateList;
+                }
             }
-            else
+            else if(data.type=="doc")
             {
-                sort=state.projectCreateSort;
-                list=state.projectCreateList;
+                if(session.get("teamId"))
+                {
+                    sort=state.docTeamSort;
+                    list=state.docTeamList;
+                }
+                else
+                {
+                    sort=state.docCreateSort;
+                    list=state.docCreateList;
+                }
             }
             if(sort==0)
             {
-                list.unshift(data);
+                list.unshift(data.data);
             }
             else
             {
                 for(var i=0;;i++)
                 {
-                    if(i==list.length || list[i].name.toLowerCase()>=data.name.toLowerCase())
+                    if(i==list.length || list[i].name.toLowerCase()>=data.data.name.toLowerCase())
                     {
-                        list.splice(i,0,data);
+                        list.splice(i,0,data.data);
                         break;
                     }
                 }
             }
         },
-        changeProjectSort:function (state,type) {
+        changeSort:function (state,data) {
             var sortType,list;
-            if(type=="create")
+            if(data.category=="interface")
             {
-                sortType=state.projectCreateSort;
-                list=state.projectCreateList;
+                if(data.type=="create")
+                {
+                    sortType=state.projectCreateSort;
+                    list=state.projectCreateList;
+                }
+                else if(data.type=="join")
+                {
+                    sortType=state.projectJoinSort;
+                    list=state.projectJoinList;
+                }
+                else if(data.type=="public")
+                {
+                    sortType=state.projectPublicSort;
+                    list=state.projectPublicList;
+                }
+                else if(data.type=="team")
+                {
+                    sortType=state.projectTeamSort;
+                    list=state.projectTeamList;
+                }
             }
-            else if(type=="join")
+            else if(data.category=="doc")
             {
-                sortType=state.projectJoinSort;
-                list=state.projectJoinList;
-            }
-            else if(type=="public")
-            {
-                sortType=state.projectPublicSort;
-                list=state.projectPublicList;
-            }
-            else if(type=="team")
-            {
-                sortType=state.projectTeamSort;
-                list=state.projectTeamList;
+                if(data.type=="create")
+                {
+                    sortType=state.docCreateSort;
+                    list=state.docCreateList;
+                }
+                else if(data.type=="join")
+                {
+                    sortType=state.docJoinSort;
+                    list=state.docJoinList;
+                }
+                else if(data.type=="public")
+                {
+                    sortType=state.docPublicSort;
+                    list=state.docPublicList;
+                }
+                else if(data.type=="team")
+                {
+                    sortType=state.docTeamSort;
+                    list=state.docTeamList;
+                }
             }
             if(sortType==0)
             {
@@ -123,14 +185,27 @@ module.exports={
                 name:data.name,
                 dis:data.dis
             };
+            var type=data.type;
             if(session.get("teamId"))
             {
                 query.team=session.get("teamId");
             }
-            return net.post("/project/create",query).then(function (data) {
+            var pro;
+            if(data.type=="interface")
+            {
+                pro=net.post("/project/create",query)
+            }
+            else if(data.type=="doc")
+            {
+                pro=net.post("/doc/project",query)
+            }
+            return pro.then(function (data) {
                 if(data.code==200)
                 {
-                    context.commit("addProject",data.data);
+                    context.commit("addProject",{
+                        data:data.data,
+                        type:type
+                    });
                 }
                 return data;
             })
@@ -143,57 +218,109 @@ module.exports={
             context.state.projectCreateSort=0;
             context.state.projectJoinSort=0;
             context.state.projectPublicSort=0;
-            context.state.projectTeaSort=0;
+            context.state.projectTeamSort=0;
+            context.state.docCreateList=[];
+            context.state.docJoinList=[];
+            context.state.docPublicList=[];
+            context.state.docTeamList=[];
+            context.state.docCreateSort=0;
+            context.state.docJoinSort=0;
+            context.state.docPublicSort=0;
+            context.state.docTeamSort=0;
             if(data)
             {
-                context.state.projectTeamList=data;
+                context.state.projectTeamList=data.interface;
+                context.state.docTeamList=data.doc;
                 return {
                     code:200
                 }
             }
             else if(session.get("teamId"))
             {
-                return net.get("/team/projectlist",{
-                    id:session.get("teamId")
-                }).then(function (data) {
-                    if(data.code==200)
+                return Promise.all([
+                    net.get("/team/projectlist",{
+                        id:session.get("teamId")
+                    }),
+                    net.get("/team/doclist",{
+                        id:session.get("teamId")
+                    }),
+                ]).then(function (values) {
+                    var data1=values[0];
+                    var data2=values[1];
+                    if(data1.code==200)
                     {
-                        for(var i=0;i<data.data.length;i++)
+                        for(var i=0;i<data1.data.length;i++)
                         {
-                            context.state.projectTeamList.push(data.data[i]);
+                            context.state.projectTeamList.push(data1.data[i]);
                         }
                         context.rootState.event.$emit("updateTeamProjectList",context.state.projectTeamList);
                     }
                     else
                     {
-                        throw data.msg;
+                        throw data1.msg;
                     }
-                    return data;
+                    if(data2.code==200)
+                    {
+                        for(var i=0;i<data2.data.length;i++)
+                        {
+                            context.state.docTeamList.push(data2.data[i]);
+                        }
+                        context.rootState.event.$emit("updateTeamDocList",context.state.docTeamList);
+                    }
+                    else
+                    {
+                        throw data2.msg;
+                    }
+                    return data1;
                 })
             }
             else
             {
-                return net.get("/project/list",{}).then(function (data) {
-                    if(data.code==200)
+                return Promise.all([
+                    net.get("/project/list",{}),
+                    net.get("/doc/projectlist",{})
+                ]).then(function (values) {
+                    var data1=values[0];
+                    var data2=values[1];
+                    if(data1.code==200)
                     {
-                        for(var i=0;i<data.data.create.length;i++)
+                        for(var i=0;i<data1.data.create.length;i++)
                         {
-                            context.state.projectCreateList.push(data.data.create[i]);
+                            context.state.projectCreateList.push(data1.data.create[i]);
                         }
-                        for(var i=0;i<data.data.join.length;i++)
+                        for(var i=0;i<data1.data.join.length;i++)
                         {
-                            context.state.projectJoinList.push(data.data.join[i]);
+                            context.state.projectJoinList.push(data1.data.join[i]);
                         }
-                        for(var i=0;i<data.data.public.length;i++)
+                        for(var i=0;i<data1.data.public.length;i++)
                         {
-                            context.state.projectPublicList.push(data.data.public[i]);
+                            context.state.projectPublicList.push(data1.data.public[i]);
                         }
                     }
                     else
                     {
-                        throw data.msg;
+                        throw data1.msg;
                     }
-                    return data;
+                    if(data2.code==200)
+                    {
+                        for(var i=0;i<data2.data.create.length;i++)
+                        {
+                            context.state.docCreateList.push(data2.data.create[i]);
+                        }
+                        for(var i=0;i<data2.data.join.length;i++)
+                        {
+                            context.state.docJoinList.push(data2.data.join[i]);
+                        }
+                        for(var i=0;i<data2.data.public.length;i++)
+                        {
+                            context.state.docPublicList.push(data2.data.public[i]);
+                        }
+                    }
+                    else
+                    {
+                        throw data2.msg;
+                    }
+                    return data1;
                 })
             }
         },

@@ -8,7 +8,7 @@
                 <template v-for="(item,index) in arrFilter">
                     <el-collapse-item :title="item.name" class="hover">
                         <template v-for="(item1,index1) in item.users">
-                            <el-row class="row" style="height: 40px;line-height: 40px;text-align: center">
+                            <el-row class="row" style="height: 40px;line-height: 40px;text-align: center" v-if="type=='interface'">
                                 <el-col class="col" :span="2">
                                     <el-checkbox v-model="item1.select" :true-label="1" :false-label="0"  v-if="item1.role!=2">
                                     </el-checkbox>
@@ -32,6 +32,21 @@
                                     <el-button  style="font-size: 15px" size="mini" @click="editRoleOption(item1)" type="text" v-if="item1.role==1">权限</el-button>
                                 </el-col>
                             </el-row>
+                            <el-row class="row" style="height: 40px;line-height: 40px;text-align: center" v-if="type=='doc'">
+                                <el-col class="col" :span="2">
+                                    <el-checkbox v-model="item1.select" :true-label="1" :false-label="0"  v-if="item1.role!=2">
+                                    </el-checkbox>
+                                </el-col>
+                                <el-col class="col" :span="6">
+                                    <img v-proxy="item1.user.photo" style="width: 30px;height: 30px; border-radius:50%;vertical-align: middle">
+                                </el-col>
+                                <el-col class="col" :span="10">
+                                    {{item1.user.name}}
+                                </el-col>
+                                <el-col class="col" :span="6">
+                                    {{item1.role==2?"项目所有者":"项目成员"}}
+                                </el-col>
+                            </el-row>
                         </template>
                     </el-collapse-item>
                 </template>
@@ -48,7 +63,7 @@
 <script>
     var proxyImg=require("common/director/proxyImg")
     module.exports={
-        props:["arr","id"],
+        props:["arr","id","type"],
         data:function () {
             return {
                 searchName:"",
@@ -92,37 +107,57 @@
         methods:{
             save:function () {
                 var arr=[];
-                this.arrFilter.forEach(function (obj) {
-                    obj.users.forEach(function (obj) {
-                        if(obj.select==1 && obj.role!=2)
-                        {
-                            var obj1={
-                                user:obj.user._id,
-                                role:obj.role
-                            };
-                            if(obj.role==1)
-                            {
-                                obj1.option=obj.option
-                            }
-                            arr.push(obj1)
-                        }
-                    })
-                })
                 this.savePending=true;
                 var _this=this;
-                net.put("/project/user",{
-                    id:this.id,
-                    user:JSON.stringify(arr)
-                }).then(function (data) {
+                var pro;
+                if(this.type=="interface")
+                {
+                    this.arrFilter.forEach(function (obj) {
+                        obj.users.forEach(function (obj) {
+                            if(obj.select==1 && obj.role!=2)
+                            {
+                                var obj1={
+                                    user:obj.user._id,
+                                    role:obj.role
+                                };
+                                if(obj.role==1)
+                                {
+                                    obj1.option=obj.option
+                                }
+                                arr.push(obj1)
+                            }
+                        })
+                    })
+                    pro=net.put("/project/user",{
+                        id:this.id,
+                        user:JSON.stringify(arr)
+                    })
+                }
+                else if(this.type=="doc")
+                {
+                    this.arrFilter.forEach(function (obj) {
+                        obj.users.forEach(function (obj) {
+                            if(obj.select==1 && obj.role!=2)
+                            {
+                                arr.push(obj.user._id)
+                            }
+                        })
+                    })
+                    pro=net.put("/doc/user",{
+                        project:this.id,
+                        user:JSON.stringify(arr)
+                    })
+                }
+                pro.then(function (d) {
                     _this.savePending=false;
-                    if(data.code==200)
+                    if(d.code==200)
                     {
                         $.notify("设置成功",1);
                         _this.$emit("update",arr);
                     }
                     else
                     {
-                        $.notify(data.msg,0);
+                        $.notify(d.msg,0);
                     }
                 })
             },

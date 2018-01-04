@@ -64,6 +64,7 @@ var app = express();
     app.use("/message",checkFormDataUser(con.imgPath),checkParam("message"),checkUser);
     app.use("/template",checkFormDataUser(con.imgPath),checkParam("template"),checkUser);
     app.use("/example",checkFormDataUser(con.imgPath),checkParam("example"),checkUser);
+    app.use("/doc",checkFormDataUser(con.imgPath),checkParam("doc"),checkUser);
     app.use("/admin",checkFormDataUser(con.imgPath),checkParam("admin"),checkAdmin);
     app.use("/mock",checkFormDataUser(con.tempPath),mock);
     app.use("/html",express.static(path.join(__dirname, '../Client')));

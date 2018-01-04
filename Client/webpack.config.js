@@ -11,7 +11,6 @@ module.exports = {
         about:["./web/controller/about/about"],
         login:["./web/controller/login/login"],
         register:["./web/controller/register/register"],
-        help:["./web/controller/help/help"],
         reset:["./web/controller/reset/reset"],
         console:["./web/controller/console/console"],
         share:["./web/controller/share/share"],
@@ -19,11 +18,13 @@ module.exports = {
         adminlogin:["./web/controller/admin/adminlogin"],
         custom:["./web/controller/custom/custom"],
         donate:["./web/controller/donate/donate"],
-        public:["./web/controller/public/public"]
+        public:["./web/controller/public/public"],
+        read:["./web/controller/read/read"]
     },
     output: {
         path: path.join(__dirname, 'dist'),
         filename: '[name].js',
+        chunkFilename: 'chunk[id].js?[chunkhash]'
     },
     plugins: [
         new webpack.ProvidePlugin({

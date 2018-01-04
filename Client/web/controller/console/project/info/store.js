@@ -185,7 +185,7 @@ module.exports= {
                             "vr":0
                         })
                     }
-                    if(obj.user._id==session.get("id"))
+                    if(obj.user && obj.user._id==session.get("id"))
                     {
                         bIn=true;
                         if(obj.role==0)

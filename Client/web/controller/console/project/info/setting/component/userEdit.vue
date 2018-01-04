@@ -47,6 +47,10 @@
             },
             arr:function () {
                 var arr=this.$store.getters.project.users.filter(function (obj) {
+                    if(!obj.user)
+                    {
+                        return false;
+                    }
                     if(obj.user._id==session.get("id"))
                     {
                         return false;

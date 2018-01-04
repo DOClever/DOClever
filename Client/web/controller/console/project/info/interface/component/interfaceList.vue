@@ -319,7 +319,7 @@
                 lastEle=null;
             },
             dragOver:function (event,item) {
-                if(dragItem==item || !lastEle)
+                if(dragItem==item || !lastEle || (dragItem.data && !item.data))
                 {
                     return;
                 }
@@ -575,7 +575,7 @@
                             else
                             {
                                 bIn=false;
-                                if(obj.index<index && obj.parent==this.parent)
+                                if(obj.index<index && ((obj.group=="" && this.parent==undefined) || (this.parent && obj.group==this.parent._id)))
                                 {
 
                                 }

@@ -1755,11 +1755,11 @@ helper.handleTestInterface=function (inter,data,status) {
     return retIndex;
 }
 
-helper.runTest=async function (obj,baseUrl,global,test,root,opt) {
+helper.runTest=async function (obj,global,test,root,opt) {
     root.output+="开始运行接口："+obj.name+"<br>"
     var name=obj.name
     var method=obj.method;
-    var baseUrl=obj.baseUrl=="defaultUrl"?baseUrl:obj.baseUrl;
+    var baseUrl=obj.baseUrl=="defaultUrl"?global.baseUrl:obj.baseUrl;
     var globalVar={};
     global.baseUrls.forEach(function (obj) {
         if(obj.url==baseUrl && obj.env)
@@ -2322,7 +2322,7 @@ helper.runTestCode=async function (code,test,global,opt,root) {
         var text;
         if(type=="1")
         {
-            text="(function (opt) {return helper.runTest("+obj.replace(/\r|\n/g,"")+",'"+opt.baseUrl+"',"+"{before:'"+opt.before.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',after:'"+opt.after.replace(/'/g,"\\'").replace(/\r|\n/g,";")+"',baseUrls:"+JSON.stringify(opt.baseUrls)+"}"+",test,root,opt)})"
+            text="(function (opt1) {return helper.runTest("+obj.replace(/\r|\n/g,"")+",opt,test,root,opt1)})"
         }
         else if(type=="2")
         {
@@ -2348,7 +2348,7 @@ helper.runTestCode=async function (code,test,global,opt,root) {
             {
                 return;
             }
-            text="(function () {return helper.runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'")+"',"+JSON.stringify(testObj)+",global,"+JSON.stringify(opt)+",root)})"
+            text="(function () {return helper.runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'")+"',"+JSON.stringify(testObj)+",global,opt,root)})"
         }
         else
         {

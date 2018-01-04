@@ -35,7 +35,7 @@
                 <el-input size="small" style="width: 80%" name="phone" v-model="obj.phone"></el-input>
             </el-form-item>
             <el-form-item label="状态" style="text-align: center">
-                <el-switch v-model="obj.state" on-color="#13ce66" off-color="#ff4949" :on-value="1" :off-value="0"></el-switch>
+                <el-switch v-model="obj.state" active-color="#13ce66" inactive-color="#ff4949" :active-value="1" :inactive-value="0"></el-switch>
             </el-form-item>
             <el-form-item label="提示问题" style="text-align: center">
                 <el-input size="small" style="width: 80%" name="question" v-model="obj.question"></el-input>
@@ -142,7 +142,7 @@
                     $.tip("请输入密码",0);
                     return;
                 }
-                obj.state=this.obj.state;
+                obj.state=Number(this.obj.state);
                 this.savePending=true;
                 this.$store.dispatch("saveUser",obj).then(function (data) {
                     _this.savePending=false;

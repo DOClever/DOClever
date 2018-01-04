@@ -14,7 +14,7 @@
                             <template v-for="item in $store.state.arrTeamPullUser">
                                 <tr class="row"  style="height: 40px;vertical-align: middle;text-align: center">
                                     <td style="width: 70%">
-                                        团队<span style="color: #00adef">{{item.from.name}}</span>邀请你加入
+                                        团队<span style="color: #00adef">{{item.from?item.from.name:""}}</span>邀请你加入
                                     </td>
                                     <td style="width: 30%">
                                         <template v-if="item.handle==0">
@@ -45,7 +45,7 @@
                             <template v-for="item in $store.state.arrTeamPullProject">
                                 <tr class="row"  style="height: 40px;vertical-align: middle;text-align: center">
                                     <td style="width: 70%">
-                                        团队<span style="color: #00adef">{{item.from.name}}</span>邀请您的项目{{item.to.name}}加入
+                                        团队<span style="color: #00adef">{{item.from?item.from.name:""}}</span>邀请您的{{item.type==1?"接口":"文档"}}项目{{item.to.name}}加入
                                     </td>
                                     <td style="width: 30%">
                                         <template v-if="item.handle==0">
@@ -76,7 +76,7 @@
                             <template v-for="item in $store.state.arrUserApplyTeam">
                                 <tr class="row"  style="height: 40px;text-align: center;vertical-align: middle">
                                     <td style="width: 60%">
-                                        用户<span style="color: #00adef">{{item.from.name}}</span>申请加入您的团队{{item.to.name}}<br>
+                                        用户<span style="color: #00adef">{{item.from?item.from.name:""}}</span>申请加入您的团队{{item.to.name}}<br>
                                         备注：{{item.dis?item.dis:"无"}}
                                     </td>
                                     <td style="width: 40%">
@@ -108,7 +108,7 @@
                             <template v-for="item in $store.state.arrProjectApplyTeam">
                                 <tr class="row"  style="height: 40px;text-align: center;vertical-align: middle">
                                     <td style="width: 60%">
-                                        项目<span style="color: #00adef">{{item.from.name}}</span>申请加入您的团队{{item.to.name}}<br>
+                                        {{item.type==1?"接口":"文档"}}项目<span style="color: #00adef">{{item.from?item.from.name:""}}</span>申请加入您的团队{{item.to.name}}<br>
                                         备注：{{item.dis?item.dis:"无"}}
                                     </td>
                                     <td style="width: 40%">

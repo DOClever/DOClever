@@ -34,12 +34,14 @@ var vue=new Vue({
             net.get("/admin/userstatistics"),
             net.get("/admin/projectstatistics"),
             net.get("/admin/teamstatistics"),
-            net.get("/admin/interfacestatistics")
+            net.get("/admin/interfacestatistics"),
+            net.get("/admin/setting")
         ]).then(function (data) {
             var obj1=data[0];
             var obj2=data[1];
             var obj3=data[2];
             var obj4=data[3];
+            var obj5=data[4];
             if(obj1.code==200)
             {
                 store.commit("setUserInfo",obj1.data)
@@ -72,6 +74,14 @@ var vue=new Vue({
             {
                 throw obj4.msg;
             }
+            if(obj5.code==200)
+            {
+                store.commit("setSettingInfo",obj5.data)
+            }
+            else
+            {
+                throw obj5.msg;
+            }
             $.stopLoading();
         }).catch(function (err) {
             $.stopLoading();
@@ -90,7 +100,9 @@ $.ready(function () {
     $.startLoading();
 })
 
-
+if (module.hot) {
+    module.hot.accept();
+}
 
 
 

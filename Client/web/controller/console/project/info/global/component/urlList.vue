@@ -92,23 +92,26 @@
                 $.showBox(this,env,{
                     propObj:item.env
                 });
-            }
-        },
-        created:function () {
-            var _this=this;
-            this.$store.getters.event.$on("init",function () {
-                if(_this.$store.getters.baseUrls.length>0)
+            },
+            init:function () {
+                if(this.$store.getters.baseUrls.length>0)
                 {
-                    _this.arr=$.clone(_this.$store.getters.baseUrls)
+                    this.arr=$.clone(this.$store.getters.baseUrls)
                 }
                 else
                 {
-                    _this.arr=[{
+                    this.arr=[{
                         url:"",
                         remark:""
                     }]
                 }
-            })
+            }
+        },
+        created:function () {
+            this.$store.getters.event.$on("init",this.init)
+        },
+        beforeDestroy:function () {
+            this.$store.getters.event.$off("init",this.init)
         }
     }
 </script>

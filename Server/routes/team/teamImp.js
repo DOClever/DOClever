@@ -413,6 +413,79 @@ var interface=[
         user:1,
         handle:[team.validate,team.projectList]
     },
+    {
+        "method":"GET",
+        "path":"/team/doclist",
+        "param": {
+            id:{
+                type:String,
+            },
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.docList]
+    },
+    {
+        "method":"DELETE",
+        "path":"/team/doc",
+        "param": {
+            id:{
+                type:String,
+            },
+            project:String
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.removeDoc]
+    },
+    {
+        "method":"GET",
+        "path":"/team/docuser",
+        "param": {
+            id:{
+                type:String,
+            },
+            project:{
+                type:String
+            }
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.docUser]
+    },
+    {
+        "method":"PUT",
+        "path":"/team/pulldoc",
+        "param": {
+            id:{
+                type:String,
+            },
+            project:String
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.pullDoc]
+    },
+    {
+        "method":"PUT",
+        "path":"/team/docapply",
+        "param": {
+            id:{
+                type:String,
+            },
+            project:{
+                type:String,
+                optional:1
+            },
+            dis:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":String,
+        user:1,
+        handle:[team.validateTeam,team.docApply]
+    },
 ];
 
 module.exports=interface;

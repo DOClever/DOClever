@@ -21,7 +21,7 @@
                                 {{"成员:"+arr[(n-1)*5+(index-1)].userCount}}
                             </el-col>
                             <el-col class="col" :span="12">
-                                {{"项目:"+arr[(n-1)*5+(index-1)].projectCount}}
+                                {{"项目:"+(arr[(n-1)*5+(index-1)].projectCount+arr[(n-1)*5+(index-1)].docCount)}}
                             </el-col>
                         </el-row>
                     </el-row>

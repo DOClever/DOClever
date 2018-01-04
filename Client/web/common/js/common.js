@@ -474,6 +474,12 @@ $.revokeUrlObject=function(obj) {
     }
 }
 
+$.basePath=function () {
+    var path=location.href;
+    var index=path.indexOf("/controller/");
+    return path.substring(0,index+"/controller/".length)
+}
+
 ;(function(){
     var bp = document.createElement('script');
     var curProtocol = window.location.protocol.split(':')[0];

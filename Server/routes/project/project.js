@@ -904,7 +904,7 @@ function Project() {
             },null,{
                 populate:{
                     path:"users.user",
-                    select:"-password"
+                    select:"-password -question -answer"
                 }
             }))
             if(req.version)
@@ -1067,7 +1067,7 @@ function Project() {
             let obj=await (project.findOneAsync({
                 _id:req.clientParam.id
             }));
-            if(obj.owner.toString()==req.clientParam.id)
+            if(obj.owner.toString()==req.userInfo._id.toString())
             {
                 util.throw(e.userForbidden,"创建的项目不能退出");
             }
@@ -2010,8 +2010,8 @@ function Project() {
                     await (objProject.saveAsync());
                 }
                 await (message.createAsync({
-                    name:req.clientParam.state==1?"您已同意项目加入团队":"您已拒绝项目加入团队",
-                    dis:`您已${req.clientParam.state==1?"通过":"拒绝"}项目${objProject.name}加入团队${obj.from.name}`,
+                    name:req.clientParam.state==1?"您已同意接口项目加入团队":"您已拒绝接口项目加入团队",
+                    dis:`您已${req.clientParam.state==1?"通过":"拒绝"}接口项目${objProject.name}加入团队${obj.from.name}`,
                     user:req.userInfo._id,
                     type:1
                 }))
@@ -2467,14 +2467,26 @@ function Project() {
                         }
                     }
                 }
-                arr.forEach(function (obj) {
-                    objGroup[obj]=await (group.createAsync({
-                        name:obj,
+                if(arr.length>0)
+                {
+                    arr.forEach(function (obj) {
+                        objGroup[obj]=await (group.createAsync({
+                            name:obj,
+                            project:objProject._id,
+                            type:0,
+                            id:uuid()
+                        }));
+                    })
+                }
+                else
+                {
+                    objGroup["未命名"]=await (group.createAsync({
+                        name:"未命名",
                         project:objProject._id,
                         type:0,
                         id:uuid()
                     }));
-                })
+                }
             }
             let objDef={};
             function handleDef(def,root,arrDef) {
@@ -2639,7 +2651,7 @@ function Project() {
                     let update={
                         name:name,
                         project:objProject._id,
-                        group:objGroup[interRaw.tags[0]]._id,
+                        group:interRaw.tags?objGroup[interRaw.tags[0]]._id:objGroup["未命名"]._id,
                         url:path,
                         remark:interRaw.description,
                         method:method.toUpperCase(),
@@ -3339,39 +3351,63 @@ function Project() {
                         }
                     }
                 }
-                arr.forEach(function (obj) {
-                    let query={
-                        name:obj.name,
-                        project:req.obj._id
-                    }
-                    if(req.version)
+                if(arr.length>0)
+                {
+                    arr.forEach(function (obj) {
+                        let query={
+                            name:obj.name,
+                            project:req.obj._id
+                        }
+                        if(req.version)
+                        {
+                            query.version=req.version._id
+                        }
+                        objGroup[obj]=await (req.groupModel.findOneAsync(query));
+                        if(objGroup[obj])
+                        {
+                            objGroup[obj]=await (req.groupModel.findOneAndUpdateAsync({
+                                _id:objGroup[obj]._id
+                            },{
+                                name:obj,
+                                $unset:{
+                                    delete:1
+                                }
+                            },{
+                                new:true
+                            }))
+                        }
+                        else
+                        {
+                            objGroup[obj]=await (req.groupModel.createAsync({
+                                name:obj,
+                                project:objProject._id,
+                                type:0,
+                                id:uuid(),
+                            }));
+                        }
+                    })
+                }
+                else
+                {
+                    let objUnName=await (req.groupModel.findOneAsync({
+                        name:"未命名",
+                        project:objProject._id,
+                        type:0,
+                    }));
+                    if(!objUnName)
                     {
-                        query.version=req.version._id
-                    }
-                    objGroup[obj]=await (req.groupModel.findOneAsync(query));
-                    if(objGroup[obj])
-                    {
-                        objGroup[obj]=await (req.groupModel.findOneAndUpdateAsync({
-                            _id:objGroup[obj]._id
-                        },{
-                            name:obj,
-                            $unset:{
-                                delete:1
-                            }
-                        },{
-                            new:true
-                        }))
-                    }
-                    else
-                    {
-                        objGroup[obj]=await (req.groupModel.createAsync({
-                            name:obj,
+                        objGroup["未命名"]=await (req.groupModel.createAsync({
+                            name:"未命名",
                             project:objProject._id,
                             type:0,
                             id:uuid(),
                         }));
                     }
-                })
+                    else
+                    {
+                        objGroup["未命名"]=objUnName;
+                    }
+                }
             }
             let objDef={};
             function handleDef(def,root,arrDef) {
@@ -3575,7 +3611,7 @@ function Project() {
                         update={
                             name:name,
                             project:objProject._id,
-                            group:objGroup[interRaw.tags[0]]._id,
+                            group:interRaw.tags?objGroup[interRaw.tags[0]]._id:objGroup["未命名"]._id,
                             url:path,
                             remark:interRaw.description,
                             method:method.toUpperCase(),

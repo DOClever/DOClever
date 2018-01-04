@@ -122,3 +122,28 @@ msgBadge {
 .el-dropdown-link .el-badge__content.is-fixed {
     top:15px
 }
+
+.docPreview {
+
+}
+.docPreview img {
+    max-width: 100%;
+}
+.docPreview table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+.docPreview td{
+    border:1px solid #BBB;
+}
+.docPreview th{
+    border:1px solid #BBB;
+}
+.docPreview tr:hover{
+    background-color: #f3f3f3;
+}
+.docPreview pre {
+    background-color: #f3f3f3;
+    padding: 10px;
+}

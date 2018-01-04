@@ -10,6 +10,7 @@ var project=require("../../model/projectModel")
 var message=require("../../model/messageModel")
 var apply=require("../../model/applyModel")
 var team=require("../../model/teamModel")
+var docProject=require("../../model/docProjectModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
 function  Message() {
@@ -37,7 +38,7 @@ function  Message() {
                     path:"creator",
                     select:"name photo"
                 },
-                sort:"-updatedAt",
+                sort:"-createdAt",
                 skip:10*req.clientParam.page,
                 limit:10
             }));
@@ -108,6 +109,22 @@ function  Message() {
                 path:"from",
                 select:"name"
             }));
+            let arrDel=[];
+            arr=arr.filter(function (obj) {
+                if(obj.from)
+                {
+                    return true;
+                }
+                else
+                {
+                    arrDel.push(obj);
+                    return false;
+                }
+            })
+            for(let o of arrDel)
+            {
+                await (o.removeAsync());
+            }
             ret.teamPullUser=arr;
             let arrProject=await (project.findAsync({
                 owner:req.userInfo._id
@@ -115,11 +132,20 @@ function  Message() {
             arrProject=arrProject.map(function (obj) {
                 return obj._id.toString()
             })
+            let arrTemp=await (docProject.findAsync({
+                owner:req.userInfo._id
+            }))
+            arrTemp=arrTemp.map(function (obj) {
+                return obj._id.toString()
+            })
+            arrProject=arrProject.concat(arrTemp);
             arr=await (apply.findAsync({
                 to:{
                     $in:arrProject
                 },
-                type:1,
+                type:{
+                    $in:[1,4]
+                },
                 state:0
             },null,{
                 populate:{
@@ -136,6 +162,22 @@ function  Message() {
                 path:"to",
                 select:"name"
             }));
+            arrDel=[];
+            arr=arr.filter(function (obj) {
+                if(obj.from && obj.to)
+                {
+                    return true;
+                }
+                else
+                {
+                    arrDel.push(obj);
+                    return false;
+                }
+            })
+            for(let o of arrDel)
+            {
+                await (o.removeAsync());
+            }
             ret.teamPullProject=arr;
             let arrTeam=await (team.findAsync({
                 owner:req.userInfo._id
@@ -148,7 +190,7 @@ function  Message() {
                     $in:arrTeam
                 },
                 type:{
-                    $in:[2,3]
+                    $in:[2,3,5]
                 },
                 state:0
             },null,{
@@ -166,12 +208,28 @@ function  Message() {
                 path:"to",
                 select:"name"
             }));
+            arrDel=[];
+            arr=arr.filter(function (obj) {
+                if(obj.from && obj.to)
+                {
+                    return true;
+                }
+                else
+                {
+                    arrDel.push(obj);
+                    return false;
+                }
+            })
+            for(let o of arrDel)
+            {
+                await (o.removeAsync());
+            }
             arr.forEach(function (obj) {
                 if(obj.type==2)
                 {
                     ret.userApplyTeam.push(obj);
                 }
-                else if(obj.type==3)
+                else if(obj.type==3 || obj.type==5)
                 {
                     ret.projectApplyTeam.push(obj);
                 }
