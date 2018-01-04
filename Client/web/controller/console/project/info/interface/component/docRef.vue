@@ -155,6 +155,7 @@
             }
         },
         created:function () {
+            var _this=this;
             this.md = window.markdownit({
                 highlight: function (str, lang) {
                     if (lang && window.hljs.getLanguage(lang)) {
