@@ -4,6 +4,7 @@ module.exports={
         team:{},
         notice:[],
         project:[],
+        doc:[],
         user:[],
         role:0,
     },
@@ -15,10 +16,24 @@ module.exports={
             return state.team.userCount;
         },
         interfaceCount:function (state,getters) {
-            return state.team.interfaceCount;
+            var count=0;
+            state.project.forEach(function (obj) {
+                count+=obj.interfaceCount;
+            })
+            return count;
         },
         projectCount:function (state,getters) {
-            return state.team.projectCount;
+            return state.project.length;
+        },
+        docCount:function (state,getters) {
+            var count=0;
+            state.doc.forEach(function (obj) {
+                count+=obj.docCount;
+            })
+            return count;
+        },
+        docProjectCount:function (state,getters) {
+            return state.doc.length;
         },
         ownRole:function (state) {
             if(state.role==2)
@@ -48,12 +63,14 @@ module.exports={
             state.project=data.project;
             state.user=data.user;
             state.role=data.role;
+            state.doc=data.doc
         },
         init:function (state) {
             state.team={};
             state.notice=[];
             state.project=[];
             state.user=[];
+            state.doc=[];
             state.role=0;
         }
     },
@@ -66,7 +83,10 @@ module.exports={
                 if(data.code==200)
                 {
                     context.commit("setTeam",data.data);
-                    return context.dispatch("project/list/init",data.data.project,{
+                    return context.dispatch("project/list/init",{
+                        interface:data.data.project,
+                        doc:data.data.doc
+                    },{
                         root:true
                     });
                 }

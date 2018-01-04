@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mac环境线下部署 - 线下部署 - DOClever 移动时代首选接口管理平台！</title>
+  <meta name="description" content="1 首先本地要安装node环境，推荐6 10 0版本下载页面安装node环境2 安装mongodb下载页面3 可使用robomongo来作为mongodb的客户端工具下载页   ">
+  <meta name="keywords" content="环境">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="../style/css/layui.css"  media="all">
+  <link rel="stylesheet" href="../style/style.css"  media="all">
+</head>
+<body>
+<div id="page-container" class="help">
+	<div class="curve2" style="background: url('../style/back.jpg') no-repeat scroll center center / cover border-box, rgba(0, 0, 0, 0) linear-gradient(60deg, rgb(23, 185, 230) 0%, rgb(23, 230, 126) 100%) repeat scroll 0% 0%;padding-bottom: 150px">
+		<div class="layui-container">
+			<ul class="layui-nav" lay-filter="" style="background: none">
+			  <li class="layui-nav-item"><a href="/"><h2 style="font-size: 32px">DOClever</h2></a></li>
+
+			</ul>
+		</div>
+	</div>
+	<div class="layui-container bd">
+		<div class="layui-tab layui-tab-brief">
+			<ul class="layui-tab-title">
+				<li ><a href="../ksks/" >快速开始</a></li>
+				<li ><a href="../xxsy/" >详细使用</a></li>
+				<li  class="layui-this" ><a href="../xxbs/" >线下部署</a></li>
+				<li ><a href="../bbgx/" >版本更新</a></li>
+				<li ><a href="../changjian/" >常见问题</a></li>
+				<li ><a href="../log/" >更新日志</a></li>
+			</ul>
+		</div>  
+	  	<div class="layui-row layui-col-space30">
+		    <div class="layui-col-md3 left ">    
+				<div class="layui-collapse" lay-accordion="">
+																	<div class="layui-colla-item">
+					    															<h2 class="layui-colla-title"><a href="../xxbs/25.html" >window环境下部署</a></h2>
+														<h2 class="layui-colla-title"><a href="../xxbs/26.html" >Mac环境线下部署</a></h2>
+																				</div>
+															</div>
+			</div>
+			<div class="layui-col-md9 right ">
+				1.首先本地要安装node环境，推荐6.10.0版本<a href="https://nodejs.org/en/">下载页面</a><br />
+安装node环境
+<p>2.安装mongodb<a href="https://www.mongodb.com/download-center?jmp=nav#community">下载页面</a><br />
+3.可使用robomongo来作为mongodb的客户端工具<a href="https://robomongo.org/">下载页面</a><br />
+下载安装完成后我们用robomongo来连接，新建一个database作为DOClever的数据库（名称随意）<br />
+<img alt="" src="https://box.kancloud.cn/bceb1c8dd83dd15880cf39d7c7c4c76b_2302x1108.png" /></p>
+<p>4.启动mongodb</p>
+<pre>
+<code>启动Mongodb服务有两种方式，前台启动或者Daemon方式启动，前者启动会需要保持当前Session不能被关闭，后者可以作为系统的fork进程执行，下文中的path是mongodb部署的实际地址。
+
+<strong><span class="hljs-number">1.</span> 最简单的启动方式，前台启动，仅指定数据目录，并且使用默认的<span class="hljs-number">27107</span>端口，cli下可以直接使用./mongo连上本机的mongodb，一般只用于临时的开发测试。</strong>
+</code></pre>
+<p><br />
+./mongod --dbpath=/path/mongodb</p>
+<p>步骤见如下图<br />
+以下是启动mongod<br />
+<br />
+<img alt="1" src="https://box.kancloud.cn/f9c4b1d296b77e4dcc4eec2f4012d6ab_1160x744.png" /><br />
+<img alt="2" src="https://box.kancloud.cn/29a0e711ad12e1c72f4b68821dd45a90_1162x746.png" /><br />
+<br />
+以下是.将DOClever的源码down到本地，在命令行下运行node DOClever的根目录/Server/bin/www（如果是windows环境下，请修改目录分隔符)，第一次启动，会出现命令行提示符，按照提示符输入即可完成相关的配置，等到DOClever启动成功后， 在浏览器里输入localhost:DOClever启动的端口号,出现首页表示部署成功。<br />
+&nbsp;</p>
+<p><img alt="" src="https://box.kancloud.cn/fde0165d307630c56aa187222dfad5df_1128x722.png" /></p>
+<p><br />
+最后在浏览器中输入之前的端口号</p>
+<p>localhost:12000<br />
+<br />
+<img alt="" src="https://box.kancloud.cn/a25f93c78385a93c6905efc436e4e6e9_1240x168.png" /><img alt="" src="https://box.kancloud.cn/1e45578182f3ac9b6548a289de88aa25_2414x1040.png" /><br />
+这样就成功了</p>
+<p><strong>2.fork启动</strong></p>
+<p>1.首先进入 mongodb的bin目录<br />
+￼￼<img alt="" src="https://box.kancloud.cn/2c5407f55509bc87947f702f8ca1bad1_1158x732.png" /><br />
+2.建立data文件夹用来记录数据，log文件夹用来记录日志<br />
+mkdir&nbsp;data<br />
+mkdir&nbsp;log<br />
+￼￼<img alt="" src="https://box.kancloud.cn/06e72f3ca7a84e92cc7cb164a0e5a37a_1158x738.png" /><br />
+3.创建mongodb.conf配置文件<br />
+￼￼<img alt="" src="https://box.kancloud.cn/11119cfd1dc8abbfdc1e507946102c3d_1148x734.png" /><br />
+4.编辑mongodb.conf 配置文件<br />
+￼￼<img alt="" src="https://box.kancloud.cn/cc4a881eb21eb72ef65daec858b27072_1274x558.png" /><br />
+port: 数据库服务使用端口<br />
+dbpath: 数据存放的文件位置<br />
+logpath: 日志文件的存放位置<br />
+fork: 后台守护进程运行<br />
+5.启动<br />
+在bin路径下，执行 ./mongod&nbsp;-f&nbsp;mongodb.conf<br />
+￼￼<img alt="" src="https://box.kancloud.cn/acbb21a111add7e79db9b582f719cfe3_1164x544.png" /><br />
+打印出类似这样的信息就成功了<br />
+about to fork child process, waiting until server is ready for connections.<br />
+forked process: 37901<br />
+child process started successfully, parent exiting</p>
+<p>如果未启动成功，错误信息如下的话：</p>
+<ol>
+<li>about&nbsp;to&nbsp;fork&nbsp;child&nbsp;process,&nbsp;waiting&nbsp;until&nbsp;server&nbsp;is&nbsp;ready&nbsp;for&nbsp;connections.</li>
+<li>forked&nbsp;process:&nbsp;760</li>
+<li>ERROR:&nbsp;child&nbsp;process&nbsp;failed,&nbsp;exited&nbsp;with&nbsp;error&nbsp;number&nbsp;1&nbsp;&nbsp;<br />
+一般情况下是权限问题，使用sodu操作来解决，</li>
+</ol>
+<p>也可能是配置文件中路径写的有问题。</p>
+<p>6.关闭MongoDB服务<br />
+在 ./mongo 进入控制台后，输入 use admin,然后输入&nbsp;db.shutdownServer()<br />
+7.查看日志<br />
+tail&nbsp;-f&nbsp;log/mongod.log&nbsp;<br />
+log/mongod.log 为日志存放路径</p>
+<p>接下来将DOClever的源码down到本地，在命令行下运行node DOClever的根目录/Server/bin/www（如果是windows环境下，请修改目录分隔符)，第一次启动，会出现命令行提示符，按照提示符输入即可完成相关的配置，等到DOClever启动成功后， 在浏览器里输入localhost:DOClever启动的端口号,出现首页表示部署成功<br />
+<img alt="" src="https://box.kancloud.cn/fde0165d307630c56aa187222dfad5df_1128x722.png" /></p>
+<p>最后在浏览器中输入之前的端口号</p>
+localhost:12000 <img alt="" src="https://box.kancloud.cn/a25f93c78385a93c6905efc436e4e6e9_1240x168.png" /><img alt="" src="https://box.kancloud.cn/1e45578182f3ac9b6548a289de88aa25_2414x1040.png" /><br />
+这样就成功了			</div>
+		</div>
+	</div>
+</div> 
+<div class="footer">
+	<div class="layui-container" style="text-align: center;">
+
+		<p class="tc">©           2016-2017 合肥市胖胖羊信息科技有限责任公司 皖ICP备17002996号</p> 
+
+	</div>  
+</div>       
+<script src="../style/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+layui.use(['element', 'layer'], function(){
+  var element = layui.element;
+  var layer = layui.layer;
+  
+  //监听折叠
+  element.on('collapse(test)', function(data){
+    layer.msg('展开状态：'+ data.show);
+  });
+});
+</script>
+
+</body>
+</html>

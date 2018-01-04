@@ -1,186 +1,380 @@
 <template>
-    <div style="width: 100%;">
-        <table style="background-color: transparent;width: 100%;height: 100%" v-if="arr.length>0">
-            <tbody>
-            <tr v-for="n in arrLength">
-                <td v-for="index in 5" style="padding: 10px;width: 20%;height: 120px">
-                    <el-row v-if="arr[(n-1)*5+(index-1)]" :style="{borderRadius:'5px',color:'gray'}" style="text-align: center;height: 100%;cursor: pointer;border: 1px #ebebeb solid;" @click.native="info(arr[(n-1)*5+(index-1)])">
-                        <el-row class="row" style="height: 65px;">
-                            <div type="primary" size="small" style="width: 26px;height: 26px;line-height:26px;border-radius: 13px;display: inline-block;color:white;margin-top: 15px;font-size: 14px" :style="{backgroundColor:color(arr[(n-1)*5+(index-1)])}">
-                                项
-                            </div>
-                            <div style="font-size: 14px;color: black;display: table;table-layout: fixed;width: 100%;margin-top: 5px"><div style="display: table-cell;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">{{arr[(n-1)*5+(index-1)].name}}</div></div>
+    <el-row class="row">
+        <template v-if="bEmpty">
+            <el-row class="row" style="text-align: center;margin-top: 100px;color: gray">
+                <i class="fa fa-list-alt" style="font-size: 60px"></i><br><br>
+                <span style="font-size: 14px">{{session.teamId?"当前团队下您":""}}还没有项目，点击下方按钮新增或者导入项目</span><br><br>
+                <template v-if="type=='interface'">
+                    <el-dropdown  v-if="session.teamId">
+                        <el-button type="primary" size="small" style="margin-left: 20px;">
+                            <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目
+                        </el-button>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item @click.native="showAdd=true">新项目</el-dropdown-item>
+                            <el-dropdown-item @click.native="addExistProject">已有项目</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                    <el-button type="primary" size="small" @click="showAdd=true" v-else>
+                        <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目
+                    </el-button>
+                    <el-button size="small" style="margin-left: 10px;" @click="importProject">
+                        <i class="el-icon-download" style="font-weight:900"></i>&nbsp;导入项目
+                    </el-button>
+                </template>
+                <template v-else-if="type=='doc'">
+                    <el-dropdown v-if="session.teamId">
+                        <el-button type="primary" size="small" style="margin-left: 20px;">
+                            <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目
+                        </el-button>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item @click.native="showAdd=true">新项目</el-dropdown-item>
+                            <el-dropdown-item @click.native="addExistProject">已有项目</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                    <el-button type="primary" size="small" style="margin-left: 20px;" @click="showAdd=true" v-else>
+                        <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目
+                    </el-button>
+                </template>
+            </el-row>
+        </template>
+        <tempalte v-else>
+            <el-row class="row" style="height: 50px;line-height: 50px;padding-right: 20px">
+                <template v-if="type=='interface'">
+                    <el-dropdown  v-if="session.teamId">
+                        <el-button type="primary" size="small" style="margin-left: 20px;">
+                            <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目
+                        </el-button>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item @click.native="showAdd=true">新项目</el-dropdown-item>
+                            <el-dropdown-item @click.native="addExistProject">已有项目</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                    <el-button type="primary" size="small" style="margin-left: 20px;" @click="showAdd=true" v-else>
+                        <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目
+                    </el-button>
+                    <el-button size="small" style="margin-left: 10px;" @click="importProject">
+                        <strong><i class="el-icon-download" style="font-weight:900"></i></strong>&nbsp;导入项目
+                    </el-button>
+                </template>
+                <template v-else-if="type=='doc'">
+                    <el-dropdown  v-if="session.teamId">
+                        <el-button type="primary" size="small" style="margin-left: 20px;">
+                            <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目
+                        </el-button>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item @click.native="showAdd=true">新项目</el-dropdown-item>
+                            <el-dropdown-item @click.native="addExistProject">已有项目</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                    <el-button type="primary" size="small" style="margin-left: 20px;" @click="showAdd=true" v-else>
+                        <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目
+                    </el-button>
+                </template>
+                <el-button size="small" type="text" style="float: right;margin-right: 10px;margin-top: 15px;color: gray">
+                    <div style="display: inline-block;height: 10px;width: 10px;border-radius: 5px;background-color: #67C23A;"></div>&nbsp;观察者
+                </el-button>
+                <el-button size="small" type="text" style="float: right;margin-right: 10px;margin-top: 15px;color: gray">
+                    <div style="display: inline-block;height: 10px;width: 10px;border-radius: 5px;background-color: #17b9e6;"></div>&nbsp;管理员
+                </el-button>
+            </el-row>
+            <el-row class="row" style="margin: 10px 20px 10px 20px;width: calc(100% - 40px);height: calc(100vh - 175px);overflow-y: auto">
+                <template v-if="!session.teamId">
+                    <expand :expand="1" style="background-color: white;border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);" v-if="arrCreate.length>0">
+                        <div slot="title" style="font-size: 14px">
+                            我创建的项目
+                        </div>
+                        <el-radio-group v-model="createSort" size="mini" slot="append" style="margin-right: 20px" @change="changeCreateSort">
+                            <el-radio-button :label="0">时间&nbsp;↓</el-radio-button>
+                            <el-radio-button :label="1">名称&nbsp;↑</el-radio-button>
+                        </el-radio-group>
+                        <el-row class="row">
+                            <list type="create" ref="createList" key="create" :category="type"></list>
                         </el-row>
-                        <el-row class="row" style="height: 30px;line-height: 30px;font-size: 13px;display: table;table-layout: fixed;">
-                            <div style="text-overflow:ellipsis;overflow:hidden;white-space:nowrap;display: table-cell;height: 25px">
-                                {{arr[(n-1)*5+(index-1)].dis?arr[(n-1)*5+(index-1)].dis:"&nbsp;"}}
-                            </div>
+                    </expand>
+                    <expand :expand="1" style="background-color: white;margin-top: 20px;border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);" v-if="arrJoin.length>0">
+                        <div slot="title" style="font-size: 14px">
+                            我加入的项目
+                        </div>
+                        <el-radio-group v-model="joinSort" size="mini" slot="append" style="margin-right: 20px" @change="changeJoinSort">
+                            <el-radio-button :label="0">时间&nbsp;↓</el-radio-button>
+                            <el-radio-button :label="1">名称&nbsp;↑</el-radio-button>
+                        </el-radio-group>
+                        <el-row class="row">
+                            <list type="join" ref="joinList" key="join" :category="type"></list>
                         </el-row>
-                        <el-row class="row" style="height: 25px;line-height:25px;font-size: 12px;color: #b9b9b9;border-top: 1px lightgray solid;background-color: rgb(245,246,249)">
-                            <el-col class="col" :span="12" style="border-right: 1px lightgray solid;">
-                                {{"成员:"+arr[(n-1)*5+(index-1)].userCount}}
-                            </el-col>
-                            <el-col class="col" :span="12">
-                                {{"接口:"+arr[(n-1)*5+(index-1)].interfaceCount}}
-                            </el-col>
+                    </expand>
+                    <expand :expand="1" style="background-color: white;margin-top: 20px;border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);" v-if="arrPublic.length>0">
+                        <div slot="title" style="font-size: 14px">
+                            公开的项目
+                        </div>
+                        <el-radio-group v-model="publicSort" size="mini" slot="append" style="margin-right: 20px" @change="changePublicSort">
+                            <el-radio-button :label="0">时间&nbsp;↓</el-radio-button>
+                            <el-radio-button :label="1">名称&nbsp;↑</el-radio-button>
+                        </el-radio-group>
+                        <el-row class="row">
+                            <list type="public" ref="publicList" key="public" :category="type"></list>
                         </el-row>
-                        <el-dropdown style="position: absolute;right: 5px;top: 0px;" v-if="manageRole">
-                            <el-button type="text" size="mini" icon="el-icon-setting" class="el-dropdown-link" style="font-size: 15px;color: #17b9e6" @click.stop="">
-                            </el-button>
-                            <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item @click.native="user(arr[(n-1)*5+(index-1)])">成员管理</el-dropdown-item>
-                                <el-dropdown-item @click.native="quit(arr[(n-1)*5+(index-1)],(n-1)*5+(index-1))">踢出团队</el-dropdown-item>
-                                <el-dropdown-item @click.native="remove(arr[(n-1)*5+(index-1)],(n-1)*5+(index-1))">删除项目</el-dropdown-item>
-                                <el-dropdown-item @click.native="transfer(arr[(n-1)*5+(index-1)],(n-1)*5+(index-1))">指定所有者</el-dropdown-item>
-                            </el-dropdown-menu>
-                        </el-dropdown>
+                    </expand>
+                </template>
+                <expand :expand="1" style="background-color: white;border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);" v-else>
+                    <div slot="title" style="font-size: 14px">
+                        团队中的项目
+                    </div>
+                    <el-radio-group v-model="teamSort" size="mini" slot="append" style="margin-right: 20px" @change="changeTeamSort">
+                        <el-radio-button :label="0">时间&nbsp;↓</el-radio-button>
+                        <el-radio-button :label="1">名称&nbsp;↑</el-radio-button>
+                    </el-radio-group>
+                    <el-row class="row">
+                        <list type="team" ref="teamList" key="team" :category="type"></list>
                     </el-row>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+                </expand>
+            </el-row>
+        </tempalte>
+        <el-dialog title="新建项目" :visible.sync="showAdd" width="50%" append-to-body>
+            <el-form label-position="top" ref="form" label-width="100px">
+                <el-form-item label="名称">
+                    <el-input  style="width: 100%"  v-model="name" placeholder="请输入新项目的名称"></el-input>
+                </el-form-item>
+                <el-form-item label="描述">
+                    <el-input type="textarea" :rows="2"  style="width: 100%"  v-model="dis" placeholder="请输入新项目的简介"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+            <el-button @click="showAdd = false">取 消</el-button>
+            <el-button type="primary" @click="addProject" :loading="addPending">确 定</el-button>
+        </span>
+        </el-dialog>
+    </el-row>
 </template>
-<style scoped>
-    .el-row::after, .el-row::before {
-        display: none;
-    }
-</style>
+
 <script>
     var sessionChange=require("common/mixins/session");
+    var expand=require("component/expand.vue");
+    var list=require("./item.vue");
+    var importProject=require("./import.vue")
     module.exports={
         props:["type"],
         data:function () {
             return {
-
+                showAdd:false,
+                name:"",
+                dis:"",
+                addPending:false,
             }
         },
         mixins:[sessionChange],
+        watch:{
+
+        },
+        components:{
+            "expand":expand,
+            "list":list
+        },
         computed:{
-            arr:function () {
-                if(this.type=="create")
-                {
-                    return this.$store.state.projectCreateList;
-                }
-                else if(this.type=="join")
-                {
-                    return this.$store.state.projectJoinList;
-                }
-                else if(this.type=="public")
-                {
-                    return this.$store.state.projectPublicList;
-                }
-                else if(this.type=="team")
-                {
-                    return this.$store.state.projectTeamList;
+            createSort:{
+                get:function () {
+                    if(this.type=="interface")
+                    {
+                        return this.$store.state.projectCreateSort;
+                    }
+                    else if(this.type=="doc")
+                    {
+                        return this.$store.state.docCreateSort;
+                    }
+                },
+                set:function (val) {
+                    if(this.type=="interface")
+                    {
+                        this.$store.state.projectCreateSort=val;
+                    }
+                    else if(this.type=="doc")
+                    {
+                        this.$store.state.docCreateSort=val;
+                    }
                 }
             },
-            arrLength:function () {
-                var val=this.arr.length/5;
-                return Math.floor(val)===val?val:(Math.floor(val)+1)
+            joinSort:{
+                get:function () {
+                    if(this.type=="interface")
+                    {
+                        return this.$store.state.projectJoinSort;
+                    }
+                    else if(this.type=="doc")
+                    {
+                        return this.$store.state.docJoinSort;
+                    }
+                },
+                set:function (val) {
+                    if(this.type=="interface")
+                    {
+                        this.$store.state.projectJoinSort=val;
+                    }
+                    else if(this.type=="doc")
+                    {
+                        this.$store.state.docJoinSort=val;
+                    }
+                }
             },
-            manageRole:function () {
+            publicSort:{
+                get:function () {
+                    if(this.type=="interface")
+                    {
+                        return this.$store.state.projectPublicSort;
+                    }
+                    else if(this.type=="doc")
+                    {
+                        return this.$store.state.docPublicSort;
+                    }
+                },
+                set:function (val) {
+                    if(this.type=="interface")
+                    {
+                        this.$store.state.projectPublicSort=val;
+                    }
+                    else if(this.type=="doc")
+                    {
+                        this.$store.state.docPublicSort=val;
+                    }
+                }
+            },
+            teamSort:{
+                get:function () {
+                    if(this.type=="interface")
+                    {
+                        return this.$store.state.projectTeamSort;
+                    }
+                    else if(this.type=="doc")
+                    {
+                        return this.$store.state.docTeamSort;
+                    }
+                },
+                set:function (val) {
+                    if(this.type=="interface")
+                    {
+                        this.$store.state.projectTeamSort=val;
+                    }
+                    else if(this.type=="doc")
+                    {
+                        this.$store.state.docTeamSort=val;
+                    }
+                }
+            },
+            bEmpty:function () {
                 if(this.session.teamId)
                 {
-                    return this.$store.getters.teamManageRole;
+                    if(this.type=="interface")
+                    {
+                        if(this.$store.state.projectTeamList.length==0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else if(this.type=="doc")
+                    {
+                        if(this.$store.state.docTeamList.length==0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
                 }
                 else
                 {
-                    return false;
+                    if(this.type=="interface")
+                    {
+                        if(this.$store.state.projectCreateList.length==0 && this.$store.state.projectJoinList.length==0 && this.$store.state.projectPublicList.length==0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else if(this.type=="doc")
+                    {
+                        if(this.$store.state.docCreateList.length==0 && this.$store.state.docJoinList.length==0 && this.$store.state.docPublicList.length==0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+            },
+            arrCreate:function () {
+                if(this.type=="interface")
+                {
+                    return this.$store.state.projectCreateList
+                }
+                else if(this.type=="doc")
+                {
+                    return this.$store.state.docCreateList
+                }
+            },
+            arrJoin:function () {
+                if(this.type=="interface")
+                {
+                    return this.$store.state.projectJoinList
+                }
+                else if(this.type=="doc")
+                {
+                    return this.$store.state.docJoinList
+                }
+            },
+            arrPublic:function () {
+                if(this.type=="interface")
+                {
+                    return this.$store.state.projectPublicList
+                }
+                else if(this.type=="doc")
+                {
+                    return this.$store.state.docPublicList
                 }
             }
         },
         methods:{
-            info:function (item) {
-                this.$store.dispatch("info",{
-                    id:item._id,
-                    name:item.name
-                })
+            changeCreateSort:function () {
+                this.$refs.createList.changeSort();
             },
-            changeSort:function () {
-                this.$store.commit("changeProjectSort",this.type);
+            changeJoinSort:function () {
+                this.$refs.joinList.changeSort();
             },
-            color:function (item) {
-                if(item.own)
+            changePublicSort:function () {
+                this.$refs.publicList.changeSort();
+            },
+            changeTeamSort:function () {
+                this.$refs.teamList.changeSort();
+            },
+            addProject:function () {
+                if(!this.name)
                 {
-                    return "#17b9e6"
+                    this.$message.error("请输入名称");
+                    return;
                 }
-                else
-                {
-                    if(item.role==0)
-                    {
-                        return "#17b9e6"
-                    }
-                    else
-                    {
-                        return "#67C23A";
-                    }
-                }
-            },
-            remove:function (item,index) {
                 var _this=this;
-                $.confirm("是否确认删除项目，该项目下一切数据都会删除",function () {
-                    var loading=_this.$loading({fullscreen:true});
-                    net.delete("/project/item",{
-                        id:item._id
-                    }).then(function (data) {
-                        loading.close();
-                        if(data.code==200)
-                        {
-                            $.notify("删除成功",1);
-                            _this.$store.state.projectTeamList.splice(index,1);
-                        }
-                        else
-                        {
-                            $.notify(data.msg,0);
-                        }
-                    })
-                })
-            },
-            quit:function (item,index) {
-                var _this=this;
-                $.confirm("是否踢出该项目，该项目下数据会被保留",function () {
-                    var loading=_this.$loading({fullscreen:true});
-                    net.delete("/team/project",{
-                        id:session.get("teamId"),
-                        project:item._id
-                    }).then(function (data) {
-                        loading.close();
-                        if(data.code==200)
-                        {
-                            $.notify("踢出成功",1);
-                            _this.$store.state.projectTeamList.splice(index,1);
-                        }
-                        else
-                        {
-                            $.notify(data.msg,0);
-                        }
-                    })
-                })
-            },
-            user:function (item) {
-                $.startHud();
-                var _this=this;
-                net.get("/team/projectuser",{
-                    id:session.get("teamId"),
-                    project:item._id
+                this.addPending=true;
+                this.$store.dispatch("addProject",{
+                    name:this.name,
+                    dis:this.dis,
+                    type:this.type
                 }).then(function (data) {
-                    $.stopHud();
+                    _this.addPending=false;
+                    _this.name="";
+                    _this.dis=""
                     if(data.code==200)
                     {
-                        var child=$.showBox(_this,require("../../../team/info/component/teamProjectUser.vue"),{
-                            arr:data.data,
-                            id:item._id
-                        });
-                        child.$on("update",function (arr) {
-                            item.userCount=arr.length+1;
-                            arr.forEach(function (obj) {
-                                if(obj.user==session.get("id"))
-                                {
-                                    item.role=obj.role;
-                                }
-                            })
-                        })
+                        $.notify("创建成功",1);
+                        _this.showAdd=false;
                     }
                     else
                     {
@@ -188,28 +382,44 @@
                     }
                 })
             },
-            transfer:function (item,index) {
-                $.startHud();
+            importProject:function () {
+                $.showBox(this,importProject)
+            },
+            addExistProject:function () {
                 var _this=this;
-                net.get("/team/projectuser",{
-                    id:session.get("teamId"),
-                    project:item._id
-                }).then(function (data) {
-                    $.stopHud();
-                    if(data.code==200)
+                $.input("请输入已有项目的项目ID",function (val) {
+                    if(!val.value)
                     {
-                        var child=$.showBox(_this,require("../../../team/info/component/projectTransfer.vue"),{
-                            arr:data.data,
-                            id:item._id
-                        });
-                        child.$on("userMinus",function () {
-                            item.userCount--;
+                        $.tip("请输入项目ID",0);
+                        return false
+                    }
+                    $.startHud();
+                    var pro;
+                    if(_this.type=="interface")
+                    {
+                        pro=net.put("/team/pullproject",{
+                            id:session.get("teamId"),
+                            project:val.value
                         })
                     }
-                    else
+                    else if(_this.type=="doc")
                     {
-                        $.notify(data.msg,0);
+                        pro=net.put("/team/pulldoc",{
+                            id:session.get("teamId"),
+                            project:val.value
+                        })
                     }
+                    pro.then(function (data) {
+                        $.stopHud();
+                        if(data.code==200)
+                        {
+                            $.notify("请求已发出，等待项目管理员响应",1);
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
                 })
             }
         }

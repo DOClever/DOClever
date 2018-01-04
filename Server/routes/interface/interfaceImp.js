@@ -237,6 +237,18 @@ var interface=[
         user:1,
         handle:inter.merge
     },
+    {
+        "method":"GET",
+        "path":"/interface/docref",
+        "param": {
+            id:{
+                type:String
+            }
+        },
+        "data":String,
+        user:1,
+        handle:inter.docRef
+    },
 ];
 
 module.exports=interface;

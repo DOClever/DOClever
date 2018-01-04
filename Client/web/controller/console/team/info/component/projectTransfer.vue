@@ -46,7 +46,7 @@
 <script>
     var proxyImg=require("common/director/proxyImg")
     module.exports={
-        props:["arr","id"],
+        props:["arr","id","type"],
         data:function () {
             return {
                 searchName:"",
@@ -92,10 +92,22 @@
                 var _this=this;
                 $.confirm("是否确认将该项目转让给用户"+item.user.name,function () {
                     $.startHud();
-                    net.put("/project/owner",{
-                        id:_this.id,
-                        user:item.user._id
-                    }).then(function (data) {
+                    var pro;
+                    if(_this.type=="category")
+                    {
+                        pro=net.put("/project/owner",{
+                            id:_this.id,
+                            user:item.user._id
+                        })
+                    }
+                    else if(_this.type=="doc")
+                    {
+                        pro=net.put("/doc/owner",{
+                            project:_this.id,
+                            user:item.user._id
+                        })
+                    }
+                    pro.then(function (data) {
                         $.stopHud();
                         if(data.code==200)
                         {

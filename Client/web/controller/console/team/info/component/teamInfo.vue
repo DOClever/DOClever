@@ -1,27 +1,45 @@
 <template>
     <el-row class="row" style="height: calc(100vh - 115px);overflow-y: auto;padding:10px 10px 50px 10px" id="teamBasicInfo">
-        <el-row class="row" style="text-align: center;height: 100px;line-height: 100px;font-size: 30px;">
+        <el-row class="row" style="text-align: center;height: 100px;font-size: 30px;cursor: pointer">
             <el-col class="col" :span="7">
-                <el-row class="row" style="width: 90%;height: 100%;border: 1px #e1e1e1 solid;background-color: white;border-radius: 5px;">
-                    {{projectCount}}
+                <el-row class="row" style="width: 90%;height: 100%;border: 1px #e1e1e1 solid;background-color: white;border-radius: 5px;padding-top: 30px;padding-bottom: 30px">
+                    <el-tooltip class="item" effect="dark" content="接口项目数" placement="bottom">
+                        <el-col class="col" :span="12" style="border-right: 1px lightgray solid;line-height: 40px">
+                            {{projectCount}}
+                        </el-col>
+                    </el-tooltip>
+                    <el-tooltip class="item" effect="dark" content="接口数" placement="bottom">
+                        <el-col class="col" :span="12">
+                            {{interfaceCount}}
+                        </el-col>
+                    </el-tooltip>
                     <div style="position: absolute;top:5px;left: 10px;color: gray;font-size: 12px;line-height: normal">
-                        项目数:
+                        接口:
                     </div>
                 </el-row>
             </el-col>
             <el-col class="col" :span="7" >
-                <el-row class="row" style="width: 90%;height: 100%;border: 1px #e1e1e1 solid;background-color: white;border-radius: 5px;">
-                    {{interfaceCount}}
+                <el-row class="row" style="width: 90%;height: 100%;border: 1px #e1e1e1 solid;background-color: white;border-radius: 5px;padding-top: 30px;padding-bottom: 30px">
+                    <el-tooltip class="item" effect="dark" content="文档项目数" placement="bottom">
+                        <el-col class="col" :span="12" style="border-right: 1px lightgray solid;line-height: 40px">
+                            {{docProjectCount}}
+                        </el-col>
+                    </el-tooltip>
+                    <el-tooltip class="item" effect="dark" content="文档数" placement="bottom">
+                        <el-col class="col" :span="12">
+                            {{docCount}}
+                        </el-col>
+                    </el-tooltip>
                     <div style="position: absolute;top:5px;left: 10px;color: gray;font-size: 12px;line-height: normal">
-                        接口数:
+                        文档:
                     </div>
                 </el-row>
             </el-col>
             <el-col class="col" :span="7">
-                <el-row class="row" style="width: 90%;height: 100%;border: 1px #e1e1e1 solid;background-color: white;border-radius: 5px;">
+                <el-row class="row" style="width: 90%;height: 100%;border: 1px #e1e1e1 solid;background-color: white;border-radius: 5px;line-height: 100px">
                     {{userCount}}
                     <div style="position: absolute;top:5px;left: 10px;color: gray;font-size: 12px;line-height: normal">
-                        成员数:
+                        成员:
                     </div>
                 </el-row>
             </el-col>
@@ -158,6 +176,12 @@
             },
             interfaceCount:function () {
                 return this.$store.getters.interfaceCount;
+            },
+            docProjectCount:function () {
+                return this.$store.getters.docProjectCount;
+            },
+            docCount:function () {
+                return this.$store.getters.docCount;
             },
             userCount:function () {
                 return this.$store.getters.userCount;

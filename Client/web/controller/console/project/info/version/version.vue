@@ -385,13 +385,17 @@
                         }
                     })
                 })
+            },
+            initVersion:function (data) {
+                this.versionList=data;
             }
         },
         created:function () {
             var _this=this;
-            store.getters.event.$on("initVersion",function (data) {
-                _this.versionList=data;
-            })
+            store.getters.event.$on("initVersion",this.initVersion)
+        },
+        beforeDestroy:function () {
+            store.getters.event.$off("initVersion",this.initVersion)
         }
     }
 </script>

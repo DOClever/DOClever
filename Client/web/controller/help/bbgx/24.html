@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>如何对DOCleve进行版本升级？ - 版本更新 - DOClever 移动时代首选接口管理平台！</title>
+  <meta name="description" content="一般情况下，在没有特殊说明的时候，我们可以采取如下的更新方式：1首先备份DOClever根目录下面的config json文件。2 然后把下载下来的新版   ">
+  <meta name="keywords" content="版本">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="../style/css/layui.css"  media="all">
+  <link rel="stylesheet" href="../style/style.css"  media="all">
+</head>
+<body>
+<div id="page-container" class="help">
+	<div class="curve2" style="background: url('../style/back.jpg') no-repeat scroll center center / cover border-box, rgba(0, 0, 0, 0) linear-gradient(60deg, rgb(23, 185, 230) 0%, rgb(23, 230, 126) 100%) repeat scroll 0% 0%;padding-bottom: 150px">
+		<div class="layui-container">
+			<ul class="layui-nav" lay-filter="" style="background: none">
+			  <li class="layui-nav-item"><a href="/"><h2 style="font-size: 32px">DOClever</h2></a></li>
+			  <li class="layui-nav-item">
+			    <a href="javascript:;">项目开源</a>
+			    <dl class="layui-nav-child"> <!-- 二级菜单 -->
+			      <dd><a href="https://github.com/sx1989827/DOClever" rel="nofollow">GitHub</a></dd>
+			      <dd><a href="https://gitee.com/sx1989827/SBDoc" rel="nofollow">码云</a></dd>
+			    </dl>
+			  </li>
+			  <li class="layui-nav-item">
+			    <a href="javascript:;">QQ交流群</a>
+			    <dl class="layui-nav-child"> <!-- 二级菜单 -->
+			      <dd style="padding:10px 30px">
+				     	<p style="text-align: center;color: #333">欢迎加入QQ讨论群：611940610</p>
+				     	<img src="http://www.doclever.cn/resource/pic/qqqun.jpg" width="200px" height="auto">
+			     	</dd>
+			    </dl>
+			  </li>
+			  <li class="layui-nav-item"><a href="http://www.doclever.cn../help.html">帮助文档</a></li>
+			  <li class="layui-nav-item"><a href="http://www.doclever.cn/controller/about/about.html">关于我们</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="layui-container bd">
+		<div class="layui-tab layui-tab-brief">
+		  	<ul class="layui-tab-title">
+		  										<li ><a href="../ksks/" >快速开始</a></li>
+								<li ><a href="../xxsy/" >详细使用</a></li>
+								<li ><a href="../xxbs/" >线下部署</a></li>
+								<li  class="layui-this" ><a href="../bbgx/" >版本更新</a></li>
+								<li ><a href="../changjian/" >常见问题</a></li>
+								<li ><a href="../log/" >更新日志</a></li>
+				 
+						  	</ul>
+		</div>  
+	  	<div class="layui-row layui-col-space30">
+		    <div class="layui-col-md3 left ">    
+				<div class="layui-collapse" lay-accordion="">
+																	<div class="layui-colla-item">
+					    															<h2 class="layui-colla-title"><a href="../bbgx/24.html" >如何对DOCleve进行版本升级？</a></h2>
+																				</div>
+															</div>
+			</div>
+			<div class="layui-col-md9 right ">
+				一般情况下，在没有特殊说明的时候，我们可以采取如下的更新方式：<br />
+<br />
+1首先备份DOClever根目录下面的config.json文件。<br />
+2.然后把下载下来的新版文件覆盖老版本。<br />
+3.还原之前备份config.json文件到DOClever的根目录下即可。<br />
+如果新版有数据结构的更新，启动的时候会自动做适应的！			</div>
+		</div>
+	</div>
+</div> 
+<div class="footer">
+	<div class="layui-container" style="text-align: center;">
+
+		<p class="tc">©           2016-2017 合肥市胖胖羊信息科技有限责任公司 皖ICP备17002996号</p> 
+
+	</div>  
+</div>       
+<script src="../style/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+layui.use(['element', 'layer'], function(){
+  var element = layui.element;
+  var layer = layui.layer;
+  
+  //监听折叠
+  element.on('collapse(test)', function(data){
+    layer.msg('展开状态：'+ data.show);
+  });
+});
+</script>
+
+</body>
+</html>

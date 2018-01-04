@@ -151,7 +151,10 @@
                             _this.savePending=false;
                             _this.showDialog=false;
                             $.notify("导入成功",1);
-                            _this.$store.commit("addProject",data.data);
+                            _this.$store.commit("addProject",{
+                                data:data.data,
+                                type:"interface"
+                            });
                         }
                         else
                         {
@@ -195,7 +198,10 @@
                         if(data.code==200)
                         {
                             $.notify("导入成功",1);
-                            _this.$store.commit("addProject",data.data);
+                            _this.$store.commit("addProject",{
+                                data:data.data,
+                                type:"interface"
+                            });
                             _this.showDialog=false;
                         }
                         else
@@ -237,7 +243,10 @@
                         if(data.code==200)
                         {
                             $.notify("导入成功",1);
-                            _this.$store.commit("addProject",data.data);
+                            _this.$store.commit("addProject",{
+                                data:data.data,
+                                type:"interface"
+                            });
                             _this.showDialog=false;
                         }
                         else
@@ -297,7 +306,10 @@
                         if(data.code==200)
                         {
                             $.notify("导入成功",1);
-                            _this.$store.commit("addProject",data.data);
+                            _this.$store.commit("addProject",{
+                                data:data.data,
+                                type:"interface"
+                            });
                             _this.showDialog=false;
                         }
                         else

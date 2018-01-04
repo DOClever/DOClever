@@ -8,6 +8,7 @@
                 运行
             </el-button>
             <el-button size="mini" type="text" icon="fa fa-arrows-alt" style="margin-left: 5px;font-size: 15px" title="放大/缩小" @click="$store.getters.event.$emit('toggleMax')"></el-button>
+            <el-button size="mini" type="text" icon="el-icon-document" style="margin-left: 5px;font-size: 15px" title="文档引用" @click="docRef" v-if="interfaceEdit._id"></el-button>
         </el-row>
         <el-row class="row" style="margin-top: 5px;overflow-y: auto;height: calc(100vh - 150px);padding-bottom: 80px;background-color: white;border-radius: 5px;font-size: 14px;">
             <el-row class="row" style="height:40px;line-height: 40px;padding-left: 10px;color: #17B9E6">
@@ -413,6 +414,33 @@
                     "interfaceEdit":obj
                 });
             },
+            docRef:function () {
+                $.startHud();
+                var _this=this;
+                net.get("/interface/docref",{
+                    id:this.interfaceEdit._id
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        if(data.data.length==0)
+                        {
+                            $.tip("该接口没有文档引用",2)
+                        }
+                        else
+                        {
+                            $.showBox(_this,require("./docRef.vue"),{
+                                arr:data.data,
+                                id:_this.interfaceEdit._id
+                            })
+                        }
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0)
+                    }
+                })
+            }
         }
     }
 </script>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>window环境下部署 - 线下部署 - DOClever 移动时代首选接口管理平台！</title>
+  <meta name="description" content="首先本地要安装node环境，推荐最新LST版本，下载页面下载完成后双击进行安装，安装完成后此时Node环境就已经安装成功；接下来我们开始安装m   ">
+  <meta name="keywords" content="环境">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="../style/css/layui.css"  media="all">
+  <link rel="stylesheet" href="../style/style.css"  media="all">
+</head>
+<body>
+<div id="page-container" class="help">
+	<div class="curve2" style="background: url('../style/back.jpg') no-repeat scroll center center / cover border-box, rgba(0, 0, 0, 0) linear-gradient(60deg, rgb(23, 185, 230) 0%, rgb(23, 230, 126) 100%) repeat scroll 0% 0%;padding-bottom: 150px">
+		<div class="layui-container">
+			<ul class="layui-nav" lay-filter="" style="background: none">
+			  <li class="layui-nav-item"><a href="/"><h2 style="font-size: 32px">DOClever</h2></a></li>
+
+			</ul>
+		</div>
+	</div>
+	<div class="layui-container bd">
+		<div class="layui-tab layui-tab-brief">
+			<ul class="layui-tab-title">
+				<li ><a href="../ksks/" >快速开始</a></li>
+				<li ><a href="../xxsy/" >详细使用</a></li>
+				<li  class="layui-this" ><a href="../xxbs/" >线下部署</a></li>
+				<li ><a href="../bbgx/" >版本更新</a></li>
+				<li ><a href="../changjian/" >常见问题</a></li>
+				<li ><a href="../log/" >更新日志</a></li>
+			</ul>
+		</div>  
+	  	<div class="layui-row layui-col-space30">
+		    <div class="layui-col-md3 left ">    
+				<div class="layui-collapse" lay-accordion="">
+																	<div class="layui-colla-item">
+					    															<h2 class="layui-colla-title"><a href="../xxbs/25.html" >window环境下部署</a></h2>
+														<h2 class="layui-colla-title"><a href="../xxbs/26.html" >Mac环境线下部署</a></h2>
+																				</div>
+															</div>
+			</div>
+			<div class="layui-col-md9 right ">
+				<h4>首先本地要安装node环境，推荐最新LST版本，<a href="https://nodejs.org/en/">下载页面</a></h4>
+<p><img alt="" src="https://box.kancloud.cn/9f5635b0ed37a66be3771b83f5cb54b2_784x385.png" /></p>
+<p>下载完成后双击进行安装，安装完成后此时Node环境就已经安装成功；</p>
+<h4 class="line" data-line="7">接下来我们开始安装mongodb(<a href="https://www.mongodb.com/">下载页面</a>)；如下图所示：</h4>
+<p><img alt="" src="https://box.kancloud.cn/56652d8af97d69087f22baf0b27dcc55_1137x567.png" /></p>
+<p><br />
+<br />
+选择合适的windows版本进行下载<br />
+&nbsp;</p>
+<p><img alt="" src="https://box.kancloud.cn/afa4407f15524311822f37a17842ebd5_497x386.png" /></p>
+<p>下载完成后我们一路 next进行安装即可，安装完成后，我们需要启动mongodb；<br />
+<img alt="" src="https://box.kancloud.cn/22eac88e07266739a753ea4d5e5d48e4_633x446.png" /><br />
+<img alt="" src="https://box.kancloud.cn/43d46991da9ed425a92d0b39c4c437df_540x68.png" /><br />
+<img alt="" src="https://box.kancloud.cn/30d35ddd58bfc0147546b28f68f60fba_647x434.png" /></p>
+<p>启动mongodb后我们可使用robomongo来作为mongodb的客户端工具(<a href="https://robomongo.org/">下载页面</a>)<br />
+下载安装完成后我们用robomongo来连接，新建一个database作为DOClever的数据库（名称随意）<br />
+<br />
+<img alt="" src="https://box.kancloud.cn/d9dd2139fdae508023bb9f72edf35664_660x397.png" /><br />
+<img alt="" src="https://box.kancloud.cn/e477ace950ba31fa798f19376ce23280_689x375.png" /><br />
+<img alt="" src="https://box.kancloud.cn/26ebd79cfee1e519805ca4b3556377f2_392x318.png" /><br />
+<br />
+新建个数据库命名为&ldquo;DOClever&rdquo;</p>
+<p>至此mongodb启动配置完成！</p>
+<p><strong>注意：前台启动mongodb的方式，不可关闭dos命令窗口界面</strong></p>
+<p>【<strong>以Windows Service的方式启动MongoDB</strong>】 <a href="https://jingyan.baidu.com/article/6b97984dbeef881ca2b0bf3e.html">点击此处查看</a></p>
+<h3 class="line" data-line="35">接下来我们开始启动DOClever:</h3>
+<p>下载DOClever源代码，这里以V4.1.3为例</p>
+<p>这里我把下载下载好的源文件解压到F:\wwwroot\doclever根目录下面；（记住这个目录，一会配置的时候要用到！）</p>
+<p><img alt="" src="https://box.kancloud.cn/2402b97648b8f46f8ba7a2bad8b44553_601x251.png" /><br />
+在命令行下运行node DOClever的根目录:（上面我们提到的解压地址在F:\wwwroot\doclever目录下）\Server\bin\www（注意斜杠）</p>
+<p><img alt="" src="https://box.kancloud.cn/e4f58a3f36b6eccc0549cea771bc7291_651x240.png" /><br />
+&nbsp;</p>
+<p>启动成功后，在浏览器输入http://localhost:20000/ （这里20000改为你设置的端口号）<br />
+&nbsp;</p>
+<p><img alt="" src="https://box.kancloud.cn/dfbb184fe442ab436eb068183c41915f_480x195.png" /></p>
+<p>至此部署成功！！</p>
+			</div>
+		</div>
+	</div>
+</div> 
+<div class="footer">
+	<div class="layui-container" style="text-align: center;">
+
+		<p class="tc">©           2016-2017 合肥市胖胖羊信息科技有限责任公司 皖ICP备17002996号</p> 
+
+	</div>  
+</div>       
+<script src="../style/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+layui.use(['element', 'layer'], function(){
+  var element = layui.element;
+  var layer = layui.layer;
+  
+  //监听折叠
+  element.on('collapse(test)', function(data){
+    layer.msg('展开状态：'+ data.show);
+  });
+});
+</script>
+
+</body>
+</html>

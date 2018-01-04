@@ -16,6 +16,7 @@ session.remove("teamName");
 session.remove("versionId");
 session.remove("versionName");
 session.remove("versionDis");
+session.remove("projectType");
 session.remove("projectId");
 session.remove("projectName");
 var vue=new Vue({
@@ -239,6 +240,7 @@ var vue=new Vue({
         }
     },
     created:function () {
+        window.hljs.initHighlightingOnLoad();
         var _this=this;
         store.dispatch("init").then(function () {
             $.stopLoading();

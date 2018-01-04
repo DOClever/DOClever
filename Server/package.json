@@ -16,7 +16,9 @@
     "express": "^4.14.1",
     "express-session": "^1.15.6",
     "hbs": "^3.1.1",
+    "html-pdf": "^2.2.0",
     "jsdom": "^11.4.0",
+    "markdown-it": "^8.4.0",
     "mockjs": "^1.0.1-beta3",
     "moment": "^2.19.2",
     "mongoomise": "0.0.8",
@@ -27,10 +29,13 @@
     "nodemailer": "^4.4.0",
     "nunjucks": "^3.0.1",
     "officegen": "^0.4.5",
+    "phantomjs-prebuilt": "^2.1.16",
     "recursive-copy": "^2.0.7",
     "request": "^2.83.0",
     "rimraf": "^2.6.2",
     "serve-favicon": "^2.3.2",
+    "socket.io": "^2.0.4",
+    "socket.io-stream": "^0.9.1",
     "uuid": "^3.1.0",
     "yargs": "^8.0.2"
   }

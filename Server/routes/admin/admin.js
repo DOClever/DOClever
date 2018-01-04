@@ -28,6 +28,7 @@ var statistic=require("../../model/statisticModel")
 var template=require("../../model/templateModel")
 var example=require("../../model/exampleModel")
 var info=require("../../model/infoModel")
+var docProject=require("../../model/docProjectModel")
 var config=require("../../../config.json")
 var uuid=require("uuid");
 var path=require("path");
@@ -340,7 +341,10 @@ function Admin()
             let arrTeam=await (teamGroup.findAsync({
                 owner:req.clientParam.id
             }))
-            if(arrProject.length>0 || arrTeam.length>0)
+            let arrDoc=await (docProject.findAsync({
+                owner:req.clientParam.id
+            }))
+            if(arrProject.length>0 || arrTeam.length>0 || arrDoc.length>0)
             {
                 util.throw(e.systemReason,"该账户下有项目或者团队，请先解除关联");
             }
@@ -360,6 +364,13 @@ function Admin()
                     users:{
                         user:req.clientParam.id
                     }
+                }
+            }))
+            await (docProject.updateAsync({
+                "users":req.clientParam.id
+            },{
+                $pull:{
+                    users:req.clientParam.id
                 }
             }))
             await (user.removeAsync({

@@ -1,137 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>帮助中心-DOClever 移动时代首选接口管理平台！</title>
-    <meta charset="UTF-8">
-    <meta name="keywords" content="API管理平台,接口管理平台,mock测试,接口文档管理,接口文档平台,接口文档系统,API文档管理"/>
-    <meta name="description" content="DOClever是一款开源免费的可视化接口管理工具，专业的api接口管理系统，集接口文档、接口自动化测试、Mock数据、团队协作、接口快照等于一身的移动时代首选接口管理平台！"/>
-    <link href="../../resource/pic/logo.ico" rel="shortcut icon">
-    <link type="text/css"  rel="stylesheet" href="../../common/css/common.css">
-    <link type="text/css"  rel="stylesheet" href="../../common/lib/font-awesome/css/font-awesome.min.css">
-    <link type="text/css"  rel="stylesheet" href="../../common/lib/element/index.css">
-    <link type="text/css"  rel="stylesheet" href="../about/about.css">
+  <meta charset="utf-8">
+  <title>快速开始 - DOClever 移动时代首选接口管理平台！</title>
+  <meta name="description" content="DOClever是一款开源免费的可视化接口管理工具，专业的api接口管理系统，集接口文档、接口自动化测试、Mock数据、团队协作、接口快照等于一身的移动时代首选接口管理平台！">
+  <meta name="keywords" content="API管理平台,接口管理平台,mock测试,接口文档管理,接口文档平台,接口文档系统,API文档管理">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="./style/css/layui.css"  media="all">
+  <link rel="stylesheet" href="./style/style.css"  media="all">
 </head>
-<body style="width: 100%">
-<div class="page-container" id="app" v-cloak>
-    <div class="curve2" style="background: url('../../resource/pic/back.jpg') no-repeat scroll center center/cover border-box, linear-gradient(60deg, #17b9e6 0%, #17e67e 100%) ;">
-        <el-row class="row">
-            <el-col :span="20" class="col" :offset="2"  ><mainnav></mainnav></el-col>
-        </el-row>
-        <div class="tc" style="color: #fff;padding-bottom: 300px">
+<body>
+<div id="page-container" class="help">
+	<div class="curve2" style="background: url('../style/back.jpg') no-repeat scroll center center / cover border-box, rgba(0, 0, 0, 0) linear-gradient(60deg, rgb(23, 185, 230) 0%, rgb(23, 230, 126) 100%) repeat scroll 0% 0%;padding-bottom: 150px">
+		<div class="layui-container">
+			<ul class="layui-nav" lay-filter="" style="background: none">
+			  <li class="layui-nav-item"><a href="/"><h2 style="font-size: 32px">DOClever</h2></a></li>
 
-        </div>
-    </div>
-    <el-tabs style="width: 90%;margin: 0 auto;">
-        <el-tab-pane label="图文指南">
-            <h5 style="float: right"><a href="../../resource/other/help.pdf">如果文档加载不出来，可以点击这里下载pdf</a></h5>
-            <iframe frameborder="0" src="https://www.kancloud.cn/lovefeiyang/doclever/432894" style="width: 100%;height: 1000px"></iframe>
-        </el-tab-pane>
-        <el-tab-pane label="视频文档">
-            <el-row class="row" style="text-align: center;height: 700px;background-color: white;padding-top: 20px">
-                <el-col class="col" :span="4" style="font-size: larger;color: #50a3ff;font-weight: bold;overflow-y: auto">
-                    基础
-                    <ul style="font-size:15px;color: gray;padding: 0">
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'n0527k7arbf',this.innerText)">注册登录</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'h0527t7izca',this.innerText)">创建工程</a>
-                        </li>
-                    </ul>
-                    接口管理
-                    <ul style="font-size:15px;color: gray;padding: 0">
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'k0527970gld',this.innerText)">创建接口</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'j0527v03qgf',this.innerText)">接口管理</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'b0527f03kj2',this.innerText)">项目设置</a>
-                        </li>
-                    </ul>
-                    接口调试
-                    <ul style="font-size:15px;color: gray;padding: 0">
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'c0527ryf71k',this.innerText)">接口测试</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'t0527uylbvj',this.innerText)">一键生成</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'v0527vcmbqn',this.innerText)">内网调试</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'y05272f98by',this.innerText)">Mock数据</a>
-                        </li>
-                    </ul>
-                    项目设置
-                    <ul style="font-size:15px;color: gray;padding: 0">
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'b0527d6351u',this.innerText)">状态码</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'h05274tabel',this.innerText)">环境注入</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'l05273geo7b',this.innerText)">文档</a>
-                        </li>
-                    </ul>
-                    自动化测试
-                    <ul style="font-size:15px;color: gray;padding: 0">
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'m05286dgwte',this.innerText)">简单测试</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'v0528it1g7g',this.innerText)">高级测试</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'h05287okclm',this.innerText)">组合测试</a>
-                        </li>
-                    </ul>
-                    版本管理
-                    <ul style="font-size:15px;color: gray;padding: 0">
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'j0528ak50hr',this.innerText)">项目版本</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'q05289vcrje',this.innerText)">接口快照</a>
-                        </li>
-                    </ul>
-                    团队协作
-                    <ul style="font-size:15px;color: gray;padding: 0">
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'y0528r14yvi',this.innerText)">创建团队</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'o05282bzn6a',this.innerText)">分配项目</a>
-                        </li>
-                        <li style="list-style-type:none;">
-                            <a style="color: gray;cursor: pointer" onclick="goTo.call(this,'u0528z4jqu7',this.innerText)">管理组员</a>
-                        </li>
-                    </ul>
-                </el-col>
-                <el-col class="col" :span="20">
-                    <el-row class="row" style="text-align: center;font-size: 20px;color: gray;margin-bottom: 20px" id="title">
-                        注册登录
-                    </el-row>
-                    <iframe frameborder="0" width="640" height="498" src="https://v.qq.com/iframe/player.html?vid=b0385i031zz&tiny=0&auto=0" allowfullscreen id="video"></iframe>
-                </el-col>
-            </el-row>
-        </el-tab-pane>
-    </el-tabs>
-    <commonfooter></commonfooter>
-</div>
-<script src="../../../dist/vendor.bundle.js"></script>
-<script src="../../common/lib/element/index.js"></script>
-<script src="../../../dist/help.js"></script>
+			</ul>
+		</div>
+	</div>
+	<div class="layui-container bd">
+		<div class="layui-tab layui-tab-brief">
+		  	<ul class="layui-tab-title">
+		  										<li  class="layui-this" ><a href="./ksks/" >快速开始</a></li>
+								<li ><a href="./xxsy/" >详细使用</a></li>
+								<li ><a href="./xxbs/" >线下部署</a></li>
+								<li ><a href="./bbgx/" >版本更新</a></li>
+								<li ><a href="./changjian/" >常见问题</a></li>
+								<li ><a href="./log/" >更新日志</a></li>
+										  	</ul>
+		</div>  
+	  	<div class="layui-row layui-col-space30">
+	  									<div class="layui-col-md3 left ">  
+					<div class="layui-collapse" lay-accordion="">
+						<div class="layui-colla-item">
+					    															<h2 class="layui-colla-title"><a href="./ksks/1.html" >产品特性</a></h2>
+														<h2 class="layui-colla-title"><a href="./ksks/3.html" >快速创建项目</a></h2>
+														<h2 class="layui-colla-title"><a href="./ksks/4.html" >快速创建接口</a></h2>
+																				</div>
+					</div>
+				</div>
+				<div class="layui-col-md9 right ">
+					<div style="display: block;overflow: hidden;margin-bottom: 15px;background: #fff;padding: 15px">
+						<h2 style="border-bottom: 2px #999 solid;padding-bottom: 10px">快速开始</h2>
+						<div class="layui-row ">
+																		<div class="layui-col-md6" > 
+							<p style="padding: 5px 0"><a href="./ksks/1.html" >产品特性</a></p>
+						</div>
+												<div class="layui-col-md6" > 
+							<p style="padding: 5px 0"><a href="./ksks/3.html" >快速创建项目</a></p>
+						</div>
+												<div class="layui-col-md6" > 
+							<p style="padding: 5px 0"><a href="./ksks/4.html" >快速创建接口</a></p>
+						</div>
+																		</div>
+					</div>
+				</div>
+					</div>
+	</div>
+</div>  
+<div class="footer">
+	<div class="layui-container" style="text-align: center;">
+
+		<p class="tc">©           2016-2017 合肥市胖胖羊信息科技有限责任公司 皖ICP备17002996号</p> 
+
+	</div>  
+</div>         
+<script src="./style/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
 <script>
-    function goTo(id,title) {
-        document.getElementById("video").src="https://v.qq.com/iframe/player.html?vid="+id+"&tiny=0&auto=0";
-        document.getElementById("title").innerText=this.innerText;
-        return false;
-    }
+layui.use(['element', 'layer'], function(){
+  var element = layui.element;
+  var layer = layui.layer;
+  
+  //监听折叠
+  element.on('collapse(test)', function(data){
+    layer.msg('展开状态：'+ data.show);
+  });
+});
 </script>
+
 </body>
 </html>

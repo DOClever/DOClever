@@ -21,6 +21,7 @@
     var sessionChange=require("common/mixins/session");
     var list=require("./list/list.vue");
     var info=require("./info/info.vue");
+    var doc=require("./doc/doc.vue");
     module.exports = {
         data: function () {
             return {}
@@ -32,7 +33,8 @@
         store:store,
         components:{
             "info":info,
-            "list":list
+            "list":list,
+            "doc":doc
         },
         methods: {}
     }

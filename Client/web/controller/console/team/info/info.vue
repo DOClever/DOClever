@@ -43,15 +43,19 @@
             "teamuser":teamUser
 
         },
-        methods: {},
+        methods: {
+            updateTeamProjectList:function (list) {
+                this.$store.state.project=list;
+            }
+        },
         created:function () {
-            var _this=this;
-            this.$store.getters.event.$on("updateTeamProjectList",function (list) {
-                _this.$store.state.project=list;
-            })
+            this.$store.getters.event.$on("updateTeamProjectList",this.updateTeamProjectList)
         },
         mounted:function () {
             this.$root.type=0;
+        },
+        beforeDestroy:function () {
+            this.$store.getters.event.$off("updateTeamProjectList",this.updateTeamProjectList)
         }
     }
 </script>

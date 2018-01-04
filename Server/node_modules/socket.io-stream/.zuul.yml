@@ -1,0 +1,6 @@
+ui: mocha-bdd
+server: ./test/support/server.js
+tunnel:
+  type: ngrok
+  authtoken: XP5uKk4Sm6C5XfdTZozb
+  proto: tcp

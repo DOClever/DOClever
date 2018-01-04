@@ -22,6 +22,7 @@ var argv=require("yargs").argv;
 var URL=require("url");
 var mockjs=require("mockjs");
 var blue=require("bluebird");
+var fsAsync=blue.promisifyAll(fs);
 var child_process=blue.promisifyAll(require("child_process"));
 require("./Base64")
 var testModel=null;
@@ -302,6 +303,39 @@ function  delImg(filePath) {
         })
     }
 }
+
+let existAsync=function (filePath) {
+    return new Promise(function (resolve) {
+        fs.access(con.filePath+filePath.replace(/\//g,path.sep),fs.constants.F_OK,function (err) {
+            if(!err)
+            {
+                resolve(1);
+            }
+            else
+            {
+                resolve(0);
+            }
+        })
+    })
+}
+
+let getFileSize=async (function (filePath) {
+    let size=0;
+    if(!filePath)
+    {
+        return size;
+    }
+    let bExist=await (existAsync(filePath));
+    if(bExist)
+    {
+        let obj=await (fsAsync.statAsync(con.filePath+filePath.replace(/\//g,path.sep)));
+        if(obj)
+        {
+            size+=obj.size;
+        }
+    }
+    return size;
+})
 
 function getIPAdress(){
     var interfaces = require('os').networkInterfaces();
@@ -2647,3 +2681,4 @@ exports.formatJson=formatJson
 exports.backup=backup;
 exports.restore=restore;
 exports.removeFolder=removeFolder;
+exports.getFileSize=getFileSize;

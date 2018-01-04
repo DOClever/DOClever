@@ -7,7 +7,7 @@
             <el-button type="primary" size="mini" style="float: right;margin-top: 4px;margin-right: 5px;margin-left: 0px" @click="run" title="运行" id="run" :loading="runPending">
                 运行
             </el-button>
-            <el-button type="primary" size="mini" style="float: right;margin-top: 4px;margin-right: 5px;margin-left: 0px" @click="$store.dispatch('project/info/interface/changeType','edit',{root:true})">
+            <el-button type="primary" size="mini" style="float: right;margin-top: 4px;margin-right: 5px;margin-left: 0px" @click="$store.dispatch('project/info/interface/changeType',interfaceEditRole?'edit':'preview',{root:true})">
                 返回
             </el-button>
             <el-button size="mini" type="text" icon="fa fa-arrows-alt" style="margin-left: 5px;font-size: 15px" title="放大/缩小" @click="$store.getters.event.$emit('toggleMax')"></el-button>

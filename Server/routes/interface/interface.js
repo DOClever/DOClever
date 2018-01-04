@@ -16,6 +16,8 @@ var interfaceSnapshot=require("../../model/interfaceSnapshotModel")
 var version=require("../../model/versionModel")
 var teamGroup=require("../../model/teamGroupModel")
 var example=require("../../model/exampleModel")
+var doc=require("../../model/docModel")
+var docProject=require("../../model/docProjectModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
 
@@ -771,6 +773,22 @@ function Interface() {
             let arr = await(this.getChild(req,req.project._id, null,1));
             util.ok(res, arr, "ok");
 
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.docRef=async ((req,res)=>{
+        try
+        {
+            await (this.validateUser(req));
+            let arr=await (doc.findAsync({
+                interface:req.clientParam.id
+            },"name",{
+                sort:"-createdAt"
+            }));
+            util.ok(res,arr,"ok");
         }
         catch (err)
         {
