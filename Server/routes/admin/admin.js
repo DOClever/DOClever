@@ -2022,8 +2022,6 @@ function Admin()
             ret.connect={
                 db:config.db,
                 filePath:config.filePath,
-                imgPath:config.imgPath,
-                tempPath:config.tempPath,
                 port:config.port
             };
             ret.db=objInfo.db;
@@ -2083,8 +2081,6 @@ function Admin()
             let obj={
                 db:req.clientParam.db,
                 filePath:req.clientParam.file,
-                imgPath:req.clientParam.img,
-                tempPath:req.clientParam.temp,
                 port:req.clientParam.port
             }
             await (fs.writeFileAsync(path.join(__dirname,"../../../config.json"),JSON.stringify(obj)));

@@ -352,7 +352,7 @@ function Doc(client) {
             this.throw(e.userNotFound,"文档不存在");
             return;
         }
-        var path=pathLib.join(con.imgPath,Date.now()+data.name);
+        var path=pathLib.join(con.filePath,"img",Date.now()+data.name);
         var index=path.lastIndexOf(pathLib.sep);
         index=path.lastIndexOf(pathLib.sep,index-1);
         var dbPath=path.substring(index).replace(/\\/g,"/");

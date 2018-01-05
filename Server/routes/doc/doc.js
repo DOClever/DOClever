@@ -561,8 +561,8 @@ function Doc()
             if(objFrom._id.toString()==objTo._id.toString())
             {
                 let obj1=objFrom.childGroup[req.clientParam.index];
-                objFrom.childGroup[req.clientParam.index]=obj;
-                objFrom.childGroup[index]=obj1;
+                objFrom.childGroup.splice(req.clientParam.index,1,obj);
+                objFrom.childGroup.splice(index,1,obj1);
                 await (objFrom.saveAsync());
             }
             else
@@ -636,8 +636,8 @@ function Doc()
             if(objFrom._id.toString()==objTo._id.toString())
             {
                 let obj1=objFrom.childDoc[req.clientParam.index];
-                objFrom.childDoc[req.clientParam.index]=obj;
-                objFrom.childDoc[index]=obj1;
+                objFrom.childDoc.splice(req.clientParam.index,1,obj);
+                objFrom.childDoc.splice(index,1,obj1);
                 await (objFrom.saveAsync());
             }
             else

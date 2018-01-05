@@ -1680,7 +1680,7 @@ function Project() {
             }))
             for(let obj of arr)
             {
-                let pathName=path.join(con.tempPath,obj.name+".zip");
+                let pathName=path.join(con.filePath,"temp",obj.name+".zip");
                 if(await (fs.existsAsync(pathName)))
                 {
                     await (fs.unlinkAsync(pathName));
@@ -1693,7 +1693,7 @@ function Project() {
                 user:req.userInfo._id,
                 project:req.obj._id,
             }))
-            await (copy(path.resolve(__dirname,"../../html"),path.join(con.tempPath,name)));
+            await (copy(path.resolve(__dirname,"../../html"),path.join(con.filePath,"temp",name)));
             let query={
                 project:req.obj._id
             }
@@ -1780,21 +1780,21 @@ function Project() {
                     creator:obj.creator
                 }
             });
-            nunjucks.configure(path.join(con.tempPath,name), {  });
+            nunjucks.configure(path.join(con.filePath,"temp",name), {  });
             var str=nunjucks.render("index.html",{
                 interface:JSON.stringify(arrGroup),
                 project:JSON.stringify(req.obj),
                 status:JSON.stringify(arrStatus),
                 name:req.obj.name
             })
-            await (fs.writeFileAsync(path.join(con.tempPath,name,"index.html"),str));
-            var pathName=path.join(con.tempPath,name+".zip");
+            await (fs.writeFileAsync(path.join(con.filePath,"temp",name,"index.html"),str));
+            var pathName=path.join(con.filePath,"temp",name+".zip");
             var output=fs.createWriteStream(pathName);
             var archive = zip('zip', {
                 zlib: { level: 9 }
             });
             output.on('close', function() {
-                rm(path.join(con.tempPath,name),{},function (err) {
+                rm(path.join(con.filePath,"temp",name),{},function (err) {
 
                 });
                 res.download(pathName,req.obj.name+".zip",function (err) {
@@ -1811,13 +1811,13 @@ function Project() {
                 });
             });
             archive.on('error', function(err) {
-                rm(path.join(con.tempPath,name),{},function (err) {
+                rm(path.join(con.filePath,"temp",name),{},function (err) {
 
                 });
                 throw err;
             });
             archive.pipe(output);
-            archive.directory(path.join(con.tempPath,name),req.obj.name);
+            archive.directory(path.join(con.filePath,"temp",name),req.obj.name);
             archive.finalize();
         }
         catch (err)

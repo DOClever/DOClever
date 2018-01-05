@@ -1759,7 +1759,7 @@ var init=async (function () {
                     })
                 })
             }
-            let arr=["请输入mongodb数据库地址（比如：mongodb://localhost:27017/DOClever)：","请输入DOClever上传文件路径（比如：/Users/Shared/DOClever）：","请输入DOClever上传图片文件路径（需要是上传文件路径的直接子目录，比如：/Users/Shared/DOClever/img）：","请输入DOClever上传临时文件路径（需要是上传文件路径的直接子目录，比如：/Users/Shared/DOClever/temp）：","请输入端口号（比如10000）："];
+            let arr=["请输入mongodb数据库地址（比如：mongodb://localhost:27017/DOClever)：","请输入DOClever上传文件路径（比如：/Users/Shared/DOClever）：","请输入端口号（比如10000）："];
             for(let i=0;i<arr.length;i++)
             {
                 let val=await (question(arr[i]));
@@ -1796,11 +1796,13 @@ var init=async (function () {
                     }
                     con.db=val;
                 }
-                else if(i==1 || i==2 || i==3)
+                else if(i==1)
                 {
                     try
                     {
-                        createDir(val)
+                        createDir(val);
+                        createDir(path.join(val,"img"));
+                        createDir(path.join(val,"temp"));
                     }
                     catch (err)
                     {
@@ -1808,20 +1810,9 @@ var init=async (function () {
                         i--;
                         continue;
                     }
-                    if(i==1)
-                    {
-                        con.filePath=val;
-                    }
-                    else if(i==2)
-                    {
-                        con.imgPath=val;
-                    }
-                    else if(i==3)
-                    {
-                        con.tempPath=val;
-                    }
+                    con.filePath=val;
                 }
-                else if(i==4)
+                else if(i==2)
                 {
                     con.port=parseInt(val);
                 }
@@ -1838,6 +1829,9 @@ var init=async (function () {
         else
         {
             con=require("../../config.json");
+            createDir(con.filePath);
+            createDir(path.join(con.filePath,"img"));
+            createDir(path.join(con.filePath,"temp"));
         }
         if(argv.db)
         {
@@ -1855,32 +1849,6 @@ var init=async (function () {
                 process.exit(0);
             }
             con.filePath=argv.file;
-        }
-        if(argv.img)
-        {
-            try
-            {
-                createDir(argv.img)
-            }
-            catch (err)
-            {
-                console.log(err);
-                process.exit(0);
-            }
-            con.imgPath=argv.img;
-        }
-        if(argv.temp)
-        {
-            try
-            {
-                createDir(argv.temp)
-            }
-            catch (err)
-            {
-                console.log(err);
-                process.exit(0);
-            }
-            con.tempPath=argv.temp;
         }
         if(argv.port)
         {

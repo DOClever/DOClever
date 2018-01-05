@@ -16,7 +16,7 @@ var uuid=require("uuid")
 function UserCommon() {
     this.downloadImg=async ((url)=>{
         return new Promise(function (resolve) {
-            var imgPath=path.join(con.imgPath,uuid()+".png");
+            var imgPath=path.join(con.filePath,"img",uuid()+".png");
             var pipe=request(url).pipe(fs.createWriteStream(imgPath))
             pipe.on("finish",function () {
                 var filePath=imgPath;
