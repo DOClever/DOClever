@@ -9,22 +9,22 @@ var async=require("asyncawait/async");
 var await=require("asyncawait/await");
 var util=require("./util/util");
 var app = express();
-var webpack = require('../Client/node_modules/webpack'),
-    webpackDevMiddleware = require('../Client/node_modules/webpack-dev-middleware'),
-    webpackHotMiddleware = require('../Client/node_modules/webpack-hot-middleware'),
-    webpackDevConfig = require('../Client/dev');
-var compiler = webpack(webpackDevConfig);
-app.use(webpackDevMiddleware(compiler, {
-
-    // public path should be the same with webpack config
-    publicPath: webpackDevConfig.output.publicPath,
-    noInfo: true,
-    stats: {
-        colors: true,
-        chunks: false
-    }
-}));
-app.use(webpackHotMiddleware(compiler));
+// var webpack = require('../Client/node_modules/webpack'),
+//     webpackDevMiddleware = require('../Client/node_modules/webpack-dev-middleware'),
+//     webpackHotMiddleware = require('../Client/node_modules/webpack-hot-middleware'),
+//     webpackDevConfig = require('../Client/dev');
+// var compiler = webpack(webpackDevConfig);
+// app.use(webpackDevMiddleware(compiler, {
+//
+//     // public path should be the same with webpack config
+//     publicPath: webpackDevConfig.output.publicPath,
+//     noInfo: true,
+//     stats: {
+//         colors: true,
+//         chunks: false
+//     }
+// }));
+// app.use(webpackHotMiddleware(compiler));
 (async (function () {
     await (util.init());
     var checkUser=require("./routes/checkUser");

@@ -2300,6 +2300,14 @@ helper.runTest=async function (obj,global,test,root,opt,id) {
         }
         root.output+="结束运行接口："+obj.name+"(耗时：<span style='color: green'>"+res.second+"秒</span>)<br>"
         return res;
+    }).catch(function (err) {
+        root.output+=err.message+"<br>";
+        root.output+="结束运行接口："+obj.name+"(耗时：<span style='color: green'>"+(((new Date())-startDate)/1000).toFixed(3)+"秒</span>)<br>"
+        return {
+            status:0,
+            header:{},
+            data:err
+        }
     })
 }
 
