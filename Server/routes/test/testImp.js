@@ -32,7 +32,15 @@ var interface=[
                 type:String,
                 optional:1
             },
+            ui:{
+                type:String,
+                optional:1
+            },
             output:{
+                type:String,
+                optional:1
+            },
+            user:{
                 type:String,
                 optional:1
             }
@@ -48,10 +56,34 @@ var interface=[
             project:{
                 type:String,
             },
+            user:{
+                type:String,
+                optional:1
+            }
         },
         "data":String,
         user:1,
         handle:[test.validateUser,test.list]
+    },
+    {
+        "method":"GET",
+        "path":"/test/info",
+        "param": {
+            project:{
+                type:String,
+            },
+            only:{
+                type:Number,
+                optional:1
+            },
+            user:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":String,
+        user:1,
+        handle:[test.validateUser,test.info]
     },
     {
         "method":"POST",
@@ -65,6 +97,10 @@ var interface=[
                 type:String
             },
             module:{
+                type:String,
+                optional:1
+            },
+            user:{
                 type:String,
                 optional:1
             }
@@ -85,6 +121,14 @@ var interface=[
                 type:String
             },
             group:{
+                type:String,
+                optional:1
+            },
+            project:{
+                type:String,
+                optional:1
+            },
+            user:{
                 type:String,
                 optional:1
             }
@@ -131,7 +175,7 @@ var interface=[
     },
     {
         "method":"GET",
-        "path":"/test/info",
+        "path":"/test/test",
         "param": {
             id:{
                 type:String,
@@ -195,6 +239,318 @@ var interface=[
         user:1,
         handle:[test.validateUser,test.moveTest]
     },
+    {
+        "method":"GET",
+        "path":"/test/projectlist",
+        "param": {
+
+        },
+        "data":String,
+        user:1,
+        handle:[test.projectList]
+    },
+    {
+        "method":"POST",
+        "path":"/test/project",
+        "param": {
+            project:{
+                type:String,
+                optional:1
+            },
+            name:String,
+            dis:{
+                type:String,
+                optional:1
+            },
+            team:{
+                type:String,
+                optional:1
+            },
+        },
+        "data":String,
+        user:1,
+        handle:[test.saveProject]
+    },
+    {
+        "method":"DELETE",
+        "path":"/test/project",
+        "param": {
+            project:String
+        },
+        "data":String,
+        user:1,
+        handle:[test.removeProject]
+    },
+    {
+        "method":"PUT",
+        "path":"/test/handleapply",
+        "param": {
+            project:String,
+            apply:String,
+            state:{
+                type:Number,
+                in:[1,2]
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.handleApply]
+    },
+    {
+        "method":"PUT",
+        "path":"/test/owner",
+        "param": {
+            project:String,
+            user:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.setOwner]
+    },
+    {
+        "method":"GET",
+        "path":"/test/filterlist",
+        "param": {
+            team:{
+                type:String,
+                optional:1
+            },
+            name:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":String,
+        user:1,
+        handle:[test.filterList]
+    },
+    {
+        "method":"POST",
+        "path":"/test/user",
+        "param": {
+            project:String,
+            user:String
+        },
+        "data":String,
+        user:1,
+        handle:[test.addUser]
+    },
+    {
+        "method":"DELETE",
+        "path":"/test/user",
+        "param": {
+            project:String,
+            user:String
+        },
+        "data":String,
+        user:1,
+        handle:[test.removeUser]
+    },
+    {
+        "method":"PUT",
+        "path":"/test/user",
+        "param": {
+            project:String,
+            user:String
+        },
+        "data":String,
+        user:1,
+        handle:[test.setUser]
+    },
+    {
+        "method":"GET",
+        "path":"/test/users",
+        "param": {
+            project:String,
+        },
+        "data":String,
+        user:1,
+        handle:[test.getUsers]
+    },
+    {
+        "method":"DELETE",
+        "path":"/test/quit",
+        "param": {
+            project:{
+                type:String
+            },
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.quit]
+    },
+    {
+        "method":"GET",
+        "path":"/test/interfacelist",
+        "param": {
+
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.interfaceList]
+    },
+    {
+        "method":"GET",
+        "path":"/test/interface",
+        "param": {
+            interface:String,
+            only:{
+                type:Number,
+                optional:1
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.interfaceInfo]
+    },
+    {
+        "method":"GET",
+        "path":"/test/urllist",
+        "param": {
+            project:String,
+            user:String,
+            urls:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.urlList]
+    },
+    {
+        "method":"GET",
+        "path":"/test/interfaceproject",
+        "param": {
+            project:String,
+            version:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.interfaceProject]
+    },
+    {
+        "method":"POST",
+        "path":"/test/collection",
+        "param": {
+            collection:{
+                type:String,
+                optional:1
+            },
+            project:{
+                type:String,
+                optional:1
+            },
+            name:String,
+            output:{
+                type:String,
+                optional:1
+            },
+            test:{
+                type:String,
+                optional:1
+            },
+            user:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.saveCollection]
+    },
+    {
+        "method":"GET",
+        "path":"/test/collectionlist",
+        "param": {
+            project:String,
+            user:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.collectionList]
+    },
+    {
+        "method":"GET",
+        "path":"/test/collection",
+        "param": {
+            collection:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.collectionInfo]
+    },
+    {
+        "method":"DELETE",
+        "path":"/test/collection",
+        "param": {
+            collection:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.removeCollection]
+    },
+    {
+        "method":"GET",
+        "path":"/test/cooperation",
+        "param": {
+            project:String,
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.cooperationInfo]
+    },
+    {
+        "method":"POST",
+        "path":"/test/cooperation",
+        "param": {
+            project:String,
+            users:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.editCooperation]
+    },
 ];
 
 module.exports=interface;
+
+
+
+
+
+
+
+

@@ -216,7 +216,7 @@ function handleHeader(req,res) {
     {
         res.setHeader("Access-Control-Allow-Headers",req.headers["access-control-request-headers"])
     }
-    res.setHeader("Access-Control-Expose-Headers","connection,content-length,date,x-powered-by,content-encoding,server,etag,accept-ranges,allow,content-language,set-cookie");
+    res.setHeader("Access-Control-Expose-Headers","connection,content-length,date,x-powered-by,content-encoding,server,etag,accept-ranges,allow,content-language,set-cookie,doclever-request");
     if(req.method=="OPTIONS")
     {
         res.writeHead(200, {'Content-Type': 'text/plain'});

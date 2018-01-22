@@ -22,9 +22,6 @@ var statusVersion=require("../../model/statusVersionModel")
 var testGroup=require("../../model/testGroupModel")
 var testModule=require("../../model/testModuleModel")
 var test=require("../../model/testModel")
-var testGroupVersion=require("../../model/testGroupVersionModel")
-var testModuleVersion=require("../../model/testModuleVersionModel")
-var testVersion=require("../../model/testVersionModel")
 var interfaceSnapshot=require("../../model/interfaceSnapshotModel")
 var poll=require("../../model/pollModel")
 var fs=require("fs");
@@ -176,35 +173,6 @@ function Version() {
                         return obj._doc
                     })));
                 }
-                arr = await(testModule.findAsync({
-                    project: req.clientParam.project
-                }));
-                for (let o of arr) {
-                    let id = o._id;
-                    delete o._doc._id;
-                    o._doc.version = obj._id
-                    let objModule = await(testModuleVersion.createAsync(o._doc));
-                    let arrGroup = await(testGroup.findAsync({
-                        module: id
-                    }))
-                    for (let o1 of arrGroup) {
-                        let id = o1._id;
-                        delete o1._doc._id;
-                        o1._doc.version = obj._id;
-                        o1._doc.module = objModule._id;
-                        let objGroup = await(testGroupVersion.createAsync(o1._doc));
-                        let arrTest = await(test.findAsync({
-                            group: id
-                        }));
-                        for (let o2 of arrTest) {
-                            delete o2._doc._id;
-                            o2._doc.version = obj._id;
-                            o2._doc.module = objModule._id;
-                            o2._doc.group = objGroup._id;
-                            await(testVersion.createAsync(o2._doc));
-                        }
-                    }
-                }
                 obj=await (version.populateAsync(obj,{
                     path:"creator",
                     select:"name photo"
@@ -250,15 +218,6 @@ function Version() {
                 version:req.version._id
             }))
             await (statusVersion.removeAsync({
-                version:req.version._id
-            }))
-            await (testModuleVersion.removeAsync({
-                version:req.version._id
-            }))
-            await (testGroupVersion.removeAsync({
-                version:req.version._id
-            }))
-            await (testVersion.removeAsync({
                 version:req.version._id
             }))
             await (interfaceSnapshot.removeAsync({
@@ -342,37 +301,6 @@ function Version() {
                 await(status.insertMany(arr.map(function (obj) {
                     return obj._doc
                 })));
-            }
-            arr = await(testModuleVersion.findAsync({
-                project: req.project._id,
-                version:req.version._id
-            }));
-            let arrMyTest=[];
-            for (let o of arr) {
-                let id = o._id;
-                delete o._doc._id;
-                delete o._doc.version
-                let objModule = await(testModule.createAsync(o._doc));
-                let arrGroup = await(testGroupVersion.findAsync({
-                    module: id
-                }))
-                for (let o1 of arrGroup) {
-                    let id = o1._id;
-                    delete o1._doc._id;
-                    delete o1._doc.version;
-                    o1._doc.module = objModule._id;
-                    let objGroup = await(testGroup.createAsync(o1._doc));
-                    let arrTest = await(testVersion.findAsync({
-                        group: id
-                    }));
-                    for (let o2 of arrTest) {
-                        delete o2._doc._id;
-                        delete o2._doc.version;
-                        o2._doc.module = objModule._id;
-                        o2._doc.group = objGroup._id;
-                        arrMyTest.push(await(test.createAsync(o2._doc)));
-                    }
-                }
             }
             let obj= await(poll.findOneAsync({
                 project: req.project._id,

@@ -21,7 +21,7 @@
                         <i class="el-icon-download" style="font-weight:900"></i>&nbsp;导入项目
                     </el-button>
                 </template>
-                <template v-else-if="type=='doc'">
+                <template v-else-if="type=='doc' || type=='test'">
                     <el-dropdown v-if="session.teamId">
                         <el-button type="primary" size="small" style="margin-left: 20px;">
                             <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目
@@ -56,7 +56,7 @@
                         <strong><i class="el-icon-download" style="font-weight:900"></i></strong>&nbsp;导入项目
                     </el-button>
                 </template>
-                <template v-else-if="type=='doc'">
+                <template v-else-if="type=='doc' || type=='test'">
                     <el-dropdown  v-if="session.teamId">
                         <el-button type="primary" size="small" style="margin-left: 20px;">
                             <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增项目
@@ -181,6 +181,10 @@
                     {
                         return this.$store.state.docCreateSort;
                     }
+                    else if(this.type=="test")
+                    {
+                        return this.$store.state.testCreateSort;
+                    }
                 },
                 set:function (val) {
                     if(this.type=="interface")
@@ -190,6 +194,10 @@
                     else if(this.type=="doc")
                     {
                         this.$store.state.docCreateSort=val;
+                    }
+                    else if(this.type=="test")
+                    {
+                        this.$store.state.testCreateSort=val;
                     }
                 }
             },
@@ -203,6 +211,10 @@
                     {
                         return this.$store.state.docJoinSort;
                     }
+                    else if(this.type=="test")
+                    {
+                        return this.$store.state.testJoinSort;
+                    }
                 },
                 set:function (val) {
                     if(this.type=="interface")
@@ -212,6 +224,10 @@
                     else if(this.type=="doc")
                     {
                         this.$store.state.docJoinSort=val;
+                    }
+                    else if(this.type=="test")
+                    {
+                        this.$store.state.testJoinSort=val;
                     }
                 }
             },
@@ -225,6 +241,10 @@
                     {
                         return this.$store.state.docPublicSort;
                     }
+                    else if(this.type=="test")
+                    {
+                        return this.$store.state.testPublicSort;
+                    }
                 },
                 set:function (val) {
                     if(this.type=="interface")
@@ -234,6 +254,10 @@
                     else if(this.type=="doc")
                     {
                         this.$store.state.docPublicSort=val;
+                    }
+                    else if(this.type=="test")
+                    {
+                        this.$store.state.testPublicSort=val;
                     }
                 }
             },
@@ -247,6 +271,10 @@
                     {
                         return this.$store.state.docTeamSort;
                     }
+                    else if(this.type=="test")
+                    {
+                        return this.$store.state.testTeamSort;
+                    }
                 },
                 set:function (val) {
                     if(this.type=="interface")
@@ -256,6 +284,10 @@
                     else if(this.type=="doc")
                     {
                         this.$store.state.docTeamSort=val;
+                    }
+                    else if(this.type=="test")
+                    {
+                        this.$store.state.testTeamSort=val;
                     }
                 }
             },
@@ -276,6 +308,17 @@
                     else if(this.type=="doc")
                     {
                         if(this.$store.state.docTeamList.length==0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else if(this.type=="test")
+                    {
+                        if(this.$store.state.testTeamList.length==0)
                         {
                             return true;
                         }
@@ -309,6 +352,17 @@
                             return false;
                         }
                     }
+                    else if(this.type=="test")
+                    {
+                        if(this.$store.state.testCreateList.length==0 && this.$store.state.testJoinList.length==0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
                 }
             },
             arrCreate:function () {
@@ -320,6 +374,10 @@
                 {
                     return this.$store.state.docCreateList
                 }
+                else if(this.type=="test")
+                {
+                    return this.$store.state.testCreateList
+                }
             },
             arrJoin:function () {
                 if(this.type=="interface")
@@ -330,6 +388,10 @@
                 {
                     return this.$store.state.docJoinList
                 }
+                else if(this.type=="test")
+                {
+                    return this.$store.state.testJoinList
+                }
             },
             arrPublic:function () {
                 if(this.type=="interface")
@@ -339,6 +401,10 @@
                 else if(this.type=="doc")
                 {
                     return this.$store.state.docPublicList
+                }
+                else if(this.type=="test")
+                {
+                    return [];
                 }
             }
         },
@@ -405,6 +471,13 @@
                     else if(_this.type=="doc")
                     {
                         pro=net.put("/team/pulldoc",{
+                            id:session.get("teamId"),
+                            project:val.value
+                        })
+                    }
+                    else if(_this.type=="test")
+                    {
+                        pro=net.put("/team/pulltest",{
                             id:session.get("teamId"),
                             project:val.value
                         })

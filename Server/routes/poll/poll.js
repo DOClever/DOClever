@@ -11,25 +11,25 @@ var version=require("../../model/versionModel")
 var group=require("../../model/groupModel")
 var interface=require("../../model/interfaceModel")
 var poll=require("../../model/pollModel")
+var testCollection=require("../../model/testCollectionModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
 function  Poll() {
     this.save=async ((req,res)=> {
         try
         {
-            let query={
-                project:req.clientParam.project
-            }
-            if(req.headers["docleverversion"])
+            let objCollection=await (testCollection.findOneAsync({
+                _id:req.clientParam.collection
+            }));
+            if(!objCollection)
             {
-                query.version=req.headers["docleverversion"]
+                util.throw(e.testCollectionNotFound,"集合不存在");
             }
-            else
+            else if(objCollection.poll && req.clientParam.id  && objCollection.poll!=req.clientParam.id)
             {
-                query.version={
-                    $exists:false
-                };
+                util.throw(e.systemReason,"集合已和轮询绑定");
             }
+            let obj;
             let update={
                 project:req.clientParam.project,
                 users:JSON.parse(req.clientParam.users),
@@ -41,25 +41,29 @@ function  Poll() {
                     smtp:req.clientParam.smtp,
                     port:req.clientParam.port
                 },
-                test:JSON.parse(req.clientParam.test),
                 baseUrl:req.clientParam.url,
                 phoneInfo:JSON.parse(req.clientParam.phoneinfo),
-                failSend:req.clientParam.failsend
+                failSend:req.clientParam.failsend,
+                owner:req.clientParam.owner,
             }
-            if(req.headers["docleverversion"])
+            if(req.clientParam.interproject)
             {
-                update.version=req.headers["docleverversion"]
-                update.testType="TestVersion"
+                update.interProject=req.clientParam.interproject;
+            }
+            if(req.clientParam.id)
+            {
+                obj=await (poll.findOneAndUpdateAsync({
+                    _id:req.clientParam.id
+                },update,{
+                    new:true
+                }));
             }
             else
             {
-                update.testType="Test"
+                obj=await (poll.createAsync(update));
             }
-            let obj=await (poll.findOneAndUpdateAsync(query,update,{
-                upsert:true,
-                setDefaultsOnInsert:true,
-                new:true
-            }));
+            objCollection.poll=obj._id;
+            await (objCollection.saveAsync());
             if(req.clientParam.immediate)
             {
                 util.runPoll([obj]);
@@ -76,19 +80,16 @@ function  Poll() {
         try
         {
             let query={
-                project:req.clientParam.project
-            }
-            if(req.headers["docleverversion"])
-            {
-                query.version=req.headers["docleverversion"]
-            }
-            else
-            {
-                query.version={
-                    $exists:false
-                }
+                _id:req.clientParam.id
             }
             await (poll.removeAsync(query))
+            await (testCollection.updateAsync({
+                poll:req.clientParam.id
+            },{
+                $unset:{
+                    poll:1
+                }
+            }))
             util.ok(res,"ok");
         }
         catch (err)
@@ -101,17 +102,7 @@ function  Poll() {
         try
         {
             let query={
-                project:req.clientParam.project
-            }
-            if(req.headers["docleverversion"])
-            {
-                query.version=req.headers["docleverversion"]
-            }
-            else
-            {
-                query.version={
-                    $exists:false
-                }
+                _id:req.clientParam.id
             }
             let obj=await (poll.findOneAsync(query,null,{
                 populate:{

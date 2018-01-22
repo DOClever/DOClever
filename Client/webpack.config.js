@@ -3,6 +3,7 @@
  */
 var path = require('path')
 var webpack = require('webpack');
+var UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 //var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 module.exports = {
     entry: {
@@ -40,13 +41,17 @@ module.exports = {
                 NODE_ENV: '"production"'
             }
         }),
-        new webpack.optimize.UglifyJsPlugin({
-            compressor: {
-                warnings: false,
-            },
-            output: {
-                comments: false,  // remove all comments
-            }
+        // new webpack.optimize.UglifyJsPlugin({
+        //     compressor: {
+        //         warnings: false,
+        //     },
+        //     output: {
+        //         comments: false,  // remove all comments
+        //     }
+        // }),
+        new UglifyJsPlugin({
+            cache:true,
+            parallel:true
         }),
         new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: '[name].bundle.js'}),
         //new BundleAnalyzerPlugin()
@@ -61,7 +66,12 @@ module.exports = {
             {
                 test: /\.vue$/,
                 loader:"vue-loader?cacheDirectory",
-                include: path.resolve(__dirname, 'web')
+                include: path.resolve(__dirname, 'web'),
+                options: {
+                    loaders: {
+                        js: 'babel-loader'
+                    }
+                }
             },
             {
                 test: /helper\.js/,

@@ -108,7 +108,7 @@ module.exports= {
         },
         renameGroup:function (context,data) {
             var query={
-                id:data.item._id,
+                group:data.item._id,
                 name:data.name,
                 project:session.get("projectId")
             }
@@ -282,8 +282,8 @@ module.exports= {
                     if(arrFrom==arrTo)
                     {
                         var obj1=arrFrom[indexFrom];
-                        arrFrom[indexFrom]=arrFrom[indexTo];
-                        arrFrom[indexTo]=obj1;
+                        arrFrom.splice(indexFrom,1);
+                        arrFrom.splice(indexTo,0,obj1);
                     }
                     else
                     {

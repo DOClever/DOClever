@@ -1755,8 +1755,12 @@ helper.handleTestInterface=function (inter,data,status) {
     return retIndex;
 }
 
-helper.runTest=async function (obj,global,test,root,opt) {
+helper.runTest=async function (obj,global,test,root,opt,id) {
     root.output+="开始运行接口："+obj.name+"<br>"
+    if(id!=undefined)
+    {
+        window.vueObj.$store.state.event.$emit("testRunStatus","interfaceStart",id);
+    }
     var name=obj.name
     var method=obj.method;
     var baseUrl=obj.baseUrl=="defaultUrl"?global.baseUrl:obj.baseUrl;
@@ -1905,7 +1909,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
             }
         }
     }
-    var body={},bUpload=false;
+    var body={},bUpload=false,reqBody={};
     if(method=="POST" || method=="PUT" || method=="PATCH")
     {
         if(obj.bodyInfo.type==0)
@@ -1938,7 +1942,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
                 {
                     var startDate=new Date();
                     var file=await (new Promise(function (resolve,reject) {
-                        var child=$.showBox(window.vueObj,require("../../controller/console/project/info/test/component/testUploadFile.vue"),{
+                        var child=$.showBox(window.vueObj,require("../../controller/console/project/test/component/testUploadFile.vue"),{
                             name:name,
                             url:path,
                             keyName:obj1.name,
@@ -1964,6 +1968,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
                     }
                 }
             }
+            reqBody=body;
         }
         else
         {
@@ -1990,7 +1995,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
             {
                 var startDate=new Date();
                 var file=await (new Promise(function (resolve,reject) {
-                    var child=$.showBox(window.vueObj,require("../../controller/console/project/info/test/component/testUploadFile.vue"),{
+                    var child=$.showBox(window.vueObj,require("../../controller/console/project/test/component/testUploadFile.vue"),{
                         name:name,
                         url:path,
                         keyName:obj.name,
@@ -2027,6 +2032,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
                 }))
                 body=file;
             }
+            reqBody=body;
         }
     }
     if(obj.pullInject)
@@ -2039,6 +2045,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
                 {
                     Object.assign(body,opt.body);
                 }
+                reqBody=body;
             }
             else
             {
@@ -2048,6 +2055,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
                     {
                         body=opt.body;
                     }
+                    reqBody=body;
                 }
                 else if(obj.bodyInfo.rawType==2)
                 {
@@ -2086,6 +2094,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
                             }
                         }
                     }
+                    reqBody=body;
                     body=JSON.stringify(body);
                 }
             }
@@ -2143,6 +2152,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
                 {
                     Object.assign(body,opt.body);
                 }
+                reqBody=body;
             }
             else
             {
@@ -2152,6 +2162,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
                     {
                         body=opt.body;
                     }
+                    reqBody=body;
                 }
                 else if(obj.bodyInfo.rawType==2)
                 {
@@ -2190,6 +2201,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
                             }
                         }
                     }
+                    reqBody=body;
                     body=JSON.stringify(body);
                 }
             }
@@ -2202,6 +2214,7 @@ helper.runTest=async function (obj,global,test,root,opt) {
             path=path.replace("{"+paramKey+"}",param[paramKey])
         }
     }
+    var reqQuery=query;
     query=$.param(query);
     if(query.length>0)
     {
@@ -2248,7 +2261,26 @@ helper.runTest=async function (obj,global,test,root,opt) {
         func=net.post(proxyUrl,body,header,null,1,bNet)
     }
     return func.then(function (result) {
-        var res={}
+        if(id!=undefined)
+        {
+            if(result.status>=200 && result.status<300)
+            {
+                window.vueObj.$store.state.event.$emit("testRunStatus","interfaceSuccess",id);
+            }
+            else
+            {
+                window.vueObj.$store.state.event.$emit("testRunStatus","interfaceFail",id);
+            }
+        }
+        var res={
+            req:{
+                param:param,
+                query:reqQuery,
+                header:filterHeader(Object.assign({},header,objHeaders)),
+                body:reqBody,
+                info:result.header["doclever-request"]?JSON.parse(result.header["doclever-request"]):{}
+            }
+        };
         res.header=result.header;
         res.status=String(result.status);
         res.second=(((new Date())-startDate)/1000).toFixed(3);
@@ -2271,24 +2303,13 @@ helper.runTest=async function (obj,global,test,root,opt) {
     })
 }
 
-helper.runTestCode=async function (code,test,global,opt,root) {
+helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level) {
     var Base64=BASE64.encoder,MD5=CryptoJS.MD5,SHA1=CryptoJS.SHA1,SHA256=CryptoJS.SHA256,SHA512=CryptoJS.SHA512,SHA3=CryptoJS.SHA3,RIPEMD160=CryptoJS.RIPEMD160,AES=CryptoJS.AES.encrypt,TripleDES=CryptoJS.TripleDES.encrypt,DES=CryptoJS.DES.encrypt,Rabbit=CryptoJS.Rabbit.encrypt,RC4=CryptoJS.RC4.encrypt,RC4Drop=CryptoJS.RC4Drop.encrypt;
     if(!global)
     {
         global={};
     }
-    var env={};
-    if(opt.baseUrls && opt.baseUrl)
-    {
-        opt.baseUrls.forEach(function (obj) {
-            if(obj.url==opt.baseUrl && obj.env)
-            {
-                obj.env.forEach(function (obj) {
-                    env[obj.key]=obj.value;
-                })
-            }
-        })
-    }
+    var env=opt.env;
     function log(text) {
         if(typeof(text)=="object")
         {
@@ -2298,7 +2319,7 @@ helper.runTestCode=async function (code,test,global,opt,root) {
     }
     function input(title,data) {
         return new Promise(function (resolve,reject) {
-            var child=$.showBox(window.vueObj,require("../../controller/console/project/info/test/component/testRunInput.vue"),{
+            var child=$.showBox(window.vueObj,require("../../controller/console/project/test/component/testRunInput.vue"),{
                 title:title,
                 data:data,
                 name:test.name
@@ -2319,17 +2340,73 @@ helper.runTestCode=async function (code,test,global,opt,root) {
     {
         var obj=arr[i].getAttribute("data");
         var type=arr[i].getAttribute("type");
+        var objId=arr[i].getAttribute("varid");
         var text;
         if(type=="1")
         {
-            text="(function (opt1) {return helper.runTest("+obj.replace(/\r|\n/g,"")+",opt,test,root,opt1)})"
+            var objInfo={};
+            var o=JSON.parse(obj);
+            var query={
+                project:o.project._id
+            }
+            if(o.version)
+            {
+                query.version=o.version;
+            }
+            var bFind=false;
+            for(var j=0;j<root.projectInfo.length;j++)
+            {
+                var objProjectInfo=root.projectInfo[j];
+                if(objProjectInfo.project==query.project && objProjectInfo.version==query.version)
+                {
+                    objInfo=objProjectInfo;
+                    bFind=true;
+                    break;
+                }
+            }
+            if(!bFind)
+            {
+                try
+                {
+                    objInfo=await net.get("/test/interfaceproject",query).then(function (data) {
+                        if(data.code==200)
+                        {
+                            return data.data;
+                        }
+                        else
+                        {
+                            throw data.msg;
+                        }
+                    })
+                }
+                catch (err)
+                {
+                    $.tip(err,0);
+                    return;
+                }
+                var objPush={
+                    baseUrls:objInfo.baseUrls,
+                    before:objInfo.before,
+                    after:objInfo.after,
+                    project:query.project
+                }
+                if(query.version)
+                {
+                    objPush.version=query.version;
+                }
+                root.projectInfo.push(objPush);
+            }
+            opt.baseUrls=objInfo.baseUrls;
+            opt.before=objInfo.before;
+            opt.after=objInfo.after;
+            text="(function (opt1) {return helper.runTest("+obj.replace(/\r|\n/g,"")+",opt,test,root,opt1,"+(level==0?objId:undefined)+")})"
         }
         else if(type=="2")
         {
-            var testObj;
+            var testObj,testMode=arr[i].hasAttribute("mode")?arr[i].getAttribute("mode"):"code";
             try
             {
-                testObj=await net.get("/test/info",{
+                testObj=await net.get("/test/test",{
                     id:obj,
                     project:session.get("projectId")
                 }).then(function (data) {
@@ -2348,7 +2425,16 @@ helper.runTestCode=async function (code,test,global,opt,root) {
             {
                 return;
             }
-            text="(function () {return helper.runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'")+"',"+JSON.stringify(testObj)+",global,opt,root)})"
+            var code;
+            if(testMode=="code")
+            {
+                code=testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'");
+            }
+            else
+            {
+                code=helper.convertToCode(testObj.ui).replace(/'/g,"\\'").replace(/\\\"/g,"\\\\\"");
+            }
+            text="(function () {var argv=Array.prototype.slice.call(arguments);return helper.runTestCode('"+code+"',"+JSON.stringify(testObj)+",global,opt,root,argv,'"+testMode+"',"+(level==0?objId:undefined)+","+(level+1)+")})"
         }
         else
         {
@@ -2363,25 +2449,65 @@ helper.runTestCode=async function (code,test,global,opt,root) {
     arrNode.forEach(function (obj) {
         obj.oldNode.parentNode.replaceChild(obj.newNode,obj.oldNode);
     })
-    root.output+="<br><div style='background-color: #ececec'>开始执行用例："+test.name+"<br>";
+    root.output+="<br><div style='background-color: #ececec'>开始执行用例："+test.name+"("+(mode=="code"?"代码模式":"UI模式")+")<br>";
+    var startTime=Date.now();
+    var startOutputIndex=root.output.length;
+    if(id!=undefined)
+    {
+        window.vueObj.$store.state.event.$emit("testRunStatus","testStart",id);
+    }
     var ret=eval("(async function () {"+ele.innerText+"})()").then(function (ret) {
-        if(ret===undefined)
+        var obj={
+            argv:[]
+        };
+        var temp;
+        if(typeof(ret)=="object" && (ret instanceof Array))
         {
+            temp=ret[0];
+            obj.argv=ret.slice(1);
+        }
+        else
+        {
+            temp=ret;
+        }
+        if(temp===undefined)
+        {
+            obj.pass=undefined;
             test.status=0;
+            if(id!=undefined)
+            {
+                root.unknown++;
+                window.vueObj.$store.state.event.$emit("testRunStatus","testUnknown",id);
+                window.vueObj.$store.state.event.$emit("testCollectionRun",id,root.output.substr(startOutputIndex),Date.now()-startTime);
+            }
             root.output+="用例执行结束："+test.name+"(未判定)";
         }
-        else if(Boolean(ret)==true)
+        else if(Boolean(temp)==true)
         {
+            obj.pass=true;
             test.status=1;
+            if(id!=undefined)
+            {
+                root.success++;
+                window.vueObj.$store.state.event.$emit("testRunStatus","testSuccess",id);
+                window.vueObj.$store.state.event.$emit("testCollectionRun",id,root.output.substr(startOutputIndex),Date.now()-startTime);
+            }
             root.output+="用例执行结束："+test.name+"(<span style='color:green'>已通过</span>)";
         }
         else
         {
+            obj.pass=false;
             test.status=2;
+            if(id!=undefined)
+            {
+                root.fail++;
+                window.vueObj.$store.state.event.$emit("testRunStatus","testFail",id);
+                window.vueObj.$store.state.event.$emit("testCollectionRun",id,root.output.substr(startOutputIndex),Date.now()-startTime);
+            }
             root.output+="用例执行结束："+test.name+"(<span style='color:red'>未通过</span>)";
         }
         root.output+="</div><br>"
-        return ret;
+        return obj;
     });
     return ret;
 }
@@ -2489,6 +2615,100 @@ helper.formatJson = function (json, options) {
     );
     return $.trim(formatted);
 };
+
+helper.convertToCode=function (data) {
+    var str="";
+    data.forEach(function (obj) {
+        if(obj.type=="interface")
+        {
+            var argv="{";
+            for(var key in obj.argv)
+            {
+                argv+=key+":{";
+                for(var key1 in obj.argv[key])
+                {
+                    argv+=key1+":"+obj.argv[key][key1]+","
+                }
+                argv+="},"
+            }
+            argv+="}"
+            str+=`<div class='testCodeLine'>var $${obj.id}=await <a href='javascript:void(0)' style='cursor: pointer; text-decoration: none;' type='1' varid='${obj.id}' data='${obj.data}'>${obj.name}</a>(${argv});</div>`
+        }
+        else if(obj.type=="test")
+        {
+            var argv="[";
+            obj.argv.forEach(function (obj) {
+                argv+=obj+","
+            })
+            argv+="]";
+            str+=`<div class='testCodeLine'>var $${obj.id}=await <a type='2' href='javascript:void(0)' style='cursor: pointer; text-decoration: none;' varid='${obj.id}' data='${obj.data}' mode='${obj.mode}'>${obj.name}</a>(...${argv});</div>`
+        }
+        else if(obj.type=="ifbegin")
+        {
+            str+=`<div class='testCodeLine'>if(${obj.data}){</div>`
+        }
+        else if(obj.type=="elseif")
+        {
+            str+=`<div class='testCodeLine'>}else if(${obj.data}){</div>`
+        }
+        else if(obj.type=="else")
+        {
+            str+=`<div class='testCodeLine'>}else{</div>`
+        }
+        else if(obj.type=="ifend")
+        {
+            str+=`<div class='testCodeLine'>}</div>`
+        }
+        else if(obj.type=="var")
+        {
+            if(obj.global)
+            {
+                str+=`<div class='testCodeLine'>global["${obj.name}"]=${obj.data};</div>`
+            }
+            else
+            {
+                str+=`<div class='testCodeLine'>var ${obj.name}=${obj.data};</div>`
+            }
+        }
+        else if(obj.type=="return")
+        {
+            if(obj.argv.length>0)
+            {
+                var argv=obj.argv.join(",");
+                str+=`<div class='testCodeLine'>return [${obj.data},${argv}];</div>`
+            }
+            else
+            {
+                str+=`<div class='testCodeLine'>return ${obj.data};</div>`
+            }
+        }
+        else if(obj.type=="log")
+        {
+            str+=`<div class='testCodeLine'>log(${obj.data});</div>`
+        }
+        else if(obj.type=="input")
+        {
+            str+=`<div class='testCodeLine'>var $${obj.id}=await input("${obj.name}",${obj.data});</div>`
+        }
+        else if(obj.type=="baseurl")
+        {
+            str+=`<div class='testCodeLine'>opt["baseUrl"]=${obj.data};</div>`
+        }
+    })
+    return str;
+}
+
+function filterHeader(obj) {
+    var o={};
+    for(var key in obj)
+    {
+        if(key.indexOf("-doclever")==-1)
+        {
+            o[key]=obj[key];
+        }
+    }
+    return o;
+}
 
 module.exports=helper;
 

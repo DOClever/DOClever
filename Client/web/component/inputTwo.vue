@@ -2,10 +2,10 @@
     <el-dialog title="DOClever"  size="50%" ref="box" :modal="hud" :visible.sync="showDialog" append-to-body>
         <el-form label-width="100px">
             <el-form-item style="text-align: center" :label="data.labelTitle">
-                <el-input  :placeholder="data.placeholderTitle"  v-model="data.textTitle"></el-input>
+                <el-input size="small" :placeholder="data.placeholderTitle"  v-model="data.textTitle"></el-input>
             </el-form-item>
             <el-form-item  style="text-align: center" :label="data.labelContent">
-                <el-input type="textarea" :rows="6" :placeholder="data.placeholderContent"  v-model="data.textContent"></el-input>
+                <el-input size="small" type="textarea" :rows="6" :placeholder="data.placeholderContent"  v-model="data.textContent"></el-input>
             </el-form-item>
         </el-form>
         <el-row class="dialog-footer" slot="footer">

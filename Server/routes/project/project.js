@@ -13,14 +13,8 @@ var groupVersion=require("../../model/groupVersionModel")
 var interfaceVersion=require("../../model/interfaceVersionModel")
 var interfaceSnapshot=require("../../model/interfaceSnapshotModel")
 var statusVersion=require("../../model/statusVersionModel")
-var testVersion=require("../../model/testVersionModel")
-var testModuleVersion=require("../../model/testModuleVersionModel")
-var testGroupVersion=require("../../model/testGroupVersionModel")
 var interface=require("../../model/interfaceModel")
 var status=require("../../model/statusModel")
-var test=require("../../model/testModel")
-var testModule=require("../../model/testModuleModel")
-var testGroup=require("../../model/testGroupModel")
 var temp=require("../../model/tempModel")
 var team=require("../../model/teamModel")
 var teamGroup=require("../../model/teamGroupModel")
@@ -130,9 +124,6 @@ function Project() {
             req.interfaceModel=interface;
             req.groupModel=group;
             req.statusModel=status;
-            req.testModuleModel=testModule;
-            req.testGroupModel=testGroup;
-            req.testModel=test;
             if(req.headers["docleverversion"])
             {
                 req.version=await (version.findOneAsync({
@@ -145,9 +136,6 @@ function Project() {
                 req.interfaceModel=interfaceVersion;
                 req.groupModel=groupVersion;
                 req.statusModel=statusVersion;
-                req.testModuleModel=testModuleVersion;
-                req.testGroupModel=testGroupVersion;
-                req.testModel=testVersion;
             }
             if(req.clientParam.id)
             {
@@ -227,9 +215,6 @@ function Project() {
             req.interfaceModel=interface;
             req.groupModel=group;
             req.statusModel=status;
-            req.testModuleModel=testModule;
-            req.testGroupModel=testGroup;
-            req.testModel=test;
             if(req.headers["docleverversion"])
             {
                 req.version=await (version.findOneAsync({
@@ -242,9 +227,6 @@ function Project() {
                 req.interfaceModel=interfaceVersion;
                 req.groupModel=groupVersion;
                 req.statusModel=statusVersion;
-                req.testModuleModel=testModuleVersion;
-                req.testGroupModel=testGroupVersion;
-                req.testModel=testVersion;
             }
             let obj=await (project.findOneAsync({
                 _id:req.clientParam.id,
@@ -1011,36 +993,6 @@ function Project() {
             await (statusVersion.removeAsync({
                 project:req.clientParam.id
             }))
-            await (test.removeAsync({
-                project:req.clientParam.id
-            }))
-            await (testVersion.removeAsync({
-                project:req.clientParam.id
-            }))
-            let arrTestModule=await (testModule.findAsync({
-                project:req.clientParam.id
-            }))
-            for(let obj of arrTestModule)
-            {
-                await (testGroup.removeAsync({
-                    module:obj._id
-                }))
-            }
-            arrTestModule=await (testModuleVersion.findAsync({
-                project:req.clientParam.id
-            }))
-            for(let obj of arrTestModule)
-            {
-                await (testGroupVersion.removeAsync({
-                    module:obj._id
-                }))
-            }
-            await (testModule.removeAsync({
-                project:req.clientParam.id
-            }))
-            await (testModuleVersion.removeAsync({
-                project:req.clientParam.id
-            }))
             await (poll.removeAsync({
                 project:req.clientParam.id
             }))
@@ -1193,37 +1145,12 @@ function Project() {
                 }
             }
             obj.global.template=await (template.findAsync(query,"-_id -project -version"))
-            obj.test=[];
             query={
                 project:req.obj._id
             }
             if(req.headers["docleverversion"])
             {
                 query.version=req.headers["docleverversion"]
-            }
-            let arrTestModule=await (req.testModuleModel.findAsync(query));
-            for(let objTestModule of arrTestModule)
-            {
-                let o={
-                    name:objTestModule.name,
-                    id:objTestModule.id,
-                    data:[]
-                };
-                let arrTestGroup=await (req.testGroupModel.findAsync({
-                    module:objTestModule._id
-                }));
-                for(let objTestGroup of arrTestGroup)
-                {
-                    let o1={
-                        name:objTestGroup.name,
-                        id:objTestGroup.id,
-                        data:(await (req.testModel.findAsync({
-                            group:objTestGroup._id
-                        },"-_id -project -module -group -owner -editor -createdAt -updatedAt")))
-                    }
-                    o.data.push(o1);
-                }
-                obj.test.push(o);
             }
             let getChild=async (function(req,obj) {
                 let query={
@@ -1360,33 +1287,6 @@ function Project() {
                 {
                     item.project=objProject._id;
                     await (template.createAsync(item));
-                }
-            }
-            if(obj.test.length>0)
-            {
-                for(let obj1 of obj.test)
-                {
-                    let objTestModule=await (testModule.createAsync({
-                        name:obj1.name,
-                        id:obj1.id,
-                        project:objProject._id
-                    }))
-                    for(let obj2 of obj1.data)
-                    {
-                        let objTestGroup=await (testGroup.createAsync({
-                            name:obj2.name,
-                            id:obj2.id,
-                            module:objTestModule._id
-                        }))
-                        for(let obj3 of obj2.data)
-                        {
-                            obj3.project=objProject._id;
-                            obj3.module=objTestModule._id;
-                            obj3.group=objTestGroup._id;
-                            obj3.editor=obj3.owner=req.userInfo._id;
-                            await (test.createAsync(obj3));
-                        }
-                    }
                 }
             }
             let bTrash=false,interfaceCount=0;

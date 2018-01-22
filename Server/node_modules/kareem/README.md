@@ -178,6 +178,33 @@ async pre hooks have called `done()`.
   
 ```
 
+#### It supports returning a promise
+
+You can also return a promise from your pre hooks instead of calling
+`next()`. When the returned promise resolves, kareem will kick off the
+next middleware.
+
+
+```javascript
+    
+    hooks.pre('cook', function() {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          this.bacon = 3;
+          resolve();
+        }, 100);
+      });
+    });
+
+    var obj = { bacon: 0 };
+
+    hooks.execPre('cook', obj, function() {
+      assert.equal(3, obj.bacon);
+      done();
+    });
+  
+```
+
 ## post hooks
 
 #### It runs without any hooks specified
@@ -374,6 +401,28 @@ async pre hooks have called `done()`.
     var k2 = k1.clone();
     assert.deepEqual(['cook'], Object.keys(k2._pres));
     assert.deepEqual(['cook'], Object.keys(k2._posts));
+  
+```
+
+## merge()
+
+#### It pulls hooks from another Kareem object
+
+```javascript
+    
+    var k1 = new Kareem();
+    var test1 = function() {};
+    k1.pre('cook', test1);
+    k1.post('cook', function() {});
+
+    var k2 = new Kareem();
+    var test2 = function() {};
+    k2.pre('cook', test2);
+    var k3 = k2.merge(k1);
+    assert.equal(k3._pres['cook'].length, 2);
+    assert.equal(k3._pres['cook'][0].fn, test2);
+    assert.equal(k3._pres['cook'][1].fn, test1);
+    assert.equal(k3._posts['cook'].length, 1);
   
 ```
 

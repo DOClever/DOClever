@@ -26,6 +26,11 @@
                         value:"doc",
                         label:"文档",
                         children:[]
+                    },
+                    {
+                        value:"test",
+                        label:"测试",
+                        children:[]
                     }
                 ]
             }
@@ -34,7 +39,7 @@
         methods: {
             changeProject:function (val) {
                 var id=val[val.length-1];
-                var arr=this.arrProject[0].children.concat(this.arrProject[1].children);
+                var arr=this.arrProject[0].children.concat(this.arrProject[1].children).concat(this.arrProject[2].children);
                 var obj;
                 for(var i=0;i<arr.length;i++)
                 {
@@ -83,6 +88,15 @@
                             $.stopLoading(1);
                         });
                     }
+                    else if(obj.type=="test")
+                    {
+                        session.set("projectId",obj.value);
+                        session.set("projectName",obj.label);
+                        $.startLoading(1);
+                        this.$store.dispatch("init").then(function () {
+                            $.stopLoading(1);
+                        });
+                    }
                 }
             },
         },
@@ -97,10 +111,12 @@
             }
             Promise.all([
                 net.get("/project/filterlist",query),
-                net.get("/doc/filterlist",query)
+                net.get("/doc/filterlist",query),
+                net.get("/test/filterlist",query)
             ]).then(function (values) {
                 var data1=values[0];
                 var data2=values[1];
+                var data3=values[2];
                 if(data1.code==200)
                 {
                     _this.arrProject[0].children=data1.data.map(function (obj) {
@@ -118,6 +134,16 @@
                             label:obj.name,
                             value:obj._id,
                             type:"doc"
+                        }
+                    });
+                }
+                if(data3.code==200)
+                {
+                    _this.arrProject[2].children=data3.data.map(function (obj) {
+                        return {
+                            label:obj.name,
+                            value:obj._id,
+                            type:"test"
                         }
                     });
                 }

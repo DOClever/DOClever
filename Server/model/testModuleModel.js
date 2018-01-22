@@ -8,9 +8,13 @@ var model=new mongoose.Schema({
     name:String,
     project:{
         type:mongoose.Schema.ObjectId,
-        ref:"Project"
+        ref:"TestProject"
     },
-    id:String
+    id:String,
+    user:{
+        type:mongoose.Schema.ObjectId,
+        ref:"User"
+    }
 },{
     timestamps:true
 });

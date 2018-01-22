@@ -14,9 +14,6 @@ var groupVersion=require("../../model/groupVersionModel")
 var interfaceVersion=require("../../model/interfaceVersionModel")
 var interfaceSnapshot=require("../../model/interfaceSnapshotModel")
 var statusVersion=require("../../model/statusVersionModel")
-var testVersion=require("../../model/testVersionModel")
-var testModuleVersion=require("../../model/testModuleVersionModel")
-var testGroupVersion=require("../../model/testGroupVersionModel")
 var test=require("../../model/testModel")
 var testModule=require("../../model/testModuleModel")
 var testGroup=require("../../model/testGroupModel")
@@ -550,9 +547,6 @@ function Admin()
             await (test.removeAsync({
                 project:req.clientParam.id
             }))
-            await (testVersion.removeAsync({
-                project:req.clientParam.id
-            }))
             let arrTestModule=await (testModule.findAsync({
                 project:req.clientParam.id
             }))
@@ -562,19 +556,7 @@ function Admin()
                     module:obj._id
                 }))
             }
-            arrTestModule=await (testModuleVersion.findAsync({
-                project:req.clientParam.id
-            }))
-            for(let obj of arrTestModule)
-            {
-                await (testGroupVersion.removeAsync({
-                    module:obj._id
-                }))
-            }
             await (testModule.removeAsync({
-                project:req.clientParam.id
-            }))
-            await (testModuleVersion.removeAsync({
                 project:req.clientParam.id
             }))
             await (poll.removeAsync({
@@ -1013,9 +995,6 @@ function Admin()
             await (test.removeAsync({
                 project:req.clientParam.id
             }))
-            await (testVersion.removeAsync({
-                project:req.clientParam.id
-            }))
             let arrTestModule=await (testModule.findAsync({
                 project:req.clientParam.id
             }))
@@ -1025,19 +1004,7 @@ function Admin()
                     module:obj._id
                 }))
             }
-            arrTestModule=await (testModuleVersion.findAsync({
-                project:req.clientParam.id
-            }))
-            for(let obj of arrTestModule)
-            {
-                await (testGroupVersion.removeAsync({
-                    module:obj._id
-                }))
-            }
             await (testModule.removeAsync({
-                project:req.clientParam.id
-            }))
-            await (testModuleVersion.removeAsync({
                 project:req.clientParam.id
             }))
             await (poll.removeAsync({

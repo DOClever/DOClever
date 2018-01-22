@@ -17,6 +17,12 @@ module.exports={
         docJoinSort:0,
         docPublicSort:0,
         docTeamSort:0,
+        testCreateList:[],
+        testJoinList:[],
+        testTeamList:[],
+        testCreateSort:0,
+        testJoinSort:0,
+        testTeamSort:0,
     },
     getters:{
         projectNotTeamLength:function (state) {
@@ -42,6 +48,12 @@ module.exports={
         },
         docPublicSort:function (state) {
             return state.docPublicSort;
+        },
+        testCreateSort:function (state) {
+            return state.testCreateSort;
+        },
+        testJoinSort:function (state) {
+            return state.testJoinSort;
         },
         rootInit:function (state,getters,rootState) {
             return rootState.init;
@@ -77,6 +89,19 @@ module.exports={
                 {
                     sort=state.docCreateSort;
                     list=state.docCreateList;
+                }
+            }
+            else if(data.type=="test")
+            {
+                if(session.get("teamId"))
+                {
+                    sort=state.testTeamSort;
+                    list=state.testTeamList;
+                }
+                else
+                {
+                    sort=state.testCreateSort;
+                    list=state.testCreateList;
                 }
             }
             if(sort==0)
@@ -143,6 +168,24 @@ module.exports={
                     list=state.docTeamList;
                 }
             }
+            else if(data.category=="test")
+            {
+                if(data.type=="create")
+                {
+                    sortType=state.testCreateSort;
+                    list=state.testCreateList;
+                }
+                else if(data.type=="join")
+                {
+                    sortType=state.testJoinSort;
+                    list=state.testJoinList;
+                }
+                else if(data.type=="team")
+                {
+                    sortType=state.testTeamSort;
+                    list=state.testTeamList;
+                }
+            }
             if(sortType==0)
             {
                 list.sort(function (obj1,obj2) {
@@ -199,6 +242,10 @@ module.exports={
             {
                 pro=net.post("/doc/project",query)
             }
+            else if(data.type=="test")
+            {
+                pro=net.post("/test/project",query)
+            }
             return pro.then(function (data) {
                 if(data.code==200)
                 {
@@ -227,10 +274,17 @@ module.exports={
             context.state.docJoinSort=0;
             context.state.docPublicSort=0;
             context.state.docTeamSort=0;
+            context.state.testCreateList=[];
+            context.state.testJoinList=[];
+            context.state.testTeamList=[];
+            context.state.testCreateSort=0;
+            context.state.testJoinSort=0;
+            context.state.testTeamSort=0;
             if(data)
             {
                 context.state.projectTeamList=data.interface;
                 context.state.docTeamList=data.doc;
+                context.state.testTeamList=data.test;
                 return {
                     code:200
                 }
@@ -244,9 +298,13 @@ module.exports={
                     net.get("/team/doclist",{
                         id:session.get("teamId")
                     }),
+                    net.get("/team/testlist",{
+                        id:session.get("teamId")
+                    }),
                 ]).then(function (values) {
                     var data1=values[0];
                     var data2=values[1];
+                    var data3=values[2];
                     if(data1.code==200)
                     {
                         for(var i=0;i<data1.data.length;i++)
@@ -271,6 +329,18 @@ module.exports={
                     {
                         throw data2.msg;
                     }
+                    if(data3.code==200)
+                    {
+                        for(var i=0;i<data3.data.length;i++)
+                        {
+                            context.state.testTeamList.push(data3.data[i]);
+                        }
+                        context.rootState.event.$emit("updateTeamTestList",context.state.testTeamList);
+                    }
+                    else
+                    {
+                        throw data3.msg;
+                    }
                     return data1;
                 })
             }
@@ -278,10 +348,12 @@ module.exports={
             {
                 return Promise.all([
                     net.get("/project/list",{}),
-                    net.get("/doc/projectlist",{})
+                    net.get("/doc/projectlist",{}),
+                    net.get("/test/projectlist",{})
                 ]).then(function (values) {
                     var data1=values[0];
                     var data2=values[1];
+                    var data3=values[2];
                     if(data1.code==200)
                     {
                         for(var i=0;i<data1.data.create.length;i++)
@@ -319,6 +391,21 @@ module.exports={
                     else
                     {
                         throw data2.msg;
+                    }
+                    if(data3.code==200)
+                    {
+                        for(var i=0;i<data3.data.create.length;i++)
+                        {
+                            context.state.testCreateList.push(data3.data.create[i]);
+                        }
+                        for(var i=0;i<data3.data.join.length;i++)
+                        {
+                            context.state.testJoinList.push(data3.data.join[i]);
+                        }
+                    }
+                    else
+                    {
+                        throw data3.msg;
                     }
                     return data1;
                 })

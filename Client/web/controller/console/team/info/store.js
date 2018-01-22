@@ -85,7 +85,8 @@ module.exports={
                     context.commit("setTeam",data.data);
                     return context.dispatch("project/list/init",{
                         interface:data.data.project,
-                        doc:data.data.doc
+                        doc:data.data.doc,
+                        test:data.data.test
                     },{
                         root:true
                     });
