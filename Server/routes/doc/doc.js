@@ -979,9 +979,94 @@ function Doc()
                     }
                 ]
             }
-            let arr=await (docProject.findAsync(query,"_id name dis",{
+            let arr=await (docProject.findAsync(query,"_id name owner dis users",{
                 sort:"createdAt"
             }));
+            let bManager=0;
+            if(req.clientParam.team)
+            {
+                let obj=await (team.findOneAsync({
+                    _id:req.clientParam.team
+                }));
+                if(!obj)
+                {
+                    util.throw(e.teamNotFound,"团队不存在");
+                }
+                let arr=await (teamGroup.findAsync({
+                    team:req.clientParam.team,
+                }))
+                req.teamGroup=arr;
+                req.team=obj;
+                if(req.team.owner.toString()==req.userInfo._id.toString())
+                {
+                    req.access=1;
+                }
+                else
+                {
+                    req.access=0;
+                    for(let o of req.teamGroup) {
+                        let bFind=false;
+                        for(let o1 of o.users)
+                        {
+                            if (o1.user.toString() == req.userInfo._id.toString() && o1.role == 0) {
+                                req.access = 1;
+                                bFind=true;
+                                break;
+                            }
+                        }
+                        if(bFind)
+                        {
+                            break;
+                        }
+                    }
+                }
+                bManager=req.access;
+            }
+            arr.forEach(function (obj) {
+                if(obj.owner.toString()==req.userInfo._id.toString())
+                {
+                    obj._doc.open=0;
+                }
+                else
+                {
+                    let objFind=null;
+                    for(let o1 of obj.users)
+                    {
+                        if (o1.user.toString() == req.userInfo._id.toString()) {
+                            objFind=o1;
+                            break;
+                        }
+                    }
+                    if(req.clientParam.team)
+                    {
+                        if(bManager)
+                        {
+                            obj._doc.open=0;
+                        }
+                        else if(objFind && objFind.role==0)
+                        {
+                            obj._doc.open=0
+                        }
+                        else
+                        {
+                            obj._doc.open=1;
+                        }
+                    }
+                    else
+                    {
+                        if(objFind && objFind.role==0)
+                        {
+                            obj._doc.open=0
+                        }
+                        else
+                        {
+                            obj._doc.open=1;
+                        }
+                    }
+                }
+                delete obj._doc.users;
+                delete obj._doc.owner;
+            })
             util.ok(res,arr,"ok");
         }
         catch (err)

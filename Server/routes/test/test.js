@@ -1306,8 +1306,10 @@ function Test() {
             let ret={};
             req.interfaceModel=interface;
             req.statusModel=status;
-            let obj=await (interface.findOneAsync({
+            let obj=await (interface.findOneAsync(req.clientParam.interface.length==24?{
                 _id:req.clientParam.interface
+            }:{
+                id:req.clientParam.interface
             }));
             if(!obj)
             {

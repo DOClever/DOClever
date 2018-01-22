@@ -2383,14 +2383,18 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
                         }
                         else
                         {
+                            $.notify(data.msg,0);
                             throw data.msg;
                         }
                     })
                 }
                 catch (err)
                 {
-                    $.tip(err,0);
-                    return;
+                   objInfo={
+                       baseUrls:[],
+                       before:"",
+                       after:""
+                   }
                 }
                 var objPush={
                     baseUrls:objInfo.baseUrls,
@@ -2431,7 +2435,12 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
             }
             catch (err)
             {
-                return;
+                testObj={
+                    code:"",
+                    ui:[],
+                    name:"",
+                    status:0
+                }
             }
             var code;
             if(testMode=="code")
@@ -2446,6 +2455,7 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
         }
         else
         {
+            arrNode.push(undefined);
             continue;
         }
         var node=document.createTextNode(text);
@@ -2455,7 +2465,10 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
         });
     }
     arrNode.forEach(function (obj) {
-        obj.oldNode.parentNode.replaceChild(obj.newNode,obj.oldNode);
+        if(obj)
+        {
+            obj.oldNode.parentNode.replaceChild(obj.newNode,obj.oldNode);
+        }
     })
     root.output+="<br><div style='background-color: #ececec'>开始执行用例："+test.name+"("+(mode=="code"?"代码模式":"UI模式")+")<br>";
     var startTime=Date.now();

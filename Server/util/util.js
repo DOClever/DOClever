@@ -1573,7 +1573,11 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
                 },"baseUrls after before"));
                 if(!objInfo)
                 {
-                    continue;
+                    objInfo={
+                        baseUrls:[],
+                        before:"",
+                        after:""
+                    }
                 }
                 if(query.version)
                 {
@@ -1618,7 +1622,12 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
             }))
             if(!testObj)
             {
-                continue;
+                testObj={
+                    code:"",
+                    ui:[],
+                    name:"",
+                    status:0
+                }
             }
             testObj=await (testModel.populateAsync(testObj,{
                 path:"group",
@@ -1637,6 +1646,7 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
         }
         else
         {
+            arrNode.push(undefined);
             continue;
         }
         var node=document.createTextNode(text);
@@ -2471,12 +2481,12 @@ let runPoll=async (function (arr) {
         let env={};
         if(obj.interProject)
         {
-            let obj=await (project.findOneAsync({
+            let objProject=await (project.findOneAsync({
                 _id:obj.interProject
             },"baseUrls"))
-            if(obj)
+            if(objProject)
             {
-                obj.baseUrls.forEach(function (obj) {
+                objProject.baseUrls.forEach(function (obj) {
                     if(obj.url==objCollection.baseUrl && obj.env)
                     {
                         obj.env.forEach(function (obj) {

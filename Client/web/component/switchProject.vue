@@ -49,6 +49,12 @@
                         break;
                     }
                 }
+                if(obj.type=="doc" &&  obj.open)
+                {
+                    this.arrSelProject=[session.get("projectType"),session.get("projectId")]
+                    window.open($.basePath()+"read/read.html#"+obj.value,"_blank");
+                    return;
+                }
                 if(this.session.projectType!=obj.type)
                 {
                     this.$store.dispatch("project/changeToInfo",{
@@ -133,7 +139,8 @@
                         return {
                             label:obj.name,
                             value:obj._id,
-                            type:"doc"
+                            type:"doc",
+                            open:obj.open
                         }
                     });
                 }
@@ -143,7 +150,7 @@
                         return {
                             label:obj.name,
                             value:obj._id,
-                            type:"test"
+                            type:"test",
                         }
                     });
                 }

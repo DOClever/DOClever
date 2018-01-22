@@ -161,7 +161,7 @@
             },
             removeDoc:function (item,index) {
                 var _this=this;
-                $.confirm("确定删除该接口到回收站？",function () {
+                $.confirm("确定删除该文档？",function () {
                     _this.$store.dispatch("removeDoc",{
                         group:_this.parent,
                         index:index,
