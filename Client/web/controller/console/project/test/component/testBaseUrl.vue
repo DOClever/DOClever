@@ -60,7 +60,7 @@
                     {
                         if(this.arrUrl[i].data[j].name==this.arrSelBaseUrl[1])
                         {
-                            env=this.arrUrl[i].data[j].env;
+                            env=this.arrUrl[i].data[j].env?this.arrUrl[i].data[j].env:[];
                             bFind=true;
                             break;
                         }
