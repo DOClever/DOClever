@@ -52,7 +52,7 @@
         },
         methods:{
             save:function () {
-                var env;
+                var env=[];
                 for(var i=0;i<this.arrUrl.length;i++)
                 {
                     var bFind=false;

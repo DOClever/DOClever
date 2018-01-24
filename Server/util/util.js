@@ -1812,7 +1812,7 @@ function convertToCode(data) {
                 argv+="},"
             }
             argv+="}"
-            str+=`<div class='testCodeLine'>var $${obj.id}=await <a href='javascript:void(0)' style='cursor: pointer; text-decoration: none;' type='1' varid='${obj.id}' data='${obj.data}'>${obj.name}</a>(${argv});</div>`
+            str+=`<div class='testCodeLine'>var $${obj.id}=await <a href='javascript:void(0)' style='cursor: pointer; text-decoration: none;' type='1' varid='${obj.id}' data='${obj.data.replace(/\'/g,"&apos;")}'>${obj.name}</a>(${argv});</div>`
         }
         else if(obj.type=="test")
         {

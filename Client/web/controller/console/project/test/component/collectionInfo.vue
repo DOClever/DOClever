@@ -182,9 +182,12 @@
                 root.fail=0;
                 root.unknown=0;
                 var env={};
-                this.$store.state.env.forEach(function (obj) {
-                    env[obj.key]=obj.value;
-                })
+                if(this.$store.state.env)
+                {
+                    this.$store.state.env.forEach(function (obj) {
+                        env[obj.key]=obj.value;
+                    })
+                }
                 var arr=this.arr.map(function (obj) {
                     return {
                         type:"test",
