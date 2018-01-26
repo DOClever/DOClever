@@ -8,7 +8,7 @@ var model=new mongoose.Schema({
     name:String,
     project:{
         type:mongoose.Schema.ObjectId,
-        ref:"Project"
+        ref:"TestProject"
     },
     module:{
         type:mongoose.Schema.ObjectId,
@@ -35,13 +35,22 @@ var model=new mongoose.Schema({
         type:String,
         default:""
     },
+    ui:{
+        type:Array,
+        default:[]
+    },
     output:{
         type:String,
         default:""
     },
-    id:String
+    id:String,
+    user:{
+        type:mongoose.Schema.ObjectId,
+        ref:"User"
+    }
 },{
-    timestamps:true
+    timestamps:true,
+    minimize: false
 });
 model.configOutputField(null,[
     "createdAt",

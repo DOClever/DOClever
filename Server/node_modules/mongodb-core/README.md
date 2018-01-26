@@ -1,5 +1,5 @@
-[![Build Status](https://secure.travis-ci.org/christkv/mongodb-core.png)](http://travis-ci.org/christkv/mongodb-core)
-[![Coverage Status](https://coveralls.io/repos/github/christkv/mongodb-core/badge.svg?branch=1.3)](https://coveralls.io/github/christkv/mongodb-core?branch=1.3)
+[![Build Status](https://secure.travis-ci.org/mongodb-js/mongodb-core.png)](http://travis-ci.org/mongodb-js/mongodb-core)
+[![Coverage Status](https://coveralls.io/repos/github/mongodb-js/mongodb-core/badge.svg?branch=1.3)](https://coveralls.io/github/mongodb-js/mongodb-core?branch=1.3)
 
 # Description
 
@@ -11,7 +11,7 @@ The MongoDB Core driver is the low level part of the 2.0 or higher MongoDB drive
 |---------------|------------------------------------------------|
 | documentation | http://mongodb.github.io/node-mongodb-native/  |
 | apidoc        | http://mongodb.github.io/node-mongodb-native/  |
-| source        | https://github.com/christkv/mongodb-core       |
+| source        | https://github.com/mongodb-js/mongodb-core     |
 | mongodb       | http://www.mongodb.org/                        |
 
 ### Blogs of Engineers involved in the driver

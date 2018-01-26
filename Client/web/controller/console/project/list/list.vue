@@ -7,6 +7,9 @@
             <el-tab-pane name="doc" label="文档">
                 <list type="doc"></list>
             </el-tab-pane>
+            <el-tab-pane name="test" label="测试">
+                <list type="test"></list>
+            </el-tab-pane>
         </el-tabs>
     </el-row>
 </template>

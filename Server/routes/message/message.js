@@ -144,7 +144,7 @@ function  Message() {
                     $in:arrProject
                 },
                 type:{
-                    $in:[1,4]
+                    $in:[1,4,6]
                 },
                 state:0
             },null,{
@@ -190,7 +190,7 @@ function  Message() {
                     $in:arrTeam
                 },
                 type:{
-                    $in:[2,3,5]
+                    $in:[2,3,5,7]
                 },
                 state:0
             },null,{
@@ -229,7 +229,7 @@ function  Message() {
                 {
                     ret.userApplyTeam.push(obj);
                 }
-                else if(obj.type==3 || obj.type==5)
+                else if(obj.type==3 || obj.type==5 || obj.type==7)
                 {
                     ret.projectApplyTeam.push(obj);
                 }

@@ -251,7 +251,7 @@ $.notify=function (content,bOk) {
     }
 }
 
-$.input=function (title,func) {
+$.input=function (title,func,defaultValue) {
     Vue.prototype.$prompt(title, 'DOClever', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -260,7 +260,8 @@ $.input=function (title,func) {
             {
                 return "请输入内容"
             }
-        }
+        },
+        inputValue:defaultValue?defaultValue:""
     }).then(function (value) {
         if(func)
         {
@@ -478,6 +479,12 @@ $.basePath=function () {
     var path=location.href;
     var index=path.indexOf("/controller/");
     return path.substring(0,index+"/controller/".length)
+}
+
+$.rand=function (Min,Max) {
+    var Range = Max - Min;
+    var Rand = Math.random();
+    return(Min + Math.round(Rand * Range));
 }
 
 ;(function(){

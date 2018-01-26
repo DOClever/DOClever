@@ -1,7 +1,6 @@
 var global=require("./global/store");
 var inter=require("./interface/store");
 var setting=require("./setting/store");
-var test=require("./test/store");
 var version=require("./version/store");
 module.exports= {
     namespaced: true,
@@ -272,9 +271,6 @@ module.exports= {
                 net.get("/status/list",{
                     id:session.get("projectId")
                 }),
-                net.get("/test/list",{
-                    project:session.get("projectId")
-                }),
                 net.get("/version/list",{
                     project:session.get("projectId"),
                     page:0
@@ -288,7 +284,6 @@ module.exports= {
                 var obj3=values[2];
                 var obj4=values[3];
                 var obj5=values[4];
-                var obj6=values[5];
                 if(obj1.code==200)
                 {
                     context.dispatch("interface/getAllInterface",obj1.data)
@@ -315,7 +310,7 @@ module.exports= {
                 }
                 if(obj4.code==200)
                 {
-                    context.getters.event.$emit("initTest",obj4.data);
+                    context.getters.event.$emit("initVersion",obj4.data);
                 }
                 else
                 {
@@ -323,19 +318,11 @@ module.exports= {
                 }
                 if(obj5.code==200)
                 {
-                    context.getters.event.$emit("initVersion",obj5.data);
+                    context.commit("setTemplate",obj5.data);
                 }
                 else
                 {
                     throw obj5.msg;
-                }
-                if(obj6.code==200)
-                {
-                    context.commit("setTemplate",obj6.data);
-                }
-                else
-                {
-                    throw obj6.msg;
                 }
                 context.getters.event.$emit("init");
                 return values;
@@ -361,7 +348,6 @@ module.exports= {
         global:global,
         interface:inter,
         setting:setting,
-        test:test,
         version:version
     }
 }

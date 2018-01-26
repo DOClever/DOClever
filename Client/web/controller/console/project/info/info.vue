@@ -6,9 +6,6 @@
             <el-tab-pane :name="0" label="接口">
                 <interface></interface>
             </el-tab-pane>
-            <el-tab-pane :name="1" label="测试">
-                <test></test>
-            </el-tab-pane>
             <el-tab-pane :name="2" label="全局">
                 <global></global>
             </el-tab-pane>
@@ -40,7 +37,6 @@
     var inter=require("./interface/interface.vue")
     var setting=require("./setting/setting.vue")
     var global=require("./global/global.vue")
-    var test=require("./test/test.vue")
     var version=require("./version/version.vue")
     var sessionChange=require("common/mixins/session");
     var refresh=require("common/mixins/refresh");
@@ -59,7 +55,6 @@
             "interface":inter,
             "setting":setting,
             "global":global,
-            "test":test,
             "version":version,
             "switchproject":switchProject
         },

@@ -90,6 +90,13 @@
                             user:item._id
                         })
                     }
+                    else if(_this.type=="test")
+                    {
+                        pro=net.put("/test/owner",{
+                            project:session.get("projectId"),
+                            user:item._id
+                        })
+                    }
                     pro.then(function (data) {
                         $.stopHud();
                         if(data.code==200)

@@ -426,6 +426,18 @@ var interface=[
         handle:[team.validate,team.docList]
     },
     {
+        "method":"GET",
+        "path":"/team/testlist",
+        "param": {
+            id:{
+                type:String,
+            },
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.testList]
+    },
+    {
         "method":"DELETE",
         "path":"/team/doc",
         "param": {
@@ -485,6 +497,67 @@ var interface=[
         "data":String,
         user:1,
         handle:[team.validateTeam,team.docApply]
+    },
+    {
+        "method":"DELETE",
+        "path":"/team/test",
+        "param": {
+            id:{
+                type:String,
+            },
+            project:String
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.removeTest]
+    },
+    {
+        "method":"GET",
+        "path":"/team/testuser",
+        "param": {
+            id:{
+                type:String,
+            },
+            project:{
+                type:String
+            }
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.testUser]
+    },
+    {
+        "method":"PUT",
+        "path":"/team/pulltest",
+        "param": {
+            id:{
+                type:String,
+            },
+            project:String
+        },
+        "data":String,
+        user:1,
+        handle:[team.validate,team.pullTest]
+    },
+    {
+        "method":"PUT",
+        "path":"/team/testapply",
+        "param": {
+            id:{
+                type:String,
+            },
+            project:{
+                type:String,
+                optional:1
+            },
+            dis:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":String,
+        user:1,
+        handle:[team.validateTeam,team.testApply]
     },
 ];
 

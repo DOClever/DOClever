@@ -617,8 +617,6 @@ var interface=[
         "param": {
             db:String,
             file:String,
-            img:String,
-            temp:String,
             port:String
         },
         "data":String,

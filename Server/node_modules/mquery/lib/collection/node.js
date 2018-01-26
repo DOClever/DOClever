@@ -26,7 +26,11 @@ NodeCollection.prototype.find = function (match, options, cb) {
   this.collection.find(match, options, function (err, cursor) {
     if (err) return cb(err);
 
-    cursor.toArray(cb);
+    try {
+      cursor.toArray(cb);
+    } catch (error) {
+      cb(error);
+    }
   });
 }
 

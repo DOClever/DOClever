@@ -27,7 +27,7 @@ var j = schedule.scheduleJob(rule,async (function(){
             let newDate=moment(obj.createdAt).add(30,"m");
             if(moment().isAfter(newDate))
             {
-                let pathName=path.join(con.tempPath,obj.name+".zip");
+                let pathName=path.join(con.filePath,"temp",obj.name+".zip");
                 if(await (fs.existsAsync(pathName)))
                 {
                     await (fs.unlinkAsync(pathName));

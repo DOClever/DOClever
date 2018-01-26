@@ -6,18 +6,8 @@ var data=require("./../../config.json");
 require("../third/schemaExtend");
 mongoose.Promise = require('bluebird');
 var db=mongoose.createConnection(data.db,{
-    server: {
-        socketOptions: {
-            keepAlive: 300000,
-            connectTimeoutMS: 30000
-        }
-    },
-    replset: {
-        socketOptions: {
-            keepAlive: 300000,
-            connectTimeoutMS : 30000
-        }
-    }
+    keepAlive: 300000,
+    connectTimeoutMS: 30000
 });
 
 module.exports=db;

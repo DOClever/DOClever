@@ -69,11 +69,6 @@
                         <el-form-item label="上传文件地址">
                             <el-input size="small" style="width: 80%" v-model="setting.connect.filePath" placeholder="请输入DOClever上传文件路径（比如：/Users/Shared/DOClever）"></el-input>
                         </el-form-item>
-                        <el-form-item label="图片文件地址">
-                            <el-input size="small" style="width: 80%" v-model="setting.connect.imgPath" placeholder="请输入DOClever上传图片文件路径（需要是上传文件路径的直接子目录，比如：/Users/Shared/DOClever/img）"></el-input>
-                        </el-form-item>
-                        <el-form-item label="临时文件地址">
-                            <el-input size="small" style="width: 80%" v-model="setting.connect.tempPath" placeholder="请输入DOClever上传临时文件路径（需要是上传文件路径的直接子目录，比如：/Users/Shared/DOClever/temp）"></el-input>
                         </el-form-item>
                         <el-form-item label="启动端口">
                             <el-input size="small" style="width: 80%" v-model="setting.connect.port" placeholder="请输入端口号（比如10000）"></el-input>
@@ -265,16 +260,6 @@
                     $.tip("请输入上传文件地址");
                     return
                 }
-                else if(!this.setting.connect.imgPath)
-                {
-                    $.tip("请输入图片文件地址");
-                    return
-                }
-                else if(!this.setting.connect.tempPath)
-                {
-                    $.tip("请输入临时文件地址");
-                    return
-                }
                 else if(!this.setting.connect.port)
                 {
                     $.tip("请输入启动端口");
@@ -285,8 +270,6 @@
                 net.put("/admin/connectinfo",{
                     db:this.setting.connect.db,
                     file:this.setting.connect.filePath,
-                    img:this.setting.connect.imgPath,
-                    temp:this.setting.connect.tempPath,
                     port:this.setting.connect.port
                 }).then(function (data) {
                     _this.configPending=false;

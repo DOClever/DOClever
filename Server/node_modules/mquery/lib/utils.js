@@ -63,38 +63,20 @@ var clone = exports.clone = function clone (obj, options) {
  */
 
 var cloneObject = exports.cloneObject = function cloneObject (obj, options) {
-  var retainKeyOrder = options && options.retainKeyOrder
-    , minimize = options && options.minimize
-    , ret = {}
-    , hasKeys
-    , keys
-    , val
-    , k
-    , i
+  var minimize = options && options.minimize;
+  var ret = {};
+  var hasKeys;
+  var keys;
+  var val;
+  var k;
+  var i;
 
-  if (retainKeyOrder) {
-    for (k in obj) {
-      val = clone(obj[k], options);
+  for (k in obj) {
+    val = clone(obj[k], options);
 
-      if (!minimize || ('undefined' !== typeof val)) {
-        hasKeys || (hasKeys = true);
-        ret[k] = val;
-      }
-    }
-  } else {
-    // faster
-
-    keys = Object.keys(obj);
-    i = keys.length;
-
-    while (i--) {
-      k = keys[i];
-      val = clone(obj[k], options);
-
-      if (!minimize || ('undefined' !== typeof val)) {
-        if (!hasKeys) hasKeys = true;
-        ret[k] = val;
-      }
+    if (!minimize || ('undefined' !== typeof val)) {
+      hasKeys || (hasKeys = true);
+      ret[k] = val;
     }
   }
 
@@ -182,16 +164,12 @@ var mergeClone = exports.mergeClone = function mergeClone (to, from) {
   while (i--) {
     key = keys[i];
     if ('undefined' === typeof to[key]) {
-      // make sure to retain key order here because of a bug handling the $each
-      // operator in mongodb 2.4.4
-      to[key] = clone(from[key], { retainKeyOrder : 1});
+      to[key] = clone(from[key]);
     } else {
       if (exports.isObject(from[key])) {
         mergeClone(to[key], from[key]);
       } else {
-        // make sure to retain key order here because of a bug handling the
-        // $each operator in mongodb 2.4.4
-        to[key] = clone(from[key], { retainKeyOrder : 1});
+        to[key] = clone(from[key]);
       }
     }
   }

@@ -7,7 +7,7 @@ var db=require("../util/db.js");
 var model=new mongoose.Schema({
     project:{
         type:mongoose.Schema.ObjectId,
-        ref:"Project"
+        ref:"TestProject"
     },
     users:{
         type:[{
@@ -16,6 +16,10 @@ var model=new mongoose.Schema({
         }],
         default:[]
     },
+    owner:{
+        type:mongoose.Schema.ObjectId,
+        ref:"User"
+    },
     date:{
         type:[Number],
         default:[]
@@ -23,10 +27,6 @@ var model=new mongoose.Schema({
     time:{
         type:[Number],
         default:[]
-    },
-    version:{
-        type:mongoose.Schema.ObjectId,
-        ref:"Version"
     },
     sendInfo:{
         user:{
@@ -46,11 +46,10 @@ var model=new mongoose.Schema({
             default:465
         }
     },
-    testType:String,
     test:{
         type:[{
             type:mongoose.Schema.ObjectId,
-            refPath:"testType"
+            ref:"Test"
         }],
         default:[]
     },
@@ -58,9 +57,9 @@ var model=new mongoose.Schema({
         type:String,
         default:""
     },
-    count:{
-        type:Number,
-        default:0
+    interProject:{
+        type:mongoose.Schema.ObjectId,
+        ref:"Project"
     },
     failSend:{
         type:Number,

@@ -51,24 +51,24 @@ var app = express();
         saveUninitialized:false,
         secret: 'DOClever'
     }))
-    app.use("/user",checkFormDataUser(con.imgPath),checkParam("user"),checkUser);
-    app.use("/project",checkFormDataUser(con.imgPath),checkParam("project"),checkUser);
-    app.use("/group",checkFormDataUser(con.imgPath),checkParam("group"),checkUser);
-    app.use("/interface",checkFormDataUser(con.imgPath),checkParam("interface"),checkUser);
-    app.use("/status",checkFormDataUser(con.imgPath),checkParam("status"),checkUser);
-    app.use("/test",checkFormDataUser(con.imgPath),checkParam("test"),checkUser);
-    app.use("/team",checkFormDataUser(con.imgPath),checkParam("team"),checkUser);
-    app.use("/version",checkFormDataUser(con.imgPath),checkParam("version"),checkUser);
-    app.use("/poll",checkFormDataUser(con.imgPath),checkParam("poll"),checkUser);
-    app.use("/article",checkFormDataUser(con.imgPath),checkParam("article"),checkUser);
-    app.use("/message",checkFormDataUser(con.imgPath),checkParam("message"),checkUser);
-    app.use("/template",checkFormDataUser(con.imgPath),checkParam("template"),checkUser);
-    app.use("/example",checkFormDataUser(con.imgPath),checkParam("example"),checkUser);
-    app.use("/doc",checkFormDataUser(con.imgPath),checkParam("doc"),checkUser);
-    app.use("/admin",checkFormDataUser(con.imgPath),checkParam("admin"),checkAdmin);
-    app.use("/mock",checkFormDataUser(con.tempPath),mock);
+    app.use("/user",checkFormDataUser(path.join(con.filePath,"img")),checkParam("user"),checkUser);
+    app.use("/project",checkFormDataUser(path.join(con.filePath,"img")),checkParam("project"),checkUser);
+    app.use("/group",checkFormDataUser(path.join(con.filePath,"img")),checkParam("group"),checkUser);
+    app.use("/interface",checkFormDataUser(path.join(con.filePath,"img")),checkParam("interface"),checkUser);
+    app.use("/status",checkFormDataUser(path.join(con.filePath,"img")),checkParam("status"),checkUser);
+    app.use("/test",checkFormDataUser(path.join(con.filePath,"img")),checkParam("test"),checkUser);
+    app.use("/team",checkFormDataUser(path.join(con.filePath,"img")),checkParam("team"),checkUser);
+    app.use("/version",checkFormDataUser(path.join(con.filePath,"img")),checkParam("version"),checkUser);
+    app.use("/poll",checkFormDataUser(path.join(con.filePath,"img")),checkParam("poll"),checkUser);
+    app.use("/article",checkFormDataUser(path.join(con.filePath,"img")),checkParam("article"),checkUser);
+    app.use("/message",checkFormDataUser(path.join(con.filePath,"img")),checkParam("message"),checkUser);
+    app.use("/template",checkFormDataUser(path.join(con.filePath,"img")),checkParam("template"),checkUser);
+    app.use("/example",checkFormDataUser(path.join(con.filePath,"img")),checkParam("example"),checkUser);
+    app.use("/doc",checkFormDataUser(path.join(con.filePath,"img")),checkParam("doc"),checkUser);
+    app.use("/admin",checkFormDataUser(path.join(con.filePath,"img")),checkParam("admin"),checkAdmin);
+    app.use("/mock",checkFormDataUser(path.join(con.filePath,"temp")),mock);
     app.use("/html",express.static(path.join(__dirname, '../Client')));
-    app.use("/img",express.static(con.imgPath));
+    app.use("/img",express.static(path.join(con.filePath,"img")));
     app.use("/",function (req,res) {
         res.redirect("/html/web/controller/index/index.html");
     });

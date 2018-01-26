@@ -16,6 +16,8 @@ var message=require("../../model/messageModel");
 var teamGroup=require("../../model/teamGroupModel");
 var docProject=require("../../model/docProjectModel");
 var doc=require("../../model/docModel");
+var testProject=require("../../model/testProjectModel");
+var test=require("../../model/testModel");
 var moment=require("moment");
 var fs=require("fs");
 function Team() {
@@ -349,6 +351,58 @@ function Team() {
             }
             obj._doc.doc=arr;
             obj._doc.docCount=await (docProject.countAsync({
+                team:req.team._id
+            }))
+            if(req.access)
+            {
+                arr=await (testProject.findAsync({
+                    team:req.team._id
+                },null,{
+                    sort:"-createdAt"
+                }));
+                arr.forEach(function (obj) {
+                    obj._doc.own=1;
+                    obj._doc.role=0;
+                })
+            }
+            else
+            {
+                arr=await (testProject.findAsync({
+                    $or:[
+                        {
+                            owner:req.userInfo._id
+                        },
+                        {
+                            users:req.userInfo._id
+                        }
+                    ],
+                    team:req.team._id
+                },null,{
+                    sort:"-createdAt"
+                }));
+                arr.forEach(function (obj) {
+                    if(req.userInfo._id.toString()==obj.owner.toString())
+                    {
+                        obj._doc.own=1;
+                        obj._doc.role=0;
+                    }
+                    else
+                    {
+                        obj._doc.own=0;
+                        obj._doc.role=0;
+                    }
+                })
+            }
+            for(let o of arr)
+            {
+                o._doc.testCount=await (test.countAsync({
+                    project:o._id
+                }))
+                o._doc.userCount=o.users.length+1;
+                delete o._doc.users;
+            }
+            obj._doc.test=arr;
+            obj._doc.testCount=await (testProject.countAsync({
                 team:req.team._id
             }))
             ret=await (teamGroup.findAsync({
@@ -1202,6 +1256,104 @@ function Team() {
                     util.ok(res,"ok");
                 }
             }
+            else if(obj.type==7)
+            {
+                let userAddCount=0;
+                obj.editor=req.userInfo._id;
+                let objProject=await (testProject.findOneAsync({
+                    _id:obj.from
+                }));
+                if(!objProject)
+                {
+                    obj.state=3;
+                    await (obj.saveAsync());
+                    util.throw(e.testProjectNotFound,"项目不存在");
+                }
+                else if(objProject.team)
+                {
+                    obj.state=3;
+                    await (obj.saveAsync());
+                    if(objProject.team.toString()==obj.to.toString())
+                    {
+                        util.throw(e.projectAlreadyJoinTeam,"项目已加入其他团队")
+                    }
+                    else
+                    {
+                        util.throw(e.projectAlreadyJoinTeam,"项目已加入团队")
+                    }
+
+                }
+                else
+                {
+                    obj.state=req.clientParam.state;
+                    if(req.clientParam.state==1)
+                    {
+                        let arrTeamUser=await (this.teamUserList(req.team._id));
+                        let arrProjectUser=objProject.users.map(function (obj) {
+                            return obj.toString();
+                        });
+                        arrProjectUser.push(objProject.owner.toString());
+                        let arr=[];
+                        for(let o of arrProjectUser)
+                        {
+                            if(arrTeamUser.indexOf(o)==-1)
+                            {
+                                arr.push(o);
+                            }
+                        }
+                        userAddCount=arr.length;
+                        if(arr.length>0)
+                        {
+                            arr=arr.map(function (obj) {
+                                return {
+                                    user:obj,
+                                    role:1
+                                }
+                            })
+                            let objGroup=await (teamGroup.findOneAndUpdateAsync({
+                                name:"未命名",
+                                team:req.team._id
+                            },{
+                                name:"未命名",
+                                team:req.team._id,
+                                $addToSet:{
+                                    users:{
+                                        $each:arr
+                                    }
+                                }
+                            },{
+                                upsert:true,
+                                setDefaultsOnInsert:true
+                            }))
+                        }
+                        objProject.team=req.team._id;
+                        await (objProject.saveAsync());
+                    }
+                    await (message.createAsync({
+                        name:req.clientParam.state==1?"接口项目申请已通过":"接口项目申请被拒绝",
+                        dis:`您申请接口项目${objProject.name}加入团队${obj.to.name}的请求已经被管理员${req.userInfo.name}${req.clientParam.state==1?"通过":"拒绝"}`,
+                        user:obj.creator,
+                        type:1
+                    }))
+                    await (obj.saveAsync());
+                }
+                if(req.clientParam.state==1)
+                {
+                    obj=await (testProject.findOneAsync({
+                        _id:obj.from
+                    }))
+                    obj._doc.userCount=obj.users.length+1;
+                    obj._doc.testCount=await (test.countAsync({
+                        project:obj._id
+                    }))
+                    obj._doc.userAddCount=userAddCount;
+                    util.ok(res,obj,"ok");
+                }
+                else
+                {
+                    util.ok(res,"ok");
+                }
+            }
         }
         catch (err)
         {
@@ -1666,6 +1818,65 @@ function Team() {
             util.catch(res,err);
         }
     })
+    this.testList=async ((req,res)=>{
+        try
+        {
+            let arr;
+            if(req.access)
+            {
+                arr=await (testProject.findAsync({
+                    team:req.clientParam.id
+                },null,{
+                    sort:"-createdAt"
+                }));
+                arr.forEach(function (obj) {
+                    obj._doc.own=1;
+                    obj._doc.role=0;
+                })
+            }
+            else
+            {
+                arr=await (testProject.findAsync({
+                    $or:[
+                        {
+                            owner:req.userInfo._id
+                        },
+                        {
+                            users:req.userInfo._id
+                        }
+                    ],
+                    team:req.clientParam.id
+                },null,{
+                    sort:"-createdAt"
+                }));
+                arr.forEach(function (obj) {
+                    if(req.userInfo._id.toString()==obj.owner.toString())
+                    {
+                        obj._doc.own=1;
+                        obj._doc.role=0;
+                    }
+                    else
+                    {
+                        obj._doc.own=0;
+                        obj._doc.role=0;
+                    }
+                })
+            }
+            for(let o of arr)
+            {
+                o._doc.testCount=await (test.countAsync({
+                    project:o._id
+                }))
+                o._doc.userCount=o.users.length+1;
+                delete o._doc.users;
+            }
+            util.ok(res,arr,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
     this.removeDoc=async ((req,res)=> {
         try
         {
@@ -1788,6 +1999,141 @@ function Team() {
                 toType:"Team",
                 to:req.team._id,
                 type:5,
+                state:0,
+                creator:req.userInfo._id,
+            },{
+                upsert:true,
+                setDefaultsOnInsert:true
+            }))
+            util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.removeTest=async ((req,res)=> {
+        try
+        {
+            let obj=await (testProject.findOneAndUpdateAsync({
+                _id:req.clientParam.project,
+                team:req.clientParam.id
+            },{
+                $unset:{
+                    team:null
+                }
+            }))
+            util.ok(res,"ok")
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.testUser=async ((req,res)=>{
+        try
+        {
+            let objPro=await (testProject.findOneAsync({
+                _id:req.clientParam.project
+            }))
+            if(!objPro)
+            {
+                util.throw(e.testProjectNotFound,"项目不存在");
+                return;
+            }
+            let arr=objPro.users.map(function (obj) {
+                return obj.toString();
+            });
+            let arrUser=await (teamGroup.findAsync({
+                team:req.team._id
+            },null,{
+                populate:{
+                    path:"users.user",
+                    select:"name photo"
+                }
+            }))
+            for(let obj of arrUser)
+            {
+                for(let obj1 of obj.users)
+                {
+                    if(obj1.user._id.toString()==objPro.owner.toString())
+                    {
+                        obj1._doc.select=1;
+                        obj1._doc.role=2;
+                    }
+                    else
+                    {
+                        let index=arr.indexOf(obj1.user._id.toString());
+                        if(index>-1)
+                        {
+                            obj1._doc.select=1;
+                            obj1._doc.role=0;
+                        }
+                        else
+                        {
+                            obj1._doc.select=0;
+                            obj1._doc.role=0;
+                        }
+                    }
+                }
+            }
+            util.ok(res,arrUser,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.pullTest=async ((req,res)=>{
+        try
+        {
+            let obj=await (testProject.findOneAsync({
+                _id:req.clientParam.project
+            }));
+            if(!obj)
+            {
+                util.throw(e.testProjectNotFound,"项目不存在");
+                return;
+            }
+            await (apply.findOneAndUpdateAsync({
+                from:req.team._id,
+                to:obj._id,
+                type:6,
+                state:0
+            },{
+                fromType:"Team",
+                from:req.team._id,
+                toType:"TestProject",
+                to:obj._id,
+                type:6,
+                state:0,
+                creator:req.userInfo._id,
+            },{
+                upsert:true,
+                setDefaultsOnInsert:true
+            }))
+            util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.testApply=async ((req,res)=>{
+        try
+        {
+            await (apply.findOneAndUpdateAsync({
+                from:req.clientParam.project,
+                to:req.team._id,
+                type:7,
+                state:0
+            },{
+                dis:req.clientParam.dis?req.clientParam.dis:"",
+                fromType:"TestProject",
+                from:req.clientParam.project,
+                toType:"Team",
+                to:req.team._id,
+                type:7,
                 state:0,
                 creator:req.userInfo._id,
             },{

@@ -22,6 +22,7 @@
     var list=require("./list/list.vue");
     var info=require("./info/info.vue");
     var doc=require("./doc/doc.vue");
+    var test=require("./test/test.vue");
     module.exports = {
         data: function () {
             return {}
@@ -34,7 +35,8 @@
         components:{
             "info":info,
             "list":list,
-            "doc":doc
+            "doc":doc,
+            "test":test
         },
         methods: {}
     }

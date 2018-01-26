@@ -36,15 +36,15 @@ function Query (criteria, options) {
   this.setOptions(proto.options);
 
   this._conditions = proto._conditions
-    ? utils.clone(proto._conditions, { retainKeyOrder: this.options.retainKeyOrder })
+    ? utils.clone(proto._conditions)
     : {};
 
   this._fields = proto._fields
-    ? utils.clone(proto._fields, { retainKeyOrder: this.options.retainKeyOrder })
+    ? utils.clone(proto._fields)
     : undefined;
 
   this._update = proto._update
-    ? utils.clone(proto._update, { retainKeyOrder: this.options.retainKeyOrder })
+    ? utils.clone(proto._update)
     : undefined;
 
   this._path = proto._path || undefined;
@@ -130,9 +130,9 @@ Query.prototype.toConstructor = function toConstructor () {
   p.setOptions(this.options);
 
   p.op = this.op;
-  p._conditions = utils.clone(this._conditions, { retainKeyOrder: this.options.retainKeyOrder });
-  p._fields = utils.clone(this._fields, { retainKeyOrder: this.options.retainKeyOrder });
-  p._update = utils.clone(this._update, { retainKeyOrder: this.options.retainKeyOrder });
+  p._conditions = utils.clone(this._conditions);
+  p._fields = utils.clone(this._fields);
+  p._update = utils.clone(this._update);
   p._path = this._path;
   p._distinct = this._distinct;
   p._collection = this._collection;
@@ -2894,7 +2894,7 @@ Query.prototype._mergeUpdate = function (doc) {
  */
 
 Query.prototype._optionsForExec = function () {
-  var options = utils.clone(this.options, { retainKeyOrder: true });
+  var options = utils.clone(this.options);
   return options;
 }
 
@@ -2906,7 +2906,7 @@ Query.prototype._optionsForExec = function () {
  */
 
 Query.prototype._fieldsForExec = function () {
-  return utils.clone(this._fields, { retainKeyOrder: true });
+  return utils.clone(this._fields);
 }
 
 /**
@@ -2916,7 +2916,7 @@ Query.prototype._fieldsForExec = function () {
  */
 
 Query.prototype._updateForExec = function () {
-  var update = utils.clone(this._update, { retainKeyOrder: true })
+  var update = utils.clone(this._update)
     , ops = utils.keys(update)
     , i = ops.length
     , ret = {}

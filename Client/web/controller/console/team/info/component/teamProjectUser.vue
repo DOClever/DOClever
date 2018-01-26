@@ -32,7 +32,7 @@
                                     <el-button  style="font-size: 15px" size="mini" @click="editRoleOption(item1)" type="text" v-if="item1.role==1">权限</el-button>
                                 </el-col>
                             </el-row>
-                            <el-row class="row" style="height: 40px;line-height: 40px;text-align: center" v-if="type=='doc'">
+                            <el-row class="row" style="height: 40px;line-height: 40px;text-align: center" v-if="type=='doc' || type=='test'">
                                 <el-col class="col" :span="2">
                                     <el-checkbox v-model="item1.select" :true-label="1" :false-label="0"  v-if="item1.role!=2">
                                     </el-checkbox>
@@ -144,6 +144,21 @@
                         })
                     })
                     pro=net.put("/doc/user",{
+                        project:this.id,
+                        user:JSON.stringify(arr)
+                    })
+                }
+                else if(this.type=="test")
+                {
+                    this.arrFilter.forEach(function (obj) {
+                        obj.users.forEach(function (obj) {
+                            if(obj.select==1 && obj.role!=2)
+                            {
+                                arr.push(obj.user._id)
+                            }
+                        })
+                    })
+                    pro=net.put("/test/user",{
                         project:this.id,
                         user:JSON.stringify(arr)
                     })

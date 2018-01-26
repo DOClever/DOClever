@@ -7,7 +7,7 @@
                     <el-row v-if="arr[(n-1)*5+(index-1)]" :style="{borderRadius:'5px',color:'gray'}" style="text-align: center;height: 100%;cursor: pointer;border: 1px #ebebeb solid;" @click.native="info(arr[(n-1)*5+(index-1)])">
                         <el-row class="row" style="height: 65px;">
                             <div type="primary" size="small" style="width: 26px;height: 26px;line-height:26px;border-radius: 13px;display: inline-block;color:white;margin-top: 15px;font-size: 14px" :style="{backgroundColor:color(arr[(n-1)*5+(index-1)])}">
-                                {{category=="interface"?"接":"文"}}
+                                {{category=="interface"?"接":(category=="doc"?"文":"测")}}
                             </div>
                             <div style="font-size: 14px;color: black;display: table;table-layout: fixed;width: 100%;margin-top: 5px"><div style="display: table-cell;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">{{arr[(n-1)*5+(index-1)].name}}</div></div>
                         </el-row>
@@ -21,7 +21,7 @@
                                 {{"成员:"+arr[(n-1)*5+(index-1)].userCount}}
                             </el-col>
                             <el-col class="col" :span="12">
-                                {{category=="interface"?("接口:"+arr[(n-1)*5+(index-1)].interfaceCount):("文档:"+arr[(n-1)*5+(index-1)].docCount)}}
+                                {{category=="interface"?("接口:"+arr[(n-1)*5+(index-1)].interfaceCount):(category=="doc"?("文档:"+arr[(n-1)*5+(index-1)].docCount):("用例:"+arr[(n-1)*5+(index-1)].testCount))}}
                             </el-col>
                         </el-row>
                         <el-dropdown style="position: absolute;right: 5px;top: 0px;" v-if="manageRole">
@@ -77,7 +77,7 @@
                         return this.$store.state.projectTeamList;
                     }
                 }
-                else
+                else if(this.category=="doc")
                 {
                     if(this.type=="create")
                     {
@@ -94,6 +94,21 @@
                     else if(this.type=="team")
                     {
                         return this.$store.state.docTeamList;
+                    }
+                }
+                else if(this.category=="test")
+                {
+                    if(this.type=="create")
+                    {
+                        return this.$store.state.testCreateList;
+                    }
+                    else if(this.type=="join")
+                    {
+                        return this.$store.state.testJoinList;
+                    }
+                    else if(this.type=="team")
+                    {
+                        return this.$store.state.testTeamList;
                     }
                 }
             },
@@ -114,7 +129,7 @@
         },
         methods:{
             info:function (item) {
-                if(this.category=="interface" || (this.category=="doc" && item.role==0))
+                if(this.category=="interface" || (this.category=="doc" && item.role==0) || this.category=="test")
                 {
                     this.$store.dispatch("info",{
                         id:item._id,
@@ -167,6 +182,12 @@
                             project:item._id
                         })
                     }
+                    else if(_this.category=="test")
+                    {
+                        pro=net.delete("/test/project",{
+                            project:item._id
+                        })
+                    }
                     pro.then(function (data) {
                         loading.close();
                         if(data.code==200)
@@ -178,6 +199,10 @@
                             else if(_this.category=="doc")
                             {
                                 _this.$store.state.docTeamList.splice(index, 1);
+                            }
+                            else if(_this.category=="test")
+                            {
+                                _this.$store.state.testTeamList.splice(index, 1);
                             }
                         }
                         else
@@ -206,6 +231,13 @@
                             project:item._id
                         })
                     }
+                    else if(_this.category=="test")
+                    {
+                        pro=net.delete("/team/test",{
+                            id:session.get("teamId"),
+                            project:item._id
+                        })
+                    }
                     pro.then(function (data) {
                         loading.close();
                         if(data.code==200)
@@ -218,6 +250,10 @@
                             else if(_this.category=="doc")
                             {
                                 _this.$store.state.docTeamList.splice(index,1);
+                            }
+                            else if(_this.category=="test")
+                            {
+                                _this.$store.state.testTeamList.splice(index,1);
                             }
                         }
                         else
@@ -241,6 +277,13 @@
                 else if(this.category=="doc")
                 {
                     pro=net.get("/team/docuser",{
+                        id:session.get("teamId"),
+                        project:item._id
+                    })
+                }
+                else if(this.category=="test")
+                {
+                    pro=net.get("/team/testuser",{
                         id:session.get("teamId"),
                         project:item._id
                     })
@@ -287,6 +330,13 @@
                 else if(this.category=="doc")
                 {
                     pro=net.get("/team/docuser",{
+                        id:session.get("teamId"),
+                        project:item._id
+                    })
+                }
+                else if(this.category=="test")
+                {
+                    pro=net.get("/team/testuser",{
                         id:session.get("teamId"),
                         project:item._id
                     })

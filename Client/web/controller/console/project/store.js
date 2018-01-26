@@ -1,6 +1,7 @@
 var list=require("./list/store.js")
 var info=require("./info/store.js")
 var doc=require("./doc/store.js")
+var test=require("./test/store.js")
 module.exports={
     namespaced:true,
     state:{
@@ -38,11 +39,19 @@ module.exports={
                 session.set("projectName",obj.name);
                 context.state.type="doc";
             }
+            else if(obj.type=="test")
+            {
+                session.set("projectType","test");
+                session.set("projectId",obj.id);
+                session.set("projectName",obj.name);
+                context.state.type="test";
+            }
         },
     },
     modules:{
         list:list,
         info:info,
-        doc:doc
+        doc:doc,
+        test:test
     },
 }

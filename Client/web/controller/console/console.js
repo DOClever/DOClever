@@ -254,6 +254,7 @@ var vue=new Vue({
     }
 });
 window.vueObj=vue;
+window.worker=new Worker('worker.js');
 $.ready(function () {
     $.startLoading();
 });

@@ -48,5 +48,9 @@
   "docGroupNotFound":46,
   "docNotFound":47,
   "userAlreadyInDoc":48,
-  "userNotInDoc":49
+  "userNotInDoc":49,
+  "userAlreadyInTest":50,
+  "userNotInTest":51,
+  "testProjectNotFound":46,
+  "testCollectionNotFound":47
 }

@@ -143,6 +143,28 @@ describe('pre hooks', function() {
       done();
     });
   });
+
+  /* You can also return a promise from your pre hooks instead of calling
+   * `next()`. When the returned promise resolves, kareem will kick off the
+   * next middleware.
+   */
+  it('supports returning a promise', function(done) {
+    hooks.pre('cook', function() {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          this.bacon = 3;
+          resolve();
+        }, 100);
+      });
+    });
+
+    var obj = { bacon: 0 };
+
+    hooks.execPre('cook', obj, function() {
+      assert.equal(3, obj.bacon);
+      done();
+    });
+  });
 });
 
 describe('post hooks', function() {

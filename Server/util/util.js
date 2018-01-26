@@ -26,9 +26,10 @@ var fsAsync=blue.promisifyAll(fs);
 var child_process=blue.promisifyAll(require("child_process"));
 require("./Base64")
 var testModel=null;
-var testVersionModel=null;
 var statusModel=null;
 var statusVersionModel=null;
+var projectModel=null;
+var versionModel=null;
 var routerMap={};
 var bProduct;
 var con;
@@ -1493,17 +1494,29 @@ var runTest=async (function (obj,global,test,root,opt) {
             }
         }
         return res;
+    }).catch(function (err) {
+        root.output+=err.message+"<br>";
+        root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]结束运行接口："+obj.name+"(耗时：<span style='color: green'>"+(((new Date())-startDate)/1000).toFixed(3)+"秒</span>)<br>"
+        return {
+            status:200,
+            header:{},
+            data:err
+        }
     })
 })
 
-var runTestCode=async (function (code,test,global,opt,root) {
+var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
     if(!testModel)
     {
         testModel=require("../model/testModel");
     }
-    if(!testVersionModel)
+    if(!projectModel)
     {
-        testVersionModel=require("../model/testVersionModel");
+        projectModel=require("../model/projectModel");
+    }
+    if(!versionModel)
+    {
+        versionModel=require("../model/versionModel");
     }
     var Base64=BASE64.encoder,MD5=CryptoJS.MD5,SHA1=CryptoJS.SHA1,SHA256=CryptoJS.SHA256,SHA512=CryptoJS.SHA512,SHA3=CryptoJS.SHA3,RIPEMD160=CryptoJS.RIPEMD160,AES=CryptoJS.AES.encrypt,TripleDES=CryptoJS.TripleDES.encrypt,DES=CryptoJS.DES.encrypt,Rabbit=CryptoJS.Rabbit.encrypt,RC4=CryptoJS.RC4.encrypt,RC4Drop=CryptoJS.RC4Drop.encrypt;
     if(!global)
@@ -1514,17 +1527,6 @@ var runTestCode=async (function (code,test,global,opt,root) {
     if(!root.cookie)
     {
         root.cookie={};
-    }
-    if(opt.baseUrls && opt.baseUrl)
-    {
-        opt.baseUrls.forEach(function (obj) {
-            if(obj.url==opt.baseUrl && obj.env)
-            {
-                obj.env.forEach(function (obj) {
-                    env[obj.key]=obj.value;
-                })
-            }
-        })
     }
     function log(text) {
         if(typeof(text)=="object")
@@ -1544,12 +1546,73 @@ var runTestCode=async (function (code,test,global,opt,root) {
         var text;
         if(type=="1")
         {
+            let objInfo={};
+            let o=JSON.parse(obj);
+            let query={
+                project:o.project._id
+            }
+            if(o.version)
+            {
+                query.version=o.version;
+            }
+            let bFind=false;
+            for(let j=0;j<root.projectInfo.length;j++)
+            {
+                let objProjectInfo=root.projectInfo[j];
+                if(objProjectInfo.project==query.project && objProjectInfo.version==query.version)
+                {
+                    objInfo=objProjectInfo;
+                    bFind=true;
+                    break;
+                }
+            }
+            if(!bFind)
+            {
+                objInfo=await (projectModel.findOneAsync({
+                    _id:query.project
+                },"baseUrls after before"));
+                if(!objInfo)
+                {
+                    objInfo={
+                        baseUrls:[],
+                        before:"",
+                        after:""
+                    }
+                }
+                if(query.version)
+                {
+                    let objVersion=await (versionModel.findOneAsync({
+                        _id:query.version
+                    },"baseUrls after before"));
+                    if(!objVersion)
+                    {
+                        continue;
+                    }
+                    objInfo=objVersion;
+                }
+                let objPush={
+                    baseUrls:objInfo.baseUrls,
+                    before:objInfo.before,
+                    after:objInfo.after,
+                    project:query.project
+                }
+                if(query.version)
+                {
+                    objPush.version=query.version;
+                }
+                root.projectInfo.push(objPush);
+            }
+            opt.baseUrls=objInfo.baseUrls;
+            opt.before=objInfo.before;
+            opt.after=objInfo.after;
             text="(function (opt1) {return runTest("+obj.replace(/\r|\n/g,"")+",opt,test,root,opt1)})"
         }
         else if(type=="2")
         {
-            var testObj;
-            testObj=await (testModel.findOneAsync({
+            var testObj,testMode=arr[i].hasAttribute("mode")?arr[i].getAttribute("mode"):"code";
+            testObj=await (testModel.findOneAsync(obj.length==24?{
+                _id:obj
+            }:{
                 id:obj
             },null,{
                 populate:{
@@ -1559,16 +1622,31 @@ var runTestCode=async (function (code,test,global,opt,root) {
             }))
             if(!testObj)
             {
-                throw "测试用例已不存在";
+                testObj={
+                    code:"",
+                    ui:[],
+                    name:"",
+                    status:0
+                }
             }
             testObj=await (testModel.populateAsync(testObj,{
                 path:"group",
                 select:"name"
             }))
-            text="(function () {return runTestCode('"+testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'")+"',"+JSON.stringify(testObj)+",global,opt,root)})"
+            var code;
+            if(testMode=="code")
+            {
+                code=testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'");
+            }
+            else
+            {
+                code=convertToCode(testObj.ui).replace(/'/g,"\\'").replace(/\\\"/g,"\\\\\"");
+            }
+            text="(function () {var argv=Array.prototype.slice.call(arguments);return runTestCode('"+code+"',"+JSON.stringify(testObj)+",global,opt,root,argv,'"+testMode+"')})"
         }
         else
         {
+            arrNode.push(undefined);
             continue;
         }
         var node=document.createTextNode(text);
@@ -1580,7 +1658,14 @@ var runTestCode=async (function (code,test,global,opt,root) {
     arrNode.forEach(function (obj) {
         obj.oldNode.parentNode.replaceChild(obj.newNode,obj.oldNode);
     })
-    root.output+="<br><div style='background-color: #ececec'>["+moment().format("YYYY-MM-DD HH:mm:ss")+"]开始执行用例："+test.module.name+"/"+test.group.name+"/"+test.name+"<br>";
+    if(test.module)
+    {
+        root.output+="<br><div style='background-color: #ececec'>["+moment().format("YYYY-MM-DD HH:mm:ss")+"]开始执行用例："+test.module.name+"/"+test.group.name+"/"+test.name+"("+(mode=="code"?"代码模式":"UI模式")+")<br>";
+    }
+    else
+    {
+        root.output+="<br><div style='background-color: #ececec'>["+moment().format("YYYY-MM-DD HH:mm:ss")+"]开始执行轮询<br>";
+    }
     var text=ele.textContent.replace(new RegExp(decodeURIComponent("%C2%A0"),"g")," ");
     function bOutside(str) {
         var a1=0,a2=0;
@@ -1621,7 +1706,7 @@ var runTestCode=async (function (code,test,global,opt,root) {
                     if(index>-1)
                     {
                         lText=text.substring(0,index);
-                        if(bOutside(evalText+lText))
+                        if(bOutside(evalText+lText) && !lText.endsWith("var argv=Array.prototype.slice.call(arguments"))
                         {
                             evalText+=lText+"));";
                             text=text.substr(index+2);
@@ -1653,26 +1738,145 @@ var runTestCode=async (function (code,test,global,opt,root) {
         }
     }
     var ret=eval("(async (function () {"+evalText+"}))()").then(function (ret) {
-        if(ret===undefined)
+        var obj={
+            argv:[]
+        };
+        var temp;
+        if(typeof(ret)=="object" && (ret instanceof Array))
         {
-            test.status=0;
-            root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]用例执行结束："+test.module.name+"/"+test.group.name+"/"+test.name+"(未判定)";
-        }
-        else if(Boolean(ret)==true)
-        {
-            test.status=1;
-            root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]用例执行结束："+test.module.name+"/"+test.group.name+"/"+test.name+"(<span style='color:green'>已通过</span>)";
+            temp=ret[0];
+            obj.argv=ret.slice(1);
         }
         else
         {
+            temp=ret;
+        }
+        if(temp===undefined)
+        {
+            obj.pass=undefined;
+            test.status=0;
+            if(test.module)
+            {
+                root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]用例执行结束："+test.module.name+"/"+test.group.name+"/"+test.name+"(未判定)";
+            }
+            else
+            {
+                root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]轮询执行结束";
+            }
+        }
+        else if(Boolean(temp)==true)
+        {
+            obj.pass=true;
+            test.status=1;
+            if(test.module)
+            {
+                root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]用例执行结束："+test.module.name+"/"+test.group.name+"/"+test.name+"(<span style='color:green'>已通过</span>)";
+            }
+            else
+            {
+                root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]轮询执行结束";
+            }
+        }
+        else
+        {
+            obj.pass=false;
             test.status=2;
-            root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]用例执行结束："+test.module.name+"/"+test.group.name+"/"+test.name+"(<span style='color:red'>未通过</span>)";
+            if(test.module)
+            {
+                root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]用例执行结束："+test.module.name+"/"+test.group.name+"/"+test.name+"(<span style='color:red'>未通过</span>)";
+            }
+            else
+            {
+                root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]轮询执行结束";
+            }
         }
         root.output+="</div><br>"
-        return ret;
+        return obj;
     });
     return ret;
 })
+
+function convertToCode(data) {
+    var str="";
+    data.forEach(function (obj) {
+        if(obj.type=="interface")
+        {
+            var argv="{";
+            for(var key in obj.argv)
+            {
+                argv+=key+":{";
+                for(var key1 in obj.argv[key])
+                {
+                    argv+=key1+":"+obj.argv[key][key1]+","
+                }
+                argv+="},"
+            }
+            argv+="}"
+            str+=`<div class='testCodeLine'>var $${obj.id}=await <a href='javascript:void(0)' style='cursor: pointer; text-decoration: none;' type='1' varid='${obj.id}' data='${obj.data.replace(/\'/g,"&apos;")}'>${obj.name}</a>(${argv});</div>`
+        }
+        else if(obj.type=="test")
+        {
+            var argv="[";
+            obj.argv.forEach(function (obj) {
+                argv+=obj+","
+            })
+            argv+="]";
+            str+=`<div class='testCodeLine'>var $${obj.id}=await <a type='2' href='javascript:void(0)' style='cursor: pointer; text-decoration: none;' varid='${obj.id}' data='${obj.data}' mode='${obj.mode}'>${obj.name}</a>(...${argv});</div>`
+        }
+        else if(obj.type=="ifbegin")
+        {
+            str+=`<div class='testCodeLine'>if(${obj.data}){</div>`
+        }
+        else if(obj.type=="elseif")
+        {
+            str+=`<div class='testCodeLine'>}else if(${obj.data}){</div>`
+        }
+        else if(obj.type=="else")
+        {
+            str+=`<div class='testCodeLine'>}else{</div>`
+        }
+        else if(obj.type=="ifend")
+        {
+            str+=`<div class='testCodeLine'>}</div>`
+        }
+        else if(obj.type=="var")
+        {
+            if(obj.global)
+            {
+                str+=`<div class='testCodeLine'>global["${obj.name}"]=${obj.data};</div>`
+            }
+            else
+            {
+                str+=`<div class='testCodeLine'>var ${obj.name}=${obj.data};</div>`
+            }
+        }
+        else if(obj.type=="return")
+        {
+            if(obj.argv.length>0)
+            {
+                var argv=obj.argv.join(",");
+                str+=`<div class='testCodeLine'>return [${obj.data},${argv}];</div>`
+            }
+            else
+            {
+                str+=`<div class='testCodeLine'>return ${obj.data};</div>`
+            }
+        }
+        else if(obj.type=="log")
+        {
+            str+=`<div class='testCodeLine'>log(${obj.data});</div>`
+        }
+        else if(obj.type=="input")
+        {
+            str+=`<div class='testCodeLine'>var $${obj.id}=await input("${obj.name}",${obj.data});</div>`
+        }
+        else if(obj.type=="baseurl")
+        {
+            str+=`<div class='testCodeLine'>opt["baseUrl"]=${obj.data};</div>`
+        }
+    })
+    return str;
+}
 
 function sendMail(smtp,port,user,pass,to,subject,content) {
     let transporter = mail.createTransport({
@@ -1759,7 +1963,7 @@ var init=async (function () {
                     })
                 })
             }
-            let arr=["请输入mongodb数据库地址（比如：mongodb://localhost:27017/DOClever)：","请输入DOClever上传文件路径（比如：/Users/Shared/DOClever）：","请输入DOClever上传图片文件路径（需要是上传文件路径的直接子目录，比如：/Users/Shared/DOClever/img）：","请输入DOClever上传临时文件路径（需要是上传文件路径的直接子目录，比如：/Users/Shared/DOClever/temp）：","请输入端口号（比如10000）："];
+            let arr=["请输入mongodb数据库地址（比如：mongodb://localhost:27017/DOClever)：","请输入DOClever上传文件路径（比如：/Users/Shared/DOClever）：","请输入端口号（比如10000）："];
             for(let i=0;i<arr.length;i++)
             {
                 let val=await (question(arr[i]));
@@ -1796,11 +2000,13 @@ var init=async (function () {
                     }
                     con.db=val;
                 }
-                else if(i==1 || i==2 || i==3)
+                else if(i==1)
                 {
                     try
                     {
-                        createDir(val)
+                        createDir(val);
+                        createDir(path.join(val,"img"));
+                        createDir(path.join(val,"temp"));
                     }
                     catch (err)
                     {
@@ -1808,20 +2014,9 @@ var init=async (function () {
                         i--;
                         continue;
                     }
-                    if(i==1)
-                    {
-                        con.filePath=val;
-                    }
-                    else if(i==2)
-                    {
-                        con.imgPath=val;
-                    }
-                    else if(i==3)
-                    {
-                        con.tempPath=val;
-                    }
+                    con.filePath=val;
                 }
-                else if(i==4)
+                else if(i==2)
                 {
                     con.port=parseInt(val);
                 }
@@ -1838,6 +2033,9 @@ var init=async (function () {
         else
         {
             con=require("../../config.json");
+            createDir(con.filePath);
+            createDir(path.join(con.filePath,"img"));
+            createDir(path.join(con.filePath,"temp"));
         }
         if(argv.db)
         {
@@ -1855,32 +2053,6 @@ var init=async (function () {
                 process.exit(0);
             }
             con.filePath=argv.file;
-        }
-        if(argv.img)
-        {
-            try
-            {
-                createDir(argv.img)
-            }
-            catch (err)
-            {
-                console.log(err);
-                process.exit(0);
-            }
-            con.imgPath=argv.img;
-        }
-        if(argv.temp)
-        {
-            try
-            {
-                createDir(argv.temp)
-            }
-            catch (err)
-            {
-                console.log(err);
-                process.exit(0);
-            }
-            con.tempPath=argv.temp;
         }
         if(argv.port)
         {
@@ -2278,6 +2450,8 @@ let runPoll=async (function (arr) {
     let poll=require("../model/pollModel");
     let test=require("../model/testModel");
     let user=require("../model/userModel");
+    let testCollection=require("../model/testCollectionModel");
+    let project=require("../model/projectModel");
     arr=await (poll.populateAsync(arr,{
         path:"project"
     }));
@@ -2289,64 +2463,74 @@ let runPoll=async (function (arr) {
     }));
     for(let obj of arr)
     {
+        let objCollection=await (testCollection.findOneAsync({
+            poll:obj._id
+        }))
+        if(!objCollection)
+        {
+            continue;
+        }
         let root={
             output:"",
-            count:obj.test.length,
+            count:objCollection.tests.length,
             success:0,
             fail:0,
-            unknown:0
+            unknown:0,
+            projectInfo:[]
         };
-        for(let obj1 of obj.test)
+        let env={};
+        if(obj.interProject)
         {
-            obj1=await (test.populateAsync(obj1,{
-                path:"module"
-            }))
-            obj1=await (test.populateAsync(obj1,{
-                path:"group"
-            }))
-            let global={
+            let objProject=await (project.findOneAsync({
+                _id:obj.interProject
+            },"baseUrls"))
+            if(objProject)
+            {
+                objProject.baseUrls.forEach(function (obj) {
+                    if(obj.url==objCollection.baseUrl && obj.env)
+                    {
+                        obj.env.forEach(function (obj) {
+                            env[obj.key]=obj.value;
+                        })
+                    }
+                })
+            }
+        }
+        let arrTest=objCollection.tests.map(function (obj) {
+            return {
+                type:"test",
+                data:obj.test,
+                mode:obj.mode,
+                id:obj.id,
+                name:"aa",
+                argv:obj.argv,
+            }
+        })
+        let  str=convertToCode(arrTest);
+        try
+        {
+            await (exports.runTestCode(str,{
+                name:"",
+                status:0
+            },{},{
                 baseUrl:obj.baseUrl,
-                before:obj.project.before,
-                after:obj.project.after,
-                baseUrls:obj.project.baseUrls
-            }
-            if(typeof (obj.version)=="object")
-            {
-                global.before=obj.version.before;
-                global.after=obj.version.after;
-                global.baseUrls=obj.version.baseUrls;
-            }
-            try
-            {
-                let ret=await (exports.runTestCode(obj1.code,obj1,{},global,root))
-                if(ret===undefined)
-                {
-                    root.unknown++;
-                }
-                else if(Boolean(ret)==true)
-                {
-                    root.success++;
-                }
-                else
-                {
-                    root.fail++;
-                }
-            }
-            catch (err)
-            {
-                root.fail++;
-                root.output+=err+"<br>"
-            }
+                env:env,
+            },root,[],"ui"));
+        }
+        catch(e)
+        {
+            root.fail++;
+            root.output+=e+"<br>"
         }
         if(obj.failSend && root.fail==0 && root.unknown==0)
         {
             return;
         }
-        var arrPollUser=obj.users.map(function (obj) {
+        let arrPollUser=obj.users.map(function (obj) {
             return obj.toString();
         });
-        var arrProjectUser=obj.project.users.map(function (obj) {
-            return obj.user.toString();
+        let arrProjectUser=obj.project.users.map(function (obj) {
+            return obj.toString();
         })
         arrProjectUser.unshift(obj.project.owner.toString());
         let arr=[],arrUser=[];
