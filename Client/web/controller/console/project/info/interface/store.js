@@ -2,11 +2,13 @@
  * Created by sunxin on 2017/2/23.
  */
 var run=require("./run/store");
+var test=require("./test/store");
 var uuid=require("uuid");
 module.exports={
     namespaced:true,
     modules:{
-        run:run
+        run:run,
+        test:test
     },
     state:{
         autoSave:false,
@@ -112,7 +114,8 @@ module.exports={
         searchText:"",
         searchType:0,
         status:[],
-        type:""
+        type:"",
+        example:{}
     },
     getters:{
         template:function (state,getters,rootState) {
@@ -239,6 +242,7 @@ module.exports={
             state.searchText="";
             state.searchType=0;
             state.type="";
+            state.example={};
         },
         setNewInterfaceStr:function (state,data) {
             state.newInterfaceStr=data;
@@ -411,6 +415,7 @@ module.exports={
             state.objCopy=data;
         },
         initParam:function (state,data) {
+            state.example={};
             state.param=[
                 {
                     name:"参数",
@@ -1772,6 +1777,6 @@ module.exports={
             return net.post("/template/item",obj).then(function (data) {
                 return data;
             })
-        }
+        },
     }
 }

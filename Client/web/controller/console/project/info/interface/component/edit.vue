@@ -6,9 +6,17 @@
             </el-tooltip>
             <el-button size="mini" type="text" icon="fa fa-arrows-alt" style="margin-left: 5px;font-size: 15px" title="放大/缩小" @click="$store.getters.event.$emit('toggleMax')"></el-button>
             <el-button size="mini" type="text" icon="el-icon-document" style="margin-left: 5px;font-size: 15px" title="文档引用" @click="docRef" v-if="interfaceEdit._id"></el-button>
-            <el-button type="primary" size="mini" style="float: right;margin-top: 4px;margin-right: 5px;margin-left: 0px" @click="$store.dispatch('changeType','run')">
+            <el-button type="primary" size="mini" style="float: right;margin-top: 4px;margin-right: 5px;margin-left: 0px" @click="$store.dispatch('changeType','run')" v-if="arrExample.length==0">
                 运行
             </el-button>
+            <el-dropdown split-button type="primary" size="mini" style="float: right;margin-right: 5px;margin-left: 0px" @click="$store.dispatch('changeType','run')" v-else>
+                运行
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item v-for="item in arrExample" @click.native="run(item)">
+                        {{item.name}}
+                    </el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
             <el-dropdown split-button type="primary" size="mini" style="float: right;margin-right: 5px;margin-left: 0px" @click="save" v-if="interfaceEditRole" id="btnSave" :loading="savePending" :disabled="savePending">
                 <span v-if="!savePending">保存</span>
                 <i class="el-icon-loading" v-else></i>
@@ -193,6 +201,17 @@
             "interfaceparam":interfaceParam
         },
         computed:{
+            arrExample:function () {
+                var id=this.param[this.index].id;
+                if(id && this.$store.state.example[id])
+                {
+                    return this.$store.state.example[id]
+                }
+                else
+                {
+                    return [];
+                }
+            },
             interfaceEdit:function () {
                 return this.$store.state.interfaceEdit
             },
@@ -762,6 +781,7 @@
             },
             initInterface:function (data) {
                 this.mailShow=false;
+                this.exampleList();
             },
             docRef:function () {
                 $.startHud();
@@ -789,6 +809,28 @@
                         $.notify(data.msg,0)
                     }
                 })
+            },
+            exampleList:function () {
+                var _this=this;
+                if(this.interfaceEdit._id)
+                {
+                    net.get("/example/alllist",{
+                        interface:this.interfaceEdit._id,
+                    }).then(function (data) {
+                        if(data.code==200)
+                        {
+                            _this.$store.state.example=data.data;
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                        }
+                    })
+                }
+            },
+            run:function (item) {
+                session.set("exampleId",item._id);
+                this.$store.dispatch('changeType','run');
             }
         },
         created:function () {
@@ -802,6 +844,9 @@
                 clearTimeout(this.timerSave);
                 this.timerSave=null;
             }
+        },
+        mounted:function () {
+            this.exampleList();
         }
     }
 </script>

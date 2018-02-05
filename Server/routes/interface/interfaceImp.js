@@ -249,6 +249,21 @@ var interface=[
         user:1,
         handle:inter.docRef
     },
+    {
+        "method":"GET",
+        "path":"/interface/param",
+        "param": {
+            id:{
+                type:String
+            },
+            param:{
+                type:String
+            }
+        },
+        "data":String,
+        user:1,
+        handle:inter.getParam
+    },
 ];
 
 module.exports=interface;

@@ -10,6 +10,7 @@ document.body.ondrop = function (event) {
     event.preventDefault();
     event.stopPropagation();
 }
+
 var $={};
 $.ready = function (callback) {
     if (document.addEventListener) {
@@ -272,6 +273,44 @@ $.input=function (title,func,defaultValue) {
     });
 }
 
+$.showMenu=function (vue,eleInput,data) {
+    var ele=document.createElement("div");
+    vue.$el.appendChild(ele);
+    var xy=$.getCaretCoordinates(eleInput,eleInput.selectionStart);
+    var bound=eleInput.getBoundingClientRect();
+    var self = vue;
+    var Child = Vue.extend(require("component/multiMenu.vue"));
+    var child = new Child({
+        el: ele,
+        parent: self,
+        propsData:{
+            source:data
+        }
+    });
+    child.$on("level",function (level) {
+        var ele=child.$el;
+        var width=level*150;
+        if(bound.left+width>document.documentElement.clientWidth)
+        {
+            ele.style.left=document.documentElement.clientWidth-width+"px";
+        }
+        else
+        {
+            ele.style.left=xy.left+bound.left+"px";
+        }
+    })
+    child.$el.style.left=xy.left+bound.left+"px";
+    if(xy.top+bound.top+xy.height+210>document.documentElement.clientHeight)
+    {
+        child.$el.style.top=xy.top+bound.top-210+"px";
+    }
+    else
+    {
+        child.$el.style.top=xy.top+bound.top+xy.height+10+"px";
+    }
+    return child;
+}
+
 $.inputMul=function (vue,placeholder,func,hudRemove,content) {
     var ele=document.createElement("div");
     vue.$el.appendChild(ele);
@@ -485,6 +524,120 @@ $.rand=function (Min,Max) {
     var Range = Max - Min;
     var Rand = Math.random();
     return(Min + Math.round(Rand * Range));
+}
+
+$.getCaretCoordinates=function (element, position, options) {
+    var properties = [
+        'direction',
+        'boxSizing',
+        'width',
+        'height',
+        'overflowX',
+        'overflowY',
+        'borderTopWidth',
+        'borderRightWidth',
+        'borderBottomWidth',
+        'borderLeftWidth',
+        'borderStyle',
+        'paddingTop',
+        'paddingRight',
+        'paddingBottom',
+        'paddingLeft',
+        'fontStyle',
+        'fontVariant',
+        'fontWeight',
+        'fontStretch',
+        'fontSize',
+        'fontSizeAdjust',
+        'lineHeight',
+        'fontFamily',
+        'textAlign',
+        'textTransform',
+        'textIndent',
+        'textDecoration',
+        'letterSpacing',
+        'wordSpacing',
+        'tabSize',
+        'MozTabSize'
+    ];
+    var isBrowser = (typeof window !== 'undefined');
+    var isFirefox = (isBrowser && window.mozInnerScreenX != null);
+    if (!isBrowser) {
+        throw new Error('textarea-caret-position#getCaretCoordinates should only be called in a browser');
+    }
+    var debug = options && options.debug || false;
+    if (debug) {
+        var el = document.querySelector('#input-textarea-caret-position-mirror-div');
+        if (el) el.parentNode.removeChild(el);
+    }
+    var div = document.createElement('div');
+    div.id = 'input-textarea-caret-position-mirror-div';
+    document.body.appendChild(div);
+    var style = div.style;
+    var computed = window.getComputedStyle ? window.getComputedStyle(element) : element.currentStyle;  // currentStyle for IE < 9
+    var isInput = element.nodeName === 'INPUT';
+    style.whiteSpace = 'pre-wrap';
+    if (!isInput)
+        style.wordWrap = 'break-word';
+    style.position = 'absolute';
+    if (!debug)
+        style.visibility = 'hidden';
+    properties.forEach(function (prop) {
+        if (isInput && prop === 'lineHeight') {
+            style.lineHeight = computed.height;
+        } else {
+            style[prop] = computed[prop];
+        }
+    });
+    if (isFirefox) {
+        if (element.scrollHeight > parseInt(computed.height))
+            style.overflowY = 'scroll';
+    } else {
+        style.overflow = 'hidden';
+    }
+    div.textContent = element.value.substring(0, position);
+    if (isInput)
+        div.textContent = div.textContent.replace(/\s/g, '\u00a0');
+    var span = document.createElement('span');
+    span.textContent = element.value.substring(position) || '.';  // || because a completely empty faux span doesn't render at all
+    div.appendChild(span);
+    var coordinates = {
+        top: span.offsetTop + parseInt(computed['borderTopWidth']),
+        left: span.offsetLeft + parseInt(computed['borderLeftWidth']),
+        height: parseInt(computed['lineHeight'])
+    };
+    if (debug) {
+        span.style.backgroundColor = '#aaa';
+    } else {
+        document.body.removeChild(div);
+    }
+    return coordinates;
+}
+
+$.tagReplace=function (str) {
+    var tagsToReplace = {
+        '&': '&amp',
+        '<': '&lt',
+        '>': '&gt'
+    };
+    return str.replace(/[&<>]/g, function (tag) {
+        return tagsToReplace[tag] || tag;
+    });
+}
+
+$.insertTextAtCursor=function (el, text) {
+    var val = el.value, endIndex, range;
+    if (typeof el.selectionStart != "undefined" && typeof el.selectionEnd != "undefined") {
+        endIndex = el.selectionEnd;
+        el.value = val.slice(0, el.selectionStart) + text + val.slice(endIndex);
+        el.selectionStart = el.selectionEnd = endIndex + text.length;
+    } else if (typeof document.selection != "undefined" && typeof document.selection.createRange != "undefined") {
+        el.focus();
+        range = document.selection.createRange();
+        range.collapse(false);
+        range.text = text;
+        range.select();
+    }
 }
 
 ;(function(){

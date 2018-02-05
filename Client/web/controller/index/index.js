@@ -1,5 +1,5 @@
-var mainNav=require("component/mainNav.vue")
-var commonFooter=require("component/commonFooter.vue")
+var mainNav=require("component/mainNav.vue");
+var commonFooter=require("component/commonFooter.vue");
 var VueFullpage=require("fullpage-vue");
 var vue=new Vue({
     "el":"#app",
@@ -9,20 +9,7 @@ var vue=new Vue({
     },
     data:{
         dialogVisible:false,
-        dis:[
-            {
-                title:"DOClever是我目前用到过最好的一个接口管理平台",
-                name:"iOS开发者李续续"
-            },
-            {
-                title:"有了DOClever，和前端的沟通都顺畅了很多",
-                name:"JAVA程序员张洋"
-            },
-            {
-                title:"使用DOClever可以让我和后端的数据无缝衔接，再也停不下来",
-                name:"前端工程师李彩凤"
-            }
-        ],
+
         isLogin:session.get('id')?true:false,
         opts: {
             start: 0,

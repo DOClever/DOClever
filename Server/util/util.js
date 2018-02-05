@@ -30,6 +30,7 @@ var statusModel=null;
 var statusVersionModel=null;
 var projectModel=null;
 var versionModel=null;
+var exampleModel=null;
 var routerMap={};
 var bProduct;
 var con;
@@ -1518,6 +1519,10 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
     {
         versionModel=require("../model/versionModel");
     }
+    if(!exampleModel)
+    {
+        exampleModel=require("../model/exampleModel");
+    }
     var Base64=BASE64.encoder,MD5=CryptoJS.MD5,SHA1=CryptoJS.SHA1,SHA256=CryptoJS.SHA256,SHA512=CryptoJS.SHA512,SHA3=CryptoJS.SHA3,RIPEMD160=CryptoJS.RIPEMD160,AES=CryptoJS.AES.encrypt,TripleDES=CryptoJS.TripleDES.encrypt,DES=CryptoJS.DES.encrypt,Rabbit=CryptoJS.Rabbit.encrypt,RC4=CryptoJS.RC4.encrypt,RC4Drop=CryptoJS.RC4Drop.encrypt;
     if(!global)
     {
@@ -1535,6 +1540,12 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
         }
         root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]"+text+"<br>";
     }
+    function __assert(val,id,title) {
+        if(level==0)
+        {
+            log("断言:"+title+"("+(val?("<span style='color: green'>通过</span>"):("<span style='color: red'>不通过</span>"))+")")
+        }
+    }
     var ele=document.createElement("div");
     ele.innerHTML=code;
     var arr=ele.getElementsByTagName("a");
@@ -1547,7 +1558,7 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
         if(type=="1")
         {
             let objInfo={};
-            let o=JSON.parse(obj);
+            let o=JSON.parse(obj.replace(/\r|\n/g,""));
             let query={
                 project:o.project._id
             }
@@ -1602,6 +1613,21 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
                 }
                 root.projectInfo.push(objPush);
             }
+            if(o.example)
+            {
+                try
+                {
+                    let objExample=await (exampleModel.findOneAsync({
+                        _id:o.example
+                    },"param"));
+                    updateTestInterfaceWithExample(o,objExample.param);
+                    obj=JSON.stringify(o);
+                }
+                catch (err)
+                {
+
+                }
+            }
             opt.baseUrls=objInfo.baseUrls;
             opt.before=objInfo.before;
             opt.after=objInfo.after;
@@ -1614,7 +1640,7 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
                 _id:obj
             }:{
                 id:obj
-            },null,{
+            },"-output",{
                 populate:{
                     path:"module",
                     select:"name"
@@ -1673,11 +1699,17 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
         {
             if(str[i]=="\"" && (i==0 || str[i-1]!="\\"))
             {
-                a1++
+                if(a2%2==0)
+                {
+                    a1++
+                }
             }
             else if(str[i]=="'" && (i==0 || str[i-1]!="\\"))
             {
-                a2++
+                if(a1%2==0)
+                {
+                    a2++
+                }
             }
         }
         if(a1%2==0 && a2%2==0)
@@ -1796,6 +1828,64 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
     return ret;
 })
 
+function updateTestInterfaceWithExample(objInter,objExample) {
+    var obj={
+        queryParam:objExample.param.query.filter(function (obj) {
+            if(obj.name)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }),
+        header:objExample.param.header.filter(function (obj) {
+            if(obj.name)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }),
+        restParam:objExample.param.param.filter(function (obj) {
+            if(obj.name)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }),
+        before:objExample.param.before,
+        after:objExample.param.after
+    }
+    if(objExample.param.body)
+    {
+        obj.bodyParam=objExample.param.body.filter(function (obj) {
+            if(obj.name)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        });
+    }
+    if(objExample.param.bodyInfo)
+    {
+        obj.bodyInfo=objExample.param.bodyInfo;
+    }
+    for(var key in obj)
+    {
+        objInter[key]=obj[key];
+    }
+}
+
 function convertToCode(data) {
     var str="";
     data.forEach(function (obj) {
@@ -1873,6 +1963,10 @@ function convertToCode(data) {
         else if(obj.type=="baseurl")
         {
             str+=`<div class='testCodeLine'>opt["baseUrl"]=${obj.data};</div>`
+        }
+        else if(obj.type=="assert")
+        {
+            str+=`<div class='testCodeLine'>if(${obj.data}){</div><div class='testCodeLine'>__assert(true,${obj.id},"${obj.name}");${obj.pass?"return true;":""}</div><div class='testCodeLine'>}</div><div class='testCodeLine'>else{</div><div class='testCodeLine'>__assert(false,${obj.id},"${obj.name}");</div><div class='testCodeLine'>return false;</div><div class='testCodeLine'>}</div>`
         }
     })
     return str;

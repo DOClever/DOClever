@@ -57,7 +57,19 @@ var interface=[
         },
         user:1,
         handle:[example.removeExample]
-    }
+    },
+    {
+        "method":"GET",
+        "path":"/example/alllist",
+        "param": {
+            interface:String,
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[example.exampleAllList]
+    },
 ];
 
 module.exports=interface;

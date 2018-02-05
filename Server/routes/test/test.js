@@ -265,7 +265,17 @@ function Test() {
                     }
                     query.user=queryUser;
                     let arrTest=await (req.testModel.findAsync(query,"name id status group user",{
-                        sort:"name"
+                        sort:"name",
+                        populate:[
+                            {
+                                path:"group",
+                                select:"name"
+                            },
+                            {
+                                path:"module",
+                                select:"name"
+                            }
+                        ]
                     }))
                     objGroup._doc.data=arrTest;
                 }
@@ -518,6 +528,16 @@ function Test() {
     this.testInfo=async ((req,res)=> {
         try
         {
+            if(req.clientParam.type=="code")
+            {
+                delete req.test._doc.ui;
+                delete req.test._doc.output;
+            }
+            else if(req.clientParam.type=="ui")
+            {
+                delete req.test._doc.code;
+                delete req.test._doc.output;
+            }
             util.ok(res,req.test,"ok");
         }
         catch (err)
@@ -1690,6 +1710,78 @@ function Test() {
             }
             await (obj.saveAsync());
             util.ok(res,"ok")
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.getAllGroupList=async ((req,res)=>{
+        try
+        {
+            let arr=await (testProject.findAsync({
+                $or:[
+                    {
+                        owner:req.userInfo._id
+                    },
+                    {
+                        users:req.userInfo._id
+                    }
+                ]
+            },"name"))
+            for(let objProject of arr)
+            {
+                objProject._doc.children=await (testModule.findAsync({
+                    user:req.userInfo._id,
+                    project:objProject._id
+                },"name"))
+                for(let objModule of objProject._doc.children)
+                {
+                    objModule._doc.children=await (testGroup.findAsync({
+                        module:objModule._id
+                    },"name"))
+                }
+            }
+            util.ok(res,arr,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.getAllList=async ((req,res)=>{
+        try
+        {
+            let arr=await (testProject.findAsync({
+                $or:[
+                    {
+                        owner:req.userInfo._id
+                    },
+                    {
+                        users:req.userInfo._id
+                    }
+                ]
+            },"name"))
+            for(let objProject of arr)
+            {
+                objProject._doc.children=await (testModule.findAsync({
+                    user:req.userInfo._id,
+                    project:objProject._id
+                },"name"))
+                for(let objModule of objProject._doc.children)
+                {
+                    objModule._doc.children=await (testGroup.findAsync({
+                        module:objModule._id
+                    },"name"))
+                    for(let objGroup of objModule._doc.children)
+                    {
+                        objGroup._doc.children=await (test.findAsync({
+                            group:objGroup._id
+                        },"name"))
+                    }
+                }
+            }
+            util.ok(res,arr,"ok");
         }
         catch (err)
         {

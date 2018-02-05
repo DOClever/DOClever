@@ -183,6 +183,10 @@ var interface=[
             project:{
                 type:String,
                 optional:1
+            },
+            type:{
+                type:String,
+                optional:1
             }
         },
         "data":String,
@@ -542,6 +546,30 @@ var interface=[
         },
         user:1,
         handle:[test.editCooperation]
+    },
+    {
+        "method":"GET",
+        "path":"/test/allgrouplist",
+        "param": {
+
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.getAllGroupList]
+    },
+    {
+        "method":"GET",
+        "path":"/test/alllist",
+        "param": {
+
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.getAllList]
     },
 ];
 

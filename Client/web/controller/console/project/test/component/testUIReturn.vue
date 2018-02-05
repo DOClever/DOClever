@@ -11,13 +11,21 @@
                 </el-form-item>
                 <el-form-item label="返回参数">
                     <el-row class="row" v-for="(item,index) in obj.argv" style="height: 40px;line-height: 40px;text-align: center">
-                        <el-col class="col" :span="18">
-                            <el-input size="small" style="width: 90%" placeholder="请填入返回值或返回语句，字符串请加双引号" v-model="item.value"></el-input>
+                        <el-col class="col" :span="4">
+                            <el-select size="small" v-model="item.type">
+                                <el-option label="Number" value="number"></el-option>
+                                <el-option label="String" value="string"></el-option>
+                                <el-option label="Boolean" value="boolean"></el-option>
+                                <el-option label="Code" value="code"></el-option>
+                            </el-select>
                         </el-col>
-                        <el-col class="col" :span="3">
-                            <el-button size="mini" type="text" style="font-weight: 900;font-size: 16px;" icon="el-icon-plus" @click="obj.argv.splice(index+1,0,{value:''})"></el-button>
+                        <el-col class="col" :span="16">
+                            <el-input size="small" style="width: 90%" v-model="item.value" @keypress.native="keyPress($event,item)"></el-input>
                         </el-col>
-                        <el-col class="col" :span="3">
+                        <el-col class="col" :span="2">
+                            <el-button size="mini" type="text" style="font-weight: 900;font-size: 16px;" icon="el-icon-plus" @click="obj.argv.splice(index+1,0,{value:'',type:'string'})"></el-button>
+                        </el-col>
+                        <el-col class="col" :span="2">
                             <el-button size="mini" type="text" style="font-weight: 900;color:red;font-size: 16px;" icon="el-icon-close" @click="index>0?obj.argv.splice(index,1):(item.value='')"></el-button>
                         </el-col>
                     </el-row>
@@ -38,7 +46,7 @@
 
 <script>
     module.exports = {
-        props:["argv","data"],
+        props:["argv","data","index"],
         data: function () {
             return {
                 showDialog:false,
@@ -50,7 +58,8 @@
                             data:"undefined",
                             argv:[
                                 {
-                                    value:""
+                                    value:"",
+                                    type:"string"
                                 }
                             ]
                         }
@@ -60,15 +69,15 @@
                     {
                         obj.data=this.data;
                         obj.argv=this.argv.map(function (obj) {
-                            return {
-                                value:obj
-                            }
+                            var o=helper.handleArgvData(undefined,obj);
+                            return o
                         })
                         if(obj.argv.length==0)
                         {
                             obj.argv=[
                                 {
-                                    value:""
+                                    value:"",
+                                    type:"string"
                                 }
                             ]
                         }
@@ -83,11 +92,31 @@
                 this.obj.argv.forEach(function (obj) {
                     if(obj.value)
                     {
-                        arr.push(obj.value);
+                        arr.push(helper.setArgvValue(obj.value,obj.type));
                     }
                 })
                 this.$emit("save",this.obj.data,arr);
                 this.showDialog=false;
+            },
+            keyPress:function (event,item) {
+                if(event.key=="$" && item.type=="code")
+                {
+                    var child=$.showMenu(this.$root,event.target,helper.getTestUIArgvList(this.$store.state.selTest.ui,this.index));
+                    child.$on("click",function (arr) {
+                        event.target.focus();
+                        $.insertTextAtCursor(event.target,arr.join(".").replace(/\.0/g,"[0]"));
+                    })
+                }
+                else if(event.key=="#" && item.type=="code")
+                {
+                    var child=$.showMenu(this.$root,event.target,helper.getTestBaseUrlList(this.$store.state.baseUrls));
+                    child.$on("click",function (arr) {
+                        event.target.focus();
+                        event.target.selectionStart-=1;
+                        event.target.selectionEnd=event.target.selectionStart+1;
+                        $.insertTextAtCursor(event.target,arr[arr.length-1]);
+                    })
+                }
             }
         }
     }

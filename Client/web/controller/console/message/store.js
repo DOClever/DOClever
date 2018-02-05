@@ -168,6 +168,14 @@ module.exports={
                     state:dt.state
                 })
             }
+            else if(dt.item.type==6)
+            {
+                pro=net.put("/test/handleapply",{
+                    project:dt.item.to._id,
+                    apply:dt.item._id,
+                    state:dt.state
+                })
+            }
             return pro.then(function (data) {
                 if(data.code==200)
                 {
@@ -209,7 +217,7 @@ module.exports={
             {
                 query.group=dt.group;
             }
-            if(dt.role)
+            if(dt.role!==undefined)
             {
                 query.role=dt.role;
             }

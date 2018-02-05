@@ -1,6 +1,6 @@
 importScripts("jshint-min.js");
 onmessage=function (e) {
-    var vars=["window","document","location","setTimeout","setInterval","input","global","argv","env","console","log","opt","parseInt","parseFloat","Math","Date","Array","Object","Function","Number","String","Boolean","decodeURI","decodeURIComponent","encodeURI","encodeURIComponent","eval","null","undefined","arguments","Base64","MD5","SHA1","SHA256","SHA512","SHA3","RIPEMD160","AES","TripleDES","DES","Rabbit","RC4","RC4Drop","navigator","screen","history","clearTimeout","clearInterval","alert","confirm","prompt","RegExp","Form"];
+    var vars=["window","document","location","setTimeout","setInterval","input","global","argv","env","console","log","opt","parseInt","parseFloat","Math","Date","Array","Object","Function","Number","String","Boolean","decodeURI","decodeURIComponent","encodeURI","encodeURIComponent","eval","null","undefined","arguments","Base64","MD5","SHA1","SHA256","SHA512","SHA3","RIPEMD160","AES","TripleDES","DES","Rabbit","RC4","RC4Drop","navigator","screen","history","clearTimeout","clearInterval","alert","confirm","prompt","RegExp","Form","function","__assert"];
     var source = e.data;
     var options = {
         undef: true,

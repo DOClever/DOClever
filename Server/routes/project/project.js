@@ -1195,6 +1195,13 @@ function Project() {
                                 newInter[key]=item._doc[key];
                             }
                         }
+                        for(let o of newInter.param)
+                        {
+                            o.example=await (example.findAsync({
+                                interface:item._doc._id,
+                                paramId:o.id
+                            },"-_id -createdAt -updatedAt -project -interface -owner"))
+                        }
                         ret.push(newInter);
                     }
                 }
@@ -1350,7 +1357,20 @@ function Project() {
                             delete item.bodyInfo;
                             item.param.push(o);
                         }
-                        await (interface.createAsync(item));
+                        let objInter=await (interface.createAsync(item));
+                        for(let o of item.param)
+                        {
+                            if(o.example && o.example.length>0)
+                            {
+                                for(let objExample of o.example)
+                                {
+                                    objExample.owner=req.userInfo._id;
+                                    objExample.project=objProject._id;
+                                    objExample.interface=objInter._id;
+                                    await (example.createAsync(objExample));
+                                }
+                            }
+                        }
                     }
                 }
             })
