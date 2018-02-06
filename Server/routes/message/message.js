@@ -11,6 +11,7 @@ var message=require("../../model/messageModel")
 var apply=require("../../model/applyModel")
 var team=require("../../model/teamModel")
 var docProject=require("../../model/docProjectModel")
+var testProject=require("../../model/testProjectModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
 function  Message() {
@@ -133,6 +134,13 @@ function  Message() {
                 return obj._id.toString()
             })
             let arrTemp=await (docProject.findAsync({
+                owner:req.userInfo._id
+            }))
+            arrTemp=arrTemp.map(function (obj) {
+                return obj._id.toString()
+            })
+            arrProject=arrProject.concat(arrTemp);
+            arrTemp=await (testProject.findAsync({
                 owner:req.userInfo._id
             }))
             arrTemp=arrTemp.map(function (obj) {

@@ -11,6 +11,7 @@
                 返回
             </el-button>
             <el-button size="mini" type="text" icon="fa fa-arrows-alt" style="margin-left: 5px;font-size: 15px" title="放大/缩小" @click="$store.getters.event.$emit('toggleMax')"></el-button>
+            <el-button size="mini" type="text" icon="fa fa-bolt" style="margin-left: 5px;font-size: 15px" title="加入用例" @click="joinTest"></el-button>
         </el-row>
         <el-row class="row" style="margin-top: 5px;overflow-y: auto;height: calc(100vh - 150px);padding-bottom: 80px;border-radius: 5px;font-size: 14px;background-color: white">
             <el-row class="row" style="padding-left: 10px;margin-top: 20px">
@@ -396,11 +397,51 @@
                         }
                     })
                 })
+            },
+            joinTest:function () {
+                var _this=this;
+                $.startHud();
+                this.$store.dispatch("joinTest").then(function (obj) {
+                    $.stopHud();
+                    var o={
+                        type:"interface",
+                        id:0,
+                        name:_this.curParam.selExample.id?(obj.name+"("+_this.curParam.selExample.value+")"):obj.name,
+                        data:JSON.stringify(obj),
+                        argv:{
+                            param:{},
+                            query:{},
+                            header:{},
+                            body:{}
+                        },
+                        status:0,
+                        modify:0
+                    };
+                    $.startHud();
+                    net.get("/test/allgrouplist").then(function (data) {
+                        $.stopHud();
+                        if(data.code!=200)
+                        {
+                            $.notify(data.msg,0);
+                        }
+                        $.showBox(_this,require("../test/test.vue"),{
+                            testType:1,
+                            propTestGroupList:data.data,
+                            propJoin:o
+                        });
+                    })
+                })
             }
         },
         created:function () {
             store.dispatch("initData",$.clone(this.interfaceEdit));
             store.commit("setIndex",this.index);
+            if(session.get("exampleId"))
+            {
+                this.curParam.selExample.value=session.get("exampleId");
+                store.dispatch("changeExample",session.get("exampleId"));
+                session.remove("exampleId");
+            }
         },
     }
 </script>

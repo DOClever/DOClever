@@ -32,7 +32,7 @@
                     </td>
                     <td style="width: 20%;text-align: center;vertical-align: middle;height: 50px;line-height: 50px">
                         <div  style="width: 90%;display: inline-block;" v-if="item.type==0 && item.value && (item.value.data.length>0 || item.value.status)">
-                            <el-autocomplete size="small" class="inline-input" v-model="item.selValue" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" @mouseenter.native="focus(item)" :disabled="!item.enable" custom style="width:100%" popper-class="my-autocomplete">
+                            <el-autocomplete size="small" class="inline-input" v-model="item.selValue" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" @mouseenter.native="focus(item)" :disabled="!item.enable || interface.example" custom style="width:100%" popper-class="my-autocomplete">
                                 <i class="el-icon-caret-bottom el-input__icon" slot="suffix" @click="showAutoComplete" style="cursor: pointer"></i>
                                 <template slot-scope="props">
                                     <div class="value">{{ props.item.value }}</div>
@@ -40,7 +40,7 @@
                                 </template>
                             </el-autocomplete>
                         </div>
-                        <el-input size="small" style="width: 90%;" placeholder="请填写值" v-model="item.selValue" v-else-if="item.type==0" custom></el-input>
+                        <el-input size="small" style="width: 90%;" placeholder="请填写值" v-model="item.selValue" v-else-if="item.type==0" custom :disabled="!item.enable || interface.example"></el-input>
                     </td>
                     <td style="width: 5%;" >
                         <span style="display: inline-block;">
@@ -51,10 +51,10 @@
                         {{item.remark?item.remark:"无备注"}}
                     </td>
                     <td style="width: 10%;height: 50px;">
-                        <el-button type="text" size="mini"  style="font-size: 15px" @click="encrypt(item)" v-if="item.type==0">{{(item.encrypt && item.encrypt.type)?item.encrypt.type:"未加密"}}</el-button>
+                        <el-button type="text" size="mini"  style="font-size: 13px" @click="encrypt(item)" v-if="item.type==0" :disabled="interface.example">{{(item.encrypt && item.encrypt.type)?item.encrypt.type:"未加密"}}</el-button>
                     </td>
                     <td style="width: 15%">
-                        <el-button type="text" size="mini" style="font-size: 15px;" @click="toggleEnable(item,index)"><span :class="item.enable?'fa fa-eye-slash':'fa fa-eye'" :title="item.enable?'发送时不包含此字段':'发送时包含此字段'"></span></el-button>
+                        <el-button type="text" size="mini" style="font-size: 15px;" @click="toggleEnable(item,index)" :disabled="interface.example"><span :class="item.enable?'fa fa-eye-slash':'fa fa-eye'" :title="item.enable?'发送时不包含此字段':'发送时包含此字段'"></span></el-button>
                     </td>
                 </tr>
             </template>

@@ -18,9 +18,10 @@ module.exports = {
         admin:["./web/controller/admin/admin"],
         adminlogin:["./web/controller/admin/adminlogin"],
         custom:["./web/controller/custom/custom"],
-        donate:["./web/controller/donate/donate"],
         public:["./web/controller/public/public"],
-        read:["./web/controller/read/read"]
+        read:["./web/controller/read/read"],
+        download:["./web/controller/download/download"],
+        join:["./web/controller/join/join"],
     },
     output: {
         path: path.join(__dirname, 'dist'),

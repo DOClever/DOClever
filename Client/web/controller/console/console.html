@@ -19,7 +19,7 @@
     <el-row class="row" style="height: 60px;line-height: 60px">
         <el-col class="col" style="width: 100px;line-height: 60px;text-align: center;background-color:#17B9E6 ">
             <a href="/">
-                <img src="../../resource/pic/consoleLogo.png" style="width:40px;height:40px;margin-top: 10px">
+                <img src="http://doclever.cn:8090/logo.png" style="width:40px;height:40px;margin-top: 10px">
             </a>
         </el-col>
         <el-col class="col" style="width: calc(100vw - 100px);background-color: white;box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 3px 0px; ">
@@ -59,6 +59,9 @@
                         </el-dropdown-menu>
                     </el-dropdown>
                 </el-col>
+                <el-button type="text" style="color: red;position: absolute;top: 10px;right: calc(25%);" @click="window.open('http://doclever.cn/controller/donate/donate.html','_blank')">
+                    桌面端众筹
+                </el-button>
             </el-row>
         </el-col>
     </el-row>

@@ -64,6 +64,11 @@
                 </el-checkbox>
             </el-col>
         </el-row>
+        <div style="position: absolute;top: 390px;right: 40px;z-index: 1000;font-size: 14px" v-if="objInterface._id">
+            切换:&nbsp;
+            <el-autocomplete size="mini" v-model="exampleName" :fetch-suggestions="querySearchExample" placeholder="筛选你的运行实例" @select="changeExample">
+            </el-autocomplete>
+        </div>
         <el-tabs type="card" style="background-color: white;padding: 20px;margin-top: 15px;border-radius: 5px;box-shadow: 0px 2px 2px #888888;" v-model="tabIndex" id="mainTest">
             <template v-for="(item, index) in originInterface.param">
                 <el-tab-pane :key="item.id" :name="index">
@@ -249,6 +254,8 @@
                     label:"name",
                     children:"data"
                 },
+                example:(this.interface && this.interface.example)?this.interface.example:"",
+                exampleName:"无运行实例"
             }
         },
         components:{
@@ -259,15 +266,54 @@
             "testinject":testInject
         },
         watch:{
-            tabIndex:function (val) {
-                var obj=this.originInterface.param[parseInt(val)];
-                for(var key in obj)
-                {
-                    if(key!="name" && key!="id" && key!="remark")
+            tabIndex:{
+                handler:function (val,oldValue) {
+                    if(!this.objInterface._id)
                     {
-                        this.objInterface[key]=obj[key];
+                        return;
                     }
-                }
+                    var _this=this;
+                    var obj=this.originInterface.param[parseInt(val)];
+                    if(obj.example)
+                    {
+                        this.exampleName=obj.example.name;
+                    }
+                    else
+                    {
+                        this.exampleName="无运行实例";
+                    }
+                    if(oldValue===undefined && this.example)
+                    {
+                        net.get("/example/list",{
+                            interface:this.objInterface._id,
+                            paramid:obj.id
+                        }).then(function (data) {
+                            var results=data.data;
+                            results=results.map(function (obj) {
+                                return {
+                                    id:obj._id,
+                                    value:obj.name
+                                }
+                            })
+                            results.unshift({
+                                value:"无运行实例",
+                                id:""
+                            })
+                            results.forEach(function (o) {
+                                if(o.id==_this.example)
+                                {
+                                    bFind=true;
+                                    _this.exampleName=o.value;
+                                    Vue.set(obj,"example",{
+                                        id:o.id,
+                                        name:o.value
+                                    })
+                                }
+                            })
+                        })
+                    }
+                },
+                immediate:true
             }
         },
         computed:{
@@ -369,14 +415,68 @@
                     $.tip("请选择接口",0);
                     return
                 }
+                var obj1=this.originInterface.param[parseInt(this.tabIndex)];
+                for(var key in obj1)
+                {
+                    if(key!="name" && key!="id" && key!="remark")
+                    {
+                        this.objInterface[key]=obj1[key];
+                    }
+                }
                 this.objInterface.baseUrl=this.baseUrl;
                 var obj=$.clone(this.objInterface);
                 obj.pullInject=this.pullInject;
                 obj.paramId=this.originInterface.param[parseInt(this.tabIndex)].id;
+                if(this.originInterface.param[parseInt(this.tabIndex)].example)
+                {
+                    obj.example=this.originInterface.param[parseInt(this.tabIndex)].example.id
+                }
+                else
+                {
+                    delete obj.example
+                }
                 delete obj.param;
-                this.$emit("save",obj);
+                this.$emit("save",obj,obj.example?this.exampleName:"");
                 this.showDialog=false;
-            }
+            },
+            querySearchExample:function (queryString,cb) {
+                net.get("/example/list",{
+                    interface:this.objInterface._id,
+                    paramid:this.originInterface.param[parseInt(this.tabIndex)].id
+                }).then(function (data) {
+                    var results=data.data;
+                    results=results.map(function (obj) {
+                        return {
+                            id:obj._id,
+                            value:obj.name
+                        }
+                    })
+                    results.unshift({
+                        value:"无运行实例",
+                        id:""
+                    })
+                    cb(results);
+                })
+            },
+            changeExample:function (item) {
+                var _this=this;
+                $.startHud();
+                this.$store.dispatch("changeExample", {
+                    id: item.id,
+                    objInterface: this.objInterface,
+                    objOriginal: this.originInterface.param[parseInt(this.tabIndex)]
+                }).then(function (data) {
+                    $.stopHud();
+                    if(data.code==200)
+                    {
+                        $.notify("切换成功",1);
+                    }
+                    else
+                    {
+                        $.notify(data.msg,0)
+                    }
+                });
+            },
         }
     }
 </script>

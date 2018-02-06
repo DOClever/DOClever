@@ -10,9 +10,7 @@
             <el-button type="primary" size="mini" style="float: right;margin-top: 4px;margin-right: 10px;margin-left: 0px" @click="save"   :loading="savePending" v-if="editRole">
                 保存
             </el-button>
-            <el-button type="text" title="设置BaseUrl" @click="setBaseUrl">
-                <i class="fa fa-link" style="font-weight: 900"></i>
-            </el-button>
+            <testbaseurl style="width: 300px"></testbaseurl>
         </el-row>
         <el-row class="row" style="height: calc(100vh - 150px);margin-top: 5px">
             <el-row class="row" style="border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);background-color: white;height: 66%;">
@@ -115,6 +113,7 @@
 </style>
 
 <script>
+    var testBaseUrl=require("./testBaseUrl.vue");
     module.exports = {
         data: function () {
             return {
@@ -125,6 +124,9 @@
                 lastEle:null,
                 paddingRight:0
             }
+        },
+        components:{
+            "testbaseurl":testBaseUrl
         },
         computed:{
             info:function () {

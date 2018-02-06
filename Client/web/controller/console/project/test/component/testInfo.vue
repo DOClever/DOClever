@@ -7,9 +7,7 @@
             <el-button type="primary" size="mini" style="float: right;margin-top: 4px;margin-right: 10px;margin-left: 0px" @click="save"   :loading="savePending" v-if="editRole">
                 保存
             </el-button>
-            <el-button type="text" title="设置BaseUrl" @click="setBaseUrl">
-                <i class="fa fa-link" style="font-weight: 900"></i>
-            </el-button>
+            <testbaseurl style="width: 300px"></testbaseurl>
         </el-row>
         <el-row class="row" style="height: calc(100vh - 150px);overflow-y: auto;margin-top: 5px">
             <el-row class="row" style="background-color: white;border-radius: 5px;box-shadow: 0 2px 4px 0 rgba(0,0,0,.12), 0 0 6px 0 rgba(0,0,0,.04);padding-bottom: 15px" >
@@ -95,6 +93,7 @@
 <script>
     var testContentCode=require("./testContentCode.vue");
     var testContentUI=require("./testContentUI.vue");
+    var testBaseUrl=require("./testBaseUrl.vue");
     module.exports = {
         data: function () {
             return {
@@ -105,7 +104,8 @@
         },
         components:{
             "testcode":testContentCode,
-            "testui":testContentUI
+            "testui":testContentUI,
+            "testbaseurl":testBaseUrl
         },
         watch:{
             type:function (val) {

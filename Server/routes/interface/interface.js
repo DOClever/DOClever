@@ -795,6 +795,33 @@ function Interface() {
             util.catch(res,err);
         }
     })
+    this.getParam=async ((req,res)=>{
+        try
+        {
+            await (this.validateUser(req));
+            let objParam;
+            for(let obj of req.interface.param)
+            {
+                if(obj.id==req.clientParam.param)
+                {
+                    objParam=obj;
+                    break;
+                }
+            }
+            if(objParam)
+            {
+                util.ok(res,objParam,"ok")
+            }
+            else
+            {
+                util.throw(e.systemReason,"运行实例不存在");
+            }
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
 }
 
 

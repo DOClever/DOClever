@@ -19,6 +19,8 @@ module.exports = {
         adminlogin:[path.join(__dirname,"./web/controller/admin/adminlogin"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         public:[path.join(__dirname,"./web/controller/public/public"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         read:[path.join(__dirname,"./web/controller/read/read"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
+        download:[path.join(__dirname,"./web/controller/download/download"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
+        join:[path.join(__dirname,"./web/controller/join/join"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
     },
     output: {
         path: path.join(__dirname, 'dist'),

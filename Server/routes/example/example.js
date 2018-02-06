@@ -29,6 +29,10 @@ function Example() {
             }
             else
             {
+                if(req.headers["docleverversion"])
+                {
+                    query.interfaceType="InterfaceVersion";
+                }
                 query.owner=req.userInfo._id;
                 obj=await (example.createAsync(query));
             }
@@ -80,6 +84,31 @@ function Example() {
                 _id:req.clientParam.id
             }));
             util.ok(res,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    })
+    this.exampleAllList=async ((req,res)=>{
+        try
+        {
+            let arr=await (example.findAsync({
+                interface:req.clientParam.interface
+            },"name paramId"));
+            let obj={};
+            arr.forEach(function (o) {
+                let id=o.paramId;
+                if(obj[id])
+                {
+                    obj[id].push(o);
+                }
+                else
+                {
+                    obj[id]=[o];
+                }
+            })
+            util.ok(res,obj,"ok");
         }
         catch (err)
         {

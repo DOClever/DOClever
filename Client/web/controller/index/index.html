@@ -14,135 +14,232 @@
 </head>
 <body>
     <el-col class="page-container" id="app" v-cloak>
-        <el-row class="row">
-            <el-col class="header1 curve1">
-                    <el-row class="row" style="z-index: 999">
-                        <el-col :span="20" class="col" :offset="2"  ><mainnav></mainnav></el-col>
-                    </el-row>
-                    <div class="vedio">
-                        <h2 class="tc">DOClever,让接口<strong>更懂你!</strong></h2>
-                        <p style="margin-top: 40px;cursor: pointer" @click="dialogVisible=true">观看视频&nbsp;<i class="fa fa-play-circle-o"></i></p>
-                    </div>
-                    <el-row :gutter="5" class="row item-boxs" >
-                            <el-col :span="5" class="col item" :offset="3" >
-                                <p><img src="../../resource/pic/xiezuo.svg" ><br><br><span>协作管理</span></p>
-                                <div class="txt">
-                                    DOClever提供了项目和团队两种协作模式，您可以在不同的模式间自由的切换，大大提高您的协作效率。
-                                </div>
-                            </el-col>
-                            <el-col :span="5" class="col item" :offset="1" >
-                                <p><img src="../../resource/pic/zidonghuaceshi.svg" ><br><br><span>自动化测试</span></p>
-                                <div class="txt">
-                                    DOClever独创的接口业务场景的自动化测试功能，并且可以通过后台轮询将结果及时发送到您的邮箱。
-                                </div>
-                            </el-col>
-                            <el-col :span="5" class="col item" :offset="1" >
-                                <p><img src="../../resource/pic/mianfeikaiyuan.svg" ><br><br><span>免费开源</span></p>
-                                <div class="txt">
-                                    DOClever本着共享和自由的开放精神，目前开放所有源代码，其托管在GitHub上的项目star已经过千。
-                                </div>
-                            </el-col>
-                        </el-row>
-                </el-col>
-        </el-row>
-        <div class="sxhn"></div>
-        <el-row class="row index-body">
-            <el-col :span="20" :offset="2">
-                <el-row class="row">
-                    <el-col :span="12">
-                        <img src="../../resource/pic/zaixianwendang.svg" width="98%" alt="在线文档，版本管理">
-                    </el-col>
-                    <el-col :span="12" class="gn-txt">
-                        <p class="gn-title">在线文档，版本管理</p>
-                        <p class="txt">Restful,Query,Header,Body,Raw信息一应俱全<br>JSON层次采用可视化编辑,结构清晰.<br>项目版本和接口快照保证你可以实时回溯到任何状态.</p>
-                    </el-col>
-                </el-row>
-                <el-row class="row">
-                    <el-col :span="12" class="gn-txt">
-                        <p class="gn-title">调试运行<br>接口场景自动化测试</p>
-                        <p class="txt">通过独创的自动化测试技术可以联调不同的业务场景<br>https,接口加密，文件上传，so easy！
-                            <br>独有的proxy技术加持为您冲破内网的束缚..</p>
-                    </el-col>
-                    <el-col :span="12">
-                           <img src="../../resource/pic/tiaoshiyunxing.svg" width="98%" alt="接口场景自动化测试">
-                    </el-col>
-                </el-row>
-                <el-row class="row">
-                    <el-col :span="12">
-                        <img src="../../resource/pic/wufengmock.svg" width="98%" alt="无缝MOCK">
-                    </el-col>
-                    <el-col :span="12" class="gn-txt">
-                        <p class="gn-title">无缝MOCK<br>我们要的是卓越</p>
-                        <p class="txt">简单强大，只需要把Mock Server的根地址替换成你web项目的地址<br>Mock就会在神不知鬼不觉中悄悄进行！.</p>
-                    </el-col>
-                </el-row>
-                <el-row class="row">
-                    <el-col :span="12" class="gn-txt">
-                        <p class="gn-title">团队协作<br>日常动态一网打尽</p>
-                        <p class="txt">作为团队的管理员，你可以查看团队的所有状态以及编辑项目和成员信息.</p>
-                    </el-col>
-                    <el-col :span="12">
-                        <img src="../../resource/pic/tuanduixiezuo.svg" width="98%" alt="团队协作">
-                    </el-col>
-                </el-row>
-            </el-col>
-        </el-row>
-        <el-row class="row hezuo">
-            <el-col :span="20" class="col" :offset="2">
-            <h2 class="tc" style="margin-bottom: 30px">DOClever已为上千项目的数万接口提供服务</h2>
-                <table style="width: 100%;margin: 0 auto" cellspacing="10">
-                    <tbody>
-                    <tr>
-                        <td style="width: 20%;"><a href="http://www.xiaojukeji.com/index/index" target="_blank" rel="nofollow"><img src="../../resource/pic/didi.png" style="width: 100%;transform: scale(0.8,0.8)" alt="didi"></a></td>
-                        <td style="width: 20%;"><a href="http://meituan.com/" target="_blank" rel="nofollow"><img
-                                src="../../resource/pic/meituan.png" style="width: 100%;transform: scale(0.8,0.8)" alt="美团"></a></td>
-                        <td style="width: 20%;"><a href="http://58.com/" target="_blank" rel="nofollow"><img
-                                src="../../resource/pic/58.png" style="width: 100%;transform: scale(0.8,0.8)" alt="58"></a></td>
-                        <td style="width: 20%;"><a href="http://www.ly.com/" target="_blank" rel="nofollow"><img
-                                src="../../resource/pic/tongcheng.png" style="width: 100%;" alt="同程旅游"></a></td>
-                        <td style="width: 20%;"><a href="http://www.injedu.com/" target="_blank" rel="nofollow"><img
-                                src="../../resource/pic/yingjie.png" style="width: 100%;transform: scale(0.9,0.9)" alt="高顿"></a></td>
-                    </tr>
-                    <tr>
-                        <td style="width: 20%;"><a href="http://www.gaodun.cn/" target="_blank" rel="nofollow"><img
-                                src="../../resource/pic/gaodun.png" style="width: 100%;color: #416abc"></a></td>
-                        <td style="width: 20%;"><a href="http://pingan.com/" target="_blank" rel="nofollow" ><img
-                                src="../../resource/pic/pingan.png" style="width: 100%;" alt="平安科技"></a></td>
-                        <td style="width: 20%;"><a href="http://www.kuaimaxueche.com/" target="_blank" rel="nofollow"><img
-                                src="../../resource/pic/kuaima.png" style="width: 100%;" alt="快马学车"></a></td>
-                        <td style="width: 20%;"><a href="http://www.leadbank.com.cn/" target="_blank" rel="nofollow"><img
-                                src="../../resource/pic/deli.png" style="width: 100%;transform: scale(0.9,0.9)" alt="得力"></a></td>
-                        <td style="width: 20%;"><a href="http://www.youxinpai.com/" target="_blank" rel="nofollow"><img
-                                src="../../resource/pic/youxin.png" style="width: 100%;transform: scale(0.8,0.8)" alt="优信拍"></a></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </el-col>
-        </el-row>
-        <div class="slide curveb">
-            <h2 class="tc pt50" style="color:#fff;">5000+的团队在使用,被千余个开发者点赞</h2>
-            <el-row class="row" style="text-align: center;margin-top: 30px">
-                <el-carousel height="150px"
-                             style="width: 70%;margin: 0 auto;color: white;font-size: small;background-position:center center;background-size: cover;">
-                    <el-carousel-item v-for="item in dis">
-                        <div class="row" style="height: 100%;text-align: center">
-                            <h3>
-                                {{item.title}}
-                            </h3>
-                            <h4>
-                                {{item.name}}
-                            </h4>
+        <mainnav></mainnav>
+        <div class="index-banner">
+            <el-carousel :interval="5000" arrow="never"  height="460px">
+                <el-carousel-item v-for="item in 3" :key="item">
+
+                </el-carousel-item>
+            </el-carousel>
+        </div>
+        <div class="index-num">
+            <div class="wrap960">
+                <el-row :gutter="30">
+                    <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                        <div class="tc box">
+                            <h3>10W+</h3>
+                            <p>在线接口</p>
                         </div>
-                    </el-carousel-item>
-                </el-carousel>
+                    </el-col>
+                    <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                        <div class="tc box">
+                            <h3>2W+</h3>
+                            <p>在线项目</p>
+                        </div>
+                    </el-col>
+                    <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                        <div class="tc box">
+                            <h3>3000+</h3>
+                            <p>在线团队</p>
+                        </div>
+                    </el-col>
+                    <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                        <div class="tc box">
+                            <h3>2W+</h3>
+                            <p>在线用户</p>
+                        </div>
+                    </el-col>
+                </el-row>
+            </div>
+        </div>
+        <div class="index-hzhb">
+            <div class="hd tc">
+                <h2>深受各企业信赖</h2>
+                <p>DOClever已为上千企业提供服务</p>
+            </div>
+            <el-row class="row hezuo">
+                <el-col :span="20" class="col" :offset="2">
+                    <table style="width: 100%;margin: 0 auto" cellspacing="10">
+                        <tbody>
+                        <tr>
+                            <td style="width: 20%;"><a href="http://www.xiaojukeji.com/index/index" target="_blank" rel="nofollow"><img src="../../resource/pic/didi.jpg" style="width: 100%;" alt="didi"></a></td>
+                            <td style="width: 20%;"><a href="http://meituan.com/" target="_blank" rel="nofollow"><img
+                                    src="../../resource/pic/meituan.jpg" style="width: 100%;" alt="美团"></a></td>
+                            <td style="width: 20%;"><a href="http://58.com/" target="_blank" rel="nofollow"><img
+                                    src="../../resource/pic/58.jpg" style="width: 100%;" alt="58"></a></td>
+                            <td style="width: 20%;"><a href="http://www.ly.com/" target="_blank" rel="nofollow"><img
+                                    src="../../resource/pic/tongcheng.jpg" style="width: 100%;" alt="同程旅游"></a></td>
+                            <td style="width: 20%;"><a href="https://www.jisuapi.com/" target="_blank" ><img
+                                    src="../../resource/pic/jisu.jpg" style="width: 100%;" ></a></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;"><a href="http://www.gaodun.cn/" target="_blank" rel="nofollow"><img
+                                    src="../../resource/pic/gaodun.jpg" style="width: 100%;color: #416abc"></a></td>
+                            <td style="width: 20%;"><a href="http://pingan.com/" target="_blank" rel="nofollow" ><img
+                                    src="../../resource/pic/pingan.jpg" style="width: 100%;" alt="平安科技"></a></td>
+                            <td style="width: 20%;"><a href="https://sdk.cn/" target="_blank"><img
+                                    src="../../resource/pic/sdk.jpg" style="width: 100%;" alt="SDK"></a></td>
+                            <td style="width: 20%;"><a href="https://www.bugtags.com/" target="_blank" ><img
+                                    src="../../resource/pic/bugtags.jpg" style="width: 100%;" alt="bugtags"></a></td>
+                            <td style="width: 20%;"><a href="http://www.youxinpai.com/" target="_blank" rel="nofollow"><img
+                                    src="../../resource/pic/youxin.jpg" style="width: 100%;" alt="优信拍"></a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </el-col>
             </el-row>
         </div>
-        <commonfooter>
-            <img src="http://doclever.cn:8090/logo.png" style="width:120px;height:40px">
-        </commonfooter>
-        <el-dialog title="DOClever产品介绍" :visible.sync="dialogVisible">
-            <embed src="https://imgcache.qq.com/tencentvideo_v1/playerv3/TPout.swf?max_age=86400&v=20161117&vid=i0548uvxzu6&auto=0" allowFullScreen="true" quality="high" width="100%" height="400" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed>
-        </el-dialog>
+        <div class="index-cpjs">
+            <div class="item1">
+                <div class="wrap">
+                    <el-row :gutter="10">
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                           <img src="../../resource/pic/index-cpjs01.png">
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <div class="txt">
+                                <h3>接口项目管理<br>在线接口文档,项目版本管理</h3>
+                                <p>Restful,Query,Header,Body,Raw信息一应俱全JSON层次采用可视化编辑,结构清晰.<br>
+                                    项目版本和接口快照保证你可以实时回溯到任何状态.https,接口加密，文件上传，so easy！<br>
+                                    独有的proxy技术加持为您冲破内网的束缚..
+                                </p>
+                                <ul>
+                                    <li><span>1</span>  接口快照回滚,项目版本控制</li>
+                                    <li><span>2</span>  兼容最新版Swagger,PostMan等平台数据</li>
+                                    <li><span>3</span>  接口文档自动在线生成</li>
+                                    <li><span>4</span>  Restful,Query,Header,Body,Raw信息一应俱全,独有的proxy技术加持为您冲破内网的束缚</li>
+                                </ul>
+                                <a href="../register/register.html"><img src="../../resource/pic/btn_03.png"> </a>
+                            </div>
+                        </el-col>
+                    </el-row>
+                </div>
+            </div>
+            <div class="item2">
+                <div class="wrap">
+                    <el-row :gutter="10">
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <div class="txt">
+                                <h3>接口场景自动化测试<br>
+                                    告别代码,数据智能验证</h3>
+                                <p>通过独创的自动化测试技术可以联调不同的业务场景<br>
+                                </p>
+                                <ul>
+                                    <li><span>1</span>  无需代码,可视化界面编写测试用例</li>
+                                    <li><span>2</span>  无需值守,后台轮询,实时监控平台的稳定与安全</li>
+                                    <li><span>3</span>  测试集合,跨项目,联调不同业务场景</li>
+
+                                </ul>
+                                <a href="../register/register.html"><img src="../../resource/pic/btn_03.png"> </a>
+                            </div>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <img src="../../resource/pic/index-cpjs02.png">
+                        </el-col>
+                    </el-row>
+                </div>
+            </div>
+            <div class="item1">
+                <div class="wrap">
+                    <el-row :gutter="10">
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <img src="../../resource/pic/index-cpjs03.jpg">
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <div class="txt">
+                                <h3>无缝MOCK<br>
+                                    我们要的是卓越</h3>
+                                <p>简单强大，只需要把Mock Server的根地址替换成你web项目的地址<br>
+                                    Mock就会在神不知鬼不觉中悄悄进行！.
+                                </p>
+                                <a href=""><img src="../../resource/pic/btn_03.png"> </a>
+                            </div>
+                        </el-col>
+                    </el-row>
+                </div>
+            </div>
+            <div class="item2">
+                <div class="wrap">
+                    <el-row :gutter="10">
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <div class="txt">
+                                <h3>团队协作<br>
+                                    日常动态一网打尽</h3>
+                                <p>作为团队的管理员，你可以查看团队的所有状态以及编辑项目和成员信息.
+                                </p>
+                                <a href=""><img src="../../resource/pic/btn_03.png"> </a>
+                            </div>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <img src="../../resource/pic/index-cpjs04.png">
+                        </el-col>
+                    </el-row>
+                </div>
+            </div>
+        </div>
+        <div class="index-user">
+            <div class="wrap">
+                <div class="hd tc">
+                    <h2>用户怎么说</h2>
+                    <p>听听用户对我们的评价，好不好试试就知道</p>
+                </div>
+                <div class="wrap960">
+                    <el-row :gutter="30">
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <div class="box">
+                                <p><img src="../../resource/pic/dh.png"></p>
+                                <p class="txt">DOClever接口管理工具可以提高我们每个人对接口管理的效率，同时提供完善的测试工具以及接口文档工具，可以使我们对接口的管理变得简单、高效；在使用了Doclever后我们觉得DOClever就是我们所需要的平台，它使我们开发变得更简单、高效!</p>
+                            </div>
+                            <div class="user">
+                                <p style="width: 43px" class="fl"> <img src="../../resource/pic/user1.jpg"></p>
+                                <span><strong>胡敏</strong> 滴滴金融项目开发工程师<br><b style="color: #449efa">北京小桔科技有限公司</b> 开发工程师</span>
+                            </div>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <div class="box">
+                                <p><img src="../../resource/pic/dh.png"></p>
+                                <p class="txt">对于开发协作平台的选择，我们同样也是很苛刻的，如何能够使团队开发变得更有艺术，是我们选择的首选条件；使用DOClever可以使我们的团队协作开发变得不再枯燥，团队协作效率提高，我们可以有更多的时间去享受生活，让工作变成艺术！</p>
+                            </div>
+                            <div class="user">
+                                <p style="width: 43px" class="fl"> <img src="../../resource/pic/user2.jpg"></p>
+                                <span><strong>李航</strong>  造作家居项目开发负责人<br><b style="color: #449efa">北京造化科技有限公司</b> 项目经理</span>
+                            </div>
+                        </el-col>
+                    </el-row>
+                </div>
+            </div>
+        </div>
+        <div class="index-numft">
+            <div class="wrap960">
+                <el-row :gutter="30">
+                    <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                        <div class="tc box">
+                            <p>日活跃用户</p>
+                            <h3>300+</h3>
+                        </div>
+                    </el-col>
+                    <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                        <div class="tc box">
+                            <p>日新建接口</p>
+                            <h3>500+</h3>
+                        </div>
+                    </el-col>
+                    <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                        <div class="tc box">
+                            <p>日新建团队</p>
+                            <h3>20+</h3>
+                        </div>
+                    </el-col>
+                    <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                        <div class="tc box">
+                            <p>日新建项目</p>
+                            <h3>80+</h3>
+                        </div>
+                    </el-col>
+                </el-row>
+            </div>
+        </div>
+        <commonfooter></commonfooter>
     </el-col>
     <script src="../../../dist/vendor.bundle.js"></script>
     <script src="../../common/lib/element/index.js"></script>

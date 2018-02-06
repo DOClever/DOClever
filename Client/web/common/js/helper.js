@@ -1411,11 +1411,12 @@ helper.getSelection=function () {
     return oRange;
 }
 
-helper.handleTestInterface=function (inter,data,status) {
+helper.handleTestInterface=function (inter,data,status,bRun) {
     inter.url=data.url;
     inter.method=data.method;
     inter.finish=data.finish;
     inter.remark=data.remark;
+    inter.updatedAt=data.updatedAt;
     var retIndex=0;
     data.param.forEach(function (obj,index) {
         var bFindInter=false;
@@ -1425,31 +1426,36 @@ helper.handleTestInterface=function (inter,data,status) {
             bFindInter=true;
         }
         if(obj.before) {
-            if (typeof(obj.before) == "object") {
-                inter.before = obj.before;
-            }
-            else
-            {
-                inter.before ={
+            if (typeof(obj.before) != "object") {
+                obj.before ={
                     mode:0,
                     code:obj.before
                 }
             }
         }
+        else
+        {
+            obj.before ={
+                mode:0,
+                code:""
+            }
+        }
         if(obj.after)
         {
-            if (typeof(obj.after) == "object") {
-                inter.after = obj.after;
-            }
-            else
-            {
-                inter.after ={
+            if (typeof(obj.after) != "object") {
+                obj.after ={
                     mode:0,
                     code:obj.after
                 }
             }
         }
-        inter.updatedAt=data.updatedAt;
+        else
+        {
+            obj.after ={
+                mode:0,
+                code:""
+            }
+        }
         Vue.set(obj,"encrypt",(bFindInter && inter.encrypt)?inter.encrypt:{
             salt:"",
             type:""
@@ -1502,7 +1508,14 @@ helper.handleTestInterface=function (inter,data,status) {
         });
         if(bFindInter)
         {
-            inter.restParam=obj.restParam;
+            if(!inter.example && !bRun)
+            {
+                inter.restParam=obj.restParam;
+            }
+            else
+            {
+                obj.restParam=inter.restParam;
+            }
         }
         obj.queryParam.forEach(function (item) {
             var obj;
@@ -1553,7 +1566,14 @@ helper.handleTestInterface=function (inter,data,status) {
         });
         if(bFindInter)
         {
-            inter.queryParam=obj.queryParam
+            if(!inter.example && !bRun)
+            {
+                inter.queryParam=obj.queryParam;
+            }
+            else
+            {
+                obj.queryParam=inter.queryParam;
+            }
         }
         obj.header.forEach(function (item) {
             var obj;
@@ -1577,7 +1597,14 @@ helper.handleTestInterface=function (inter,data,status) {
         });
         if(bFindInter)
         {
-            inter.header=obj.header;
+            if(!inter.example && !bRun)
+            {
+                inter.header=obj.header;
+            }
+            else
+            {
+                obj.header=inter.header;
+            }
         }
         if(obj.bodyParam)
         {
@@ -1630,7 +1657,14 @@ helper.handleTestInterface=function (inter,data,status) {
             });
             if(bFindInter)
             {
-                inter.bodyParam=obj.bodyParam;
+                if(!inter.example && !bRun)
+                {
+                    inter.bodyParam=obj.bodyParam;
+                }
+                else
+                {
+                    obj.bodyParam=inter.bodyParam;
+                }
             }
         }
         else
@@ -1700,11 +1734,18 @@ helper.handleTestInterface=function (inter,data,status) {
             {
                 return;
             }
-            for(var key in obj.bodyInfo)
+            else if(bFindInter && (inter.example || bRun))
             {
-                if(key!="rawJSON")
+                obj.bodyInfo=inter.bodyInfo;
+            }
+            else
+            {
+                for(var key in obj.bodyInfo)
                 {
-                    inter.bodyInfo[key]=obj.bodyInfo[key];
+                    if(key!="rawJSON")
+                    {
+                        inter.bodyInfo[key]=obj.bodyInfo[key];
+                    }
                 }
             }
             if(obj.bodyInfo.type==1 && obj.bodyInfo.rawType==2)
@@ -2220,6 +2261,21 @@ helper.runTest=async function (obj,global,test,root,opt,id) {
     {
         path=path+"?"+query;
     }
+    for(var keyHeader in header)
+    {
+        var headerType=typeof (header[keyHeader]);
+        if(headerType!="string")
+        {
+            if(headerType=="object")
+            {
+                header[keyHeader]=JSON.stringify(header[keyHeader]);
+            }
+            else
+            {
+                header[keyHeader]=String(header[keyHeader]);
+            }
+        }
+    }
     header["url-doclever"]=baseUrl;
     header["path-doclever"]=path;
     header["method-doclever"]=method;
@@ -2261,17 +2317,6 @@ helper.runTest=async function (obj,global,test,root,opt,id) {
         func=net.post(proxyUrl,body,header,null,1,bNet)
     }
     return func.then(function (result) {
-        if(id!=undefined)
-        {
-            if(result.status>=200 && result.status<300)
-            {
-                window.vueObj.$store.state.event.$emit("testRunStatus","interfaceSuccess",id);
-            }
-            else
-            {
-                window.vueObj.$store.state.event.$emit("testRunStatus","interfaceFail",id);
-            }
-        }
         var res={
             req:{
                 param:param,
@@ -2286,6 +2331,17 @@ helper.runTest=async function (obj,global,test,root,opt,id) {
         res.second=(((new Date())-startDate)/1000).toFixed(3);
         res.type=typeof (result.data);
         res.data=result.data;
+        if(id!=undefined)
+        {
+            if(result.status>=200 && result.status<300)
+            {
+                window.vueObj.$store.state.event.$emit("testRunStatus","interfaceSuccess",id,res);
+            }
+            else
+            {
+                window.vueObj.$store.state.event.$emit("testRunStatus","interfaceFail",id,res);
+            }
+        }
         if(obj.after.mode==0)
         {
             if(global.after)
@@ -2311,13 +2367,27 @@ helper.runTest=async function (obj,global,test,root,opt,id) {
     })
 }
 
-helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level) {
+helper.runTestCode=async function (code,test,global,opt,root,argv,mode,__id,level) {
     var Base64=BASE64.encoder,MD5=CryptoJS.MD5,SHA1=CryptoJS.SHA1,SHA256=CryptoJS.SHA256,SHA512=CryptoJS.SHA512,SHA3=CryptoJS.SHA3,RIPEMD160=CryptoJS.RIPEMD160,AES=CryptoJS.AES.encrypt,TripleDES=CryptoJS.TripleDES.encrypt,DES=CryptoJS.DES.encrypt,Rabbit=CryptoJS.Rabbit.encrypt,RC4=CryptoJS.RC4.encrypt,RC4Drop=CryptoJS.RC4Drop.encrypt;
     if(!global)
     {
         global={};
     }
     var env=opt.env;
+    function __assert(val,id,title) {
+        if(level==0)
+        {
+            log("断言:"+title+"("+(val?("<span style='color: green'>通过</span>"):("<span style='color: red'>不通过</span>"))+")")
+            if(val)
+            {
+                window.vueObj.$store.state.event.$emit("testRunStatus","assertSuccess",id)
+            }
+            else
+            {
+                window.vueObj.$store.state.event.$emit("testRunStatus","assertFail",id)
+            }
+        }
+    }
     function log(text) {
         if(typeof(text)=="object")
         {
@@ -2353,7 +2423,7 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
         if(type=="1")
         {
             var objInfo={};
-            var o=JSON.parse(obj);
+            var o=JSON.parse(obj.replace(/\r|\n/g,""));
             var query={
                 project:o.project._id
             }
@@ -2408,6 +2478,30 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
                 }
                 root.projectInfo.push(objPush);
             }
+            if(o.example)
+            {
+                try
+                {
+                    await net.get("/example/item",{
+                        id:o.example
+                    }).then(function (data) {
+                        if(data.code==200)
+                        {
+                            helper.updateTestInterfaceWithExample(o,data.data);
+                        }
+                        else
+                        {
+                            $.notify(data.msg,0);
+                            throw data.msg;
+                        }
+                    })
+                    obj=JSON.stringify(o);
+                }
+                catch (err)
+                {
+
+                }
+            }
             opt.baseUrls=objInfo.baseUrls;
             opt.before=objInfo.before;
             opt.after=objInfo.after;
@@ -2418,10 +2512,15 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
             var testObj,testMode=arr[i].hasAttribute("mode")?arr[i].getAttribute("mode"):"code";
             try
             {
-                testObj=await net.get("/test/test",{
+                var queryTest={
                     id:obj,
-                    project:session.get("projectId")
-                }).then(function (data) {
+                    type:testMode
+                }
+                if(obj.length!=24)
+                {
+                    queryTest.project=session.get("projectId")
+                }
+                testObj=await net.get("/test/test",queryTest).then(function (data) {
                     if(data.code==200)
                     {
                         return data.data
@@ -2442,16 +2541,19 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
                     status:0
                 }
             }
-            var code;
+            var code1;
             if(testMode=="code")
             {
-                code=testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'");
+                code1=testObj.code.replace(/\\\&quot\;/g,"\\\\&quot;").replace(/'/g,"\\'");
             }
             else
             {
-                code=helper.convertToCode(testObj.ui).replace(/'/g,"\\'").replace(/\\\"/g,"\\\\\"");
+                code1=helper.convertToCode(testObj.ui).replace(/'/g,"\\'").replace(/\\\"/g,"\\\\\"");
             }
-            text="(function () {var argv=Array.prototype.slice.call(arguments);return helper.runTestCode('"+code+"',"+JSON.stringify(testObj)+",global,opt,root,argv,'"+testMode+"',"+(level==0?objId:undefined)+","+(level+1)+")})"
+            delete testObj.output;
+            delete testObj.code;
+            delete testObj.ui;
+            text="(function () {var argv=Array.prototype.slice.call(arguments);return helper.runTestCode('"+code1+"',"+JSON.stringify(testObj)+",global,opt,root,argv,'"+testMode+"',"+(level==0?objId:undefined)+","+(level+1)+")})"
         }
         else
         {
@@ -2473,9 +2575,9 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
     root.output+="<br><div style='background-color: #ececec'>开始执行用例："+test.name+"("+(mode=="code"?"代码模式":"UI模式")+")<br>";
     var startTime=Date.now();
     var startOutputIndex=root.output.length;
-    if(id!=undefined)
+    if(__id!=undefined)
     {
-        window.vueObj.$store.state.event.$emit("testRunStatus","testStart",id);
+        window.vueObj.$store.state.event.$emit("testRunStatus","testStart",__id);
     }
     var ret=eval("(async function () {"+ele.innerText+"})()").then(function (ret) {
         var obj={
@@ -2495,11 +2597,11 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
         {
             obj.pass=undefined;
             test.status=0;
-            if(id!=undefined)
+            if(__id!=undefined)
             {
                 root.unknown++;
-                window.vueObj.$store.state.event.$emit("testRunStatus","testUnknown",id);
-                window.vueObj.$store.state.event.$emit("testCollectionRun",id,root.output.substr(startOutputIndex),Date.now()-startTime);
+                window.vueObj.$store.state.event.$emit("testRunStatus","testUnknown",__id);
+                window.vueObj.$store.state.event.$emit("testCollectionRun",__id,root.output.substr(startOutputIndex),Date.now()-startTime);
             }
             root.output+="用例执行结束："+test.name+"(未判定)";
         }
@@ -2507,11 +2609,11 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
         {
             obj.pass=true;
             test.status=1;
-            if(id!=undefined)
+            if(__id!=undefined)
             {
                 root.success++;
-                window.vueObj.$store.state.event.$emit("testRunStatus","testSuccess",id);
-                window.vueObj.$store.state.event.$emit("testCollectionRun",id,root.output.substr(startOutputIndex),Date.now()-startTime);
+                window.vueObj.$store.state.event.$emit("testRunStatus","testSuccess",__id);
+                window.vueObj.$store.state.event.$emit("testCollectionRun",__id,root.output.substr(startOutputIndex),Date.now()-startTime);
             }
             root.output+="用例执行结束："+test.name+"(<span style='color:green'>已通过</span>)";
         }
@@ -2519,11 +2621,11 @@ helper.runTestCode=async function (code,test,global,opt,root,argv,mode,id,level)
         {
             obj.pass=false;
             test.status=2;
-            if(id!=undefined)
+            if(__id!=undefined)
             {
                 root.fail++;
-                window.vueObj.$store.state.event.$emit("testRunStatus","testFail",id);
-                window.vueObj.$store.state.event.$emit("testCollectionRun",id,root.output.substr(startOutputIndex),Date.now()-startTime);
+                window.vueObj.$store.state.event.$emit("testRunStatus","testFail",__id);
+                window.vueObj.$store.state.event.$emit("testCollectionRun",__id,root.output.substr(startOutputIndex),Date.now()-startTime);
             }
             root.output+="用例执行结束："+test.name+"(<span style='color:red'>未通过</span>)";
         }
@@ -2662,7 +2764,7 @@ helper.convertToCode=function (data) {
                 argv+=obj+","
             })
             argv+="]";
-            str+=`<div class='testCodeLine'>var $${obj.id}=await <a type='2' href='javascript:void(0)' style='cursor: pointer; text-decoration: none;' varid='${obj.id}' data='${obj.data}' mode='${obj.mode}'>${obj.name}</a>(...${argv});</div>`
+            str+=`<div class='testCodeLine'>var $${obj.id}=await <a type='2' href='javascript:void(0)' style='cursor: pointer; text-decoration: none;color:orange' varid='${obj.id}' data='${obj.data}' mode='${obj.mode}'>${obj.name}</a>(...${argv});</div>`
         }
         else if(obj.type=="ifbegin")
         {
@@ -2705,7 +2807,7 @@ helper.convertToCode=function (data) {
         }
         else if(obj.type=="log")
         {
-            str+=`<div class='testCodeLine'>log(${obj.data});</div>`
+            str+=`<div class='testCodeLine'>log("打印${obj.name}:"+(${obj.data}));</div>`
         }
         else if(obj.type=="input")
         {
@@ -2714,6 +2816,10 @@ helper.convertToCode=function (data) {
         else if(obj.type=="baseurl")
         {
             str+=`<div class='testCodeLine'>opt["baseUrl"]=${obj.data};</div>`
+        }
+        else if(obj.type=="assert")
+        {
+            str+=`<div class='testCodeLine'>if(${obj.data}){</div><div class='testCodeLine'>__assert(true,${obj.id},"${obj.name}");${obj.pass?"return true;":""}</div><div class='testCodeLine'>}</div><div class='testCodeLine'>else{</div><div class='testCodeLine'>__assert(false,${obj.id},"${obj.name}");</div><div class='testCodeLine'>return false;</div><div class='testCodeLine'>}</div>`
         }
     })
     return str;
@@ -2729,6 +2835,317 @@ function filterHeader(obj) {
         }
     }
     return o;
+}
+
+helper.getArgvType=function (data) {
+    var type;
+    try
+    {
+        var val=eval("("+data+")");
+        if(Number.isNaN(val) || val===undefined)
+        {
+            type="code";
+        }
+        else if(typeof(val)=="number")
+        {
+            type="number";
+        }
+        else if(typeof(val)=="string")
+        {
+            type="string";
+        }
+        else if(typeof(val)=="boolean")
+        {
+            type="boolean";
+        }
+        else
+        {
+            type="string"
+        }
+    }
+    catch (err)
+    {
+        type="code"
+    }
+    return type;
+},
+helper.handleArgvData=function (key,value) {
+    var o={
+        type:helper.getArgvType(value)
+    }
+    if(key!==undefined)
+    {
+        o.key=key;
+    }
+    var data=value;
+    if(o.type=="string")
+    {
+        data=data.substr(1,data.length-2);
+    }
+    o.value=data;
+    return o;
+},
+helper.setArgvValue=function (data,type) {
+    if(type=="string")
+    {
+        return "\""+data+"\""
+    }
+    else
+    {
+        return data;
+    }
+}
+
+helper.getTestUIArgvList=function (arrUI,index) {
+    var arrUI=arrUI.slice(0,index+1).filter(function (obj) {
+        if(obj.type=="interface" || obj.type=="test")
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    });
+    var arr=[];
+    arrUI.forEach(function (obj) {
+        var o={
+            label:obj.name,
+            value:obj.id
+        }
+        if(obj.type=="test")
+        {
+            o.data=[
+                {
+                    label:"pass",
+                    value:"pass"
+                },
+                {
+                    label:"argv",
+                    value:"argv"
+                }
+            ]
+        }
+        else
+        {
+            o.data=[
+                {
+                    label:"header",
+                    value:"header"
+                },
+                {
+                    label:"status",
+                    value:"status"
+                },
+                {
+                    label:"second",
+                    value:"second"
+                },
+                {
+                    label:"type",
+                    value:"type"
+                },
+            ]
+            var objInter=JSON.parse(obj.data);
+            var objReq={
+                label:"req",
+                value:"req",
+                data:[]
+            }
+            var reqParam={
+                label:"param",
+                value:"param"
+            }
+            if(objInter.restParam && objInter.restParam.length>0)
+            {
+                reqParam.data=[];
+                objInter.restParam.forEach(function (obj) {
+                    reqParam.data.push({
+                        label:obj.name,
+                        value:obj.name
+                    })
+                })
+            }
+            objReq.data.push(reqParam);
+            var reqQuery={
+                label:"query",
+                value:"query"
+            }
+            if(objInter.queryParam && objInter.queryParam.length>0)
+            {
+                reqQuery.data=[];
+                objInter.queryParam.forEach(function (obj) {
+                    reqQuery.data.push({
+                        label:obj.name,
+                        value:obj.name
+                    })
+                })
+            }
+            objReq.data.push(reqQuery);
+            var reqHeader={
+                label:"header",
+                value:"header"
+            }
+            if(objInter.header && objInter.header.length>0)
+            {
+                reqHeader.data=[];
+                objInter.header.forEach(function (obj) {
+                    reqHeader.data.push({
+                        label:obj.name,
+                        value:obj.name
+                    })
+                })
+            }
+            objReq.data.push(reqHeader);
+            var reqBody={
+                label:"body",
+                value:"body"
+            }
+            if(objInter.bodyInfo)
+            {
+                if(objInter.bodyInfo.type==0 && objInter.bodyParam && objInter.bodyParam.length>0)
+                {
+                    reqBody.data=[];
+                    objInter.bodyParam.forEach(function (obj) {
+                        reqBody.data.push({
+                            label:obj.name,
+                            value:obj.name
+                        })
+                    })
+                }
+                else if(objInter.bodyInfo.rawJSON && objInter.bodyInfo.rawJSON.length>0)
+                {
+                    var arrData=[];
+                    (function (arrRaw,arr) {
+                        for(var i=0;i<arrRaw.length;i++)
+                        {
+                            var o={
+                                label:arrRaw[i].name?arrRaw[i].name:0,
+                                value:arrRaw[i].name?arrRaw[i].name:0
+                            }
+                            if(arrRaw[i].data && arrRaw[i].data.length>0)
+                            {
+                                o.data=[];
+                                arguments.callee(arrRaw[i].data,o.data);
+                            }
+                            arr.push(o);
+                        }
+                    })(objInter.bodyInfo.rawJSON,arrData)
+                    reqBody.data=arrData;
+                }
+
+            }
+            objReq.data.push(reqBody);
+            objReq.data.push({
+                label:"info",
+                value:"info"
+            })
+            o.data.unshift(objReq)
+            var objData={
+                label:"data",
+                value:"data"
+            }
+            if(objInter.outInfo.type==0)
+            {
+                var arrData=[];
+                (function (arrRaw,arr) {
+                    for(var i=0;i<arrRaw.length;i++)
+                    {
+                        var o={
+                            label:arrRaw[i].name?arrRaw[i].name:0,
+                            value:arrRaw[i].name?arrRaw[i].name:0
+                        }
+                        if(arrRaw[i].data && arrRaw[i].data.length>0)
+                        {
+                            o.data=[];
+                            arguments.callee(arrRaw[i].data,o.data);
+                        }
+                        arr.push(o);
+                    }
+                })(objInter.outParam,arrData)
+                objData.data=arrData;
+            }
+            o.data.unshift(objData);
+        }
+        arr.push(o);
+    })
+    return arr;
+}
+
+helper.updateTestInterfaceWithExample=function (objInter,objExample) {
+    var obj={
+        queryParam:objExample.param.query.filter(function (obj) {
+            if(obj.name)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }),
+        header:objExample.param.header.filter(function (obj) {
+            if(obj.name)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }),
+        restParam:objExample.param.param.filter(function (obj) {
+            if(obj.name)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }),
+        before:objExample.param.before,
+        after:objExample.param.after
+    }
+    if(objExample.param.body)
+    {
+        obj.bodyParam=objExample.param.body.filter(function (obj) {
+            if(obj.name)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        });
+    }
+    if(objExample.param.bodyInfo)
+    {
+        obj.bodyInfo=objExample.param.bodyInfo;
+    }
+    for(var key in obj)
+    {
+        objInter[key]=obj[key];
+    }
+}
+
+helper.getTestBaseUrlList=function (arr) {
+    var ret=[];
+    arr.forEach(function (obj) {
+        var o={
+            label:obj.name,
+            value:obj._id,
+            data:obj.data.map(function (obj) {
+                return {
+                    label:obj.name,
+                    value:obj._id,
+                }
+            })
+        }
+        ret.push(o);
+    })
+    return ret;
 }
 
 module.exports=helper;

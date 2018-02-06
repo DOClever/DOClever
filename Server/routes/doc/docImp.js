@@ -112,7 +112,6 @@ var interface=[
             id:String,
         },
         "data":String,
-        user:1,
         handle:[doc.docInfo]
     },
     {

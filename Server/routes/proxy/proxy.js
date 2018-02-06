@@ -10,10 +10,11 @@ var run=require("../../model/runModel")
 var getHeader = function (req) {
     var ret = {};
     for (var i in req.headers) {
-        if (!/^(host|connection|Access-|origin|referer|user-agent|user-doclever|path-doclever|url-doclever|method-doclever|headers-doclever)/i.test(i)) {
+        if (!/^(host|connection|Access-|origin|referer|user-agent|user-doclever|path-doclever|url-doclever|method-doclever|headers-doclever|content-|X-Requested-With)/i.test(i)) {
                 ret[i] = req.headers[i];
         }
     }
+    ret["accept"]="*/*";
     var headers=req.headers["headers-doclever"];
     if(headers)
     {
@@ -108,7 +109,7 @@ function redirect(res,bHttps,opt,location) {
             path:     objUrl.path,
             method:   "GET",
             port:objUrl.port?objUrl.port:80,
-			headers:{cookie:opt.headers.cookie}
+			headers:opt.headers
         }
         request1=http.request;
         bHttps=false;
@@ -122,7 +123,7 @@ function redirect(res,bHttps,opt,location) {
             port:objUrl.port?objUrl.port:443,
             rejectUnauthorized: false,
             requestCert: true,
-			headers:{cookie:opt.headers.cookie}
+			headers:opt.headers
         }
         request1=https.request;
         bHttps=true;

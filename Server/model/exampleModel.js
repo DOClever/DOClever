@@ -7,9 +7,13 @@ var model=new mongoose.Schema({
         type:mongoose.Schema.ObjectId,
         ref:"Project"
     },
+    interfaceType:{
+        type:String,
+        default:"Interface"
+    },
     interface:{
         type:mongoose.Schema.ObjectId,
-        ref:"Interface"
+        refPath:"interfaceType"
     },
     owner:{
         type:mongoose.Schema.ObjectId,

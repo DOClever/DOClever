@@ -2,13 +2,13 @@
     <el-row class="row" id="testContentCode">
         <el-row class="row" style="height: 50px;line-height: 50px">
             <el-button size="mini" type="primary" style="margin-left: 20px" @click="insertInterface">插入接口</el-button>&nbsp;&nbsp;&nbsp;
-            <el-button size="mini" type="primary" @click="insertTest">插入用例</el-button>
-            <el-button size="mini" type="primary" @click="copyCode">复制</el-button>
-            <el-button size="mini" type="primary" @click="pasteCode" v-if="$store.state.objCopy">粘贴</el-button>
+            <el-button size="mini" type="primary" @click="insertTest" v-if="type!=1">插入用例</el-button>
+            <el-button size="mini" type="primary" @click="copyCode" v-if="!type">复制</el-button>
+            <el-button size="mini" type="primary" @click="pasteCode" v-if="$store.state.objCopy && !type">粘贴</el-button>
             <a href="/html/web/resource/other/test.html" style="float: right;margin-right: 20px;color: #17b9e6" target="_blank">如何编写</a>
         </el-row>
         <el-row class="row" style="height: 300px;border: 1px solid lightgray;margin-left: 10px;width: calc(100% - 20px)">
-            <el-col class="col" style="width: 40px;background-color: lightgray;padding-top: 5px;padding-bottom:5px;overflow-y: hidden;" id="testScroll">
+            <el-col class="col" style="width: 40px;background-color: lightgray;padding-top: 5px;overflow-y: hidden;" :style="{paddingBottom:5+scrollHeight+'px'}" id="testScroll">
                 <el-row class="row" style="text-align: right;padding-right: 5px;line-height: 1.5;font-size: 15px" v-for="n in line">
                     {{n}}
                     <span style="position: absolute;left: 0px;top: 0px;color: red;width: 26px;height: 26px;text-align: left" v-if="objAnalyse.err.indexOf(n)>-1">
@@ -41,6 +41,7 @@
 
 <script>
     module.exports = {
+        props:["type"],
         data: function () {
             return {
                 timer:null,
@@ -55,12 +56,28 @@
                 selMenuIndex:0,
                 start:0,
                 end:0,
-                stopKeyUp:0
+                stopKeyUp:0,
+                scrollHeight:0
             }
         },
         computed:{
             test:function () {
                 return this.$store.state.selTest
+            },
+        },
+        watch:{
+            line:{
+                handler:function (val) {
+                    if(this.vars)
+                    {
+                        var ele=document.getElementById("testContent");
+                        if(ele)
+                        {
+                            this.scrollHeight=ele.offsetHeight-ele.clientHeight;
+                        }
+                    }
+                },
+                immediate:true
             }
         },
         methods: {
@@ -107,14 +124,14 @@
                     status:[],
                     index:0,
                 });
-                child.$on("save",function (obj) {
+                child.$on("save",function (obj,example) {
                     var a=document.createElement("a");
                     a.setAttribute("type","1");
                     a.setAttribute("data",JSON.stringify(obj));
                     a.href="javascript:void(0)";
                     a.style.cursor="pointer";
                     a.style.textDecoration="none";
-                    a.innerText=obj.name;
+                    a.innerText=example?(obj.name+"("+example+")"):obj.name;
                     a.onclick=function () {
                         _this.editInterface(a);
                     }
@@ -126,7 +143,7 @@
                 var objInterface=JSON.parse(ele.getAttribute("data"));
                 $.startHud();
                 var _this=this;
-                Promise.all([
+                var arrPromise=[
                     net.get("/project/interface",{
                         id:objInterface.project._id
                     }),
@@ -137,16 +154,22 @@
                         interface:objInterface._id,
                         only:1
                     })
-                ]).then(function (values) {
+                ];
+                Promise.all(arrPromise).then(function (values) {
                     $.stopHud();
                     var obj1=values[0];
                     var obj2=values[1];
                     var obj3=values[2];
+                    var obj4=values[3];
                     if(obj1.code==200 && obj2.code==200)
                     {
                         if(obj3.code==200)
                         {
-                            var index=helper.handleTestInterface(objInterface,obj3.data,obj2.data);
+                            if(obj4 && obj4.code==200)
+                            {
+                                helper.updateTestInterfaceWithExample(objInterface,obj4.data);
+                            }
+                            var index=helper.handleTestInterface(objInterface,obj3.data,obj2.data,_this.type?1:0);
                             var child=$.showBox(_this,require("./testInterfaceRun.vue"),{
                                 url:obj1.data.baseUrl,
                                 status:obj2.data,
@@ -154,9 +177,9 @@
                                 index:index,
                                 netInterface:obj3.data
                             });
-                            child.$on("save",function (obj) {
+                            child.$on("save",function (obj,example) {
                                 ele.setAttribute("data",JSON.stringify(obj));
-                                ele.innerText=obj.name;
+                                ele.innerText=example?(obj.name+"("+example+")"):obj.name;
                                 ele.style.textDecoration="none";
                             })
                         }
@@ -190,7 +213,7 @@
                 $.startHud();
                 var _this=this;
                 net.get("/test/list",{
-                    project:session.get("projectId")
+                    project:this.type==2?this.$store.state.selTest.project:session.get("projectId")
                 }).then(function (data) {
                     $.stopHud();
                     if(data.code==200)
@@ -230,11 +253,11 @@
                 var _this=this;
                 Promise.all([
                     net.get("/test/list",{
-                        project:session.get("projectId")
+                        project:this.type==2?this.$store.state.selTest.project:session.get("projectId")
                     }),
                     net.get("/test/test",{
                         id:id,
-                        project:session.get("projectId")
+                        project:this.type==2?this.$store.state.selTest.project:session.get("projectId")
                     })
                 ]).then(function (values) {
                     $.stopHud();
@@ -374,7 +397,7 @@
                         var id=obj.getAttribute("data");
                         arrPromise.push(net.get("/test/test",{
                             id:id,
-                            project:session.get("projectId")
+                            project:this.type==2?this.$store.state.selTest.project:session.get("projectId")
                         }).then(function (data) {
                             if(data.code==200)
                             {

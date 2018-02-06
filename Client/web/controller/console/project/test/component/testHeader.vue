@@ -7,16 +7,16 @@
                         <el-input size="small" style="width: 90%;" placeholder="请填写参数名称" v-model="item.name" :disabled="true"></el-input>
                     </td>
                     <td style="width: 30%">
-                        <el-autocomplete size="small" style="width: 90%;" class="inline-input" placeholder="请填写value" v-model="item.value" :fetch-suggestions="querySearchValue" @mouseenter.native="focus(item)"></el-autocomplete>
+                        <el-autocomplete size="small" style="width: 90%;" class="inline-input" placeholder="请填写value" v-model="item.value" :fetch-suggestions="querySearchValue" @mouseenter.native="focus(item)" :disabled="interface.example"></el-autocomplete>
                     </td>
                     <td style="width: 30%;line-height: normal;">
                         {{item.remark?item.remark:"无备注"}}
                     </td>
                     <td style="width: 10%;height: 50px;">
-                        <el-button type="text" size="mini" style="font-size: 15px" @click="encrypt(item)">{{(item.encrypt && item.encrypt.type)?item.encrypt.type:"未加密"}}</el-button>
+                        <el-button type="text" size="mini" style="font-size: 13px" @click="encrypt(item)" :disabled="interface.example">{{(item.encrypt && item.encrypt.type)?item.encrypt.type:"未加密"}}</el-button>
                     </td>
                     <td style="width: 10%">
-                        <el-button size="mini" type="text" style="font-size: 15px;" @click="toggleEnable(item,index)"><span :class="item.enable?'fa fa-eye-slash':'fa fa-eye'" :title="item.enable?'发送时不包含此字段':'发送时包含此字段'"></span></el-button>
+                        <el-button size="mini" type="text" style="font-size: 15px;" @click="toggleEnable(item,index)" :disabled="interface.example"><span :class="item.enable?'fa fa-eye-slash':'fa fa-eye'" :title="item.enable?'发送时不包含此字段':'发送时包含此字段'"></span></el-button>
                     </td>
                 </tr>
             </template>

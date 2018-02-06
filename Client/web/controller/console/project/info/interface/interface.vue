@@ -4,14 +4,24 @@
             <el-row class="row" style="height: 35px;line-height: 35px">
                 <el-tooltip class="item" effect="dark" content="新增分组" placement="bottom">
                     <el-button size="mini" type="primary" @click.native="addGroup" v-if="interfaceEditRole">
-                        <i class="el-icon-plus" style="font-weight:900"></i>&nbsp;新增
+                        <i class="el-icon-plus" style="font-weight:900"></i>
                     </el-button>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="导入分组" placement="bottom" v-if="interfaceEditRole">
-                    <el-button size="mini" style="margin-left: 3px" @click.native="importGroup">
-                        <i class="el-icon-download" style="font-weight:900"></i>&nbsp;导入
+                    <el-button size="mini" type="primary" style="margin-left: 3px" @click.native="importGroup">
+                        <i class="el-icon-download" style="font-weight:900"></i>
                     </el-button>
                 </el-tooltip>
+                <el-dropdown trigger="hover" @command="quickTest">
+                    <div class="el-dropdown-link">
+                        <el-button size="mini" type="primary" icon="fa fa-bolt" plain>
+                        </el-button>
+                    </div>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item :command="1">新用例</el-dropdown-item>
+                        <el-dropdown-item :command="2">已有用例</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
                 <el-dropdown trigger="hover">
                     <div class="el-dropdown-link">
                         <el-button size="mini" icon="fa fa-sort-amount-desc">
@@ -201,6 +211,39 @@
             },
             toggleMax:function (data) {
                 this.bMax=!this.bMax
+            },
+            quickTest:function (command) {
+                var _this=this;
+                if(command==1)
+                {
+                    $.startHud();
+                    net.get("/test/allgrouplist").then(function (data) {
+                        $.stopHud();
+                        if(data.code!=200)
+                        {
+                            $.notify(data.msg,0);
+                        }
+                        $.showBox(_this,require("./test/test.vue"),{
+                            testType:1,
+                            propTestGroupList:data.data,
+                        });
+                    })
+                }
+                else if(command==2)
+                {
+                    $.startHud();
+                    net.get("/test/alllist").then(function (data) {
+                        $.stopHud();
+                        if(data.code!=200)
+                        {
+                            $.notify(data.msg,0);
+                        }
+                        $.showBox(_this,require("./test/test.vue"),{
+                            testType:2,
+                            propArrTest:data.data
+                        });
+                    })
+                }
             }
         },
         created:function () {

@@ -13,47 +13,56 @@
     <link type="text/css"  rel="stylesheet" href="../../common/css/common.css">
     <link type="text/css"  rel="stylesheet" href="../../common/lib/font-awesome/css/font-awesome.min.css">
     <link type="text/css"  rel="stylesheet" href="../../common/lib/element/index.css">
-    <link type="text/css"  rel="stylesheet" href="../about/about.css">
+    <link type="text/css"  rel="stylesheet" href="custom.css">
 </head>
 <body>
 <div class="page-container" v-cloak id="app">
-    <div class="curve2" style="background: url('../../resource/pic/back.jpg') no-repeat scroll center center/cover border-box, linear-gradient(60deg, #17b9e6 0%, #17e67e 100%) ;">
-        <el-row class="row">
-            <el-col :span="20" class="col" :offset="2"  ><mainnav></mainnav></el-col>
-        </el-row>
-        <div class="tc" style="color: #fff;padding-bottom: 300px">
-
+    <div class="header-custom">
+        <mainnav></mainnav>
+        <p style="font-size: 42px;color: #fff;padding-top: 100px" class="tc"></p>
+        <p class="line" style="background: #ccc"></p>
+    </div>
+    <div class="custom-sever">
+        <div class="hd">
+            <h2>定制化服务</h2>
+            <p>DOClever为企业提供个性化定制服务</p>
+            <p class="line"></p>
+        </div>
+        <div class="wrap960">
+            <div class="el-table el-table--fit el-table--border el-table--enable-row-hover el-table--enable-row-transition" style="width: 100%;">
+                <div class="el-table__body-wrapper is-scroll-left">
+                    <table class="el-table__body" cellspacing="0" cellpadding="0" border="0">
+                        <thead class="has-gutter">
+                        <tr class="">
+                            <th colspan="1" rowspan="1" class="el-table_1_column_1     is-leaf">
+                                <div class="cell">收费标准</div>
+                            </th>
+                            <th colspan="1" rowspan="1" class="el-table_1_column_2     is-leaf">
+                                <div class="cell">服务对象</div>
+                            </th>
+                            <th colspan="1" rowspan="1" class="el-table_1_column_3     is-leaf">
+                                <div class="cell">发票标准</div>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="el-table__row">
+                                <td class="el-table_1_column_1  ">
+                                    <div class="cell">600元起</div>
+                                </td>
+                                <td class="el-table_1_column_2  ">
+                                    <div class="cell">团体或者企业（需要签订协议，个人暂不接受）</div>
+                                </td>
+                                <td class="el-table_1_column_3  ">
+                                    <div class="cell">您在DOClever的服务费用累计超过2000元时，我们会为您开发票</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-    <el-row class="row" style="padding: 10px;background-color: white;">
-        <p>如果DOClever目前的功能不能满足你的需要，我们提供在DOClever的基础上的定制化服务和二次开发，并且我们会提供免费的升级维护工作，保证你的DOClever可以使用到最新最酷的功能！迄今为止，我们已经和数十家大型互联网企业进行了合作，期待您的加入，具体可以加QQ:395414574 QQ:985576131详聊！</p>
-        <table style="width: 100%;text-align: center;vertical-align: middle">
-            <tr>
-                <td>
-                    收费标准
-                </td>
-                <td>
-                    600元起
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    服务对象
-                </td>
-                <td>
-                    团体或者企业（需要签订协议，个人暂不接受）
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    发票标准
-                </td>
-                <td>
-                    当您在DOClever的服务费用累计超过2000元时，我们会为您开发票
-                </td>
-            </tr>
-        </table>
-    </el-row>
     <commonfooter></commonfooter>
 </div>
 <script src="../../../dist/vendor.bundle.js"></script>

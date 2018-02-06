@@ -17,6 +17,8 @@ module.exports={
         tree:null,
         interfaceList:[],
         baseUrl:"",
+        baseUrls:[],
+        arrSelBaseUrl:[],
         env:[],
         objCopy:null,
         collection:[],
@@ -83,7 +85,9 @@ module.exports={
             };
             state.selUser=data?data.user:"";
             state.infoType="";
-            state.baseUrl=""
+            state.baseUrl="";
+            state.baseUrls=[];
+            state.arrSelBaseUrl=[];
             state.env=[];
             state.objCopy=null;
             state.collection=data?data.collectionList:[];
@@ -110,6 +114,7 @@ module.exports={
                 if(dt.code==200)
                 {
                     context.commit("init",dt.data);
+                    context.dispatch("baseUrl",1)
                 }
                 return dt;
             })
@@ -354,11 +359,17 @@ module.exports={
                 var objDiv=arrChild[i];
                 if(objDiv.textContent)
                 {
-                    objDiv.innerHTML=objDiv.textContent;
+                    objDiv.innerHTML=$.tagReplace(objDiv.textContent);
                 }
             }
             arrLinkOuter.forEach(function (obj) {
                 tempEle.innerHTML=tempEle.innerHTML.replace(obj.text,obj.html);
+            })
+            context.state.selTest.ui.forEach(function (obj) {
+                if(obj.type=="interface")
+                {
+                    delete obj.info;
+                }
             })
             var code=tempEle.innerHTML;
             var obj={
@@ -369,7 +380,8 @@ module.exports={
                 status:context.state.selTest.status,
                 code:code,
                 ui:JSON.stringify(context.state.selTest.ui),
-                output:context.state.selTest.output===undefined?"":context.state.selTest.output
+                output:context.state.selTest.output===undefined?"":context.state.selTest.output,
+                user:context.state.selUser
             }
             return net.post("/test/test",obj).then(function (data) {
                 if(data.code==200)
@@ -722,6 +734,8 @@ module.exports={
             context.state.groupModel=[];
             context.state.infoType="";
             context.state.baseUrl="";
+            context.state.baseUrls=[];
+            context.state.arrSelBaseUrl=[];
             context.state.env=[];
             context.state.collection=[];
             context.state.selCollection=null;
@@ -734,6 +748,7 @@ module.exports={
                     project:session.get("projectId"),
                     user:context.state.selUser
                 }),
+                context.dispatch("baseUrl",1)
             ]).then(function (values) {
                 var data1=values[0];
                 var data2=values[1];
@@ -748,9 +763,9 @@ module.exports={
                 return data1;
             })
         },
-        baseUrl:function (context) {
+        baseUrl:function (context,ignore) {
             var urls="",arrProject=[];;
-            if(document.getElementById("testContent"))
+            if(document.getElementById("testContent") && !ignore)
             {
                 var ele=document.getElementById("testContent");
                 var arr=ele.querySelectorAll("a[data]");
@@ -768,7 +783,7 @@ module.exports={
                     }
                 })
             }
-            if(context.state.selTest && context.state.selTest.ui.length>0)
+            if(context.state.selTest && context.state.selTest.ui.length>0  && !ignore)
             {
                 context.state.selTest.ui.forEach(function (obj) {
                     if(obj.type=="interface")
@@ -787,6 +802,10 @@ module.exports={
                 user:context.state.selUser,
                 urls:urls
             }).then(function (data) {
+                if(data.code==200)
+                {
+                    context.state.baseUrls=data.data;
+                }
                 return data;
             })
         },
@@ -834,7 +853,287 @@ module.exports={
             return net.post("/test/collection",data).then(function (dt) {
                 return dt
             })
-        }
+        },
+        changeExample:function (context,obj) {
+            var pro;
+            if(obj.id)
+            {
+                pro=net.get("/example/item",{
+                    id:obj.id
+                })
+            }
+            else
+            {
+                pro=net.get("/interface/param",{
+                    id:obj.objInterface._id,
+                    param:obj.objOriginal.id
+                })
+            }
+            return pro.then(function (data) {
+                if(data.code==200)
+                {
+                    var objNew;
+                    if(obj.id)
+                    {
+                        objNew={
+                            queryParam:data.data.param.query.filter(function (obj) {
+                                if(obj.name)
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }),
+                            header:data.data.param.header.filter(function (obj) {
+                                if(obj.name)
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }),
+                            restParam:data.data.param.param.filter(function (obj) {
+                                if(obj.name)
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }),
+                            before:data.data.param.before,
+                            after:data.data.param.after
+                        }
+                        if(data.data.param.body)
+                        {
+                            objNew.bodyParam=data.data.param.body.filter(function (obj) {
+                                if(obj.name)
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            });
+                        }
+                        if(data.data.param.bodyInfo)
+                        {
+                            objNew.bodyInfo=data.data.param.bodyInfo;
+                        }
+                    }
+                    else
+                    {
+                        objNew={
+                            queryParam:data.data.queryParam,
+                            header:data.data.header,
+                            restParam:data.data.restParam,
+                            before:data.data.before,
+                            after:data.data.after
+                        }
+                        if(data.data.bodyParam)
+                        {
+                            objNew.bodyParam=data.data.bodyParam;
+                        }
+                        if(data.data.bodyInfo)
+                        {
+                            objNew.bodyInfo=data.data.bodyInfo;
+                        }
+                        Vue.set(objNew,"encrypt",{
+                            type:"",
+                            salt:""
+                        })
+                        objNew.queryParam.forEach(function (item,i) {
+                            Vue.set(item,"enable",1);
+                            Vue.set(item,"selValue","");
+                            if(item.value && item.value.type==0 && item.value.data.length>0)
+                            {
+                                item.selValue=item.value.data[0].value;
+                            }
+                            else if(item.value && item.value.type==1 && item.value.status)
+                            {
+                                var objStatus=null;
+                                obj.status.forEach(function (obj) {
+                                    if(obj.id==item.value.status)
+                                    {
+                                        objStatus=obj;
+                                    }
+                                })
+                                if(objStatus && objStatus.data.length>0)
+                                {
+                                    item.selValue=objStatus.data[0].key;
+                                }
+                                else
+                                {
+                                    item.selValue="";
+                                }
+                            }
+                            else
+                            {
+                                item.selValue="";
+                            }
+                        })
+                        if(objNew.bodyParam)
+                        {
+                            objNew.bodyParam.forEach(function (item,i) {
+                                Vue.set(item,"enable",1);
+                                Vue.set(item,"selValue","");
+                                if(item.value && item.value.type==0 && item.value.data.length>0)
+                                {
+                                    item.selValue=item.value.data[0].value;
+                                }
+                                else if(item.value && item.value.type==1 && item.value.status)
+                                {
+                                    var objStatus=null;
+                                    obj.status.forEach(function (obj) {
+                                        if(obj.id==item.value.status)
+                                        {
+                                            objStatus=obj;
+                                        }
+                                    })
+                                    if(objStatus && objStatus.data.length>0)
+                                    {
+                                        item.selValue=objStatus.data[0].key;
+                                    }
+                                    else
+                                    {
+                                        item.selValue="";
+                                    }
+                                }
+                                else
+                                {
+                                    item.selValue="";
+                                }
+                            })
+                        }
+                        objNew.header.forEach(function (item) {
+                            Vue.set(item,"enable",1);
+                        })
+                        objNew.restParam.forEach(function (item,i) {
+                            Vue.set(item,"selValue","");
+                            if(item.value && item.value.type==0 && item.value.data.length>0)
+                            {
+                                item.selValue=item.value.data[0].value;
+                            }
+                            else if(item.value && item.value.type==1 && item.value.status)
+                            {
+                                var objStatus=null;
+                                obj.status.forEach(function (obj) {
+                                    if(obj.id==item.value.status)
+                                    {
+                                        objStatus=obj;
+                                    }
+                                })
+                                if(objStatus && objStatus.data.length>0)
+                                {
+                                    item.selValue=objStatus.data[0].key;
+                                }
+                                else
+                                {
+                                    item.selValue="";
+                                }
+                            }
+                            else
+                            {
+                                item.selValue="";
+                            }
+                        });
+                        if(obj.objInterface.method=="POST" || obj.objInterface.method=="PUT" || obj.objInterface.method=="PATCH")
+                        {
+                            Vue.set(objNew,"encrypt",{
+                                type:"",
+                                salt:""
+                            });
+                            if(objNew.bodyParam===undefined)
+                            {
+                                Vue.set(objNew,"bodyParam",[]);
+                            }
+                            if(objNew.bodyInfo===undefined)
+                            {
+                                Vue.set(objNew,"bodyInfo",{
+                                    type:0,
+                                    rawType:0
+                                });
+                            }
+                            if(objNew.bodyInfo.rawText===undefined)
+                            {
+                                Vue.set(objNew.bodyInfo,"rawText","");
+                            }
+                            if(objNew.bodyInfo.rawTextRemark===undefined)
+                            {
+                                Vue.set(objNew.bodyInfo,"rawTextRemark","");
+                            }
+                            if(objNew.bodyInfo.rawFileRemark===undefined)
+                            {
+                                Vue.set(objNew.bodyInfo,"rawFileRemark","");
+                            }
+                            if(objNew.bodyInfo.rawJSONType===undefined)
+                            {
+                                Vue.set(objNew.bodyInfo,"rawJSONType",0);
+                            }
+                            if(objNew.bodyInfo.rawJSON==undefined)
+                            {
+                                Vue.set(objNew.bodyInfo,"rawJSON",[]);
+                            }
+                            var bFind=false;
+                            for(var i=0;i<objNew.header.length;i++)
+                            {
+                                var obj1=objNew.header[i];
+                                if(obj1.name.toLowerCase()=="content-type" && obj1.value.toLowerCase().indexOf("application/json")>-1)
+                                {
+                                    bFind=true;
+                                    break;
+                                }
+                            }
+                            if(bFind && objNew.bodyInfo.rawText)
+                            {
+                                var obj1;
+                                try
+                                {
+                                    obj1=JSON.parse(objNew.bodyInfo.rawText);
+                                }
+                                catch (e)
+                                {
+
+                                }
+                                if(obj1)
+                                {
+                                    var result=[];
+                                    for(var key in obj1)
+                                    {
+                                        helper.handleResultData(key,obj1[key],result,null,1)
+                                    }
+                                    objNew.bodyInfo.rawJSON=result;
+                                    objNew.bodyInfo.rawText="";
+                                    objNew.bodyInfo.rawType=2;
+                                }
+                            }
+                        }
+                    }
+                    for(var key in objNew)
+                    {
+                        Vue.set(obj.objOriginal,key,objNew[key]);
+                    }
+                    if(obj.id)
+                    {
+                        Vue.set(obj.objOriginal,"example",{
+                            id:data.data._id,
+                            name:data.data.name
+                        });
+                    }
+                    else
+                    {
+                        delete obj.objOriginal.example
+                    }
+                }
+                return data;
+            })
+        },
     }
 }
 

@@ -1355,6 +1355,88 @@ module.exports={
                 }
                 return data;
             })
+        },
+        joinTest:function (context) {
+            var pro;
+            if(context.getters.curParam.selExample.id)
+            {
+                pro=context.dispatch("saveExample",{
+                    type:"save"
+                })
+            }
+            else
+            {
+                pro=helper.delay(0);
+            }
+            return pro.then(function () {
+                var obj=$.clone(context.state.interface);
+                delete obj.param;
+                Object.assign(obj,{
+                    paramId:context.getters.curParam.id,
+                    queryParam:context.getters.curParam.query.filter(function (obj) {
+                        if(obj.name)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }),
+                    header:context.getters.curParam.header.filter(function (obj) {
+                        if(obj.name)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }),
+                    restParam:context.getters.curParam.param.filter(function (obj) {
+                        if(obj.name)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }),
+                    before:context.getters.curParam.before,
+                    after:context.getters.curParam.after,
+                    encrypt:context.getters.curParam.encrypt?context.getters.curParam.encrypt:{
+                        "type":"",
+                        "salt":""
+                    },
+                    baseUrl:"defaultUrl",
+                    pullInject:0,
+                    outInfo:context.getters.curParam.outInfo,
+                    outParam:context.getters.curParam.result
+                })
+                if(context.getters.curParam.body)
+                {
+                    obj.bodyParam=context.getters.curParam.body.filter(function (obj) {
+                        if(obj.name)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    });
+                }
+                if(context.getters.curParam.bodyInfo)
+                {
+                    obj.bodyInfo=context.getters.curParam.bodyInfo;
+                }
+                if(context.getters.curParam.selExample.id)
+                {
+                    obj.example=context.getters.curParam.selExample.id;
+                }
+                return obj;
+            })
         }
     }
 }
