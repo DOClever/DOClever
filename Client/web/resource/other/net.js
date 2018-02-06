@@ -7,10 +7,11 @@ var pass = require('stream').PassThrough;
 var getHeader = function (req) {
     var ret = {};
     for (var i in req.headers) {
-        if (!/^(host|connection|Access-|origin|referer|user-agent|user-doclever|path-doclever|url-doclever|method-doclever|headers-doclever)/i.test(i)) {
+        if (!/^(host|connection|Access-|origin|referer|user-agent|user-doclever|path-doclever|url-doclever|method-doclever|headers-doclever|X-Requested-With)/i.test(i)) {
             ret[i] = req.headers[i];
         }
     }
+    ret["accept"]="*/*";
     var headers=req.headers["headers-doclever"];
     if(headers)
     {
@@ -188,7 +189,7 @@ function mock(req,res) {
         }
     });
     var stream;
-    if (/POST|PUT/i.test(req.method))
+    if (/POST|PUT|PATCH/i.test(req.method))
     {
         stream=new pass();
         req.pipe(stream);
@@ -351,7 +352,7 @@ function proxy(req,res) {
             });
         }
     });
-    if (/POST|PUT/i.test(req.method)) {
+    if (/POST|PUT|PATCH/i.test(req.method)) {
         req.pipe(req2);
     } else {
         req2.end();

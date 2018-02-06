@@ -10,7 +10,7 @@ var run=require("../../model/runModel")
 var getHeader = function (req) {
     var ret = {};
     for (var i in req.headers) {
-        if (!/^(host|connection|Access-|origin|referer|user-agent|user-doclever|path-doclever|url-doclever|method-doclever|headers-doclever|content-|X-Requested-With)/i.test(i)) {
+        if (!/^(host|connection|Access-|origin|referer|user-agent|user-doclever|path-doclever|url-doclever|method-doclever|headers-doclever|X-Requested-With)/i.test(i)) {
                 ret[i] = req.headers[i];
         }
     }
@@ -249,7 +249,7 @@ var onProxy = function (req, res) {
             });
         }
     });
-    if (/POST|PUT/i.test(req.method)) {
+    if (/POST|PUT|PATCH/i.test(req.method)) {
         req.pipe(req2);
     } else {
         req2.end();
