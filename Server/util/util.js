@@ -1954,7 +1954,7 @@ function convertToCode(data) {
         }
         else if(obj.type=="log")
         {
-            str+=`<div class='testCodeLine'>log(${obj.data});</div>`
+            str+=`<div class='testCodeLine'>log("打印${obj.name}:");log((${obj.data}));</div>`
         }
         else if(obj.type=="input")
         {
