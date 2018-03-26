@@ -1,0 +1,2 @@
+rebuild:
+	node-gyp rebuild

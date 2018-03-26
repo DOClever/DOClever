@@ -26,69 +26,74 @@ var app = express();
 // }));
 // app.use(webpackHotMiddleware(compiler));
 (async (function () {
-    await (util.init());
-    var checkUser=require("./routes/checkUser");
-    var checkAdmin=require("./routes/checkAdmin");
-    var checkParam=require("./routes/checkParam");
-    var checkFormDataUser=require("./routes/checkFormDataUser");
-    var con=require("./../config.json");
-    var proxy=require("./routes/proxy/proxy");
-    var mock=require("./routes/mock/mock");
-    app.set('views', path.join(__dirname, 'views'));
-    app.set('view engine', 'hbs');
-    app.disable('etag');
-    app.all('*', function(req, res, next) {
-        next();
-    });
-    app.use(logger('dev'));
-    app.use("/proxy",proxy);
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: false,limit:"100000kb" }));
-    app.use(cookieParser());
-    app.use(session({
-        cookie: {maxAge: 1000*3600*6 },
-        resave:true,
-        saveUninitialized:false,
-        secret: 'DOClever'
-    }))
-    app.use("/user",checkFormDataUser(path.join(con.filePath,"img")),checkParam("user"),checkUser);
-    app.use("/project",checkFormDataUser(path.join(con.filePath,"img")),checkParam("project"),checkUser);
-    app.use("/group",checkFormDataUser(path.join(con.filePath,"img")),checkParam("group"),checkUser);
-    app.use("/interface",checkFormDataUser(path.join(con.filePath,"img")),checkParam("interface"),checkUser);
-    app.use("/status",checkFormDataUser(path.join(con.filePath,"img")),checkParam("status"),checkUser);
-    app.use("/test",checkFormDataUser(path.join(con.filePath,"img")),checkParam("test"),checkUser);
-    app.use("/team",checkFormDataUser(path.join(con.filePath,"img")),checkParam("team"),checkUser);
-    app.use("/version",checkFormDataUser(path.join(con.filePath,"img")),checkParam("version"),checkUser);
-    app.use("/poll",checkFormDataUser(path.join(con.filePath,"img")),checkParam("poll"),checkUser);
-    app.use("/article",checkFormDataUser(path.join(con.filePath,"img")),checkParam("article"),checkUser);
-    app.use("/message",checkFormDataUser(path.join(con.filePath,"img")),checkParam("message"),checkUser);
-    app.use("/template",checkFormDataUser(path.join(con.filePath,"img")),checkParam("template"),checkUser);
-    app.use("/example",checkFormDataUser(path.join(con.filePath,"img")),checkParam("example"),checkUser);
-    app.use("/doc",checkFormDataUser(path.join(con.filePath,"img")),checkParam("doc"),checkUser);
-    app.use("/admin",checkFormDataUser(path.join(con.filePath,"img")),checkParam("admin"),checkAdmin);
-    app.use("/mock",checkFormDataUser(path.join(con.filePath,"temp")),mock);
-    app.use("/html",express.static(path.join(__dirname, '../Client')));
-    app.use("/img",express.static(path.join(con.filePath,"img")));
-    app.use("/",function (req,res) {
-        res.redirect("/html/web/controller/index/index.html");
-    });
+  await (util.init());
+  var checkUser=require("./routes/checkUser");
+  var checkAdmin=require("./routes/checkAdmin");
+  var checkParam=require("./routes/checkParam");
+  var checkFormDataUser=require("./routes/checkFormDataUser");
+  var con=require("./../config.json");
+  var proxy=require("./routes/proxy/proxy");
+  var mock=require("./routes/mock/mock");
+  var requireHttps = require('require-https');
+  app.set('views', path.join(__dirname, 'views'));
+  app.set('view engine', 'hbs');
+  app.disable('etag');
+  if(con.https==true || con.https=="true"){
+    app.enable('trust proxy');
+    app.use(requireHttps());
+  }
+  app.all('*', function(req, res, next) {
+    next();
+  });
+  app.use(logger('dev'));
+  app.use("/proxy",proxy);
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: false,limit:"100000kb" }));
+  app.use(cookieParser());
+  app.use(session({
+    cookie: {maxAge: 1000*3600*6 },
+    resave:true,
+    saveUninitialized:false,
+    secret: 'DOClever'
+  }))
+  app.use("/user",checkFormDataUser(path.join(con.filePath,"img")),checkParam("user"),checkUser);
+  app.use("/project",checkFormDataUser(path.join(con.filePath,"img")),checkParam("project"),checkUser);
+  app.use("/group",checkFormDataUser(path.join(con.filePath,"img")),checkParam("group"),checkUser);
+  app.use("/interface",checkFormDataUser(path.join(con.filePath,"img")),checkParam("interface"),checkUser);
+  app.use("/status",checkFormDataUser(path.join(con.filePath,"img")),checkParam("status"),checkUser);
+  app.use("/test",checkFormDataUser(path.join(con.filePath,"img")),checkParam("test"),checkUser);
+  app.use("/team",checkFormDataUser(path.join(con.filePath,"img")),checkParam("team"),checkUser);
+  app.use("/version",checkFormDataUser(path.join(con.filePath,"img")),checkParam("version"),checkUser);
+  app.use("/poll",checkFormDataUser(path.join(con.filePath,"img")),checkParam("poll"),checkUser);
+  app.use("/article",checkFormDataUser(path.join(con.filePath,"img")),checkParam("article"),checkUser);
+  app.use("/message",checkFormDataUser(path.join(con.filePath,"img")),checkParam("message"),checkUser);
+  app.use("/template",checkFormDataUser(path.join(con.filePath,"img")),checkParam("template"),checkUser);
+  app.use("/example",checkFormDataUser(path.join(con.filePath,"img")),checkParam("example"),checkUser);
+  app.use("/doc",checkFormDataUser(path.join(con.filePath,"img")),checkParam("doc"),checkUser);
+  app.use("/admin",checkFormDataUser(path.join(con.filePath,"img")),checkParam("admin"),checkAdmin);
+  app.use("/mock",checkFormDataUser(path.join(con.filePath,"temp")),mock);
+  app.use("/html",express.static(path.join(__dirname, '../Client')));
+  app.use("/img",express.static(path.join(con.filePath,"img")));
+  app.use("/",function (req,res) {
+    res.redirect("/html/web/controller/index/index.html");
+  });
 // catch 404 and forward to error handler
-    app.use(function(req, res, next) {
-        var err = new Error('Not Found');
-        err.status = 404;
-        next(err);
-    });
+  app.use(function(req, res, next) {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
+  });
 
 // error handler
-    app.use(function(err, req, res, next) {
-        // set locals, only providing error in development
-        res.locals.message = err.message;
-        res.locals.error = req.app.get('env') === 'development' ? err : {};
+  app.use(function(err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-        // render the error page
-        res.status(err.status || 500);
-        res.render('error');
-    });
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
+  });
 }))();
 
 
