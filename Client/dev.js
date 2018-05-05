@@ -3,8 +3,8 @@
  */
 var path = require('path')
 var webpack = require('webpack');
-var publicPath = 'http://localhost:10001/html/dist';
-var hotMiddlewareScript = 'webpack-hot-middleware/client?http://localhost:10001';
+var publicPath = 'http://localhost:10000/html/dist';
+var hotMiddlewareScript = 'webpack-hot-middleware/client?http://localhost:10000';
 module.exports = {
     entry: {
         vendor:["vue","vuex",path.join(__dirname,"./web/common/js/common.js"),path.join(__dirname,"./web/common/js/net"),path.join(__dirname,"./web/common/js/local"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
