@@ -25,7 +25,7 @@ http://doclever.cn
 
 2.线上系统在安全性方面做了不少加固处理，而内网版本默认内网是安全的，也为了提高node作为服务器的效率，取消了很多加固处理，如果用户有需要可以自行添加。
 ## 如何部署
-1.首先本地要安装node环境，推荐6.10.0版本([下载页面](https://nodejs.org/en/))
+1.首先本地要安装node环境，推荐8.11.1版本([下载页面](https://nodejs.org/en/))
 
 2.安装mongodb([下载页面](https://www.mongodb.com/))，可使用robomongo来作为mongodb的客户端工具([下载页面](https://robomongo.org/))，启动mongodb后（[如何启动](http://www.open-open.com/lib/view/open1435117403544.html)），用robomongo来连接，新建一个database作为DOClever的数据库（名称随意）
 
