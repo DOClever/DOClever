@@ -155,6 +155,8 @@ $.stopLoading=function () {
         var ele=document.getElementById("SBDocStartLoading");
         if(ele)
         {
+            ele.style.animationDuration="0.3s";
+            ele.style.animationDelay="0s";
             $.addClass(ele,"animated fadeOut");
             $.once(ele,"webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend",function () {
                 var ele=document.getElementById("SBDocStartLoading");

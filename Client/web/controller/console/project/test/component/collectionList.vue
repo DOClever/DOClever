@@ -81,6 +81,10 @@
                         if(data.code==200)
                         {
                             item.name=val.value;
+                            if(_this.$store.state.selCollection && _this.$store.state.selCollection._id==item._id)
+                            {
+                                _this.$store.state.selCollection.name=item.name
+                            }
                             $.notify("修改成功",1);
                         }
                         else

@@ -198,7 +198,7 @@
                 {
                     query.team=this.session.teamId;
                 }
-                net.post("/test/testproject",query).then(function (data) {
+                net.post("/test/project",query).then(function (data) {
                     _this.infoPending=false;
                     if(data.code)
                     {
@@ -217,7 +217,7 @@
                 {
                     $.confirm("确定删除该工程？该工程下的所有数据都会被删除!",function () {
                         _this.deletePending=true;
-                        net.delete("/test/testproject",{
+                        net.delete("/test/project",{
                             project:session.get("projectId")
                         }).then(function (data) {
                             _this.deletePending=false;

@@ -262,7 +262,7 @@
         created:function () {
             this.$store.getters.event.$on("addTestModule",this.addModule);
         },
-        beforeDestroyed:function () {
+        beforeDestroy:function () {
             this.$store.getters.event.$off("addTestModule",this.addModule);
         }
     }

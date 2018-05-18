@@ -79,6 +79,7 @@
                     child.$on("click",function (arr) {
                         event.target.focus();
                         $.insertTextAtCursor(event.target,arr.join(".").replace(/\.0/g,"[0]"));
+                        item.value=event.target.value;
                     })
                 }
                 else if(event.key=="#" && item.type=="code")
@@ -89,6 +90,7 @@
                         event.target.selectionStart-=1;
                         event.target.selectionEnd=event.target.selectionStart+1;
                         $.insertTextAtCursor(event.target,arr[arr.length-1]);
+                        item.value=event.target.value;
                     })
                 }
             }

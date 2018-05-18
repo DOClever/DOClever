@@ -67,12 +67,14 @@
                 this.showDialog=false;
             },
             keyPress:function (event) {
+                var _this=this;
                 if(event.key=="$" && this.type=="code")
                 {
                     var child=$.showMenu(this.$root,event.target,helper.getTestUIArgvList(this.$store.state.selTest.ui,this.index));
                     child.$on("click",function (arr) {
                         event.target.focus();
                         $.insertTextAtCursor(event.target,arr.join(".").replace(/\.0/g,"[0]"));
+                        _this.valueEdit=event.target.value;
                     })
                 }
                 else if(event.key=="#" && this.type=="code")
@@ -83,6 +85,7 @@
                         event.target.selectionStart-=1;
                         event.target.selectionEnd=event.target.selectionStart+1;
                         $.insertTextAtCursor(event.target,arr[arr.length-1]);
+                        _this.valueEdit=event.target.value;
                     })
                 }
             }
