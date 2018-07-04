@@ -27,6 +27,9 @@ COMMAND_PORT=" --port "$PORT
 
 if [ ! $HTTPS ]; then
   HTTPS="false"
+else
+    cd /root/DOClever/Client/dist/
+    sed -i 's/:"http:\/\/"/:"https:\/\/"/g' vendor.bundle.js
 fi
 COMMAND_HTTPS=" --https "$HTTPS
 
