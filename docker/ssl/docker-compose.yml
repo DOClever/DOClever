@@ -1,0 +1,39 @@
+version: "2"
+services:
+  nginx:
+    container_name: 'nginx'
+    restart: always
+    image: nginx
+    ports:
+    - "80:80"
+    - "443:443"
+    volumes:
+    - /home/nginx/:/etc/nginx/conf.d:ro
+    - /home/ssh:/home/ssh
+    links:
+    - doclever:doclever
+
+  doclever:
+    image: lw96/doclever:latest
+    restart: always
+    container_name: "DOClever"
+    volumes:
+    - /home/DOClever/file:/root/DOClever/data/file
+    - /home/DOClever/img:/root/DOClever/data/img
+    - /home/DOClever/tmp:/root/DOClever/data/tmp
+    environment:
+    - PORT=10000
+    - HTTPS=false
+    links:
+    - mongo:mongo
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    container_name: "mongodb"
+#    If you need to store your database to local please add these two lines, and define your local data direction.
+#    volumes:
+#    - /my/own/datadir:/data/db
+    
+
+    

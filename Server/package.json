@@ -32,6 +32,7 @@
     "phantomjs-prebuilt": "^2.1.16",
     "recursive-copy": "^2.0.7",
     "request": "^2.83.0",
+    "require-https": "^1.1.1",
     "rimraf": "^2.6.2",
     "serve-favicon": "^2.3.2",
     "socket.io": "^2.0.4",
