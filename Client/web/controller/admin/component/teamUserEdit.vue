@@ -76,7 +76,7 @@
 </template>
 
 <script>
-    var proxyImg=require("common/director/proxyImg")
+    var proxyImg=require("director/proxyImg.js")
     module.exports={
         props:["propObj","teamId"],
         data:function () {

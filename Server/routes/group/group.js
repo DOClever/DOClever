@@ -1,8 +1,8 @@
 /**
  * Created by sunxin on 2016/11/17.
  */
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var con=require("../../../config.json");
@@ -19,7 +19,7 @@ var fs=require("fs");
 var uuid=require("uuid/v1");
 
 function Group() {
-    this.sort=async (function (req,objGroup,objMove,index,bGroup) {
+    this.sort=async function (req,objGroup,objMove,index,bGroup) {
         let arr;
         if(bGroup)
         {
@@ -75,8 +75,8 @@ function Group() {
             obj.sort=i;
             await (obj.saveAsync());
         }
-    })
-    this.getChild=async (function(req,id,obj,bInter) {
+    }
+    this.getChild=async function(req,id,obj,bInter) {
         let query={
             project:id,
             parent:obj?obj.id:{
@@ -113,8 +113,8 @@ function Group() {
             arr=arr.concat(arrInterface);
         }
         return arr;
-    })
-    this.validateUser=async ((req,res)=> {
+    }
+    this.validateUser=async (req,res)=> {
         try
         {
             req.interfaceModel=interface;
@@ -207,9 +207,9 @@ function Group() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.create=async ((req,res)=> {
+    this.create=async (req,res)=> {
         try
         {
             let query={
@@ -282,9 +282,9 @@ function Group() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.remove=async ((req,res)=> {
+    this.remove=async (req,res)=> {
         try
         {
             if(req.group.type==0)
@@ -298,7 +298,7 @@ function Group() {
                     query.version=req.headers["docleverversion"]
                 }
                 let objTrash=await (req.groupModel.findOneAsync(query));
-                let removeChild=async (function (objGroup) {
+                let removeChild=async function (objGroup) {
                     let arrGroup=await (req.groupModel.findAsync({
                         project:req.group.project,
                         parent:objGroup.id
@@ -322,7 +322,7 @@ function Group() {
                         multi:true
                     }));
                     await (objGroup.removeAsync());
-                })
+                }
                 await (removeChild(req.group));
                 let arr=await (this.getChild(req,req.group.project,null,1));
                 util.ok(res,arr,"删除成功");
@@ -336,8 +336,8 @@ function Group() {
         {
             util.catch(res,err);
         }
-    })
-    this.exportJSON=async ((req,res)=>{
+    }
+    this.exportJSON=async (req,res)=>{
         try
         {
             let obj={
@@ -345,7 +345,7 @@ function Group() {
                 flag:"SBDoc",
                 data:[]
             };
-            let _map=async (function(req,id,obj) {
+            let _map=async function(req,id,obj) {
                 let query={
                     project:id,
                     parent:obj?obj.id:{
@@ -371,7 +371,7 @@ function Group() {
                 }));
                 arr=arr.concat(arrInterface);
                 return arr;
-            })
+            }
             obj.data=await (_map(req,req.group.project,req.group));
             let content=JSON.stringify(obj);
             res.writeHead(200,{
@@ -389,9 +389,9 @@ function Group() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.importJSON=async ((req,res)=>{
+    this.importJSON=async (req,res)=>{
         try
         {
             let obj;
@@ -428,7 +428,7 @@ function Group() {
                     return;
                 }
             }
-            let importChild=async (function (data,objParent) {
+            let importChild=async function (data,objParent) {
                 for(let item of data)
                 {
                     if(item.data)
@@ -495,7 +495,7 @@ function Group() {
                         await (req.interfaceModel.createAsync(item));
                     }
                 }
-            })
+            }
             await (importChild([obj],req.group?req.group:null))
             let arr=await (this.getChild(req,objProject._id,null,1));
             util.ok(res,arr,"导入成功");
@@ -504,8 +504,8 @@ function Group() {
         {
             util.catch(res,err);
         }
-    })
-    this.move=async ((req,res)=>{
+    }
+    this.move=async (req,res)=>{
         try
         {
             let toGroup;
@@ -531,15 +531,15 @@ function Group() {
                 new:true
             }));
             await (this.sort(req,toGroup,obj,req.clientParam.index?req.clientParam.index:0,1))
-            let arr = await(this.getChild(req,obj.project, null,1))
+            let arr = await (this.getChild(req,obj.project, null,1))
             util.ok(res,arr,"ok");
         }
         catch (err)
         {
             util.catch(res,err);
         }
-    })
-    this.merge=async ((req,res)=>{
+    }
+    this.merge=async (req,res)=>{
         try
         {
             await (req.groupModel.updateAsync({
@@ -549,7 +549,7 @@ function Group() {
                     delete:1
                 }
             }))
-            let mergeChild=async (function(obj) {
+            let mergeChild=async function(obj) {
                 let query={
                     project:req.obj._id,
                     parent:obj.id
@@ -579,7 +579,7 @@ function Group() {
                 },{
                     multi:true
                 }));
-            })
+            }
             await (mergeChild(req.group));
             let arr = await (this.getChild(req,req.group.project,null,1));
             util.ok(res, arr, "ok");
@@ -588,7 +588,7 @@ function Group() {
         {
             util.catch(res,err);
         }
-    })
+    }
 }
 
 

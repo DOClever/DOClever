@@ -1,5 +1,5 @@
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var project=require("../model/projectModel");
 var test=require("../model/testModel");
 var testGroup=require("../model/testGroupModel");
@@ -10,7 +10,7 @@ var testCollection=require("../model/testCollectionModel");
 var uuid=require("uuid");
 var mongoose = require('mongoose');
 var db=require("../util/db.js");
-module.exports=async (function () {
+module.exports=async function () {
     let modalA=db.model("TestModuleVersion",new mongoose.Schema({}));
     let modalB=db.model("TestGroupVersion",new mongoose.Schema({}));
     let modalC=db.model("TestVersion",new mongoose.Schema({}));
@@ -164,7 +164,7 @@ module.exports=async (function () {
             await (objModule.removeAsync());
         }
     }
-})
+}
 
 
 

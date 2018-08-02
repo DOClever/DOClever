@@ -1,0 +1,209 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.computeReleaseNotes = computeReleaseNotes;
+exports.GitHubProvider = exports.BaseGitHubProvider = void 0;
+
+function _builderUtilRuntime() {
+  const data = require("builder-util-runtime");
+
+  _builderUtilRuntime = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function semver() {
+  const data = _interopRequireWildcard(require("semver"));
+
+  semver = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function _url() {
+  const data = require("url");
+
+  _url = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function _main() {
+  const data = require("./main");
+
+  _main = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function _Provider() {
+  const data = require("./Provider");
+
+  _Provider = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+class BaseGitHubProvider extends _main().Provider {
+  constructor(options, defaultHost, executor) {
+    super(executor, false
+    /* because GitHib uses S3 */
+    );
+    this.options = options;
+    this.baseUrl = (0, _main().newBaseUrl)((0, _builderUtilRuntime().githubUrl)(options, defaultHost));
+    const apiHost = defaultHost === "github.com" ? "api.github.com" : defaultHost;
+    this.baseApiUrl = (0, _main().newBaseUrl)((0, _builderUtilRuntime().githubUrl)(options, apiHost));
+  }
+
+  computeGithubBasePath(result) {
+    // https://github.com/electron-userland/electron-builder/issues/1903#issuecomment-320881211
+    const host = this.options.host;
+    return host != null && host !== "github.com" && host !== "api.github.com" ? `/api/v3${result}` : result;
+  }
+
+}
+
+exports.BaseGitHubProvider = BaseGitHubProvider;
+
+class GitHubProvider extends BaseGitHubProvider {
+  constructor(options, updater, executor) {
+    super(options, "github.com", executor);
+    this.options = options;
+    this.updater = updater;
+  }
+
+  async getLatestVersion() {
+    const cancellationToken = new (_builderUtilRuntime().CancellationToken)();
+    const feedXml = await this.httpRequest((0, _main().newUrlFromBase)(`${this.basePath}.atom`, this.baseUrl), {
+      Accept: "application/xml, application/atom+xml, text/xml, */*"
+    }, cancellationToken);
+    const feed = (0, _builderUtilRuntime().parseXml)(feedXml);
+    const latestRelease = feed.element("entry", false, `No published versions on GitHub`);
+    let version;
+
+    try {
+      if (this.updater.allowPrerelease) {
+        // noinspection TypeScriptValidateJSTypes
+        version = latestRelease.element("link").attribute("href").match(/\/tag\/v?([^\/]+)$/)[1];
+      } else {
+        version = await this.getLatestVersionString(cancellationToken);
+      }
+    } catch (e) {
+      throw (0, _builderUtilRuntime().newError)(`Cannot parse releases feed: ${e.stack || e.message},\nXML:\n${feedXml}`, "ERR_UPDATER_INVALID_RELEASE_FEED");
+    }
+
+    if (version == null) {
+      throw (0, _builderUtilRuntime().newError)(`No published versions on GitHub`, "ERR_UPDATER_NO_PUBLISHED_VERSIONS");
+    }
+
+    const channelFile = (0, _main().getChannelFilename)((0, _main().getDefaultChannelName)());
+    const channelFileUrl = (0, _main().newUrlFromBase)(this.getBaseDownloadPath(version, channelFile), this.baseUrl);
+    const requestOptions = this.createRequestOptions(channelFileUrl);
+    let rawData;
+
+    try {
+      rawData = await this.executor.request(requestOptions, cancellationToken);
+    } catch (e) {
+      if (!this.updater.allowPrerelease && e instanceof _builderUtilRuntime().HttpError && e.statusCode === 404) {
+        throw (0, _builderUtilRuntime().newError)(`Cannot find ${channelFile} in the latest release artifacts (${channelFileUrl}): ${e.stack || e.message}`, "ERR_UPDATER_CHANNEL_FILE_NOT_FOUND");
+      }
+
+      throw e;
+    }
+
+    const result = (0, _Provider().parseUpdateInfo)(rawData, channelFile, channelFileUrl);
+
+    if ((0, _main().isUseOldMacProvider)()) {
+      result.releaseJsonUrl = `${(0, _builderUtilRuntime().githubUrl)(this.options)}/${requestOptions.path}`;
+    }
+
+    if (result.releaseName == null) {
+      result.releaseName = latestRelease.elementValueOrEmpty("title");
+    }
+
+    if (result.releaseNotes == null) {
+      result.releaseNotes = computeReleaseNotes(this.updater.currentVersion, this.updater.fullChangelog, feed, latestRelease);
+    }
+
+    return result;
+  }
+
+  async getLatestVersionString(cancellationToken) {
+    const url = new (_url().URL)(`${this.computeGithubBasePath(`/repos/${this.options.owner}/${this.options.repo}/releases`)}/latest`, this.baseApiUrl);
+
+    try {
+      // do not use API to avoid limit
+      const rawData = await this.httpRequest(url, {
+        Accept: "application/json"
+      }, cancellationToken);
+
+      if (rawData == null) {
+        return null;
+      }
+
+      const releaseInfo = JSON.parse(rawData);
+      return releaseInfo.tag_name.startsWith("v") ? releaseInfo.tag_name.substring(1) : releaseInfo.tag_name;
+    } catch (e) {
+      throw (0, _builderUtilRuntime().newError)(`Unable to find latest version on GitHub (${url}), please ensure a production release exists: ${e.stack || e.message}`, "ERR_UPDATER_LATEST_VERSION_NOT_FOUND");
+    }
+  }
+
+  get basePath() {
+    return `/${this.options.owner}/${this.options.repo}/releases`;
+  }
+
+  resolveFiles(updateInfo) {
+    // still replace space to - due to backward compatibility
+    return (0, _Provider().resolveFiles)(updateInfo, this.baseUrl, p => this.getBaseDownloadPath(updateInfo.version, p.replace(/ /g, "-")));
+  }
+
+  getBaseDownloadPath(version, fileName) {
+    return `${this.basePath}/download/${this.options.vPrefixedTagName === false ? "" : "v"}${version}/${fileName}`;
+  }
+
+}
+
+exports.GitHubProvider = GitHubProvider;
+
+function getNoteValue(parent) {
+  const result = parent.elementValueOrEmpty("content"); // GitHub reports empty notes as <content>No content.</content>
+
+  return result === "No content." ? "" : result;
+}
+
+function computeReleaseNotes(currentVersion, isFullChangelog, feed, latestRelease) {
+  if (!isFullChangelog) {
+    return getNoteValue(latestRelease);
+  }
+
+  const releaseNotes = [];
+
+  for (const release of feed.getElements("entry")) {
+    // noinspection TypeScriptValidateJSTypes
+    const versionRelease = release.element("link").attribute("href").match(/\/tag\/v?([^\/]+)$/)[1];
+
+    if (semver().lt(currentVersion, versionRelease)) {
+      releaseNotes.push({
+        version: versionRelease,
+        note: getNoteValue(release)
+      });
+    }
+  }
+
+  return releaseNotes.sort((a, b) => semver().rcompare(a.version, b.version));
+} 
+//# sourceMappingURL=GitHubProvider.js.map

@@ -2,8 +2,8 @@
  * Created by sunxin on 2017/2/5.
  */
 var express=require("express");
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var con=require("../../../config.json");
@@ -14,12 +14,7 @@ var interface=require("../../model/interfaceModel")
 var interfaceVersion=require("../../model/interfaceVersionModel")
 var fs=require("fs");
 var router=express.Router();
-router.use("/:id",async (validate))
-
-router.use(async (handle))
-
-
-function validate(req,res,next) {
+router.use("/:id",async function(req,res,next) {
     try
     {
         req.arrFile.forEach(function (obj) {
@@ -124,9 +119,9 @@ function validate(req,res,next) {
     {
         util.catch(res,err);
     }
-}
+})
 
-function handle(req,res) {
+router.use(async function(req,res) {
     try
     {
         let param,clientParam,type;
@@ -165,5 +160,8 @@ function handle(req,res) {
     {
         util.catch(res,err);
     }
-}
+})
+
+
+
 module.exports=router;

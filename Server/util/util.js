@@ -8,8 +8,8 @@ var event=require("events");
 var express=require("express");
 var fs=require("fs");
 var path = require('path');
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var CryptoJS=require("crypto-js")
 var request=require("../third/requestAsync");
 var mongoose = require('mongoose');
@@ -25,6 +25,7 @@ var blue=require("bluebird");
 var fsAsync=blue.promisifyAll(fs);
 var child_process=blue.promisifyAll(require("child_process"));
 require("./Base64")
+var uuid=require("uuid");
 var testModel=null;
 var statusModel=null;
 var statusVersionModel=null;
@@ -321,7 +322,7 @@ let existAsync=function (filePath) {
     })
 }
 
-let getFileSize=async (function (filePath) {
+let getFileSize=async function (filePath) {
     let size=0;
     if(!filePath)
     {
@@ -337,7 +338,7 @@ let getFileSize=async (function (filePath) {
         }
     }
     return size;
-})
+}
 
 function getIPAdress(){
     var interfaces = require('os').networkInterfaces();
@@ -1035,7 +1036,7 @@ var runAfter=function (code,status,header,data) {
     }
 }
 
-var runTest=async (function (obj,global,test,root,opt) {
+var runTest=async function (obj,global,test,root,opt) {
     root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]开始运行接口："+obj.name+"<br>"
     var name=obj.name
     var method=obj.method;
@@ -1504,9 +1505,9 @@ var runTest=async (function (obj,global,test,root,opt) {
             data:err
         }
     })
-})
+}
 
-var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
+var runTestCode=async function (code,test,global,opt,root,argv,mode,__id,level) {
     if(!testModel)
     {
         testModel=require("../model/testModel");
@@ -1554,6 +1555,7 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
     {
         var obj=arr[i].getAttribute("data");
         var type=arr[i].getAttribute("type");
+        var objId=arr[i].getAttribute("varid");
         var text;
         if(type=="1")
         {
@@ -1631,7 +1633,7 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
             opt.baseUrls=objInfo.baseUrls;
             opt.before=objInfo.before;
             opt.after=objInfo.after;
-            text="(function (opt1) {return runTest("+obj.replace(/\r|\n/g,"")+",opt,test,root,opt1)})"
+            text="(function (opt1) {return runTest("+obj.replace(/\r|\n/g,"")+",opt,test,root,opt1,"+(level==0?objId:undefined)+")})"
         }
         else if(type=="2")
         {
@@ -1668,7 +1670,7 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
             {
                 code=convertToCode(testObj.ui).replace(/'/g,"\\'").replace(/\\\"/g,"\\\\\"");
             }
-            text="(function () {var argv=Array.prototype.slice.call(arguments);return runTestCode('"+code+"',"+JSON.stringify(testObj)+",global,opt,root,argv,'"+testMode+"')})"
+            text="(function () {var argv=Array.prototype.slice.call(arguments);return runTestCode('"+code+"',"+JSON.stringify(testObj)+",global,opt,root,argv,'"+testMode+"',"+(level==0?objId:undefined)+","+(level+1)+")})"
         }
         else
         {
@@ -1693,83 +1695,7 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
         root.output+="<br><div style='background-color: #ececec'>["+moment().format("YYYY-MM-DD HH:mm:ss")+"]开始执行轮询<br>";
     }
     var text=ele.textContent.replace(new RegExp(decodeURIComponent("%C2%A0"),"g")," ");
-    function bOutside(str) {
-        var a1=0,a2=0;
-        for(var i=0;i<str.length;i++)
-        {
-            if(str[i]=="\"" && (i==0 || str[i-1]!="\\"))
-            {
-                if(a2%2==0)
-                {
-                    a1++
-                }
-            }
-            else if(str[i]=="'" && (i==0 || str[i-1]!="\\"))
-            {
-                if(a1%2==0)
-                {
-                    a2++
-                }
-            }
-        }
-        if(a1%2==0 && a2%2==0)
-        {
-            return true;
-        }
-        else
-        {
-            return false
-        }
-    }
-    var evalText="";
-    while(true)
-    {
-        let index=text.indexOf("await ");
-        if(index>-1)
-        {
-            let lText=text.substring(0,index);
-            if(bOutside(evalText+lText))
-            {
-                evalText+=lText+"await (";
-                text=text.substr(index+6);
-                while(true)
-                {
-                    index=text.indexOf(");");
-                    if(index>-1)
-                    {
-                        lText=text.substring(0,index);
-                        if(bOutside(evalText+lText) && !lText.endsWith("var argv=Array.prototype.slice.call(arguments"))
-                        {
-                            evalText+=lText+"));";
-                            text=text.substr(index+2);
-                            break;
-                        }
-                        else
-                        {
-                            evalText+=lText+");";
-                            text=text.substr(index+2);
-                        }
-                    }
-                    else
-                    {
-                        evalText+=text;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                evalText+=lText+"await ";
-                text=text.substr(index+6);
-            }
-        }
-        else
-        {
-            evalText+=text;
-            break;
-        }
-    }
-    var ret=eval("(async (function () {"+evalText+"}))()").then(function (ret) {
+    var ret=eval("(async function () {"+text+"})()").then(function (ret) {
         var obj={
             argv:[]
         };
@@ -1787,6 +1713,10 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
         {
             obj.pass=undefined;
             test.status=0;
+            if(__id!=undefined)
+            {
+                root.unknown++;
+            }
             if(test.module)
             {
                 root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]用例执行结束："+test.module.name+"/"+test.group.name+"/"+test.name+"(未判定)";
@@ -1800,6 +1730,10 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
         {
             obj.pass=true;
             test.status=1;
+            if(__id!=undefined)
+            {
+                root.success++;
+            }
             if(test.module)
             {
                 root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]用例执行结束："+test.module.name+"/"+test.group.name+"/"+test.name+"(<span style='color:green'>已通过</span>)";
@@ -1813,6 +1747,10 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
         {
             obj.pass=false;
             test.status=2;
+            if(__id!=undefined)
+            {
+                root.fail++;
+            }
             if(test.module)
             {
                 root.output+="["+moment().format("YYYY-MM-DD HH:mm:ss")+"]用例执行结束："+test.module.name+"/"+test.group.name+"/"+test.name+"(<span style='color:red'>未通过</span>)";
@@ -1826,7 +1764,7 @@ var runTestCode=async (function (code,test,global,opt,root,argv,mode) {
         return obj;
     });
     return ret;
-})
+}
 
 function updateTestInterfaceWithExample(objInter,objExample) {
     var obj={
@@ -2041,8 +1979,8 @@ function versionDiff(obj1,obj2) {
     }
 }
 
-var init=async (function () {
-    let setConfig=async (function () {
+var init=async function () {
+    let setConfig=async function () {
         if((!fs.existsSync(path.join(__dirname, "../../config.json")) || !require("../../config.json").db) && process.argv.length<=2)
         {
             con={};
@@ -2152,8 +2090,8 @@ var init=async (function () {
         {
             con.port=parseInt(argv.port);
         }
-    })
-    let patch=async (function () {
+    }
+    let patch=async function () {
         let curVersion=require("../../ver.json").version;
         var stat = fs.statSync(path.join(__dirname,"../patch"));
         if(!stat.isDirectory())
@@ -2205,15 +2143,15 @@ var init=async (function () {
             upsert:true,
             setDefaultsOnInsert:true
         }))
-    })
+    }
     await (setConfig());
     await (patch());
     require("../event/event");
     exports.event.emit("init");
     console.log("DOClever启动成功");
-})
+}
 
-var getMockParam=async (function(clientParam,obj,type,version) {
+var getMockParam=async function(clientParam,obj,type,version) {
     var arr=[];
     if(!statusModel)
     {
@@ -2320,7 +2258,7 @@ var getMockParam=async (function(clientParam,obj,type,version) {
         }
     }
     return obj.param[index];
-})
+}
 
 function handleResultData(name,data,result,originObj,show,input,bArr) {
     name=typeof(name)=="string"?name:null;
@@ -2540,7 +2478,7 @@ function parseURL(url) {
     };
 }
 
-let runPoll=async (function (arr) {
+let runPoll=async function (arr) {
     let poll=require("../model/pollModel");
     let test=require("../model/testModel");
     let user=require("../model/userModel");
@@ -2609,7 +2547,7 @@ let runPoll=async (function (arr) {
             },{},{
                 baseUrl:obj.baseUrl,
                 env:env,
-            },root,[],"ui"));
+            },root,[],"ui",undefined,0));
         }
         catch(e)
         {
@@ -2678,7 +2616,7 @@ let runPoll=async (function (arr) {
             sendSMS(method,baseUrl,param);
         }
     }
-})
+}
 
 function handleGlobalVar(str,global) {
     var type;
@@ -2761,7 +2699,7 @@ function getNowFormatDate(fmt,date) {
     return fmt;
 }
 
-var createStatistic=async (function() {
+var createStatistic=async function() {
     let inter=require("../model/interfaceModel");
     let project=require("../model/projectModel");
     let team=require("../model/teamModel");
@@ -2803,7 +2741,7 @@ var createStatistic=async (function() {
         }
     }))
     await (statistic.createAsync(obj));
-})
+}
 
 var formatJson = function (json, options) {
     var reg = null,
@@ -2865,7 +2803,7 @@ var formatJson = function (json, options) {
     return formatted;
 };
 
-var backup=async (function (db,version) {
+var backup=async function (db,version) {
     if(!db.dbPath || !db.host || !db.name || !db.backPath)
     {
         return
@@ -2884,9 +2822,9 @@ var backup=async (function (db,version) {
         str+=` -u ${db.user} -p ${db.pass} --authenticationDatabase ${db.authDb}`
     }
     await (child_process.execAsync(str));
-})
+}
 
-var restore=async (function (db,dir) {
+var restore=async function (db,dir) {
     if(!db.dbPath || !db.host || !db.name || !db.backPath)
     {
         return
@@ -2904,7 +2842,7 @@ var restore=async (function (db,dir) {
         str+=` -u ${db.user} -p ${db.pass} --authenticationDatabase ${db.authDb}`
     }
     await (child_process.execAsync(str));
-})
+}
 
 var removeFolder=function (path) {
     var files = [];

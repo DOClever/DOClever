@@ -1,11 +1,11 @@
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var interface=require("../model/interfaceModel");
 require("../model/groupModel")
 require("../model/groupVersionModel")
 var interfaceVersion=require("../model/interfaceVersionModel");
 var interfaceSnapshot=require("../model/interfaceSnapshotModel");
-module.exports=async (function () {
+module.exports=async function () {
     var arr=[interface,interfaceVersion,interfaceSnapshot];
     var i=0;
     for(let inter of arr)
@@ -30,7 +30,7 @@ module.exports=async (function () {
     {
         console.log(`修复了${i}条数据`)
     }
-})
+}
 
 
 

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+    <link type="text/css"  rel="stylesheet" href="../../common/css/common.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/font-awesome/css/font-awesome.min.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/animate.css/animate.min.css">
+    <link type="text/css"  rel="stylesheet" href="../../common/lib/element/index.css">
+    <title>DOClever 移动时代首选接口管理平台！</title>
+    <style>
+        .el-form-item__label {
+            padding-bottom: 0px;
+            height: 30px;
+        }
+        .el-form-item {
+            margin-bottom: 0px;
+        }
+    </style>
+</head>
+<body style="background-color: rgb(45,45,45);">
+<div class="container" id="app" v-cloak>
+    <el-row class="row" style="margin-top: 150px;height: 50px;line-height: 50px;font-size: 30px;text-align: center;color:white">
+        DOClever
+    </el-row>
+    <el-form>
+        <el-form-item  style="text-align: center">
+            <el-select v-model="member" size="small" style="width: 300px" placeholder="线上会员绑定(没有可不填)">
+                <el-option :label="item.user" :disabled="item.disabled" :value="item.user" v-for="(item,index) in arrMember">
+                    <span style="float: left">{{ item.user }}</span>
+                    <i class="el-icon-close fa fa-lg" style="float: right;color: red;margin-top: 8px" @click.prevent.stop="removeMember(item,index)"></i>
+                </el-option>
+            </el-select>
+            <el-button size="small" type="text" style="left: calc(50vw + 160px);position: absolute;" @click="showApplyMember=true">
+                <i class="el-icon-plus fa fa-lg" style="font-weight: 900"></i>
+            </el-button>
+            <el-button size="small" type="text" style="left: calc(50vw + 180px);position: absolute;" @click="getValidMember">
+                <i class="el-icon-refresh fa fa-lg" style="font-weight: 900"></i>
+            </el-button>
+        </el-form-item>
+        <el-form-item style="text-align: center">
+            <el-select v-model="envId" size="small" style="width: 300px" placeholder="选择连接环境">
+                <el-option label="doclever.cn" value="doclever.cn"></el-option>
+                <el-option :label="item.name" :value="item.id" v-for="(item,index) in arrEnv">
+                    <span style="float: left">{{ item.name }}</span>
+                    <i class="el-icon-close fa fa-lg" style="float: right;color: red;margin-top: 8px" @click.prevent.stop="removeEnv(item,index)"></i>
+                    <i class="el-icon-edit fa fa-lg" style="float: right;margin-top: 8px;margin-right: 8px" @click.prevent.stop="editEnv(item)"></i>
+                </el-option>
+            </el-select>
+            <el-button size="small" type="text" style="left: calc(50vw + 160px);position: absolute;" @click="add">
+                <i class="el-icon-plus fa fa-lg" style="font-weight: 900"></i>
+            </el-button>
+            <el-button size="small" type="text" style="left: calc(50vw + 180px);position: absolute;" @click="refresh" v-if="envId">
+                <i class="el-icon-refresh fa fa-lg" style="font-weight: 900"></i>
+            </el-button>
+        </el-form-item>
+        <el-form-item  style="text-align: center">
+            <el-input size="small" placeholder="请输入用户名" style="width:300px" v-model="username"></el-input>
+        </el-form-item>
+        <el-form-item style="text-align: center">
+            <el-input size="small" type="password" placeholder="请输入密码" style="width:300px" v-model="password"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-checkbox :true-label="1" :false-label="0" v-model="remember" style="margin-left: calc(50vw - 150px)"><span  style="color: white">自动连接到该环境</span></el-checkbox>
+            <el-button size="mini" type="text" @click="reset.step=0,showReset=true" style="margin-left: 110px;" v-if="objVersion.version">
+                找回密码
+            </el-button>
+        </el-form-item>
+        <el-form-item style="text-align: center">
+            <el-row class="row" style="width: 300px;margin: 0 auto" v-if="objVersion.version">
+                <el-button size="small" type="primary" style="float: left" @click="showRegister=true">
+                    注册新用户
+                </el-button>
+                <el-button size="small" type="primary" style="float: right" @click="login">
+                    登陆
+                </el-button>
+            </el-row>
+        </el-form-item>
+    </el-form>
+    <el-dialog title="添加环境" :visible.sync="showAdd" width="50%" append-to-body>
+        <el-form label-width="100px">
+            <el-form-item label="环境名称">
+                <el-input size="small" placeholder="请输入环境名称" v-model="envEdit.name"></el-input>
+            </el-form-item>
+            <el-form-item label="服务器地址">
+                <el-input size="small" placeholder="请输入服务器地址" v-model="envEdit.url"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button size="mini" type="primary" @click="addEnv" :loading="addPending">确 定</el-button>
+        </span>
+    </el-dialog>
+    <el-dialog title="绑定线上会员" :visible.sync="showApplyMember" width="50%" append-to-body>
+        <el-form label-width="100px">
+            <el-form-item label="会员名">
+                <el-input size="small" placeholder="请输入线上会员名称" v-model="memberEdit.user"></el-input>
+            </el-form-item>
+            <el-form-item label="绑定密码">
+                <el-input size="small" placeholder="请输入线上会员绑定密码" v-model="memberEdit.pass"></el-input>
+            </el-form-item>
+            <el-form-item label="主机名称">
+                <el-input size="small" placeholder="请输入主机名称" v-model="memberEdit.name"></el-input>
+            </el-form-item>
+            <el-form-item label="备注">
+                <el-input size="small" placeholder="请输入备注" v-model="memberEdit.remark"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button size="mini" type="primary" @click="applyMember" :loading="addPending">申请</el-button>
+        </span>
+    </el-dialog>
+    <el-dialog title="注册用户" :visible.sync="showRegister" width="60%" append-to-body>
+        <el-form>
+            <el-form-item label="请输入用户名" prop="name">
+                <el-input size="small" v-model="objRegister.username"></el-input>
+            </el-form-item>
+            <el-form-item label="请输入密码" prop="password">
+                <el-input size="small" v-model="objRegister.pwd" type="password"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码" prop="password">
+                <el-input size="small" v-model="objRegister.pwd1" type="password"></el-input>
+            </el-form-item>
+            <el-form-item label="请留下邮箱" prop="email">
+                <el-input size="small" v-model="objRegister.email"></el-input>
+            </el-form-item>
+            <el-form-item label="密码找回问题" prop="rest">
+                <el-input size="small" v-model="objRegister.question" ></el-input>
+            </el-form-item>
+            <el-form-item label="密码找回答案" prop="qustion" style="margin-bottom: 30px">
+                <el-input size="small" v-model="objRegister.answer"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button size="small" type="primary" @click.prevent="register">注册</el-button>
+        </span>
+    </el-dialog>
+    <el-dialog title="找回密码" :visible.sync="showReset" width="40%" append-to-body>
+        <el-form  v-if="reset.step==1">
+            <el-form-item label="请输入您预留的问题">
+                <el-input size="small" v-model="reset.question" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item  label="请输入找回密码的问题答案">
+                <el-input size="small"  v-model="reset.answer"></el-input>
+            </el-form-item>
+            <el-form-item  label="请输入新密码">
+                <el-input size="small"  v-model="reset.pwd" type="password"></el-input>
+            </el-form-item>
+            <el-form-item label="请确认新密码">
+                <el-input size="small" v-model="reset.pwd1" type="password"></el-input>
+            </el-form-item>
+            <el-form-item >
+                <el-button size="small" type="warning" :loading="reset.resetPending" @click.prevent="resetUser" style="width: 100%">立即重置</el-button>
+            </el-form-item>
+        </el-form>
+        <el-form  v-else>
+            <el-form-item label="请输入您要找回密码的用户名">
+                <el-input size="small"  v-model="reset.username"></el-input>
+            </el-form-item>
+            <el-form-item >
+                <el-button size="small" type="primary" :loading="reset.questionPending"  @click.prevent="getQuestion" style="width: 100%;margin-top: 20px">立即找回 </el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+</div>
+<script src="../../../node/api.js"></script>
+<script src="../../../dist/vendor.bundle.js"></script>
+<script src="../../common/lib/element/index.js"></script>
+<script src="../../../dist/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+import { AllPublishOptions, CancellationToken, UpdateInfo } from "builder-util-runtime";
+import "source-map-support/register";
+import { BaseUpdater } from "./BaseUpdater";
+export declare class NsisUpdater extends BaseUpdater {
+    constructor(options?: AllPublishOptions | null, app?: any);
+    /*** @private */
+    protected doDownloadUpdate(updateInfo: UpdateInfo, cancellationToken: CancellationToken): Promise<Array<string>>;
+    private verifySignature(tempUpdateFile);
+    protected doInstall(installerPath: string, isSilent: boolean, isForceRunAfter: boolean): boolean;
+    private differentialDownloadInstaller(fileInfo, installerPath, requestHeaders, provider);
+    private differentialDownloadWebPackage(packageInfo, packagePath, provider);
+}

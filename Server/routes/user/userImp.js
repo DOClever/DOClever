@@ -256,6 +256,16 @@ var interface=[
         user:1,
         handle:user.getSendInfo
     },
+    {
+        "method":"GET",
+        "path":"/user/version",
+        "param": {
+        },
+        "data":{
+
+        },
+        handle:user.version
+    },
 ];
 
 module.exports=interface;

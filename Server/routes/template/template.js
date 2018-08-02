@@ -1,5 +1,5 @@
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var user=require("../../model/userModel")
@@ -8,7 +8,7 @@ var fs=require("fs");
 var uuid=require("uuid/v1");
 
 function Template() {
-    this.saveTemplate=async ((req,res)=>{
+    this.saveTemplate=async (req,res)=>{
         try
         {
             let query={
@@ -42,8 +42,8 @@ function Template() {
         {
             util.catch(res,err);
         }
-    })
-    this.templateInfo=async ((req,res)=>{
+    }
+    this.templateInfo=async (req,res)=>{
         try
         {
             let obj=await (template.findOneAsync({
@@ -59,8 +59,8 @@ function Template() {
         {
             util.catch(res,err);
         }
-    })
-    this.templateList=async ((req,res)=>{
+    }
+    this.templateList=async (req,res)=>{
         try
         {
             let query={
@@ -79,8 +79,8 @@ function Template() {
         {
             util.catch(res,err);
         }
-    })
-    this.removeTemplate=async ((req,res)=>{
+    }
+    this.removeTemplate=async (req,res)=>{
         try
         {
             await (template.removeAsync({
@@ -92,7 +92,7 @@ function Template() {
         {
             util.catch(res,err);
         }
-    })
+    }
 }
 
 

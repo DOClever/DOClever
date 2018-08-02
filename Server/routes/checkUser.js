@@ -7,11 +7,11 @@ var user=require("../model/userModel");
 var e=require("../util/error.json");
 var con=require("../../config.json");
 var fs=require("fs");
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var util=require("../util/util");
 var e=require("../util/error.json");
-router.use(async (function(req,res,next)
+router.use(async function(req,res,next)
 {
     let bUp=false;
     if(/^multipart\/form-data/i.test(req.headers["content-type"]))
@@ -27,9 +27,9 @@ router.use(async (function(req,res,next)
         }
         else
         {
-            if(req.cookies.id)
+            if(req.cookies.id || req.cookies.docleveruserid)
             {
-                userId=req.cookies.id;
+                userId=req.cookies.id?req.cookies.id:req.cookies.docleveruserid;
                 req.session.userid=userId;
             }
             else
@@ -93,7 +93,7 @@ router.use(async (function(req,res,next)
         }
         util.catch(res,err);
     }
-}));
+});
 
 
 module.exports=router;

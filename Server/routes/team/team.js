@@ -1,8 +1,8 @@
 /**
  * Created by sunxin on 2017/6/7.
  */
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var user=require("../../model/userModel")
@@ -21,7 +21,7 @@ var test=require("../../model/testModel");
 var moment=require("moment");
 var fs=require("fs");
 function Team() {
-    this.validateTeam=async ((req,res)=> {
+    this.validateTeam=async (req,res)=> {
         try
         {
             let obj=await (team.findOneAsync({
@@ -38,8 +38,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.validate=async ((req,res)=> {
+    }
+    this.validate=async (req,res)=> {
         try
         {
             let obj=await (team.findOneAsync({
@@ -95,9 +95,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.existUserInTeam=async ( (teamId,userId)=> {
+    this.existUserInTeam=async (teamId,userId)=> {
         let arrUser=await (teamGroup.findAsync({
             team:teamId
         }))
@@ -123,9 +123,9 @@ function Team() {
         {
             return false;
         }
-    })
+    }
 
-    this.teamUserList=async ( (teamId)=> {
+    this.teamUserList=async (teamId)=> {
         let arrUser=await (teamGroup.findAsync({
             team:teamId
         }))
@@ -136,8 +136,8 @@ function Team() {
             })
         })
         return arr;
-    })
-    this.save=async ((req,res)=> {
+    }
+    this.save=async (req,res)=> {
         try
         {
             let obj;
@@ -167,6 +167,8 @@ function Team() {
                 }));
                 obj._doc.userCount=1;
                 obj._doc.projectCount=0;
+                obj._doc.docCount=0;
+                obj._doc.testCount=0;
                 obj._doc.role=2;
                 obj._doc.own=1;
                 let objGroup=await (teamGroup.createAsync({
@@ -186,9 +188,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.info=async ((req,res)=> {
+    this.info=async (req,res)=> {
         try
         {
             let obj=await (team.populateAsync(req.team,{
@@ -445,9 +447,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.pullUser=async ((req,res)=> {
+    this.pullUser=async (req,res)=> {
         try
         {
             if(req.access==0)
@@ -491,9 +493,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.removeUser=async ((req,res)=> {
+    this.removeUser=async (req,res)=> {
         try
         {
             if(req.access==0 && !req.clientParam.self)
@@ -534,9 +536,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.removeProjectUser=async ((req,res)=> {
+    this.removeProjectUser=async (req,res)=> {
         try
         {
             await (project.updateAsync({
@@ -561,9 +563,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.projectUser=async ((req,res)=> {
+    this.projectUser=async (req,res)=> {
         try
         {
             let objPro=await (project.findOneAsync({
@@ -628,9 +630,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.userRole=async ((req,res)=> {
+    this.userRole=async (req,res)=> {
         try
         {
             let arrUser=JSON.parse(req.clientParam.user);
@@ -649,9 +651,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.moveUser=async ((req,res)=> {
+    this.moveUser=async (req,res)=> {
         try
         {
             let obj=await (teamGroup.findOneAndUpdateAsync({
@@ -701,9 +703,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.createGroup=async ((req,res)=> {
+    this.createGroup=async (req,res)=> {
         try
         {
             let obj;
@@ -730,9 +732,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.removeGroup=async ((req,res)=> {
+    this.removeGroup=async (req,res)=> {
         try
         {
             let obj=await (teamGroup.findOneAsync({
@@ -753,9 +755,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.pullProject=async ((req,res)=> {
+    this.pullProject=async (req,res)=> {
         try
         {
             if(req.access==0)
@@ -793,9 +795,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.userApply=async ((req,res)=> {
+    this.userApply=async (req,res)=> {
         try
         {
             let bIn=await (this.existUserInTeam(req.team._id,req.userInfo._id));
@@ -827,9 +829,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.projectApply=async ((req,res)=> {
+    this.projectApply=async (req,res)=> {
         try
         {
             await (apply.findOneAndUpdateAsync({
@@ -856,9 +858,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.groupList=async ((req,res)=> {
+    this.groupList=async (req,res)=> {
         try
         {
             let arr=await (teamGroup.findAsync({
@@ -872,9 +874,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.saveNotice=async ((req,res)=> {
+    this.saveNotice=async (req,res)=> {
         try
         {
             let obj;
@@ -913,9 +915,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.getNotice=async ((req,res)=> {
+    this.getNotice=async (req,res)=> {
         try
         {
             let arr=req.team.notice.slice(req.clientParam.page*10,(req.clientParam.page+1)*10);
@@ -925,9 +927,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.removeNotice=async ((req,res)=> {
+    this.removeNotice=async (req,res)=> {
         try
         {
             await (team.findOneAndUpdateAsync({
@@ -945,10 +947,10 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
 
-    this.applyList=async ((req,res)=> {
+    this.applyList=async (req,res)=> {
         try
         {
             let arr=await (apply.findAsync({
@@ -978,9 +980,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-
-    this.handleApply=async ((req,res)=> {
+    }
+    this.handleApply=async (req,res)=> {
         try
         {
             let obj=await (apply.findOneAsync({
@@ -1359,9 +1360,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.removeProject=async ((req,res)=> {
+    this.removeProject=async (req,res)=> {
         try
         {
             let obj=await (project.findOneAndUpdateAsync({
@@ -1378,9 +1379,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.userPulledList=async ((req,res)=> {
+    this.userPulledList=async (req,res)=> {
         try
         {
             let arrTeamUser=await (this.teamUserList(req.team._id));
@@ -1422,9 +1423,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.userJoin=async ((req,res)=> {
+    this.userJoin=async (req,res)=> {
         try
         {
             if(await (this.existUserInTeam(req.team._id,req.clientParam.user)))
@@ -1450,9 +1451,9 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.removeTeam=async ((req,res)=> {
+    this.removeTeam=async (req,res)=> {
         try
         {
             if(req.team.owner.toString()!=req.userInfo._id.toString())
@@ -1478,8 +1479,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.transfer=async ((req,res)=>{
+    }
+    this.transfer=async (req,res)=>{
         try
         {
             if(req.userInfo._id.toString()!=req.team.owner.toString())
@@ -1513,8 +1514,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.userList=async ((req,res)=>{
+    }
+    this.userList=async (req,res)=>{
         try
         {
             let ret=await (teamGroup.findAsync({
@@ -1532,8 +1533,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.list=async (function (req,res) {
+    }
+    this.list=async function (req,res) {
         try
         {
             let obj={},ret=[];
@@ -1561,6 +1562,9 @@ function Team() {
                     team:obj._id
                 }))
                 obj._doc.docCount=await (docProject.countAsync({
+                    team:obj._id
+                }))
+                obj._doc.testCount=await (testProject.countAsync({
                     team:obj._id
                 }))
             }
@@ -1642,6 +1646,9 @@ function Team() {
                 obj._doc.docCount=await (docProject.countAsync({
                     team:obj._id
                 }))
+                obj._doc.testCount=await (testProject.countAsync({
+                    team:obj._id
+                }))
             }
             obj.join=ret;
             util.ok(res,obj,"ok");
@@ -1650,8 +1657,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    });
-    this.projectList=async (function (req,res) {
+    };
+    this.projectList=async function (req,res) {
         try
         {
             let ret=[];
@@ -1741,8 +1748,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.docList=async ((req,res)=>{
+    }
+    this.docList=async (req,res)=>{
         try
         {
             let arr;
@@ -1817,8 +1824,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.testList=async ((req,res)=>{
+    }
+    this.testList=async (req,res)=>{
         try
         {
             let arr;
@@ -1876,8 +1883,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.removeDoc=async ((req,res)=> {
+    }
+    this.removeDoc=async (req,res)=> {
         try
         {
             let obj=await (docProject.findOneAndUpdateAsync({
@@ -1894,8 +1901,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.docUser=async ((req,res)=>{
+    }
+    this.docUser=async (req,res)=>{
         try
         {
             let objPro=await (docProject.findOneAsync({
@@ -1948,8 +1955,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.pullDoc=async ((req,res)=>{
+    }
+    this.pullDoc=async (req,res)=>{
         try
         {
             let obj=await (docProject.findOneAsync({
@@ -1983,8 +1990,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.docApply=async ((req,res)=>{
+    }
+    this.docApply=async (req,res)=>{
         try
         {
             await (apply.findOneAndUpdateAsync({
@@ -2011,8 +2018,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.removeTest=async ((req,res)=> {
+    }
+    this.removeTest=async (req,res)=> {
         try
         {
             let obj=await (testProject.findOneAndUpdateAsync({
@@ -2029,8 +2036,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.testUser=async ((req,res)=>{
+    }
+    this.testUser=async (req,res)=>{
         try
         {
             let objPro=await (testProject.findOneAsync({
@@ -2083,8 +2090,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.pullTest=async ((req,res)=>{
+    }
+    this.pullTest=async (req,res)=>{
         try
         {
             let obj=await (testProject.findOneAsync({
@@ -2118,8 +2125,8 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
-    this.testApply=async ((req,res)=>{
+    }
+    this.testApply=async (req,res)=>{
         try
         {
             await (apply.findOneAndUpdateAsync({
@@ -2146,7 +2153,7 @@ function Team() {
         {
             util.catch(res,err);
         }
-    })
+    }
 }
 
 

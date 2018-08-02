@@ -1,5 +1,5 @@
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var pdf = require('html-pdf');
 var md = require('markdown-it')();
 var con=require("../../../config.json")
@@ -27,7 +27,7 @@ var status=require("../../model/statusModel")
 var statusVersion=require("../../model/statusVersionModel")
 function Doc()
 {
-    this.teamUserList=async ( (teamId)=> {
+    this.teamUserList=async (teamId)=> {
         let arrUser=await (teamGroup.findAsync({
             team:teamId
         }))
@@ -38,8 +38,8 @@ function Doc()
             })
         })
         return arr;
-    })
-    this.existUserInTeam=async ( (teamId,userId)=>{
+    }
+    this.existUserInTeam=async (teamId,userId)=>{
         let arrUser=await (teamGroup.findAsync({
             team:teamId
         }))
@@ -65,8 +65,8 @@ function Doc()
         {
             return false;
         }
-    })
-    this.saveProject=async ((req,res)=>{
+    }
+    this.saveProject=async (req,res)=>{
         try
         {
             let query={
@@ -114,8 +114,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.projectList=async ((req,res)=>{
+    }
+    this.projectList=async (req,res)=>{
         try
         {
             let ret={}
@@ -195,8 +195,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.projectInfo=async ((req,res)=>{
+    }
+    this.projectInfo=async (req,res)=>{
         try
         {
             let objProject=await (docProject.findOneAsync({
@@ -221,8 +221,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.removeProject=async ((req,res)=>{
+    }
+    this.removeProject=async (req,res)=>{
         try
         {
             let arrDoc=await (doc.findAsync({
@@ -252,8 +252,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.saveGroup=async ((req,res)=>{
+    }
+    this.saveGroup=async (req,res)=>{
         try
         {
             let query={
@@ -313,8 +313,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.removeGroup=async ((req,res)=>{
+    }
+    this.removeGroup=async (req,res)=>{
         try
         {
             let objGroup=await (docGroup.findOneAsync({
@@ -335,7 +335,7 @@ function Doc()
                 }))
             }
             let size=0;
-            let __map=async (function (obj) {
+            let __map=async function (obj) {
                 if(obj.childGroup && obj.childGroup.length>0)
                 {
                     let arrGroup=await (docGroup.findAsync({
@@ -371,7 +371,7 @@ function Doc()
                     }
                 }
                 await (obj.removeAsync());
-            })
+            }
             await (__map(objGroup));
             let obj=await (docProject.findOneAndUpdateAsync({
                 _id:objGroup.project
@@ -388,8 +388,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.saveDoc=async ((req,res)=>{
+    }
+    this.saveDoc=async (req,res)=>{
         try
         {
             let objGroup=await (docGroup.findOneAsync({
@@ -428,8 +428,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.docInfo=async ((req,res)=>{
+    }
+    this.docInfo=async (req,res)=>{
         try
         {
             let obj=await (doc.findOneAsync({
@@ -462,8 +462,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.removeDoc=async ((req,res)=>{
+    }
+    this.removeDoc=async (req,res)=>{
         try
         {
             let obj=await (doc.findOneAsync({
@@ -507,8 +507,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.moveGroup=async ((req,res)=>{
+    }
+    this.moveGroup=async (req,res)=>{
         try
         {
             let obj=await (docGroup.findOneAsync({
@@ -600,8 +600,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.moveDoc=async ((req,res)=>{
+    }
+    this.moveDoc=async (req,res)=>{
         try
         {
             let obj=await (doc.findOneAsync({
@@ -660,8 +660,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.addUser=async ((req,res)=>{
+    }
+    this.addUser=async (req,res)=>{
         try
         {
             let objUser=await (user.findOneAsync({
@@ -706,8 +706,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.removeUser=async ((req,res)=>{
+    }
+    this.removeUser=async (req,res)=>{
         try
         {
             let objUser=await (user.findOneAsync({
@@ -749,8 +749,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.quit=async ((req,res)=>{
+    }
+    this.quit=async (req,res)=>{
         try
         {
             let obj=await (docProject.findOneAsync({
@@ -785,8 +785,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.setUser=async ((req,res)=>{
+    }
+    this.setUser=async (req,res)=>{
         try
         {
             let obj=await (docProject.findOneAsync({
@@ -804,8 +804,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.setOwner=async ((req,res)=> {
+    }
+    this.setOwner=async (req,res)=> {
         try
         {
             let obj=await (user.findOneAsync({
@@ -874,8 +874,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.structure=async ((req,res)=>{
+    }
+    this.structure=async (req,res)=>{
         try
         {
             let objProject=await (docProject.findOneAsync({
@@ -885,7 +885,7 @@ function Doc()
             {
                 util.throw(e.docProjectNotFound,"项目没有找到");
             }
-            let __map=async (function (obj) {
+            let __map=async function (obj) {
                 if(obj.childGroup && obj.childGroup.length>0)
                 {
                     let type;
@@ -924,7 +924,7 @@ function Doc()
                     }
                 }
                 return obj;
-            })
+            }
             objProject=await (__map(objProject));
             util.ok(res,objProject.childGroup,"ok");
         }
@@ -932,8 +932,105 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.filterList=async ((req,res)=>{
+    }
+    this.filterStructure=async (req,res)=>{
+        try
+        {
+            let objProject=await (docProject.findOneAsync({
+                _id:req.clientParam.project
+            }))
+            if(!objProject)
+            {
+                util.throw(e.docProjectNotFound,"项目没有找到");
+            }
+            let __map=async function (obj) {
+                if(obj.childGroup && obj.childGroup.length>0)
+                {
+                    let type;
+                    if(obj.users)
+                    {
+                        type=docProject;
+                    }
+                    else
+                    {
+                        type=docGroup;
+                    }
+                    obj=await (type.populateAsync(obj,{
+                        path:"childGroup",
+                    }));
+                    for(let i=0;i<obj.childGroup.length;i++)
+                    {
+                        obj.childGroup[i]=await (__map(obj.childGroup[i]));
+                    }
+                }
+                obj.childGroup=obj.childGroup.filter(function (obj) {
+                    if(obj.childDoc.length>0)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                })
+                if(obj.childDoc && obj.childDoc.length>0)
+                {
+                    let query={
+                        path:"childDoc",
+                        select:"-content -img -file -interface",
+                    }
+                    if(req.clientParam.key)
+                    {
+                        if(req.clientParam.type==0)
+                        {
+                            query.match={
+                                name:new RegExp(req.clientParam.key,"i")
+                            }
+                        }
+                        else if(req.clientParam.type==1)
+                        {
+                            query.match={
+                                content:new RegExp(req.clientParam.key,"i")
+                            }
+                        }
+                        else if(req.clientParam.type==2)
+                        {
+                            query.match={
+                                $or:[
+                                    {
+                                        name:new RegExp(req.clientParam.key,"i")
+                                    },
+                                    {
+                                        content:new RegExp(req.clientParam.key,"i")
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                    obj=await (docGroup.populateAsync(obj,query))
+                    for(let j=0;j<obj.childDoc.length;j++)
+                    {
+                        obj.childDoc[j]=await (doc.populateAsync(obj.childDoc[j],{
+                            path:"owner",
+                            select:"name"
+                        }))
+                        obj.childDoc[j]=await (doc.populateAsync(obj.childDoc[j],{
+                            path:"editor",
+                            select:"name"
+                        }))
+                    }
+                }
+                return obj;
+            }
+            objProject=await (__map(objProject));
+            util.ok(res,objProject.childGroup,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    }
+    this.filterList=async (req,res)=>{
         try
         {
             let query={
@@ -1073,8 +1170,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.handleApply=async ((req,res)=>{
+    }
+    this.handleApply=async (req,res)=>{
         try
         {
             let obj=await (apply.findOneAsync({
@@ -1194,8 +1291,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.interfaceProject=async ((req,res)=>{
+    }
+    this.interfaceProject=async (req,res)=>{
         try
         {
             let query={},arr=[];
@@ -1287,8 +1384,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.interfaceVersion=async ((req,res)=>{
+    }
+    this.interfaceVersion=async (req,res)=>{
         try
         {
             let arr=await (version.findAsync({
@@ -1302,8 +1399,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.interfaceList=async ((req,res)=>{
+    }
+    this.interfaceList=async (req,res)=>{
         try
         {
             req.groupModel=group;
@@ -1313,7 +1410,7 @@ function Doc()
                 req.groupModel=groupVersion;
                 req.interfaceModel=interfaceVersion;
             }
-            let getChild=async (function(req,id,obj,bInter) {
+            let getChild=async function(req,id,obj,bInter) {
                 let query={
                     project:id,
                     parent:obj?obj.id:{
@@ -1341,7 +1438,7 @@ function Doc()
                     arr=arr.concat(arrInterface);
                 }
                 return arr;
-            })
+            }
             let arr=await (getChild(req,req.clientParam.project,null,1));
             util.ok(res,arr,"ok");
         }
@@ -1349,47 +1446,47 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.getInterface=async ((req,res)=>{
+    }
+    this.getInterface=async (req,res)=>{
         try
         {
             let interfaceModel = interface;
-            let inter = await(interfaceModel.findOneAsync({
+            let inter = await (interfaceModel.findOneAsync({
                 _id: req.clientParam.id
             }));
             if (!inter) {
                 interfaceModel = interfaceVersion;
-                inter = await(interfaceModel.findOneAsync({
+                inter = await (interfaceModel.findOneAsync({
                     _id: req.clientParam.id
                 }));
                 if (!inter) {
                     util.throw(e.interfaceNotFound, "接口不存在");
                 }
             }
-            let obj = await(interfaceModel.populateAsync(inter, {
+            let obj = await (interfaceModel.populateAsync(inter, {
                 path: "project",
                 select: "name baseUrls"
             }))
             if (obj.group) {
-                obj = await(interfaceModel.populateAsync(obj, {
+                obj = await (interfaceModel.populateAsync(obj, {
                     path: "group",
                     select: "name"
                 }))
             }
             if (obj.owner) {
-                obj = await(interfaceModel.populateAsync(obj, {
+                obj = await (interfaceModel.populateAsync(obj, {
                     path: "owner",
                     select: "name"
                 }))
             }
             if (obj.editor) {
-                obj = await(interfaceModel.populateAsync(obj, {
+                obj = await (interfaceModel.populateAsync(obj, {
                     path: "editor",
                     select: "name"
                 }))
             }
             if (obj.version) {
-                obj = await(interfaceModel.populateAsync(obj, {
+                obj = await (interfaceModel.populateAsync(obj, {
                     path: "version",
                     select: "name"
                 }))
@@ -1412,20 +1509,20 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.getInterfaceInfo=async ((req,res)=>{
+    }
+    this.getInterfaceInfo=async (req,res)=>{
         try
         {
             let ret={};
             let interfaceModel = interface;
             let statusModel=status;
-            let inter = await(interfaceModel.findOneAsync({
+            let inter = await (interfaceModel.findOneAsync({
                 _id: req.clientParam.id
             }));
             if (!inter) {
                 interfaceModel = interfaceVersion;
                 statusModel=statusVersion;
-                inter = await(interfaceModel.findOneAsync({
+                inter = await (interfaceModel.findOneAsync({
                     _id: req.clientParam.id
                 }));
                 if (!inter) {
@@ -1455,8 +1552,8 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
-    this.exportPdf=async ((req,res)=>{
+    }
+    this.exportPdf=async (req,res)=>{
         try
         {
             let objProject=await (docProject.findOneAsync({
@@ -1467,7 +1564,7 @@ function Doc()
                 util.throw(e.docProjectNotFound,"项目没有找到");
             }
             let html="";
-            let __map=async (function (obj) {
+            let __map=async function (obj) {
                 if(obj.childGroup && obj.childGroup.length>0)
                 {
                     let type;
@@ -1514,7 +1611,7 @@ function Doc()
                     }
                 }
                 return obj;
-            })
+            }
             objProject=await (__map(objProject));
             html=`
                 <style>
@@ -1570,7 +1667,7 @@ function Doc()
         {
             util.catch(res,err);
         }
-    })
+    }
 }
 module.exports=Doc;
 

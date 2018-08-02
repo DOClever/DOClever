@@ -1,0 +1,5 @@
+import { BlockMap } from "builder-util-runtime/out/blockMapApi";
+import { DifferentialDownloader } from "./DifferentialDownloader";
+export declare class GenericDifferentialDownloader extends DifferentialDownloader {
+    download(newBlockMap: BlockMap): Promise<void>;
+}

@@ -1,12 +1,10 @@
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
 var project=require("../model/projectModel")
 var group=require("../model/groupModel");
 var interface=require("../model/interfaceModel");
 var interfaceVersion=require("../model/interfaceVersionModel");
 var interfaceSnapshot=require("../model/interfaceSnapshotModel");
 var uuid=require("uuid");
-module.exports=async (function () {
+module.exports=async function () {
     var arrProject=await (project.$where(function () {
         return (this.baseUrls.length>0 && typeof(this.baseUrls[0])=="string")
     }))
@@ -170,7 +168,7 @@ module.exports=async (function () {
         }
     }
 
-})
+}
 
 
 

@@ -571,6 +571,126 @@ var interface=[
         user:1,
         handle:[test.getAllList]
     },
+    {
+        "method":"GET",
+        "path":"/test/exportproject",
+        "param": {
+            project:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.exportProject]
+    },
+    {
+        "method":"POST",
+        "path":"/test/importproject",
+        "param": {
+            content:String,
+            team:{
+                type:String,
+                optional:1
+            },
+            project:{
+                type:String,
+                optional:1
+            }
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.importProject]
+    },
+    {
+        "method":"GET",
+        "path":"/test/exportmodule",
+        "param": {
+            module:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.exportModule]
+    },
+    {
+        "method":"POST",
+        "path":"/test/importmodule",
+        "param": {
+            content:String,
+            project:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.importModule]
+    },
+    {
+        "method":"GET",
+        "path":"/test/exportgroup",
+        "param": {
+            group:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.exportGroup]
+    },
+    {
+        "method":"POST",
+        "path":"/test/importgroup",
+        "param": {
+            content:String,
+            module:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.importGroup]
+    },
+    {
+        "method":"GET",
+        "path":"/test/exporttest",
+        "param": {
+            test:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.exportTest]
+    },
+    {
+        "method":"POST",
+        "path":"/test/importtest",
+        "param": {
+            content:String,
+            group:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.importTest]
+    },
+    {
+        "method":"POST",
+        "path":"/test/pastetest",
+        "param": {
+            test:String,
+            group:String
+        },
+        "data":{
+
+        },
+        user:1,
+        handle:[test.pasteTest]
+    },
 ];
 
 module.exports=interface;

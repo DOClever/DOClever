@@ -1,5 +1,5 @@
 <template>
-    <el-row id="navBar" class="row" :style="transparent?{height:'50px','backgroundColor':'rgba(0,0,0,0.3)',left:0,top:0,position:'absolute'}:{height:'50px','backgroundColor':'white'}" style="box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15)">
+    <el-row id="navBar" class="row" :style="{height:'50px','backgroundColor':'white'}" style="box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15)">
         <slot name="other"></slot>
         <el-col class="col" :span="3" style="text-align: left;line-height: 50px;color:#50bfff ;font-size: 25px;padding-left: 20px">
             <a style="text-decoration: none;cursor: pointer;color: inherit" href="/">DOClever</a>
@@ -44,16 +44,15 @@
     </el-row>
 </template>
 <script>
-    var proxyImg=require("common/director/proxyImg");
-    var sessionChange=require("common/mixins/session");
+    var proxyImg=require("director/proxyImg");
+    var sessionChange=require("mixins/session");
     module.exports={
-        props:["transparent"],
         mixins:[sessionChange],
         data:function () {
             return {
                 bShowApply:document.title.indexOf("DOClever")>-1?false:true,
                 admin:sessionStorage.getItem("admin"),
-                adminPhoto:require("../../../resource/pic/admin.jpeg"),
+                adminPhoto:require("pic/admin.jpeg"),
             }
         },
         directives:{

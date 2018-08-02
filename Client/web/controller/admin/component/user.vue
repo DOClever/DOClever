@@ -111,7 +111,7 @@
 
 <script>
     var page=require("component/page.vue");
-    var proxyImg=require("common/director/proxyImg");
+    var proxyImg=require("director/proxyImg.js");
     var userProject=require("./userProject.vue");
     var userTeam=require("./userTeam.vue");
     module.exports={

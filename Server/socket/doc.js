@@ -1,7 +1,7 @@
 var io=require("socket.io");
 var ss=require("socket.io-stream");
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var docProject=require("../model/docProjectModel");
 var docGroup=require("../model/docGroupModel");
 var doc=require("../model/docModel");
@@ -44,7 +44,7 @@ function Doc(client) {
             arrClient.splice(index,1);
         }
     })
-    this.socket.on("data",async (function (data) {
+    this.socket.on("data",async function (data) {
         let obj=JSON.parse(data);
         let objUser=await (user.findOneAsync({
             _id:obj.user
@@ -120,7 +120,7 @@ function Doc(client) {
                 }
                 objDoc.interface=existInter;
                 await (objDoc.saveAsync());
-                await ((async (function (arrImg,arrFile) {
+                await ((async function (arrImg,arrFile) {
                     let fileSize=0;
                     for(let o of arrImg)
                     {
@@ -144,7 +144,7 @@ function Doc(client) {
                         new:true
                     }))
                     _this.ok(obj.useSize,"useSize");
-                }))(delImg,delFile));
+                })(delImg,delFile));
             }
             else
             {
@@ -297,7 +297,7 @@ function Doc(client) {
                             groupModel=groupVersion;
                             interfaceModel=interfaceVersion;
                         }
-                        let getChild=async (function(id,obj,bInter) {
+                        let getChild=async function(id,obj,bInter) {
                             let query={
                                 project:id,
                                 parent:obj?obj.id:{
@@ -326,7 +326,7 @@ function Doc(client) {
                                 arr=arr.concat(arrInterface);
                             }
                             return arr;
-                        })
+                        }
                         let arr=await (getChild(curProjectID,null,1));
                         (objVersion._doc?objVersion._doc:objVersion).data=arr;
                     }
@@ -334,8 +334,8 @@ function Doc(client) {
             }
             _this.ok(ret,"interfaceList");
         }
-    }));
-    this.socketStream.on("upload",async (function (stream,data) {
+    });
+    this.socketStream.on("upload",async function (stream,data) {
         let objDoc=await (doc.findOneAsync({
             _id:data.doc
         }))
@@ -357,7 +357,7 @@ function Doc(client) {
         index=path.lastIndexOf(pathLib.sep,index-1);
         var dbPath=path.substring(index).replace(/\\/g,"/");
         var pipe=stream.pipe(fs.createWriteStream(path));
-        pipe.on("finish",async (function () {
+        pipe.on("finish",async function () {
             let update={
                 editor:objUser._id,
             };
@@ -388,8 +388,8 @@ function Doc(client) {
                 type:data.type,
                 name:data.name
             },"upload");
-        }))
-    }))
+        })
+    })
 
 }
 

@@ -1,0 +1,7 @@
+import { AllPublishOptions, PublishConfiguration } from "builder-util-runtime";
+import { AppUpdater } from "./AppUpdater";
+import { BintrayProvider } from "./BintrayProvider";
+import { GenericProvider } from "./GenericProvider";
+import { GitHubProvider } from "./GitHubProvider";
+import { PrivateGitHubProvider } from "./PrivateGitHubProvider";
+export declare function createClient(data: PublishConfiguration | AllPublishOptions, updater: AppUpdater): GenericProvider | BintrayProvider | GitHubProvider | PrivateGitHubProvider;

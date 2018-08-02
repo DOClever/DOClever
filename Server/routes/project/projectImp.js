@@ -266,6 +266,10 @@ var interface=[
             id:{
                 type:String
             },
+            version:{
+                type:String,
+                optional:1
+            }
         },
         "data":{
 
@@ -280,6 +284,10 @@ var interface=[
             id:{
                 type:String
             },
+            version:{
+                type:String,
+                optional:1
+            }
         },
         "data":{
 
@@ -522,6 +530,10 @@ var interface=[
             id:{
                 type:String
             },
+            version:{
+                type:String,
+                optional:1
+            }
         },
         "data":{
 

@@ -1,0 +1,19 @@
+{
+  "name": "sx",
+  "version": "0.0.0",
+  "description": "",
+  "private": true,
+  "main": "webpack.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "archiver": "^2.1.1",
+    "request": "^2.83.0",
+    "rimraf": "^2.6.2",
+    "decompress":"",
+    "fs-extra":""
+  }
+}

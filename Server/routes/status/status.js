@@ -1,8 +1,8 @@
 /**
  * Created by sunxin on 2017/4/13.
  */
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var user=require("../../model/userModel")
@@ -15,7 +15,7 @@ var version=require("../../model/versionModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
 function Status() {
-    this.validate=async ((req,res)=> {
+    this.validate=async (req,res)=> {
         try
         {
             req.statusModel=status;
@@ -36,9 +36,9 @@ function Status() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.save=async ((req,res)=> {
+    this.save=async (req,res)=> {
         try
         {
             var obj={};
@@ -78,9 +78,9 @@ function Status() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.remove=async ((req,res)=> {
+    this.remove=async (req,res)=> {
         try
         {
             await (req.statusModel.removeAsync({
@@ -92,9 +92,9 @@ function Status() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.list=async ((req,res)=> {
+    this.list=async (req,res)=> {
         try
         {
             let query={
@@ -113,9 +113,9 @@ function Status() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.exportJSON=async ((req,res)=> {
+    this.exportJSON=async (req,res)=> {
         try
         {
             let ret=await (req.statusModel.findOneAsync({
@@ -148,9 +148,9 @@ function Status() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.importJSON=async ((req,res)=> {
+    this.importJSON=async (req,res)=> {
         try
         {
             let obj;
@@ -193,7 +193,7 @@ function Status() {
         {
             util.catch(res,err);
         }
-    })
+    }
 }
 
 module.exports=Status;

@@ -133,7 +133,8 @@ var interface=[
             key:{
                 type:String,
                 optional:1
-            }
+            },
+            category:Number
         },
         "data":String,
         admin:1,
@@ -143,7 +144,8 @@ var interface=[
         "method":"GET",
         "path":"/admin/project",
         "param": {
-            id:String
+            id:String,
+            category:Number
         },
         "data":String,
         admin:1,
@@ -159,7 +161,11 @@ var interface=[
                 type:String,
                 optional:1
             },
-            public:Number
+            public:{
+                type:Number,
+                optional:1
+            },
+            category:Number
         },
         "data":String,
         admin:1,
@@ -169,7 +175,8 @@ var interface=[
         "method":"DELETE",
         "path":"/admin/project",
         "param": {
-            id:String
+            id:String,
+            category:Number
         },
         "data":String,
         admin:1,
@@ -286,7 +293,8 @@ var interface=[
         "path":"/admin/userprojectown",
         "param": {
             id:String,
-            user:String
+            user:String,
+            category:Number
         },
         "data":String,
         admin:1,
@@ -355,6 +363,7 @@ var interface=[
                 type:String,
                 optional:1
             },
+            category:Number
         },
         "data":String,
         admin:1,
@@ -365,7 +374,8 @@ var interface=[
         "path":"/admin/projectuser",
         "param": {
             id:String,
-            users:String
+            users:String,
+            category:Number
         },
         "data":String,
         admin:1,
@@ -506,7 +516,8 @@ var interface=[
         "path":"/admin/teampullproject",
         "param": {
             id:String,
-            project:String
+            project:String,
+            category:Number
         },
         "data":String,
         admin:1,
@@ -517,7 +528,8 @@ var interface=[
         "path":"/admin/teampushproject",
         "param": {
             id:String,
-            project:String
+            project:String,
+            category:Number
         },
         "data":String,
         admin:1,
@@ -529,11 +541,15 @@ var interface=[
         "param": {
             id:String,
             user:String,
-            role:Number,
+            role:{
+                type:Number,
+                optional:1
+            },
             option:{
                 type:String,
                 optional:1
-            }
+            },
+            category:Number
         },
         "data":String,
         admin:1,
@@ -544,7 +560,8 @@ var interface=[
         "path":"/admin/projectuser",
         "param": {
             id:String,
-            user:String
+            user:String,
+            category:Number
         },
         "data":String,
         admin:1,
@@ -554,7 +571,8 @@ var interface=[
         "method":"GET",
         "path":"/admin/projectuserlist",
         "param": {
-            id:String
+            id:String,
+            category:Number
         },
         "data":String,
         admin:1,

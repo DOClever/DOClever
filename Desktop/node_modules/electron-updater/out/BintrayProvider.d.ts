@@ -1,0 +1,10 @@
+import { BintrayOptions, HttpExecutor, UpdateInfo } from "builder-util-runtime";
+import { Provider, ResolvedUpdateFileInfo } from "./main";
+export declare class BintrayProvider extends Provider<UpdateInfo> {
+    private client;
+    private readonly baseUrl;
+    constructor(configuration: BintrayOptions, httpExecutor: HttpExecutor<any>);
+    setRequestHeaders(value: any): void;
+    getLatestVersion(): Promise<UpdateInfo>;
+    resolveFiles(updateInfo: UpdateInfo): Array<ResolvedUpdateFileInfo>;
+}

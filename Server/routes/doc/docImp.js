@@ -215,10 +215,24 @@ var interface=[
         "method":"GET",
         "path":"/doc/structure",
         "param": {
-            project:String,
+            project:String
         },
         "data":String,
         handle:[doc.structure]
+    },
+    {
+        "method":"GET",
+        "path":"/doc/filterstructure",
+        "param": {
+            project:String,
+            key:{
+                type:String,
+                optional:1
+            },
+            type:String
+        },
+        "data":String,
+        handle:[doc.filterStructure]
     },
     {
         "method":"GET",

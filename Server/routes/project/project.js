@@ -1,8 +1,8 @@
 /**
  * Created by sunxin on 2016/11/16.
  */
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var con=require("../../../config.json");
@@ -39,7 +39,7 @@ var office=require("officegen");
 blue.promisifyAll(fs);
 
 function Project() {
-    this.getChild=async (function(req,id,obj,bInter) {
+    this.getChild=async function(req,id,obj,bInter) {
         let query={
             project:id,
             parent:obj?obj.id:{
@@ -70,14 +70,14 @@ function Project() {
         {
             let arrInterface=await (req.interfaceModel.findAsync({
                 group:obj._id
-            },"_id name method finish url id delete",{
+            },"_id name method finish url id delete group",{
                 sort:sort
             }));
             arr=arr.concat(arrInterface);
         }
         return arr;
-    })
-    this.existUserInTeam=async ( (teamId,userId)=>{
+    }
+    this.existUserInTeam=async (teamId,userId)=>{
         let arrUser=await (teamGroup.findAsync({
             team:teamId
         }))
@@ -103,9 +103,9 @@ function Project() {
         {
             return false;
         }
-    })
+    }
 
-    this.teamUserList=async ( (teamId)=> {
+    this.teamUserList=async (teamId)=> {
         let arrUser=await (teamGroup.findAsync({
             team:teamId
         }))
@@ -116,9 +116,9 @@ function Project() {
             })
         })
         return arr;
-    })
+    }
 
-    this.validateUser=async ((req,res)=> {
+    this.validateUser=async (req,res)=> {
         try
         {
             req.interfaceModel=interface;
@@ -207,18 +207,18 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.inProject=async ((req,res)=> {
+    this.inProject=async (req,res)=> {
         try
         {
             req.interfaceModel=interface;
             req.groupModel=group;
             req.statusModel=status;
-            if(req.headers["docleverversion"])
+            if(req.headers["docleverversion"] || req.clientParam.version)
             {
                 req.version=await (version.findOneAsync({
-                    _id:req.headers["docleverversion"]
+                    _id:req.headers["docleverversion"] || req.clientParam.version
                 }))
                 if(!req.version)
                 {
@@ -286,9 +286,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.create=async ((req,res)=> {
+    this.create=async (req,res)=> {
         try
         {
             let query={
@@ -359,9 +359,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.addMember=async ((req,res)=> {
+    this.addMember=async (req,res)=> {
         try
         {
             let obj=req.obj;
@@ -424,9 +424,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.role=async ((req,res) =>{
+    this.role=async (req,res) =>{
         try
         {
             let update={
@@ -452,9 +452,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.removeMember=async ((req,res)=> {
+    this.removeMember=async (req,res)=> {
         try
         {
             await (project.updateAsync({
@@ -473,9 +473,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.list=async ((req,res)=> {
+    this.list=async (req,res)=> {
         try
         {
             let obj={},ret=[];
@@ -617,8 +617,8 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
-    this.filterList=async ((req,res)=>{
+    }
+    this.filterList=async (req,res)=>{
         try
         {
             let ret=[];
@@ -842,8 +842,8 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
-    this.url=async ((req,res)=> {
+    }
+    this.url=async (req,res)=> {
         try
         {
             let arr=JSON.parse(req.clientParam.urls);
@@ -876,9 +876,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.info=async ((req,res)=> {
+    this.info=async (req,res)=> {
         try
         {
             let obj=await (project.findOneAsync({
@@ -902,9 +902,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.groupList=async ((req,res)=> {
+    this.groupList=async (req,res)=> {
         try
         {
 
@@ -915,9 +915,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.interfaceList=async ((req,res)=> {
+    this.interfaceList=async (req,res)=> {
         try
         {
             let arr=await (this.getChild(req,req.clientParam.id,null,1));
@@ -930,9 +930,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.clear=async ((req,res)=> {
+    this.clear=async (req,res)=> {
         try
         {
             let query={
@@ -964,9 +964,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.removeProject=async ((req,res)=> {
+    this.removeProject=async (req,res)=> {
         try
         {
             await (interface.removeAsync({
@@ -1011,9 +1011,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.quit=async ((req,res)=> {
+    this.quit=async (req,res)=> {
         try
         {
             let obj=await (project.findOneAsync({
@@ -1048,9 +1048,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.addUrl=async ((req,res)=> {
+    this.addUrl=async (req,res)=> {
         try
         {
             let url=req.clientParam.url;
@@ -1092,9 +1092,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.exportJSON=async ((req,res)=> {
+    this.exportJSON=async (req,res)=> {
         try
         {
             let obj={};
@@ -1133,9 +1133,9 @@ function Project() {
             let query={
                 project:req.obj._id
             }
-            if(req.headers["docleverversion"])
+            if(req.clientParam.version)
             {
-                query.version=req.headers["docleverversion"]
+                query.version=req.clientParam.version
             }
             obj.global.status=await (req.statusModel.findAsync(query,"-_id -project -version"));
             if(!query.version)
@@ -1148,20 +1148,20 @@ function Project() {
             query={
                 project:req.obj._id
             }
-            if(req.headers["docleverversion"])
+            if(req.clientParam.version)
             {
-                query.version=req.headers["docleverversion"]
+                query.version=req.clientParam.version
             }
-            let getChild=async (function(req,obj) {
+            let getChild=async function(req,obj) {
                 let query={
                     project:req.obj._id,
                     parent:obj?obj.id:{
                         $exists:false
                     }
                 }
-                if(req.headers["docleverversion"])
+                if(req.clientParam.version)
                 {
-                    query.version=req.headers["docleverversion"]
+                    query.version=req.clientParam.version
                 }
                 let arr=await (req.groupModel.findAsync(query,null,{
                     sort:"name"
@@ -1206,7 +1206,7 @@ function Project() {
                     }
                 }
                 return ret;
-            })
+            }
             obj.data=await (getChild(req));
             let content=JSON.stringify(obj);
             res.writeHead(200,{
@@ -1224,9 +1224,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.importJSON=async ((req,res)=> {
+    this.importJSON=async (req,res)=> {
         try
         {
             let obj;
@@ -1297,7 +1297,7 @@ function Project() {
                 }
             }
             let bTrash=false,interfaceCount=0;
-            let importChild=async (function (data,objParent) {
+            let importChild=async function (data,objParent) {
                 for(let item of data)
                 {
                     if(item.type==1)
@@ -1373,7 +1373,7 @@ function Project() {
                         }
                     }
                 }
-            })
+            }
             await (importChild(obj.data));
             if(!bTrash)
             {
@@ -1394,9 +1394,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.setInject=async ((req,res)=> {
+    this.setInject=async (req,res)=> {
         try
         {
             if(req.version)
@@ -1417,9 +1417,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.urlList=async ((req,res)=> {
+    this.urlList=async (req,res)=> {
         try
         {
             if(req.version)
@@ -1435,9 +1435,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.getImportMember=async ((req,res)=> {
+    this.getImportMember=async (req,res)=> {
         try
         {
             let arrProject=await (project.findAsync({
@@ -1539,9 +1539,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.importMember=async ((req,res)=> {
+    this.importMember=async (req,res)=> {
         try
         {
             let arr=JSON.parse(req.clientParam.data);
@@ -1589,9 +1589,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.exportHTML=async ((req,res)=> {
+    this.exportHTML=async (req,res)=> {
         try
         {
             let arr=await (temp.findAsync({
@@ -1617,20 +1617,20 @@ function Project() {
             let query={
                 project:req.obj._id
             }
-            if(req.headers["docleverversion"])
+            if(req.clientParam.version)
             {
-                query.version=req.headers["docleverversion"]
+                query.version=req.clientParam.version
             }
-            let getChild=async (function(req,obj) {
+            let getChild=async function(req,obj) {
                 let query={
                     project:req.obj._id,
                     parent:obj?obj.id:{
                         $exists:false
                     }
                 }
-                if(req.headers["docleverversion"])
+                if(req.clientParam.version)
                 {
-                    query.version=req.headers["docleverversion"]
+                    query.version=req.clientParam.version
                 }
                 let arr=await (req.groupModel.findAsync(query,null,{
                     sort:"name"
@@ -1665,14 +1665,14 @@ function Project() {
                     arr=arr.concat(arrInterface);
                 }
                 return arr;
-            })
+            }
             let arrGroup=await (getChild(req));
             query={
                 project:req.obj._id
             }
-            if(req.headers["docleverversion"])
+            if(req.clientParam.version)
             {
-                query.version=req.headers["docleverversion"]
+                query.version=req.clientParam.version
             }
             let arrStatus=await (req.statusModel.findAsync(query,null,{
                 sort:"name"
@@ -1744,9 +1744,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.setOwner=async ((req,res)=> {
+    this.setOwner=async (req,res)=> {
         try
         {
             let obj=await (user.findOneAsync({
@@ -1810,9 +1810,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.applyList=async ((req,res)=> {
+    this.applyList=async (req,res)=> {
         try
         {
             let arr=await (apply.findAsync({
@@ -1836,9 +1836,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.handleApply=async ((req,res)=> {
+    this.handleApply=async (req,res)=> {
         try
         {
             let obj=await (apply.findOneAsync({
@@ -1952,9 +1952,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.setUser=async ((req,res)=> {
+    this.setUser=async (req,res)=> {
         try
         {
             let objUser=JSON.parse(req.clientParam.user);
@@ -1973,9 +1973,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.getUsers=async ((req,res)=> {
+    this.getUsers=async (req,res)=> {
         try
         {
             req.obj=await (project.populateAsync(req.obj,{
@@ -1995,9 +1995,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.importRap=async ((req,res)=> {
+    this.importRap=async (req,res)=> {
         try
         {
             let obj=JSON.parse(req.clientParam.json);
@@ -2298,9 +2298,9 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.importSwagger=async ((req,res)=> {
+    this.importSwagger=async (req,res)=> {
         try
         {
             let data=req.clientParam.json;
@@ -2358,14 +2358,14 @@ function Project() {
             let objGroup={};
             if(obj.tags)
             {
-                obj.tags.forEach(function (obj) {
-                    objGroup[obj.name]=await (group.createAsync({
-                        name:obj.name,
+                for(let o of obj.tags){
+                    objGroup[o.name]=await (group.createAsync({
+                        name:o.name,
                         project:objProject._id,
                         type:0,
                         id:uuid()
                     }));
-                })
+                }
             }
             else
             {
@@ -2389,14 +2389,14 @@ function Project() {
                 }
                 if(arr.length>0)
                 {
-                    arr.forEach(function (obj) {
+                    for(let obj of arr){
                         objGroup[obj]=await (group.createAsync({
                             name:obj,
                             project:objProject._id,
                             type:0,
                             id:uuid()
                         }));
-                    })
+                    }
                 }
                 else
                 {
@@ -2571,7 +2571,7 @@ function Project() {
                     let update={
                         name:name,
                         project:objProject._id,
-                        group:interRaw.tags?objGroup[interRaw.tags[0]]._id:objGroup["未命名"]._id,
+                        group:(interRaw.tags && objGroup[interRaw.tags[0]])?objGroup[interRaw.tags[0]]._id:objGroup["未命名"]._id,
                         url:path,
                         remark:interRaw.description,
                         method:method.toUpperCase(),
@@ -3115,8 +3115,8 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
-    this.updateSwagger=async ((req,res)=>{
+    }
+    this.updateSwagger=async (req,res)=>{
         try
         {
             let data=req.clientParam.json;
@@ -3217,22 +3217,22 @@ function Project() {
             let objGroup={};
             if(obj.tags)
             {
-                obj.tags.forEach(function (obj) {
+                for(let o of obj.tags){
                     let query={
-                        name:obj.name,
+                        name:o.name,
                         project:req.obj._id
                     }
                     if(req.version)
                     {
                         query.version=req.version._id
                     }
-                    objGroup[obj.name]=await (req.groupModel.findOneAsync(query));
-                    if(objGroup[obj.name])
+                    objGroup[o.name]=await (req.groupModel.findOneAsync(query));
+                    if(objGroup[o.name])
                     {
-                        objGroup[obj.name]=await (req.groupModel.findOneAndUpdateAsync({
-                            _id:objGroup[obj.name]._id
+                        objGroup[o.name]=await (req.groupModel.findOneAndUpdateAsync({
+                            _id:objGroup[o.name]._id
                         },{
-                            name:obj.name,
+                            name:o.name,
                             $unset:{
                                 delete:1
                             }
@@ -3242,14 +3242,14 @@ function Project() {
                     }
                     else
                     {
-                        objGroup[obj.name]=await (req.groupModel.createAsync({
-                            name:obj.name,
+                        objGroup[o.name]=await (req.groupModel.createAsync({
+                            name:o.name,
                             project:objProject._id,
                             type:0,
                             id:uuid(),
                         }));
                     }
-                })
+                }
             }
             else
             {
@@ -3273,7 +3273,7 @@ function Project() {
                 }
                 if(arr.length>0)
                 {
-                    arr.forEach(function (obj) {
+                    for(let obj of arr){
                         let query={
                             name:obj.name,
                             project:req.obj._id
@@ -3305,7 +3305,7 @@ function Project() {
                                 id:uuid(),
                             }));
                         }
-                    })
+                    }
                 }
                 else
                 {
@@ -3531,7 +3531,7 @@ function Project() {
                         update={
                             name:name,
                             project:objProject._id,
-                            group:interRaw.tags?objGroup[interRaw.tags[0]]._id:objGroup["未命名"]._id,
+                            group:(interRaw.tags && objGroup[interRaw.tags[0]])?objGroup[interRaw.tags[0]]._id:objGroup["未命名"]._id,
                             url:path,
                             remark:interRaw.description,
                             method:method.toUpperCase(),
@@ -4081,8 +4081,8 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
-    this.importPostman=async ((req,res)=>{
+    }
+    this.importPostman=async (req,res)=>{
         try
         {
             let obj=JSON.parse(req.clientParam.json);
@@ -4119,7 +4119,7 @@ function Project() {
             insertDate=objProject;
             projectID=objProject._id;
             var indexInterface=0,defaultGroupId;
-            let _map=async (function (obj,groupParent) {
+            let _map=async function (obj,groupParent) {
                 for(let grp of obj.item)
                 {
                     if(grp.request)
@@ -4501,7 +4501,7 @@ function Project() {
                     }
                     else
                     {
-                        let createGroup=async (function () {
+                        let createGroup=async function () {
                             var groupName;
                             groupName=grp.name;
                             let query={
@@ -4516,7 +4516,7 @@ function Project() {
                             }
                             let objGroup=await (group.createAsync(query));
                             return objGroup;
-                        })
+                        }
                         let objGroup=await (createGroup());
                         if(grp.item && grp.item.length>0)
                         {
@@ -4524,7 +4524,7 @@ function Project() {
                         }
                     }
                 }
-            })
+            }
             await (_map(obj));
             await (project.updateAsync({
                 _id:objProject._id
@@ -4541,21 +4541,21 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
-    this.exportDocx=async ((req,res)=>{
+    }
+    this.exportDocx=async (req,res)=>{
         try
         {
             var docx=office("docx");
-            let func=async (function(req,id,obj) {
+            let func=async function(req,id,obj) {
                 let query={
                     project:id,
                     parent:obj?obj.id:{
                         $exists:false
                     }
                 }
-                if(req.headers["docleverversion"])
+                if(req.clientParam.version)
                 {
-                    query.version=req.headers["docleverversion"]
+                    query.version=req.clientParam.version
                 }
                 let arr=await (req.groupModel.findAsync(query,null))
                 for(let obj of arr)
@@ -4572,7 +4572,7 @@ function Project() {
                         handleDoc(o);
                     }
                 }
-            })
+            }
             function handleDoc(obj) {
                 var pObj = docx.createP ({
                     align:"center"
@@ -4868,7 +4868,7 @@ function Project() {
         {
             util.catch(res,err);
         }
-    })
+    }
 }
 
 module.exports=Project

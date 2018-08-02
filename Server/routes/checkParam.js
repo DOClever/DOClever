@@ -5,8 +5,8 @@ var express=require("express");
 var user=require("../model/userModel");
 var e=require("../util/error.json");
 var util=require("../util/util");
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 function route(category) {
     var router = util.router(category);
     if(router instanceof Array)
@@ -14,7 +14,7 @@ function route(category) {
         return router[0];
     }
     var inter=require("./"+category+"/"+category+"Imp.js");
-    router.use(async (function(req,res,next)
+    router.use(async function(req,res,next)
     {
         var bFind=false;
         var index;
@@ -127,7 +127,7 @@ function route(category) {
             }
 
         }
-    }));
+    });
     return router;
 }
 

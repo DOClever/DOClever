@@ -1,8 +1,8 @@
 /**
  * Created by sunxin on 2017/7/5.
  */
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var user=require("../../model/userModel")
@@ -15,7 +15,7 @@ var testCollection=require("../../model/testCollectionModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
 function  Poll() {
-    this.save=async ((req,res)=> {
+    this.save=async (req,res)=> {
         try
         {
             let objCollection=await (testCollection.findOneAsync({
@@ -74,9 +74,9 @@ function  Poll() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.remove=async ((req,res)=> {
+    this.remove=async (req,res)=> {
         try
         {
             let query={
@@ -96,9 +96,9 @@ function  Poll() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.info=async ((req,res)=> {
+    this.info=async (req,res)=> {
         try
         {
             let query={
@@ -120,7 +120,7 @@ function  Poll() {
         {
             util.catch(res,err);
         }
-    })
+    }
 }
 
 module.exports=Poll;

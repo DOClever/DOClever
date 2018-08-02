@@ -8,8 +8,6 @@ var UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 module.exports = {
     entry: {
         vendor:["vue","vuex","./web/common/js/common.js","./web/common/js/net","./web/common/js/local"],
-        index:["./web/controller/index/index"],
-        about:["./web/controller/about/about"],
         login:["./web/controller/login/login"],
         register:["./web/controller/register/register"],
         reset:["./web/controller/reset/reset"],
@@ -17,11 +15,8 @@ module.exports = {
         share:["./web/controller/share/share"],
         admin:["./web/controller/admin/admin"],
         adminlogin:["./web/controller/admin/adminlogin"],
-        custom:["./web/controller/custom/custom"],
         public:["./web/controller/public/public"],
-        read:["./web/controller/read/read"],
-        download:["./web/controller/download/download"],
-        join:["./web/controller/join/join"],
+        read:["./web/controller/read/read"]
     },
     output: {
         path: path.join(__dirname, 'dist'),
@@ -99,10 +94,10 @@ module.exports = {
     //devtool: 'cheap-module-eval-source-map',
     devtool: 'source-map',
     resolve: {
-        modules: [path.resolve(__dirname, 'web'),path.resolve(__dirname, 'node_modules')],
+        modules: [path.resolve(__dirname, 'web'),path.resolve(__dirname, 'web/resource'),path.resolve(__dirname, 'web/common'),path.resolve(__dirname, '../node_modules')],
         alias: {
-            "vue": path.join(__dirname, 'node_modules/vue/dist/vue.min'),
-            "vuex": path.join(__dirname, 'node_modules/vuex/dist/vuex.min')
+            "vue": path.join(__dirname, '../node_modules/vue/dist/vue.min'),
+            "vuex": path.join(__dirname, '../node_modules/vuex/dist/vuex.min')
         }
     }
 }

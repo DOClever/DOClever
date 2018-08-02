@@ -1,7 +1,7 @@
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var admin=require("../model/adminModel")
-module.exports=async (function () {
+module.exports=async function () {
     let obj=await (admin.findOneAsync({
         name:"DOClever"
     }));
@@ -12,4 +12,4 @@ module.exports=async (function () {
             password:"DOClever"
         }));
     }
-})
+}

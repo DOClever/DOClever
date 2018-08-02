@@ -7,7 +7,7 @@
             <el-form-item label="描述" style="text-align: center">
                 <el-input size="small" :rows="3"  style="width: 80%" name="dis" v-model="obj.dis"></el-input>
             </el-form-item>
-            <el-form-item label="公开" style="text-align: center">
+            <el-form-item label="公开" style="text-align: center" v-if="category!=2">
                 <el-switch v-model="obj.public" active-color="#13ce66" inactive-color="#ff4949" :active-value="1" :inactive-value="0"></el-switch>
             </el-form-item>
         </el-form>
@@ -21,7 +21,7 @@
 
 <script>
     module.exports={
-        props:["propObj"],
+        props:["propObj","category"],
         data:function () {
             return {
                 obj:this.propObj,
@@ -39,8 +39,12 @@
                     id:this.obj._id,
                     name:this.obj.name,
                     dis:this.obj.dis,
-                    public:this.obj.public
+                    category:this.category
                 };
+                if(this.category==0 || this.category==1)
+                {
+                    obj.public=this.obj.public;
+                }
                 this.savePending=true;
                 this.$store.dispatch("saveProject",obj).then(function (data) {
                     _this.savePending=false;

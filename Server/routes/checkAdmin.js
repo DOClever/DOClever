@@ -3,11 +3,11 @@ var router = express.Router();
 var admin=require("../model/adminModel");
 var e=require("../util/error.json");
 var fs=require("fs");
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var util=require("../util/util");
 var e=require("../util/error.json");
-router.use(async (function(req,res,next)
+router.use(async function(req,res,next)
 {
     let bUp=false;
     if(/^multipart\/form-data/i.test(req.headers["content-type"]))
@@ -59,7 +59,7 @@ router.use(async (function(req,res,next)
         }
         util.catch(res,err);
     }
-}));
+});
 
 
 module.exports=router;

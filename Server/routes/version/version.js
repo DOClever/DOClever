@@ -1,8 +1,8 @@
 /**
  * Created by sunxin on 2017/6/26.
  */
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var con=require("../../../config.json");
@@ -26,7 +26,7 @@ var interfaceSnapshot=require("../../model/interfaceSnapshotModel")
 var poll=require("../../model/pollModel")
 var fs=require("fs");
 function Version() {
-    this.validateVersion=async ((req,res)=> {
+    this.validateVersion=async (req,res)=> {
         try
         {
             if(req.clientParam.id)
@@ -105,9 +105,9 @@ function Version() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.save=async ((req,res)=> {
+    this.save=async (req,res)=> {
         try
         {
             let obj;
@@ -133,6 +133,13 @@ function Version() {
             }
             else
             {
+                let groupModel=group,interfaceModel=interface,statusModel=status;
+                if(req.headers["docleverversion"])
+                {
+                    groupModel=groupVersion;
+                    interfaceModel=interfaceVersion;
+                    statusModel=statusVersion;
+                }
                 if(req.project.source)
                 {
                     update.source=req.project.source
@@ -141,35 +148,50 @@ function Version() {
                 update.baseUrls=req.project.baseUrls;
                 update.before=req.project.before;
                 update.after=req.project.after;
-                obj = await(version.createAsync(update));
-                let arr = await(group.findAsync({
+                obj = await (version.createAsync(update));
+                let query={
                     project: req.clientParam.project
-                }));
+                }
+                if(req.headers["docleverversion"])
+                {
+                    query.version=req.headers["docleverversion"];
+                }
+                let arr = await (groupModel.findAsync(query));
                 for (let o of arr) {
                     let id = o._id;
                     delete o._doc._id;
                     o._doc.version = obj._id
-                    let objGroup = await(groupVersion.createAsync(o._doc));
-                    let arrInter = await(interface.findAsync({
+                    let objGroup = await (groupVersion.createAsync(o._doc));
+                    let query={
                         group: id
-                    }));
+                    }
+                    if(req.headers["docleverversion"])
+                    {
+                        query.version=req.headers["docleverversion"];
+                    }
+                    let arrInter = await (interfaceModel.findAsync(query));
                     for (let o1 of arrInter) {
                         delete o1._doc._id;
                         o1._doc.version = obj._id;
                         o1._doc.group = objGroup._id;
-                        await(interfaceVersion.createAsync(o1._doc));
+                        await (interfaceVersion.createAsync(o1._doc));
                     }
                 }
-                arr = await(status.findAsync({
+                query={
                     project: req.clientParam.project
-                }));
+                }
+                if(req.headers["docleverversion"])
+                {
+                    query.version=req.headers["docleverversion"];
+                }
+                arr = await (status.findAsync(query));
                 for (let o of arr) {
                     delete o._doc._id;
                     o._doc.version = obj._id
                 }
                 if(arr.length>0)
                 {
-                    await(statusVersion.insertMany(arr.map(function (obj) {
+                    await (statusVersion.insertMany(arr.map(function (obj) {
                         return obj._doc
                     })));
                 }
@@ -184,9 +206,9 @@ function Version() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.list=async ((req,res)=> {
+    this.list=async (req,res)=> {
         try
         {
             let arr=await (version.findAsync({
@@ -206,9 +228,9 @@ function Version() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.remove=async ((req,res)=> {
+    this.remove=async (req,res)=> {
         try
         {
             await (groupVersion.removeAsync({
@@ -233,9 +255,9 @@ function Version() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.roll=async ((req,res)=> {
+    this.roll=async (req,res)=> {
         try
         {
             await (group.removeAsync({
@@ -269,7 +291,7 @@ function Version() {
                     $exists:false
                 }
             }))
-            arr = await(groupVersion.findAsync({
+            arr = await (groupVersion.findAsync({
                 project: req.project._id,
                 version:req.version._id
             }));
@@ -277,18 +299,18 @@ function Version() {
                 let id = o._id;
                 delete o._doc._id;
                 delete o._doc.version;
-                let objGroup = await(group.createAsync(o._doc));
-                let arrInter = await(interfaceVersion.findAsync({
+                let objGroup = await (group.createAsync(o._doc));
+                let arrInter = await (interfaceVersion.findAsync({
                     group: id
                 }));
                 for (let o1 of arrInter) {
                     delete o1._doc._id;
                     delete o1._doc.version;
                     o1._doc.group = objGroup._id;
-                    await(interface.createAsync(o1._doc));
+                    await (interface.createAsync(o1._doc));
                 }
             }
-            arr = await(statusVersion.findAsync({
+            arr = await (statusVersion.findAsync({
                 project: req.project._id,
                 version:req.version._id
             }));
@@ -298,11 +320,11 @@ function Version() {
             }
             if(arr.length>0)
             {
-                await(status.insertMany(arr.map(function (obj) {
+                await (status.insertMany(arr.map(function (obj) {
                     return obj._doc
                 })));
             }
-            let obj= await(poll.findOneAsync({
+            let obj= await (poll.findOneAsync({
                 project: req.project._id,
                 version:req.version._id
             },null,{
@@ -336,7 +358,7 @@ function Version() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
 }
 

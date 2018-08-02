@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DOClever 移动时代首选接口管理平台！</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="API管理平台,接口管理平台,mock测试,接口文档管理,接口文档平台,接口文档系统,API文档管理"/>
+    <meta name="description" content="DOClever是一款开源免费的可视化接口管理工具，专业的api接口管理系统，集接口文档、接口自动化测试、Mock数据、团队协作、接口快照等于一身的移动时代首选接口管理平台！"/>
+    <link type="text/css"  rel="stylesheet" href="./common/css/common.css">
+    <link type="text/css"  rel="stylesheet" href="./common/lib/font-awesome/css/font-awesome.min.css">
+    <link type="text/css"  rel="stylesheet" href="./common/lib/animate.css/animate.min.css">
+    <link type="text/css"  rel="stylesheet" href="./common/lib/highlight/highlight.css">
+    <link type="text/css"  rel="stylesheet" href="./common/lib/element/index.css">
+    <link type="text/css"  rel="stylesheet" href="./common/lib/prismjs/prism.css">
+</head>
+<body>
+<div class="container" id="app" v-cloak>
+    <el-row class="row" style="height: 60px;line-height: 60px;background-color: rgb(45,45,45)">
+        <el-row class="row" style="width: 100px;position: absolute;top:10px;left:calc(50% - 50px);display: none;color: #13ce66;animation-duration: 3s;text-align: center" id="showPoint">
+        </el-row>
+        <img style="height: 30px;float: left;margin-top: 15px;cursor: pointer;" src="./resource/pic/leftlogo.png" @click="goHome" id="adLogo">
+        <div style="height: 100%;width: auto;display: inline-block;float: right;margin-right: 20px">
+            <img v-proxy="session.photo" style="width: 28px;height: 28px; border-radius:50%;margin-top: 17px">&nbsp;
+            <el-dropdown @command="handleCommand" style="top: -10px;">
+                        <span class="el-dropdown-link" style="color: rgb(230,230,230);cursor: pointer">
+                            <span>
+                                {{session.name}}
+                            </span>
+                            <i class="el-icon-caret-bottom el-icon--right"></i>
+                        </span>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="info">个人资料</el-dropdown-item>
+                    <el-tooltip class="item" effect="dark" :content="memberInfo" placement="left" v-if="session.member">
+                        <el-dropdown-item>会员信息</el-dropdown-item>
+                    </el-tooltip>
+                    <el-dropdown-item command="help">帮助中心</el-dropdown-item>
+                    <el-dropdown-item command="quit">退出</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+        </div>
+        <el-button type="text" icon="fa fa-shopping-cart fa-lg" style="float: right;margin-right: 20px;color:rgb(230,230,230);height: 100%" @click="plugin" v-if="session.member"></el-button>
+        <el-button type="text" icon="fa fa-bell-o fa-lg" style="position: relative;float: right;margin-right: 20px;color:rgb(230,230,230);height: 100%;margin-left: 0" @click="message" >
+            <div style="position: absolute;width: 10px;height: 10px;border-radius: 5px;background-color: red;top: 13px;right: -5px" id="messageDot" v-if="showDot">
+            </div>
+        </el-button>
+        <el-popover placement="bottom" trigger="hover">
+            <el-button type="text" icon="el-icon-service fa-lg" style="float: right;margin-right: 20px;color:rgb(230,230,230);height: 100%" slot="reference"></el-button>
+            <span v-if="mockList.length==0">暂没有Mock实例</span>
+            <el-row class="row" style="width: 300px" v-else>
+                <el-row class="row" style="height: 40px;line-height: 40px;text-align: center" v-for="(item,index) in mockList">
+                    <el-col class="col" :span="15">
+                        {{item.name}}
+                    </el-col>
+                    <el-col class="col" :span="3">
+                        {{item.port}}
+                    </el-col>
+                    <el-col class="col" :span="3">
+                        <el-button size="mini" type="text" class="btnMini" v-if="item.state" @click="stopMock(item)">
+                            暂停
+                        </el-button>
+                        <el-button size="mini" type="text" class="btnMini" v-else @click="startMock(item)">
+                            启动
+                        </el-button>
+                    </el-col>
+                    <el-col class="col" :span="3">
+                        <el-button size="mini" type="text" class="btnMini" style="color: red" @click="removeMock(item)">
+                            关闭
+                        </el-button>
+                    </el-col>
+                </el-row>
+            </el-row>
+        </el-popover>
+        <el-button type="text" icon="fa fa-refresh fa-lg" style="float: right;margin-right: 20px;color:rgb(230,230,230);height: 100%" @click="init"></el-button>
+    </el-row>
+    <el-row class="row" style="height: calc(100vh - 60px);position: fixed">
+        <transition name="el-fade-in-linear">
+            <keep-alive>
+                <team v-if="type=='team'"></team>
+            </keep-alive>
+            <project v-if="type=='project'"></project>
+        </transition>
+    </el-row>
+</div>
+<script src="./node/api.js"></script>
+<script>
+    if(window.debug)
+    {
+        document.write("<script src='../../dist/vendor.bundle.js'><\/script>");
+    }
+    else
+    {
+        document.write("<script src='./dist/vendor.bundle.js'><\/script>");
+
+    }
+
+</script>
+<!--<script src="../../dist/vendor.bundle.js"></script>-->
+<!--<script src="./dist/vendor.bundle.js"></script>-->
+<script src="./common/lib/element/index.js"></script>
+<script src="./common/lib/socket.io/socket.io.js"></script>
+<script src="./common/lib/socket.io/socket.io-stream.js"></script>
+<script src="./common/lib/markdown/markdown-it.min.js"></script>
+<script src="./common/lib/highlight/highlight.js"></script>
+<script src="./common/lib/prismjs/prism.js"></script>
+<script src="./common/lib/vue-markdown/vue-markdown.js"></script>
+<script>
+    if(window.debug)
+    {
+        document.write("<script src='../../dist/index.js'><\/script>");
+    }
+    else
+    {
+        document.write("<script src='./dist/index.js'><\/script>");
+
+    }
+
+</script>
+<!--<script src="../../dist/index.js"></script>-->
+<!--<script src="./dist/index.js"></script>-->
+</body>
+</html>

@@ -1,8 +1,8 @@
 /**
  * Created by sunxin on 2016/11/20.
  */
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var con=require("../../../config.json");
@@ -22,7 +22,7 @@ var fs=require("fs");
 var uuid=require("uuid/v1");
 
 function Interface() {
-    this.sort=async (function (req,objGroup,objMove,index,bGroup) {
+    this.sort=async function (req,objGroup,objMove,index,bGroup) {
         let arr;
         if(bGroup)
         {
@@ -78,8 +78,8 @@ function Interface() {
             obj.sort=i;
             await (obj.saveAsync());
         }
-    })
-    this.getChild=async (function(req,id,obj,bInter) {
+    }
+    this.getChild=async function(req,id,obj,bInter) {
         let query={
             project:id,
             parent:obj?obj.id:{
@@ -116,13 +116,13 @@ function Interface() {
             arr=arr.concat(arrInterface);
         }
         return arr;
-    })
-    this.validateUser = async((req)=> {
+    }
+    this.validateUser = async (req)=> {
         let obj, pro;
         req.interfaceModel = interface;
         req.groupModel = group;
         if (req.headers["docleverversion"]) {
-            req.version = await(version.findOneAsync({
+            req.version = await (version.findOneAsync({
                 _id: req.headers["docleverversion"]
             }))
             if (!req.version) {
@@ -135,7 +135,7 @@ function Interface() {
             req.interfaceModel = interfaceSnapshot;
         }
         if (req.clientParam.id) {
-            let obj = await(req.interfaceModel.findOneAsync(req.clientParam.id.length == 24 ? {
+            let obj = await (req.interfaceModel.findOneAsync(req.clientParam.id.length == 24 ? {
                 _id: req.clientParam.id
             } : {
                 id: req.clientParam.id,
@@ -151,7 +151,7 @@ function Interface() {
             pro = req.clientParam.project;
         }
         if (pro) {
-            obj = await(project.findOneAsync({
+            obj = await (project.findOneAsync({
                 _id: pro,
                 $or: [
                     {
@@ -163,7 +163,7 @@ function Interface() {
                 ]
             }))
             if (!obj) {
-                obj = await(project.findOneAsync({
+                obj = await (project.findOneAsync({
                     _id: pro
                 }));
                 if (!obj) {
@@ -171,7 +171,7 @@ function Interface() {
                     return;
                 }
                 if (obj.team) {
-                    let arrUser = await(teamGroup.findAsync({
+                    let arrUser = await (teamGroup.findAsync({
                         team: obj.team,
                         users: {
                             $elemMatch: {
@@ -212,7 +212,7 @@ function Interface() {
             }
         }
         if (req.clientParam.group) {
-            let g = await(req.groupModel.findOneAsync({
+            let g = await (req.groupModel.findOneAsync({
                 _id: req.clientParam.group
             }));
             if (!g) {
@@ -229,11 +229,11 @@ function Interface() {
                 }
             }
         }
-    })
+    }
 
-    this.create=async ((req, res)=> {
+    this.create=async (req, res)=> {
         try {
-            await(this.validateUser(req));
+            await (this.validateUser(req));
             let query={
                 url:req.clientParam.url,
                 method:req.clientParam.method,
@@ -273,7 +273,7 @@ function Interface() {
                 if (req.headers["docleversnapshot"]) {
                     update.snapshot = decodeURIComponent(req.headers["docleversnapshotdis"]);
                 }
-                let obj = await(req.interfaceModel.findOneAndUpdateAsync({
+                let obj = await (req.interfaceModel.findOneAndUpdateAsync({
                     _id: req.clientParam.id
                 }, update, {
                     new: false
@@ -287,7 +287,7 @@ function Interface() {
                         $nin:arr
                     }
                 }))
-                if (req.clientParam.group) {
+                if (req.clientParam.group && !req.clientParam.autosave) {
                     if (obj.group.toString() != req.clientParam.group) {
                         if (req.interfaceModel != interfaceSnapshot) {
                             let query = {
@@ -302,11 +302,11 @@ function Interface() {
                                     $exists: false
                                 }
                             }
-                            await(interfaceSnapshot.updateAsync(query, {
+                            await (interfaceSnapshot.updateAsync(query, {
                                 group: req.clientParam.group
                             }));
                         }
-                        let arr = await(this.getChild(req,obj.project, null,1))
+                        let arr = await (this.getChild(req,obj.project, null,1))
                         util.ok(res, arr, "修改成功");
                         return;
                     }
@@ -321,18 +321,18 @@ function Interface() {
                 if (req.headers["docleverversion"]) {
                     update.version = req.headers["docleverversion"]
                 }
-                let obj = await(req.interfaceModel.createAsync(update))
+                let obj = await (req.interfaceModel.createAsync(update))
                 util.ok(res, obj, bDuplicate?"有重复接口，请尽量避免":"新建成功");
             }
         }
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.remove=async ((req, res)=> {
+    this.remove=async (req, res)=> {
         try {
-            await(this.validateUser(req));
+            await (this.validateUser(req));
             let query = {
                 project: req.project._id,
                 type: 1
@@ -340,9 +340,9 @@ function Interface() {
             if (req.headers["docleverversion"]) {
                 query.version = req.headers["docleverversion"]
             }
-            let obj = await(req.groupModel.findOneAsync(query))
+            let obj = await (req.groupModel.findOneAsync(query))
             req.interface.group = obj._id;
-            await(req.interface.saveAsync())
+            await (req.interface.saveAsync())
             query = {
                 id: req.interface.id,
                 project: req.project._id
@@ -355,26 +355,26 @@ function Interface() {
                     $exists: false
                 }
             }
-            await(interfaceSnapshot.updateAsync(query, {
+            await (interfaceSnapshot.updateAsync(query, {
                 group: obj._id
             }));
-            let arr = await(this.getChild(req,req.project._id, null,1));
+            let arr = await (this.getChild(req,req.project._id, null,1));
             util.ok(res, arr, "已移到回收站");
         }
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.move=async ((req, res)=> {
+    this.move=async (req, res)=> {
         try {
-            await(this.validateUser(req));
+            await (this.validateUser(req));
             if (req.headers["docleversnapshot"]) {
                 util.throw(e.systemReason, "快照状态下不可移动");
             }
             let update = {};
             update.group = req.group._id;
-            let obj=await(req.interfaceModel.findOneAndUpdateAsync({
+            let obj=await (req.interfaceModel.findOneAndUpdateAsync({
                 _id: req.clientParam.id
             }, update,{
                 new:true
@@ -391,37 +391,37 @@ function Interface() {
                     $exists: false
                 }
             }
-            await(interfaceSnapshot.updateAsync(query, update));
+            await (interfaceSnapshot.updateAsync(query, update));
             await (this.sort(req,req.group,obj,req.clientParam.index?req.clientParam.index:0))
-            let arr = await(this.getChild(req,obj.project, null,1))
+            let arr = await (this.getChild(req,obj.project, null,1))
             util.ok(res,arr,"移动成功");
         }
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.info=async ((req, res)=> {
+    this.info=async (req, res)=> {
         try {
-            await(this.validateUser(req));
-            let obj = await(req.interfaceModel.populateAsync(req.interface, {
+            await (this.validateUser(req));
+            let obj = await (req.interfaceModel.populateAsync(req.interface, {
                 path: "project",
                 select: "name"
             }))
             if (obj.group) {
-                obj = await(req.interfaceModel.populateAsync(obj, {
+                obj = await (req.interfaceModel.populateAsync(obj, {
                     path: "group",
                     select: "name"
                 }))
             }
             if (obj.owner) {
-                obj = await(req.interfaceModel.populateAsync(obj, {
+                obj = await (req.interfaceModel.populateAsync(obj, {
                     path: "owner",
                     select: "name"
                 }))
             }
             if (obj.editor) {
-                obj = await(req.interfaceModel.populateAsync(obj, {
+                obj = await (req.interfaceModel.populateAsync(obj, {
                     path: "editor",
                     select: "name"
                 }))
@@ -437,22 +437,22 @@ function Interface() {
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.share=async ((req, res)=>{
+    this.share=async (req, res)=>{
         try {
             let interfaceModel = interface;
-            let inter = await(interfaceModel.findOneAsync({
+            let inter = await (interfaceModel.findOneAsync({
                 _id: req.clientParam.id
             }));
             if (!inter) {
                 interfaceModel = interfaceVersion;
-                inter = await(interfaceModel.findOneAsync({
+                inter = await (interfaceModel.findOneAsync({
                     _id: req.clientParam.id
                 }));
                 if (!inter) {
                     interfaceModel = interfaceSnapshot;
-                    inter = await(interfaceModel.findOneAsync({
+                    inter = await (interfaceModel.findOneAsync({
                         _id: req.clientParam.id
                     }));
                     if (!inter) {
@@ -460,24 +460,24 @@ function Interface() {
                     }
                 }
             }
-            let obj = await(interfaceModel.populateAsync(inter, {
+            let obj = await (interfaceModel.populateAsync(inter, {
                 path: "project",
                 select: "name"
             }))
             if (obj.group) {
-                obj = await(interfaceModel.populateAsync(obj, {
+                obj = await (interfaceModel.populateAsync(obj, {
                     path: "group",
                     select: "name"
                 }))
             }
             if (obj.owner) {
-                obj = await(interfaceModel.populateAsync(obj, {
+                obj = await (interfaceModel.populateAsync(obj, {
                     path: "owner",
                     select: "name"
                 }))
             }
             if (obj.editor) {
-                obj = await(interfaceModel.populateAsync(obj, {
+                obj = await (interfaceModel.populateAsync(obj, {
                     path: "editor",
                     select: "name"
                 }))
@@ -487,12 +487,12 @@ function Interface() {
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.destroy=async ((req, res)=>{
+    this.destroy=async (req, res)=>{
         try {
-            await(this.validateUser(req));
-            await(req.interface.removeAsync())
+            await (this.validateUser(req));
+            await (req.interface.removeAsync())
             let query = {
                 id: req.interface.id,
                 project: req.project._id
@@ -505,21 +505,21 @@ function Interface() {
                     $exists: false
                 }
             }
-            await(interfaceSnapshot.removeAsync(query))
+            await (interfaceSnapshot.removeAsync(query))
             await (example.removeAsync({
                 interface:req.interface._id
             }))
-            let arr = await(this.getChild(req,req.project._id, null,1));
+            let arr = await (this.getChild(req,req.project._id, null,1));
             util.ok(res, arr, "删除成功");
         }
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.exportJSON=async ((req, res)=> {
+    this.exportJSON=async (req, res)=> {
         try {
-            await(this.validateUser(req));
+            await (this.validateUser(req));
             let obj = {
                 flag: "SBDoc",
             };
@@ -543,11 +543,11 @@ function Interface() {
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.importJSON=async ((req, res)=> {
+    this.importJSON=async (req, res)=> {
         try {
-            await(this.validateUser(req));
+            await (this.validateUser(req));
             let obj;
             try {
                 obj = JSON.parse(req.clientParam.json);
@@ -560,7 +560,7 @@ function Interface() {
                 util.throw(e.systemReason, "不是DOClever的导出格式");
                 return;
             }
-            let objGroup = await(req.groupModel.findOneAsync({
+            let objGroup = await (req.groupModel.findOneAsync({
                 _id: req.clientParam.group
             }))
             if (!objGroup) {
@@ -606,17 +606,17 @@ function Interface() {
                 delete obj.bodyInfo;
                 obj.param.push(o);
             }
-            obj = await(req.interfaceModel.createAsync(obj));
+            obj = await (req.interfaceModel.createAsync(obj));
             util.ok(res, obj, "导入成功");
         }
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.createSnapshot=async ((req, res)=> {
+    this.createSnapshot=async (req, res)=> {
         try {
-            await(this.validateUser(req));
+            await (this.validateUser(req));
             delete req.interface._doc._id;
             delete req.interface._doc.createdAt;
             delete req.interface._doc.updatedAt;
@@ -629,17 +629,17 @@ function Interface() {
             else {
                 req.interface._doc.groupType = "Group";
             }
-            await(interfaceSnapshot.createAsync(req.interface._doc));
+            await (interfaceSnapshot.createAsync(req.interface._doc));
             util.ok(res, "ok");
         }
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.snapshotList=async ((req, res)=>{
+    this.snapshotList=async (req, res)=>{
         try {
-            await(this.validateUser(req));
+            await (this.validateUser(req));
             let query = {
                 project: req.interface.project,
                 id: req.interface.id
@@ -652,7 +652,7 @@ function Interface() {
                     $exists: false
                 }
             }
-            let arr = await(interfaceSnapshot.findAsync(query, "", {
+            let arr = await (interfaceSnapshot.findAsync(query, "", {
                 sort: "-createdAt",
                 populate: {
                     path: "version"
@@ -660,7 +660,7 @@ function Interface() {
                 skip: req.clientParam.page * 10,
                 limit: 10
             }));
-            arr = await(interfaceSnapshot.populateAsync(arr, {
+            arr = await (interfaceSnapshot.populateAsync(arr, {
                 path: "snapshotCreator",
                 select: "name photo"
             }))
@@ -669,23 +669,23 @@ function Interface() {
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.removeSnapshot=async ((req, res)=> {
+    this.removeSnapshot=async (req, res)=> {
         try {
-            await(this.validateUser(req));
-            await(req.interface.removeAsync());
+            await (this.validateUser(req));
+            await (req.interface.removeAsync());
             util.ok(res, "ok");
         }
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.snapshotRoll=async ((req, res)=>{
+    this.snapshotRoll=async (req, res)=>{
         try {
-            await(this.validateUser(req));
-            let obj = await(interface.findOneAsync({
+            await (this.validateUser(req));
+            let obj = await (interface.findOneAsync({
                 id: req.interface.id,
                 project: req.interface.project
             }));
@@ -699,7 +699,7 @@ function Interface() {
             delete req.interface._doc.groupType;
             delete req.interface._doc.createdAt;
             delete req.interface._doc.updatedAt;
-            await(interface.updateAsync({
+            await (interface.updateAsync({
                 _id: obj._id
             }, req.interface._doc));
             util.ok(res, "ok");
@@ -707,8 +707,8 @@ function Interface() {
         catch (err) {
             util.catch(res, err);
         }
-    })
-    this.notify=async ((req,res)=>{
+    }
+    this.notify=async (req,res)=>{
         try
         {
             await (this.validateUser(req));
@@ -758,8 +758,8 @@ function Interface() {
         {
             util.catch(res,err);
         }
-    })
-    this.merge=async ((req,res)=>{
+    }
+    this.merge=async (req,res)=>{
         try
         {
             await (this.validateUser(req));
@@ -770,7 +770,7 @@ function Interface() {
                     delete:1
                 }
             }))
-            let arr = await(this.getChild(req,req.project._id, null,1));
+            let arr = await (this.getChild(req,req.project._id, null,1));
             util.ok(res, arr, "ok");
 
         }
@@ -778,8 +778,8 @@ function Interface() {
         {
             util.catch(res,err);
         }
-    })
-    this.docRef=async ((req,res)=>{
+    }
+    this.docRef=async (req,res)=>{
         try
         {
             await (this.validateUser(req));
@@ -794,8 +794,8 @@ function Interface() {
         {
             util.catch(res,err);
         }
-    })
-    this.getParam=async ((req,res)=>{
+    }
+    this.getParam=async (req,res)=>{
         try
         {
             await (this.validateUser(req));
@@ -821,7 +821,7 @@ function Interface() {
         {
             util.catch(res,err);
         }
-    })
+    }
 }
 
 

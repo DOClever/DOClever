@@ -8,8 +8,6 @@ var hotMiddlewareScript = 'webpack-hot-middleware/client?http://localhost:10000'
 module.exports = {
     entry: {
         vendor:["vue","vuex",path.join(__dirname,"./web/common/js/common.js"),path.join(__dirname,"./web/common/js/net"),path.join(__dirname,"./web/common/js/local"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
-        index:[path.join(__dirname,"./web/controller/index/index"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
-        about:[path.join(__dirname,"./web/controller/about/about"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         login:[path.join(__dirname,"./web/controller/login/login"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         register:[path.join(__dirname,"./web/controller/register/register"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         reset:[path.join(__dirname,"./web/controller/reset/reset"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
@@ -18,9 +16,7 @@ module.exports = {
         admin:[path.join(__dirname,"./web/controller/admin/admin"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         adminlogin:[path.join(__dirname,"./web/controller/admin/adminlogin"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
         public:[path.join(__dirname,"./web/controller/public/public"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
-        read:[path.join(__dirname,"./web/controller/read/read"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
-        download:[path.join(__dirname,"./web/controller/download/download"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
-        join:[path.join(__dirname,"./web/controller/join/join"),hotMiddlewareScript,'webpack/hot/only-dev-server'],
+        read:[path.join(__dirname,"./web/controller/read/read"),hotMiddlewareScript,'webpack/hot/only-dev-server']
     },
     output: {
         path: path.join(__dirname, 'dist'),
@@ -78,13 +74,13 @@ module.exports = {
     //devtool: 'cheap-module-eval-source-map',
     devtool: 'source-map',
     resolve: {
-        modules: [path.resolve(__dirname, 'web'),path.resolve(__dirname, 'node_modules')],
+        modules: [path.resolve(__dirname, 'web'),path.resolve(__dirname, 'web/resource'),path.resolve(__dirname, 'web/common'),path.resolve(__dirname, '../node_modules')],
         alias: {
-            "vue": path.join(__dirname, 'node_modules/vue/dist/vue.min'),
-            "vuex": path.join(__dirname, 'node_modules/vuex/dist/vuex.min')
+            "vue": path.join(__dirname, '../node_modules/vue/dist/vue.min'),
+            "vuex": path.join(__dirname, '../node_modules/vuex/dist/vuex.min')
         }
     },
     resolveLoader: {
-        modules: [path.resolve(__dirname, 'node_modules')],
+        modules: [path.resolve(__dirname, '../node_modules')],
     },
 }

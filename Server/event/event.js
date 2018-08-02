@@ -2,8 +2,8 @@
  * Created by sunxin on 2017/5/19.
  */
 var schedule = require("node-schedule");
-var async=require("asyncawait/async");
-var await=require("asyncawait/await");
+;
+;
 var moment=require("moment");
 var fs=require("fs");
 var temp=require("../model/tempModel");
@@ -18,7 +18,7 @@ var path = require('path');
 var rule = new schedule.RecurrenceRule();
 rule.minute = 30;
 blue.promisifyAll(fs);
-var j = schedule.scheduleJob(rule,async (function(){
+var j = schedule.scheduleJob(rule,async function(){
     try
     {
         let arr=await (temp.findAsync());
@@ -42,9 +42,9 @@ var j = schedule.scheduleJob(rule,async (function(){
     }
 
 
-}));
+});
 
-schedule.scheduleJob("0 0 0 * * *",(async (function () {
+schedule.scheduleJob("0 0 0 * * *",(async function () {
     try
     {
         await (util.createStatistic());
@@ -53,9 +53,9 @@ schedule.scheduleJob("0 0 0 * * *",(async (function () {
     {
         console.log(err);
     }
-})));
+}));
 
-var j1=schedule.scheduleJob("0 * * * *",(async (function () {
+var j1=schedule.scheduleJob("0 * * * *",(async function () {
     try
     {
         let date=moment();
@@ -76,7 +76,7 @@ var j1=schedule.scheduleJob("0 * * * *",(async (function () {
     {
         console.log(err);
     }
-})));
+}));
 
 
 

@@ -1,0 +1,126 @@
+/// <reference types="node" />
+import { AllPublishOptions, CancellationToken, PublishConfiguration, UpdateInfo } from "builder-util-runtime";
+import { EventEmitter } from "events";
+import { OutgoingHttpHeaders } from "http";
+import { Lazy } from "lazy-val";
+import "source-map-support/register";
+import { Logger, Provider, UpdateCheckResult, UpdaterSignal } from "./main";
+import { DownloadedUpdateHelper } from "./DownloadedUpdateHelper";
+export declare abstract class AppUpdater extends EventEmitter {
+    /**
+     * Whether to automatically download an update when it is found.
+     */
+    autoDownload: boolean;
+    /**
+     * Whether to automatically install a downloaded update on app quit (if `quitAndInstall` was not called before).
+     *
+     * Applicable only on Windows and Linux.
+     */
+    autoInstallOnAppQuit: boolean;
+    /**
+     * *GitHub provider only.* Whether to allow update to pre-release versions. Defaults to `true` if application version contains prerelease components (e.g. `0.12.1-alpha.1`, here `alpha` is a prerelease component), otherwise `false`.
+     *
+     * If `true`, downgrade will be allowed (`allowDowngrade` will be set to `true`).
+     */
+    allowPrerelease: boolean;
+    /**
+     * *GitHub provider only.* Get all release notes (from current version to latest), not just the latest.
+     * @default false
+     */
+    fullChangelog: boolean;
+    /**
+     * Whether to allow version downgrade (when a user from the beta channel wants to go back to the stable channel).
+     * @default false
+     */
+    allowDowngrade: boolean;
+    /**
+     * The current application version.
+     */
+    readonly currentVersion: string;
+    private _channel;
+    protected readonly downloadedUpdateHelper: DownloadedUpdateHelper;
+    /**
+     * Get the update channel. Not applicable for GitHub. Doesn't return `channel` from the update configuration, only if was previously set.
+     */
+    /**
+     * Set the update channel. Not applicable for GitHub. Overrides `channel` in the update configuration.
+     *
+     * `allowDowngrade` will be automatically set to `true`. If this behavior is not suitable for you, simple set `allowDowngrade` explicitly after.
+     */
+    channel: string | null;
+    /**
+     *  The request headers.
+     */
+    requestHeaders: OutgoingHttpHeaders | null;
+    protected _logger: Logger;
+    /**
+     * The logger. You can pass [electron-log](https://github.com/megahertz/electron-log), [winston](https://github.com/winstonjs/winston) or another logger with the following interface: `{ info(), warn(), error() }`.
+     * Set it to `null` if you would like to disable a logging feature.
+     */
+    logger: Logger | null;
+    /**
+     * For type safety you can use signals, e.g. `autoUpdater.signals.updateDownloaded(() => {})` instead of `autoUpdater.on('update-available', () => {})`
+     */
+    readonly signals: UpdaterSignal;
+    private _appUpdateConfigPath;
+    /**
+     * test only
+     * @private
+     */
+    updateConfigPath: string | null;
+    protected updateAvailable: boolean;
+    private clientPromise;
+    protected readonly provider: Promise<Provider<any>>;
+    protected readonly stagingUserIdPromise: Lazy<string>;
+    configOnDisk: Lazy<any>;
+    private readonly untilAppReady;
+    private checkForUpdatesPromise;
+    protected readonly app: Electron.App;
+    protected updateInfo: UpdateInfo | null;
+    protected constructor(options: AllPublishOptions | null | undefined, app?: Electron.App);
+    getFeedURL(): string | null | undefined;
+    /**
+     * Configure update provider. If value is `string`, [GenericServerOptions](/configuration/publish.md#genericserveroptions) will be set with value as `url`.
+     * @param options If you want to override configuration in the `app-update.yml`.
+     */
+    setFeedURL(options: PublishConfiguration | AllPublishOptions | string): void;
+    /**
+     * Asks the server whether there is an update.
+     */
+    checkForUpdates(): Promise<UpdateCheckResult>;
+    checkForUpdatesAndNotify(): Promise<UpdateCheckResult | null>;
+    private isStagingMatch(updateInfo);
+    private _checkForUpdates();
+    private computeFinalHeaders(headers);
+    protected getUpdateInfo(): Promise<UpdateInfo>;
+    private doCheckForUpdates();
+    protected onUpdateAvailable(updateInfo: UpdateInfo): void;
+    /**
+     * Start downloading update manually. You can use this method if `autoDownload` option is set to `false`.
+     * @returns {Promise<string>} Path to downloaded file.
+     */
+    downloadUpdate(cancellationToken?: CancellationToken): Promise<any>;
+    protected dispatchError(e: Error): void;
+    protected abstract doDownloadUpdate(updateInfo: UpdateInfo, cancellationToken: CancellationToken): Promise<Array<string>>;
+    /**
+     * Restarts the app and installs the update after it has been downloaded.
+     * It should only be called after `update-downloaded` has been emitted.
+     *
+     * **Note:** `autoUpdater.quitAndInstall()` will close all application windows first and only emit `before-quit` event on `app` after that.
+     * This is different from the normal quit event sequence.
+     *
+     * @param isSilent *windows-only* Runs the installer in silent mode. Defaults to `false`.
+     * @param isForceRunAfter Run the app after finish even on silent install. Not applicable for macOS. Ignored if `isSilent` is set to `false`.
+     */
+    abstract quitAndInstall(isSilent?: boolean, isForceRunAfter?: boolean): void;
+    private loadUpdateConfig();
+    /*** @private */
+    protected computeRequestHeaders(): Promise<OutgoingHttpHeaders>;
+    private getOrCreateStagingUserId();
+}
+/** @private */
+export declare class NoOpLogger implements Logger {
+    info(message?: any): void;
+    warn(message?: any): void;
+    error(message?: any): void;
+}

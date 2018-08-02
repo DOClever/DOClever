@@ -1,5 +1,5 @@
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var user=require("../../model/userModel")
@@ -8,7 +8,7 @@ var fs=require("fs");
 var uuid=require("uuid/v1");
 
 function Example() {
-    this.saveExample=async ((req,res)=>{
+    this.saveExample=async (req,res)=>{
         try
         {
             let query={
@@ -42,8 +42,8 @@ function Example() {
         {
             util.catch(res,err);
         }
-    })
-    this.exampleInfo=async ((req,res)=>{
+    }
+    this.exampleInfo=async (req,res)=>{
         try
         {
             let obj=await (example.findOneAsync({
@@ -59,8 +59,8 @@ function Example() {
         {
             util.catch(res,err);
         }
-    })
-    this.exampleList=async ((req,res)=>{
+    }
+    this.exampleList=async (req,res)=>{
         try
         {
             let query={
@@ -76,8 +76,8 @@ function Example() {
         {
             util.catch(res,err);
         }
-    })
-    this.removeExample=async ((req,res)=>{
+    }
+    this.removeExample=async (req,res)=>{
         try
         {
             await (example.removeAsync({
@@ -89,8 +89,8 @@ function Example() {
         {
             util.catch(res,err);
         }
-    })
-    this.exampleAllList=async ((req,res)=>{
+    }
+    this.exampleAllList=async (req,res)=>{
         try
         {
             let arr=await (example.findAsync({
@@ -114,7 +114,7 @@ function Example() {
         {
             util.catch(res,err);
         }
-    })
+    }
 }
 
 

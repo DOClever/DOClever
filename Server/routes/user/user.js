@@ -1,8 +1,8 @@
 /**
  * Created by sunxin on 2016/11/9.
  */
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var userCom=require("./userCommon");
@@ -18,7 +18,7 @@ var fs=require("fs");
 
 function User() {
     this.user=new userCom();
-    this.login=async ((req,res) =>{
+    this.login=async (req,res) =>{
         try
         {
             let obj;
@@ -59,8 +59,8 @@ function User() {
         {
             util.catch(res,err);
         }
-    })
-    this.createQQ=async ((req,res)=>{
+    }
+    this.createQQ=async (req,res)=>{
         try
         {
             let obj={
@@ -87,8 +87,8 @@ function User() {
         {
             util.catch(res,err);
         }
-    })
-    this.save=async ((req,res)=> {
+    }
+    this.save=async (req,res)=> {
         try
         {
             if(req.clientParam.userid)
@@ -168,9 +168,9 @@ function User() {
             });
             util.catch(res,err);
         }
-    })
+    }
 
-    this.logout=async ((req,res)=> {
+    this.logout=async (req,res)=> {
         try
         {
             req.session.userid=null;
@@ -181,9 +181,9 @@ function User() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.editPass=async ((req,res)=> {
+    this.editPass=async (req,res)=> {
         try
         {
             if(req.userInfo.password!=req.clientParam.oldpass)
@@ -198,9 +198,9 @@ function User() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.reset=async ((req,res)=> {
+    this.reset=async (req,res)=> {
         try
         {
             let obj=await (user.findOneAsync({
@@ -222,9 +222,9 @@ function User() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.question=async ((req,res)=> {
+    this.question=async (req,res)=> {
         try
         {
             let obj=await (user.findOneAsync({
@@ -244,9 +244,9 @@ function User() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.applyList=async ((req,res)=> {
+    this.applyList=async (req,res)=> {
         try
         {
             let arr=await (apply.findAsync({
@@ -270,9 +270,9 @@ function User() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.handleApply=async ((req,res)=> {
+    this.handleApply=async (req,res)=> {
         try
         {
             let obj=await (apply.findOneAsync({
@@ -360,8 +360,8 @@ function User() {
         {
             util.catch(res,err);
         }
-    })
-    this.setSendInfo=async ((req,res)=>{
+    }
+    this.setSendInfo=async (req,res)=>{
         try
         {
             req.userInfo.sendInfo.user=req.clientParam.user;
@@ -375,8 +375,8 @@ function User() {
         {
             util.catch(res,err);
         }
-    })
-    this.getSendInfo=async ((req,res)=>{
+    }
+    this.getSendInfo=async (req,res)=>{
         try
         {
             util.ok(res,req.userInfo.sendInfo,"ok");
@@ -385,7 +385,18 @@ function User() {
         {
             util.catch(res,err);
         }
-    })
+    }
+    this.version=async (req,res)=>{
+        try
+        {
+            let obj=await (this.user.getVersionInfo());
+            util.ok(res,obj,"ok");
+        }
+        catch (err)
+        {
+            util.catch(res,err);
+        }
+    }
 }
 
 module.exports=User;

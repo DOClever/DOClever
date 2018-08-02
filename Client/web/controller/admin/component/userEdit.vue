@@ -53,7 +53,7 @@
 </template>
 
 <script>
-    var imgFile=require("common/director/imgFile")
+    var imgFile=require("director/imgFile.js")
     module.exports={
         props:["propObj"],
         data:function () {

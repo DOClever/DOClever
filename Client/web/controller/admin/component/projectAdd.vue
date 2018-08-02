@@ -7,7 +7,7 @@
             <el-form-item label="描述" style="text-align: center">
                 <el-input size="small" type="textarea" :rows="3"  style="width: 80%" name="dis" v-model="obj.dis" placeholder="请输入项目描述"></el-input>
             </el-form-item>
-            <el-form-item label="公开" style="text-align: center">
+            <el-form-item label="公开" style="text-align: center" v-if="category==0 || category==1">
                 <el-switch v-model="obj.public" active-color="#13ce66" inactive-color="#ff4949" :active-value="1" :inactive-value="0"></el-switch>
             </el-form-item>
             <el-form-item label="所有者" style="text-align: center">
@@ -19,13 +19,13 @@
                         <el-col :span="12" class="col">
                             <el-autocomplete size="small" :fetch-suggestions="querySearchAsync.bind(this,index)" style="width: 80%" v-model="item.name" @input="index==obj.users.length-1?add():''" placeholder="请输入用户名称" @select="selUser"></el-autocomplete>
                         </el-col>
-                        <el-col :span="6" class="col">
+                        <el-col :span="6" class="col" v-if="category==0">
                             <el-select size="small" v-model="item.role" style="width: 80%">
                                 <el-option label="管理员" :value="0"></el-option>
                                 <el-option label="观察者" :value="1"></el-option>
                             </el-select>
                         </el-col>
-                        <el-col :span="4" class="col">
+                        <el-col :span="4" class="col" v-if="category==0">
                             <el-button size="mini" type="text" v-if="item.role==1" @click="roleOption(item,index)">
                                 权限
                             </el-button>
@@ -49,6 +49,7 @@
 <script>
     var roleOption=require("component/roleOption.vue");
     module.exports={
+        props:["category"],
         data:function () {
             return {
                 savePending:false,
@@ -136,7 +137,10 @@
                 {
                     obj.dis=this.obj.dis;
                 }
-                obj.public=this.obj.public;
+                if(this.category==0 || this.category==1)
+                {
+                    obj.public=this.obj.public;
+                }
                 if(!this.obj.owner.id)
                 {
                     $.tip("请选择所有者",0);

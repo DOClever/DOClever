@@ -7,18 +7,40 @@ module.exports=new Vuex.Store({
             list:[]
         },
         project:{
-            total:0,
-            todayCreate:0,
-            list:[]
+            interface:{
+                total:0,
+                todayCreate:0,
+                list:[]
+            },
+            doc:{
+                total:0,
+                todayCreate:0,
+                list:[]
+            },
+            test:{
+                total:0,
+                todayCreate:0,
+                list:[]
+            },
         },
         team:{
             total:0,
             todayCreate:0,
             list:[]
         },
-        interface:{
-            total:0,
-            todayCreate:0,
+        item:{
+            interface:{
+                total:0,
+                todayCreate:0,
+            },
+            doc:{
+                total:0,
+                todayCreate:0,
+            },
+            test:{
+                total:0,
+                todayCreate:0,
+            },
         },
         setting:{
             info: {
@@ -40,16 +62,24 @@ module.exports=new Vuex.Store({
             state.user.todayRegister=data.register;
         },
         setProjectInfo:function (state,data) {
-            state.project.total=data.total;
-            state.project.todayCreate=data.today;
+            state.project.interface.total=data.interfaceTotal;
+            state.project.interface.todayCreate=data.interfaceToday;
+            state.project.doc.total=data.docTotal;
+            state.project.doc.todayCreate=data.docToday;
+            state.project.test.total=data.testTotal;
+            state.project.test.todayCreate=data.testToday;
         },
         setTeamInfo:function (state,data) {
             state.team.total=data.total;
             state.team.todayCreate=data.today;
         },
         setInterfaceInfo:function (state,data) {
-            state.interface.total=data.total;
-            state.interface.todayCreate=data.today;
+            state.item.interface.total=data.interface.total;
+            state.item.interface.todayCreate=data.interface.today;
+            state.item.doc.total=data.doc.total;
+            state.item.doc.todayCreate=data.doc.today;
+            state.item.test.total=data.test.total;
+            state.item.test.todayCreate=data.test.today;
         },
         setSettingInfo:function (state,data) {
             state.setting=data;
@@ -96,7 +126,20 @@ module.exports=new Vuex.Store({
             return net.put("/admin/project",query).then(function (data) {
                 if(data.code==200)
                 {
-                    context.state.project.list.forEach(function (obj) {
+                    let list;
+                    if(query.category==0)
+                    {
+                        list=context.state.project.interface.list;
+                    }
+                    else if(query.category==1)
+                    {
+                        list=context.state.project.doc.list;
+                    }
+                    else
+                    {
+                        list=context.state.project.test.list;
+                    }
+                    list.forEach(function (obj) {
                         if(obj._id==data.data._id)
                         {
                             obj.name=data.data.name;
@@ -109,11 +152,25 @@ module.exports=new Vuex.Store({
         },
         removeProject:function (context,query) {
             return net.delete("/admin/project",{
-                id:query.id
+                id:query.id,
+                category:query.category
             }).then(function (data) {
                 if(data.code==200)
                 {
-                    context.state.project.list.splice(query.index,1);
+                    let list;
+                    if(query.category==0)
+                    {
+                        list=context.state.project.interface.list;
+                    }
+                    else if(query.category==1)
+                    {
+                        list=context.state.project.doc.list;
+                    }
+                    else
+                    {
+                        list=context.state.project.test.list;
+                    }
+                    list.splice(query.index,1);
                 }
                 return data;
             })
@@ -122,7 +179,18 @@ module.exports=new Vuex.Store({
             return net.get("/admin/projectlist",query).then(function (data) {
                 if(data.code==200)
                 {
-                    context.state.project.list=data.data;
+                    if(query.category==0)
+                    {
+                        context.state.project.interface.list=data.data;
+                    }
+                    else if(query.category==1)
+                    {
+                        context.state.project.doc.list=data.data;
+                    }
+                    else
+                    {
+                        context.state.project.test.list=data.data;
+                    }
                 }
                 return data;
             })
@@ -163,7 +231,8 @@ module.exports=new Vuex.Store({
         setProjectOwner:function (context,query) {
             return net.put("/admin/userprojectown",{
                 id:query.project,
-                user:query.user
+                user:query.user,
+                category:query.category
             }).then(function (data) {
                 return data;
             })
@@ -183,7 +252,8 @@ module.exports=new Vuex.Store({
         removeProjectUser:function (context,obj) {
             return net.delete("/admin/projectuser",{
                 id:obj.id,
-                user:obj.user
+                user:obj.user,
+                category:obj.category
             }).then(function (data) {
                 return data;
             })
@@ -193,9 +263,10 @@ module.exports=new Vuex.Store({
                 return data;
             })
         },
-        projectUserList:function (context,id) {
+        projectUserList:function (context,obj) {
             return net.get("/admin/projectuserlist",{
-                id:id
+                id:obj.id,
+                category:obj.category
             }).then(function (data) {
                 return data;
             })

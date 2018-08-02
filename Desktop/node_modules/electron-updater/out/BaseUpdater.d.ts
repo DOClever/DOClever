@@ -1,0 +1,20 @@
+import { UpdateInfo, AllPublishOptions, DownloadOptions } from "builder-util-runtime";
+import { AppUpdater } from "./AppUpdater";
+import { ResolvedUpdateFileInfo } from "./main";
+export declare abstract class BaseUpdater extends AppUpdater {
+    protected quitAndInstallCalled: boolean;
+    private quitHandlerAdded;
+    protected constructor(options?: AllPublishOptions | null, app?: any);
+    quitAndInstall(isSilent?: boolean, isForceRunAfter?: boolean): Promise<void>;
+    protected executeDownload(taskOptions: DownloadExecutorTask): Promise<Array<string>>;
+    protected abstract doInstall(installerPath: string, isSilent: boolean, isRunAfter: boolean): boolean;
+    protected install(isSilent: boolean, isRunAfter: boolean): Promise<boolean>;
+    protected addQuitHandler(): void;
+}
+export interface DownloadExecutorTask {
+    readonly fileExtension: string;
+    readonly downloadOptions: DownloadOptions;
+    readonly fileInfo: ResolvedUpdateFileInfo;
+    readonly updateInfo: UpdateInfo;
+    readonly task: (destinationFile: string, packageFile: string | null, removeTempDirIfAny: () => Promise<any>) => Promise<any>;
+}

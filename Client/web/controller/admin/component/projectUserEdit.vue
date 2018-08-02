@@ -7,13 +7,13 @@
             <el-col class="col" :span="11" style="text-align: center">
                 <el-input size="small" placeholder="输入新增的用户名" style="width: 80%" v-model="name"></el-input>
             </el-col>
-            <el-col class="col" :span="4" style="text-align: center">
+            <el-col class="col" :span="4" style="text-align: center" v-if="category==0">
                 <el-select size="small" style="width: 80%" v-model="role">
                     <el-option :value="1" label="观察者"></el-option>
                     <el-option :value="0" label="管理员"></el-option>
                 </el-select>
             </el-col>
-            <el-col class="col" :span="3" style="line-height: 50px;text-align: center">
+            <el-col class="col" :span="3" style="line-height: 50px;text-align: center" v-if="category==0">
                 <el-button  style="font-size: 15px" size="mini" @click="editOption" type="text" v-if="role==1">权限</el-button>
             </el-col>
             <el-col class="col" :span="3" style="line-height: 50px;text-align: center">
@@ -27,18 +27,18 @@
                 <template v-for="(item,index) in arr">
                     <tr style="text-align: center;vertical-align: middle;height: 80px">
                         <td style="width: 15%">
-                            <img v-proxy="item.user.photo" style="border-radius: 30px"  width="60" height="60">
+                            <img v-proxy="category==0?item.user.photo:item.photo" style="border-radius: 30px"  width="60" height="60">
                         </td>
                         <td style="width: 50%;text-align: center">
-                            {{item.user.name}}
+                            {{category==0?item.user.name:item.name}}
                         </td>
-                        <td style="width: 15%;text-align: center">
+                        <td style="width: 15%;text-align: center" v-if="category==0">
                             <el-select size="small" v-model="item.role" @input="editRole(item)" style="width: 90%">
                                 <el-option :value="1" label="观察者"></el-option>
                                 <el-option :value="0" label="管理员"></el-option>
                             </el-select>
                         </td>
-                        <td style="width: 10%;text-align: center">
+                        <td style="width: 10%;text-align: center" v-if="category==0">
                             <el-button  style="font-size: 15px" size="mini" @click="editRoleOption(item,index)" type="text" v-if="item.role==1">权限</el-button>
                         </td>
                         <td style="width: 10%;text-align: center">
@@ -53,9 +53,9 @@
 
 <script>
     var roleOption=require("component/roleOption.vue");
-    var proxyImg=require("common/director/proxyImg")
+    var proxyImg=require("director/proxyImg.js")
     module.exports={
-        props:["propObj","projectId"],
+        props:["propObj","projectId","category"],
         data:function () {
             return {
                 arr:this.propObj,
@@ -107,7 +107,8 @@
                     $.startHud();
                     _this.$store.dispatch("removeProjectUser",{
                         id:_this.projectId,
-                        user:item.user._id
+                        user:_this.category==0?item.user._id:item._id,
+                        category:_this.category
                     }).then(function (data) {
                         $.stopHud();
                         if(data.code==200)
@@ -194,7 +195,8 @@
                     id:this.projectId,
                     user:this.name,
                     role:this.role,
-                    option:JSON.stringify(this.roleOption)
+                    option:JSON.stringify(this.roleOption),
+                    category:this.category
                 }).then(function (data) {
                     _this.invitePending=false;
                     if(data.code==200)

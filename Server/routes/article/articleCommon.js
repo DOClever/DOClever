@@ -1,31 +1,31 @@
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var user=require("../../model/userModel")
 var project=require("../../model/projectModel")
 var article=require("../../model/articleModel")
 
 function ArticleCommon() {
-    this.save=async (function (id,query) {
+    this.save=async function (id,query) {
         let obj;
         if (id) {
-            obj = await(article.findOneAndUpdateAsync({
+            obj = await (article.findOneAndUpdateAsync({
                 _id: id
             }, query, {
                 new: true
             }))
         }
         else {
-            obj = await(article.createAsync(query))
+            obj = await (article.createAsync(query))
         }
         return obj;
-    })
-    this.remove=async (function (id) {
-        await(article.removeAsync({
+    }
+    this.remove=async function (id) {
+        await (article.removeAsync({
             _id: id
         }));
-    })
-    this.info=async (function (id) {
-        let obj=await(article.findOneAsync({
+    }
+    this.info=async function (id) {
+        let obj=await (article.findOneAsync({
             _id: id
         }, null, {
             populate: {
@@ -34,9 +34,9 @@ function ArticleCommon() {
             }
         }));
         return obj;
-    })
-    this.list=async (function (projectId,page) {
-        let arr=await(article.findAsync({
+    }
+    this.list=async function (projectId,page) {
+        let arr=await (article.findAsync({
             project: projectId
         }, "-content", {
             populate: {
@@ -48,7 +48,7 @@ function ArticleCommon() {
             limit: 10
         }));
         return arr;
-    })
+    }
 }
 
 module.exports=ArticleCommon;

@@ -1,0 +1,133 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.DownloadedUpdateHelper = void 0;
+
+function _crypto() {
+  const data = require("crypto");
+
+  _crypto = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function _fs() {
+  const data = require("fs");
+
+  _fs = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function _lodash() {
+  const data = _interopRequireDefault(require("lodash.isequal"));
+
+  _lodash = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function _fsExtraP() {
+  const data = require("fs-extra-p");
+
+  _fsExtraP = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/** @private **/
+class DownloadedUpdateHelper {
+  constructor(cacheDir) {
+    this.cacheDir = cacheDir;
+    this._file = null;
+    this._packageFile = null;
+    this.versionInfo = null;
+    this.fileInfo = null;
+  }
+
+  get file() {
+    return this._file;
+  }
+
+  get packageFile() {
+    return this._packageFile;
+  }
+
+  async validateDownloadedPath(updateFile, versionInfo, fileInfo, logger) {
+    if (this.versionInfo != null && this.file === updateFile) {
+      // update has already been downloaded from this running instance
+      // check here only existence, not checksum
+      return (0, _lodash().default)(this.versionInfo, versionInfo) && (0, _lodash().default)(this.fileInfo, fileInfo) && (await (0, _fsExtraP().pathExists)(updateFile));
+    } // update has already been downloaded from some previous app launch
+
+
+    if (await DownloadedUpdateHelper.isUpdateValid(updateFile, fileInfo, logger)) {
+      logger.info(`Update has already been downloaded ${updateFile}).`);
+      return true;
+    }
+
+    return false;
+  }
+
+  setDownloadedFile(downloadedFile, packageFile, versionInfo, fileInfo) {
+    this._file = downloadedFile;
+    this._packageFile = packageFile;
+    this.versionInfo = versionInfo;
+    this.fileInfo = fileInfo;
+  }
+
+  clear() {
+    this._file = null;
+    this.versionInfo = null;
+    this.fileInfo = null;
+  }
+
+  static async isUpdateValid(updateFile, fileInfo, logger) {
+    if (!(await (0, _fsExtraP().pathExists)(updateFile))) {
+      logger.info("No cached update available");
+      return false;
+    }
+
+    const sha512 = await hashFile(updateFile);
+
+    if (fileInfo.info.sha512 !== sha512) {
+      logger.warn(`Sha512 checksum doesn't match the latest available update. New update must be downloaded. Cached: ${sha512}, expected: ${fileInfo.info.sha512}`);
+      return false;
+    }
+
+    return true;
+  }
+
+}
+
+exports.DownloadedUpdateHelper = DownloadedUpdateHelper;
+
+function hashFile(file, algorithm = "sha512", encoding = "base64", options) {
+  return new Promise((resolve, reject) => {
+    const hash = (0, _crypto().createHash)(algorithm);
+    hash.on("error", reject).setEncoding(encoding);
+    (0, _fs().createReadStream)(file, Object.assign({}, options, {
+      highWaterMark: 1024 * 1024
+      /* better to use more memory but hash faster */
+
+    })).on("error", reject).on("end", () => {
+      hash.end();
+      resolve(hash.read());
+    }).pipe(hash, {
+      end: false
+    });
+  });
+} 
+//# sourceMappingURL=DownloadedUpdateHelper.js.map

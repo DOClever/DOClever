@@ -45,6 +45,10 @@ var interface=[
             id:{
                 type:String,
                 optional:1
+            },
+            autosave:{
+                type:String,
+                optional:1
             }
         },
         "data":String,

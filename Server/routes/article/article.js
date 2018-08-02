@@ -1,8 +1,8 @@
 /**
  * Created by sunxin on 2017/7/7.
  */
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var article=require("./articleCommon");
@@ -12,7 +12,7 @@ var uuid=require("uuid/v1");
 function Article()
 {
     this.article=new article;
-    this.save=async ( (req, res)=> {
+    this.save=async (req, res)=> {
         try {
             let query = {
                 title: req.clientParam.title,
@@ -26,9 +26,9 @@ function Article()
         catch (err) {
             util.catch(res, err);
         }
-    });
+    };
 
-    this.remove=async ((req, res)=> {
+    this.remove=async (req, res)=> {
         try {
             await (this.article.remove(req.clientParam.id));
             util.ok(res, "ok");
@@ -36,9 +36,9 @@ function Article()
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.info=async ((req, res) =>{
+    this.info=async (req, res) =>{
         try {
             let obj =await (this.article.info(req.clientParam.id));
             if (!obj) {
@@ -49,9 +49,9 @@ function Article()
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 
-    this.list=async ((req, res)=> {
+    this.list=async (req, res)=> {
         try {
             let arr = await (this.article.list(req.clientParam.project,req.clientParam.page));
             util.ok(res, arr, "ok");
@@ -59,7 +59,7 @@ function Article()
         catch (err) {
             util.catch(res, err);
         }
-    })
+    }
 }
 module.exports=Article;
 

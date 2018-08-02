@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文档阅读-DOClever 移动时代首选接口管理平台！</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="API管理平台,接口管理平台,mock测试,接口文档管理,接口文档平台,接口文档系统,API文档管理"/>
+    <meta name="description" content="DOClever是一款开源免费的可视化接口管理工具，专业的api接口管理系统，集接口文档、接口自动化测试、Mock数据、团队协作、接口快照等于一身的移动时代首选接口管理平台！"/>
+    <link href="../../resource/pic/logo.ico" rel="shortcut icon">
+    <link type="text/css"  rel="stylesheet" href="../common/css/common.css">
+    <link type="text/css"  rel="stylesheet" href="../common/lib/font-awesome/css/font-awesome.min.css">
+    <link type="text/css"  rel="stylesheet" href="../common/lib/animate.css/animate.min.css">
+    <link type="text/css"  rel="stylesheet" href="../common/lib/highlight/highlight.css">
+    <link type="text/css"  rel="stylesheet" href="../common/lib/element/index.css">
+</head>
+<body>
+<div class="container" id="app" v-cloak>
+    <el-row class="row" style="height: 40px;line-height: 40px;text-align: center;font-size: 16px;background-color: white;color: #00adef">
+        {{doc.name}}
+    </el-row>
+    <el-row class="row" style="height: calc(100vh - 40px);border-top: 1px lightgray solid">
+        <el-col class="col" :span="5" style="overflow-y: auto;background-color: white;border-right: 1px lightgray solid">
+            <el-input size="mini" v-model="key" style="width: 100%" placeholder="请输入搜索内容" suffix-icon="el-icon-search">
+                <el-select size="mini" v-model="type" slot="prepend" style="width: 80px" placeholder="类型">
+                    <el-option label="标题" :value="0"></el-option>
+                    <el-option label="内容" :value="1"></el-option>
+                    <el-option label="全部" :value="2"></el-option>
+                </el-select>
+            </el-input>
+            <list :group="list"></list>
+        </el-col>
+        <el-col class="col docPreview" :span="19" v-html="preview" style="overflow-y: auto;word-break: break-all;padding: 0 10px 0 10px;line-height: 1.5;background-color: white" id="preview">
+
+        </el-col>
+    </el-row>
+</div>
+<script src="../node/api.js"></script>
+<script>
+    if(location.href.startsWith("http"))
+    {
+        window.debug = true;
+    }
+    if(window.debug)
+    {
+        document.write("<script src='../../../dist/vendor.bundle.js'><\/script>");
+    }
+    else
+    {
+        document.write("<script src='../dist/vendor.bundle.js'><\/script>");
+    }
+</script>
+<!--<script src="../../../dist/vendor.bundle.js"></script>-->
+<!--<script src="../dist/vendor.bundle.js"></script>-->
+<script src="../common/lib/element/index.js"></script>
+<script src="../common/lib/markdown/markdown-it.min.js"></script>
+<script src="../common/lib/highlight/highlight.js"></script>
+<script>
+    if(window.debug)
+    {
+        document.write("<script src='../../../dist/read.js'><\/script>");
+    }
+    else
+    {
+        document.write("<script src='../dist/read.js'><\/script>");
+
+    }
+</script>
+<script src="../../../dist/read.js"></script>
+<script src="../dist/read.js"></script>
+</body>
+</html>

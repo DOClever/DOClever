@@ -1,0 +1,9 @@
+import { AllPublishOptions, CancellationToken, UpdateInfo } from "builder-util-runtime";
+import { AppUpdater } from "./AppUpdater";
+export declare class MacUpdater extends AppUpdater {
+    private readonly nativeUpdater;
+    constructor(options?: AllPublishOptions);
+    protected doDownloadUpdate(updateInfo: UpdateInfo, cancellationToken: CancellationToken): Promise<Array<string>>;
+    private doProxyUpdateFile(nativeResponse, url, headers, sha512, cancellationToken, errorHandler);
+    quitAndInstall(): void;
+}

@@ -1,8 +1,8 @@
 /**
  * Created by sunxin on 2017/7/7.
  */
-var async=require("asyncawait/async")
-var await=require("asyncawait/await")
+
+
 var e=require("../../util/error.json");
 var util=require("../../util/util");
 var user=require("../../model/userModel")
@@ -15,7 +15,7 @@ var testProject=require("../../model/testProjectModel")
 var fs=require("fs");
 var uuid=require("uuid/v1");
 function  Message() {
-    this.remove=async ((req,res)=> {
+    this.remove=async (req,res)=> {
         try
         {
             await (message.removeAsync({
@@ -27,9 +27,9 @@ function  Message() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.list=async ((req,res)=> {
+    this.list=async (req,res)=> {
         try
         {
             let arr=await (message.findAsync({
@@ -56,9 +56,9 @@ function  Message() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.clear=async ((req,res)=>{
+    this.clear=async (req,res)=>{
         try
         {
             await (message.removeAsync({
@@ -70,9 +70,9 @@ function  Message() {
         {
             util.catch(res,err);
         }
-    })
+    }
 
-    this.newMsg=async ((req,res)=> {
+    this.newMsg=async (req,res)=> {
         try
         {
             let obj=await (message.findOneAsync({
@@ -85,8 +85,8 @@ function  Message() {
         {
             util.catch(res,err);
         }
-    })
-    this.applyList=async ((req,res)=>{
+    }
+    this.applyList=async (req,res)=>{
         try
         {
             let ret={
@@ -248,7 +248,7 @@ function  Message() {
         {
             util.catch(res,err);
         }
-    })
+    }
 }
 
 

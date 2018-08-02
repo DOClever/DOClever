@@ -5,27 +5,29 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-var async=require("asyncawait/async");
-var await=require("asyncawait/await");
 var util=require("./util/util");
 var app = express();
-// var webpack = require('../Client/node_modules/webpack'),
-//     webpackDevMiddleware = require('../Client/node_modules/webpack-dev-middleware'),
-//     webpackHotMiddleware = require('../Client/node_modules/webpack-hot-middleware'),
-//     webpackDevConfig = require('../Client/dev');
-// var compiler = webpack(webpackDevConfig);
-// app.use(webpackDevMiddleware(compiler, {
-//
-//     // public path should be the same with webpack config
-//     publicPath: webpackDevConfig.output.publicPath,
-//     noInfo: true,
-//     stats: {
-//         colors: true,
-//         chunks: false
-//     }
-// }));
-// app.use(webpackHotMiddleware(compiler));
-(async (function () {
+var argv=require("yargs").argv;
+if(argv.webpack)
+{
+    var webpack = require('../node_modules/webpack'),
+        webpackDevMiddleware = require('../node_modules/webpack-dev-middleware'),
+        webpackHotMiddleware = require('../node_modules/webpack-hot-middleware'),
+        webpackDevConfig = require('./admin/dev');
+    var compiler = webpack(webpackDevConfig);
+    app.use(webpackDevMiddleware(compiler, {
+
+        // public path should be the same with webpack config
+        publicPath: webpackDevConfig.output.publicPath,
+        noInfo: true,
+        stats: {
+            colors: true,
+            chunks: false
+        }
+    }));
+    app.use(webpackHotMiddleware(compiler));
+}
+(async function () {
     await (util.init());
     var checkUser=require("./routes/checkUser");
     var checkAdmin=require("./routes/checkAdmin");
@@ -65,12 +67,15 @@ var app = express();
     app.use("/template",checkFormDataUser(path.join(con.filePath,"img")),checkParam("template"),checkUser);
     app.use("/example",checkFormDataUser(path.join(con.filePath,"img")),checkParam("example"),checkUser);
     app.use("/doc",checkFormDataUser(path.join(con.filePath,"img")),checkParam("doc"),checkUser);
+    app.use("/command",checkFormDataUser(path.join(con.filePath,"img")),checkParam("command"),checkUser);
     app.use("/admin",checkFormDataUser(path.join(con.filePath,"img")),checkParam("admin"),checkAdmin);
     app.use("/mock",checkFormDataUser(path.join(con.filePath,"temp")),mock);
     app.use("/html",express.static(path.join(__dirname, '../Client')));
+    app.use("/node_modules",express.static(path.join(__dirname, '../node_modules')));
     app.use("/img",express.static(path.join(con.filePath,"img")));
+    app.use("/resource",express.static(path.join(__dirname,"resource")));
     app.use("/",function (req,res) {
-        res.redirect("/html/web/controller/index/index.html");
+        res.redirect("/html/web/controller/login/login.html");
     });
 // catch 404 and forward to error handler
     app.use(function(req, res, next) {
@@ -89,7 +94,7 @@ var app = express();
         res.status(err.status || 500);
         res.render('error');
     });
-}))();
+})();
 
 
 module.exports = app;
