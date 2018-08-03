@@ -14,7 +14,6 @@ var getHeader = function (req) {
                 ret[i] = req.headers[i];
         }
     }
-    ret["accept"]="*/*";
     var headers=req.headers["headers-doclever"];
     if(headers)
     {

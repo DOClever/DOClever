@@ -123,7 +123,9 @@
                 this.obj.users[data.index].id=data.id;
             },
             save:function () {
-                var obj={};
+                var obj={
+                    category:this.category
+                };
                 if(!this.obj.name)
                 {
                     $.tip("名称不能为空",0);

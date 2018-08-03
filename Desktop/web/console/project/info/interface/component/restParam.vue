@@ -14,7 +14,7 @@
                         </el-tooltip>
                     </td>
                     <td style="width: 40%">
-                        <div  style="width: 90%;display: inline-block;" v-if="item.value && (item.value.data.length>0 || item.value.status)">
+                        <div  style="width: 90%;display: inline-block;" v-if="item.value && ((item.value.data && item.value.data.length>0)|| item.value.status)">
                             <el-autocomplete size="small" class="inline-input" v-model="item.selValue" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" @mouseenter.native="focus(item)" style="width:100%" popper-class="my-autocomplete">
                                 <i class="el-icon-caret-bottom el-input__icon" slot="suffix" @click="showAutoComplete" style="cursor: pointer"></i>
                                 <template slot-scope="props">

@@ -34,7 +34,7 @@
                         <el-input size="small" type="textarea" style="width: 90%;height: 46px;line-height: 46px" resize="none" :rows="0" placeholder="请填写备注;" v-model="item.remark" :disabled="true"></el-input>
                     </td>
                     <td style="width: 30%">
-                        <el-autocomplete size="small" class="inline-input" v-model="item.mock" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" @mouseenter.native="focusAuto(item)" style="width:100%" popper-class="my-autocomplete" v-if="item.value && (item.value.data.length>0 || item.value.status)" :disabled="interface.example">
+                        <el-autocomplete size="small" class="inline-input" v-model="item.mock" :fetch-suggestions="querySearch" placeholder="选择或者填入你的值" @mouseenter.native="focusAuto(item)" style="width:100%" popper-class="my-autocomplete" v-if="item.value && ((item.value.data && item.value.data.length>0) || item.value.status)" :disabled="interface.example">
                             <i class="el-icon-caret-bottom el-input__icon" slot="suffix" @click="showAutoComplete" style="cursor: pointer"></i>
                             <template slot-scope="props">
                                 <div class="value">{{ props.item.value }}</div>

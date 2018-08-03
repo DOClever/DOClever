@@ -247,8 +247,13 @@ global.apiNode={
                         for (let index in cookies) {
                             let cookie = cookies[index];
                             let realOfCookie = cookie.split(";")[0];
-                            let arrCookie=realOfCookie.split("=");
-                            remoteApi.cookie.set(arrCookie[0],arrCookie[1],0,host)
+                            let i=realOfCookie.indexOf("=");
+                            if(i>-1)
+                            {
+                                let key=realOfCookie.substring(0,i);
+                                let val=realOfCookie.substr(i+1);
+                                remoteApi.cookie.set(key,val,0,host)
+                            }
                         }
                     }
                     var obj={

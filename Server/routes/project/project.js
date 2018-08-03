@@ -1173,7 +1173,11 @@ function Project() {
                         name:obj.name,
                         type:obj.type,
                         id:obj.id,
-                        data:[]
+                        data:[],
+                    }
+                    if(obj.remark)
+                    {
+                        o.remark=obj.remark;
                     }
                     o.data=await (getChild(req,obj));
                     ret.push(o);
@@ -1312,6 +1316,10 @@ function Project() {
                             type:item.type,
                             id:item.id?item.id:uuid()
                         };
+                        if(item.remark)
+                        {
+                            query.remark=item.remark;
+                        }
                         if(objParent)
                         {
                             query.parent=objParent.id;
@@ -2356,57 +2364,56 @@ function Project() {
                 id:uuid()
             }));
             let objGroup={};
+            let arr=[],objRemark={};
             if(obj.tags)
             {
-                for(let o of obj.tags){
-                    objGroup[o.name]=await (group.createAsync({
-                        name:o.name,
+                for(let o of obj.tags)
+                {
+                    arr.push(o.name);
+                    if(o.description)
+                    {
+                        objRemark[o.name]=o.description;
+                    }
+                }
+            }
+            for(let key in obj.paths)
+            {
+                let objInter=obj.paths[key];
+                for(let key1 in objInter)
+                {
+                    let objIns=objInter[key1];
+                    if(objIns.tags)
+                    {
+                        objIns.tags.forEach(function (obj) {
+                            if(arr.indexOf(obj)==-1)
+                            {
+                                arr.push(obj);
+                            }
+                        })
+                    }
+                }
+            }
+            if(arr.length>0)
+            {
+                for(let obj of arr){
+                    objGroup[obj]=await (group.createAsync({
+                        name:obj,
                         project:objProject._id,
                         type:0,
-                        id:uuid()
+                        id:uuid(),
+                        remark:objRemark[obj]?objRemark[obj]:""
                     }));
                 }
             }
             else
             {
-                let arr=[];
-                for(let key in obj.paths)
-                {
-                    let objInter=obj.paths[key];
-                    for(let key1 in objInter)
-                    {
-                        let objIns=objInter[key1];
-                        if(objIns.tags)
-                        {
-                            objIns.tags.forEach(function (obj) {
-                                if(arr.indexOf(obj)==-1)
-                                {
-                                    arr.push(obj);
-                                }
-                            })
-                        }
-                    }
-                }
-                if(arr.length>0)
-                {
-                    for(let obj of arr){
-                        objGroup[obj]=await (group.createAsync({
-                            name:obj,
-                            project:objProject._id,
-                            type:0,
-                            id:uuid()
-                        }));
-                    }
-                }
-                else
-                {
-                    objGroup["未命名"]=await (group.createAsync({
-                        name:"未命名",
-                        project:objProject._id,
-                        type:0,
-                        id:uuid()
-                    }));
-                }
+                objGroup["未命名"]=await (group.createAsync({
+                    name:"未命名",
+                    project:objProject._id,
+                    type:0,
+                    id:uuid(),
+                    remark:""
+                }));
             }
             let objDef={};
             function handleDef(def,root,arrDef) {
@@ -2558,6 +2565,10 @@ function Project() {
                     if(interRaw.summary)
                     {
                         name=interRaw.summary
+                    }
+                    else if(interRaw.description)
+                    {
+                        name=interRaw.description
                     }
                     else
                     {
@@ -3215,119 +3226,56 @@ function Project() {
                 multi:true
             }))
             let objGroup={};
+            let arr=[],objRemark={};
             if(obj.tags)
             {
-                for(let o of obj.tags){
-                    let query={
-                        name:o.name,
-                        project:req.obj._id
-                    }
-                    if(req.version)
+                for(let o of obj.tags)
+                {
+                    arr.push(o.name);
+                    if(o.description)
                     {
-                        query.version=req.version._id
+                        objRemark[o.name]=o.description;
                     }
-                    objGroup[o.name]=await (req.groupModel.findOneAsync(query));
-                    if(objGroup[o.name])
+                }
+            }
+            for(let key in obj.paths)
+            {
+                let objInter=obj.paths[key];
+                for(let key1 in objInter)
+                {
+                    let objIns=objInter[key1];
+                    if(objIns.tags)
                     {
-                        objGroup[o.name]=await (req.groupModel.findOneAndUpdateAsync({
-                            _id:objGroup[o.name]._id
-                        },{
-                            name:o.name,
-                            $unset:{
-                                delete:1
+                        objIns.tags.forEach(function (obj) {
+                            if(arr.indexOf(obj)==-1)
+                            {
+                                arr.push(obj);
                             }
-                        },{
-                            new:true
-                        }))
+                        })
                     }
-                    else
-                    {
-                        objGroup[o.name]=await (req.groupModel.createAsync({
-                            name:o.name,
-                            project:objProject._id,
-                            type:0,
-                            id:uuid(),
-                        }));
-                    }
+                }
+            }
+            if(arr.length>0)
+            {
+                for(let obj of arr){
+                    objGroup[obj]=await (group.createAsync({
+                        name:obj,
+                        project:objProject._id,
+                        type:0,
+                        id:uuid(),
+                        remark:objRemark[obj]?objRemark[obj]:""
+                    }));
                 }
             }
             else
             {
-                let arr=[];
-                for(let key in obj.paths)
-                {
-                    let objInter=obj.paths[key];
-                    for(let key1 in objInter)
-                    {
-                        let objIns=objInter[key1];
-                        if(objIns.tags)
-                        {
-                            objIns.tags.forEach(function (obj) {
-                                if(arr.indexOf(obj)==-1)
-                                {
-                                    arr.push(obj);
-                                }
-                            })
-                        }
-                    }
-                }
-                if(arr.length>0)
-                {
-                    for(let obj of arr){
-                        let query={
-                            name:obj.name,
-                            project:req.obj._id
-                        }
-                        if(req.version)
-                        {
-                            query.version=req.version._id
-                        }
-                        objGroup[obj]=await (req.groupModel.findOneAsync(query));
-                        if(objGroup[obj])
-                        {
-                            objGroup[obj]=await (req.groupModel.findOneAndUpdateAsync({
-                                _id:objGroup[obj]._id
-                            },{
-                                name:obj,
-                                $unset:{
-                                    delete:1
-                                }
-                            },{
-                                new:true
-                            }))
-                        }
-                        else
-                        {
-                            objGroup[obj]=await (req.groupModel.createAsync({
-                                name:obj,
-                                project:objProject._id,
-                                type:0,
-                                id:uuid(),
-                            }));
-                        }
-                    }
-                }
-                else
-                {
-                    let objUnName=await (req.groupModel.findOneAsync({
-                        name:"未命名",
-                        project:objProject._id,
-                        type:0,
-                    }));
-                    if(!objUnName)
-                    {
-                        objGroup["未命名"]=await (req.groupModel.createAsync({
-                            name:"未命名",
-                            project:objProject._id,
-                            type:0,
-                            id:uuid(),
-                        }));
-                    }
-                    else
-                    {
-                        objGroup["未命名"]=objUnName;
-                    }
-                }
+                objGroup["未命名"]=await (group.createAsync({
+                    name:"未命名",
+                    project:objProject._id,
+                    type:0,
+                    id:uuid(),
+                    remark:""
+                }));
             }
             let objDef={};
             function handleDef(def,root,arrDef) {
@@ -3478,6 +3426,10 @@ function Project() {
                     if(interRaw.summary)
                     {
                         name=interRaw.summary
+                    }
+                    else if(interRaw.description)
+                    {
+                        name=interRaw.description
                     }
                     else
                     {

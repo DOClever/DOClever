@@ -1,11 +1,11 @@
 <template>
-    <el-dialog title="新建项目"  width="80%" ref="box" :visible.sync="showDialog" append-to-body>
+    <el-dialog title="新建团队"  width="80%" ref="box" :visible.sync="showDialog" append-to-body>
         <el-form ref="form" label-width="100px">
             <el-form-item label="名称" style="text-align: center">
-                <el-input  size="small" style="width: 80%" name="name" v-model="obj.name" placeholder="请输入项目名称"></el-input>
+                <el-input  size="small" style="width: 80%" name="name" v-model="obj.name" placeholder="请输入团队名称"></el-input>
             </el-form-item>
             <el-form-item label="描述" style="text-align: center">
-                <el-input size="small" type="textarea" :rows="3"  style="width: 80%" name="dis" v-model="obj.dis" placeholder="请输入项目描述"></el-input>
+                <el-input size="small" type="textarea" :rows="3"  style="width: 80%" name="dis" v-model="obj.dis" placeholder="请输入团队描述"></el-input>
             </el-form-item>
             <el-form-item label="所有者" style="text-align: center">
                 <el-autocomplete size="small" :fetch-suggestions="querySearchAsync.bind(this,0)" style="width: 80%" name="owner" v-model="obj.owner.name" placeholder="请输入所有者名称" @select="sel"></el-autocomplete>

@@ -48,7 +48,7 @@
                         {{item.remark?item.remark:"无备注"}}
                     </td>
                     <td style="width: 20%">
-                        <el-autocomplete size="small" v-model="item.mock" :fetch-suggestions="querySearch" placeholder="选择参考值" @mouseenter.native="focusAuto(item)" style="width:100%" popper-class="my-autocomplete" v-if="item.value && (item.value.data.length>0 || item.value.status)">
+                        <el-autocomplete size="small" v-model="item.mock" :fetch-suggestions="querySearch" placeholder="选择参考值" @mouseenter.native="focusAuto(item)" style="width:100%" popper-class="my-autocomplete" v-if="item.value && ((item.value.data && item.value.data.length>0) || item.value.status)">
                             <i class="el-icon-caret-bottom el-input__icon" slot="suffix" @click="showAutoComplete"></i>
                             <template slot-scope="props">
                                 <div class="value">{{ props.item.value }}</div>

@@ -10,7 +10,7 @@
                 <el-col class="col" :span="4" style="text-align: center;white-space: nowrap" @click.native="item.show=!item.show">
                     <span :class="item.show?'fa fa-folder-open':'fa fa-folder'" style="color:#c7c7c7;font-size: 13px "></span>
                 </el-col>
-                <el-col class="col" :span="20-2*level" :style="{margin: 0,fontSize: '14px',color: item.type==0?'gray':'red',whiteSpace: 'nowrap',padding: 0,textOverflow:'ellipsis',overflow:'hidden',textDecoration:item.delete?'line-through':'none'}" @click.native="item.show=!item.show" :title="item.name">
+                <el-col class="col" :span="20-2*level" :style="{margin: 0,fontSize: '14px',color: item.type==0?'gray':'red',whiteSpace: 'nowrap',padding: 0,textOverflow:'ellipsis',overflow:'hidden',textDecoration:item.delete?'line-through':'none'}" @click.native="item.show=!item.show" :title="item.remark">
                     {{item.name}}({{item.data.length}})
                 </el-col>
                 <div class="col" style="height: 35px;white-space: nowrap;text-align: center;position: absolute;top: 0px;right: 0px;" v-show="item.menu && interfaceEditRole && !search">

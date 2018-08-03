@@ -24,7 +24,8 @@ var model=new mongoose.Schema({
     sort:{
         type:Number,
         default:0
-    }
+    },
+    remark:String
 },{
     timestamps:true
 });
