@@ -1267,8 +1267,7 @@ function Common() {
         update.owner=owner;
         if(users)
         {
-            let users=JSON.parse(users);
-            update.users=users;
+            update.users=JSON.parse(users);
         }
         if(category==0)
         {
