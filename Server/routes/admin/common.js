@@ -1366,8 +1366,8 @@ function Common() {
         }))
         if(users)
         {
-            let users=JSON.parse(users);
-            for(let obj of users)
+            let _users=JSON.parse(users);
+            for(let obj of _users)
             {
                 objGroup.users.push(obj);
             }
