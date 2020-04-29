@@ -1267,8 +1267,7 @@ function Common() {
         update.owner=owner;
         if(users)
         {
-            let users=JSON.parse(users);
-            update.users=users;
+            update.users=JSON.parse(users);
         }
         if(category==0)
         {
@@ -1367,8 +1366,8 @@ function Common() {
         }))
         if(users)
         {
-            let users=JSON.parse(users);
-            for(let obj of users)
+            let _users=JSON.parse(users);
+            for(let obj of _users)
             {
                 objGroup.users.push(obj);
             }
