@@ -4,6 +4,7 @@
 var config=require("./config");
 var resource=require("vue-resource")
 Vue.use(resource)
+Vue.http.options.responseType="blob";
 var net={};
 function getAllHeaders(obj) {
     var result={};
