@@ -35,7 +35,7 @@
   "dependencies": {
     "archiver": "^2.1.1",
     "crypto-js": "^3.1.9-1",
-    "decompress": "^4.2.0",
+    "decompress": "^4.2.1",
     "electron-updater": "^2.21.4",
     "fs-extra": "^5.0.0",
     "getmac": "^1.4.1",
