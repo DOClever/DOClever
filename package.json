@@ -18,7 +18,7 @@
     "hbs": "^3.1.1",
     "html-pdf": "^2.2.0",
     "jsdom": "^11.4.0",
-    "markdown-it": "^8.4.0",
+    "markdown-it": "^12.3.2",
     "mockjs": "^1.0.1-beta3",
     "moment": "^2.19.2",
     "mongoomise": "0.0.8",
