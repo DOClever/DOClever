@@ -55,7 +55,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-3": "^6.24.1",
     "css-loader": "^0.28.7",
-    "dexie": "^2.0.2",
+    "dexie": "^3.2.2",
     "express": "^4.16.2",
     "file-loader": "1.1.5",
     "html-loader": "^0.4.5",
