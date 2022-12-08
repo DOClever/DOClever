@@ -12,7 +12,7 @@
     "cookie-parser": "^1.4.3",
     "crypto-js": "^3.1.9-1",
     "debug": "^2.2.0",
-    "express": "^4.14.1",
+    "express": "^4.17.3",
     "express-session": "^1.15.6",
     "fs-extra": "^5.0.0",
     "hbs": "^3.1.1",
